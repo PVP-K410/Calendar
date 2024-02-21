@@ -1,10 +1,12 @@
 package com.pvp.app.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class User(
-    val id: Int,
-    val username: String,
-    val email: String,
-    val height: Int,
-    val mass: Int,
-    var points: Int
+    val email: String = "",
+    var height: Int = 0,
+    var mass: Int = 0,
+    var points: Int = 0,
+    var username: String = ""
 )
