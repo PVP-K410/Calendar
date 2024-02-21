@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">PVP_Project</string>
+    <string name="app_name">Calendar</string>
+    <string name="route_calendar">Calendar</string>
 </resources>
