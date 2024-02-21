@@ -1,4 +1,4 @@
-package com.pvp.app.models
+package com.pvp.app.model
 
 data class User(
     val id: Int,

@@ -1,4 +1,4 @@
-package com.pvp.app.models
+package com.pvp.app.model
 
 import java.time.LocalDate
 import java.time.LocalTime
