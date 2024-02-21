@@ -20,14 +20,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.pvp.app.ui.route.Router
 import com.pvp.app.ui.route.Routes
 import com.pvp.app.ui.theme.CalendarTheme
 
-@Preview
 @Composable
 fun ApplicationScreen() {
     val controller = rememberNavController()
