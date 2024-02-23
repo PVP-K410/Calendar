@@ -1,11 +1,19 @@
 package com.pvp.app.model
 
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.Duration
+import java.time.LocalDateTime
 
-class MealTask(
-    date: LocalDate,
-    startTime: LocalTime,
-    var recipe: List<String>,
-    var kCal: Int
-) : Task(date, startTime)
+sealed class MealTask(
+    description: String?,
+    duration: Duration?,
+    isCompleted: Boolean,
+    var recipe: String,
+    scheduledAt: LocalDateTime,
+    title: String
+) : Task(
+    description,
+    duration,
+    isCompleted,
+    scheduledAt,
+    title
+)

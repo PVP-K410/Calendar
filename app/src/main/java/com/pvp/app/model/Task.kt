@@ -1,9 +1,12 @@
 package com.pvp.app.model
 
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.Duration
+import java.time.LocalDateTime
 
-open class Task(
-    val date: LocalDate,
-    var startTime: LocalTime
+sealed class Task(
+    var description: String?,
+    var duration: Duration?,
+    var isCompleted: Boolean,
+    var scheduledAt: LocalDateTime,
+    var title: String
 )

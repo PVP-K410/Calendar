@@ -1,10 +1,20 @@
 package com.pvp.app.model
 
-import java.time.LocalDate
-import java.time.LocalTime
+import java.time.Duration
+import java.time.LocalDateTime
 
-class SportTask(
-    date: LocalDate,
-    startTime: LocalTime,
-    val activity: SportActivity
-) : Task(date, startTime)
+sealed class SportTask(
+    var activity: SportActivity,
+    description: String?,
+    var distance: Double?,
+    duration: Duration?,
+    isCompleted: Boolean,
+    scheduledAt: LocalDateTime,
+    title: String
+) : Task(
+    description,
+    duration,
+    isCompleted,
+    scheduledAt,
+    title
+)

@@ -1,10 +1,13 @@
-package com.pvp.app.ui
+package com.pvp.app.ui.screen
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,22 +21,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.pvp.app.ui.route.Router
-import com.pvp.app.ui.route.Routes
+import com.pvp.app.ui.Router
+import com.pvp.app.ui.Routes
 import com.pvp.app.ui.theme.CalendarTheme
 
-@Preview
 @Composable
-fun ApplicationScreen() {
+fun Layout() {
     val controller = rememberNavController()
     val destination = controller.currentBackStackEntryAsState().value?.destination
     val screen = Routes.routes.find { it.route == destination?.route } ?: Routes.Calendar
-    val state = rememberSaveable { (mutableStateOf(true)) }
+    val state = rememberSaveable { mutableStateOf(true) }
 
     CalendarTheme {
         Surface(
@@ -43,7 +46,7 @@ fun ApplicationScreen() {
             Scaffold(
                 topBar = {
                     Header(
-                        back = { controller.navigateUp() },
+                        backHandler = { controller.navigateUp() },
                         containsPreviousRoute = controller.previousBackStackEntry != null &&
                                 !Routes.routes.contains(screen),
                         route = screen,
@@ -63,7 +66,7 @@ fun ApplicationScreen() {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun Header(
-    back: () -> Unit,
+    backHandler: () -> Unit,
     containsPreviousRoute: Boolean,
     modifier: Modifier = Modifier,
     route: Routes,
@@ -76,13 +79,10 @@ fun Header(
             visible = state
         ) {
             TopAppBar(
-                actions = {
-
-                },
                 modifier = modifier,
                 navigationIcon = {
                     if (containsPreviousRoute) {
-                        IconButton(onClick = back) {
+                        IconButton(onClick = backHandler) {
                             Icon(
                                 contentDescription = null,
                                 imageVector = Icons.Filled.ArrowBack
@@ -91,10 +91,21 @@ fun Header(
                     }
                 },
                 title = {
-                    Text(
-                        style = MaterialTheme.typography.titleLarge,
-                        text = stringResource(id = route.routeNameId),
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            contentDescription = null,
+                            imageVector = route.icon
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            style = MaterialTheme.typography.titleLarge,
+                            text = stringResource(id = route.routeNameId)
+                        )
+                    }
                 }
             )
         }
