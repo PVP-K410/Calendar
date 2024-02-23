@@ -95,3 +95,15 @@
 - `src/main/res/values/strings.xml` is used to define strings used in the application.
 
 ---
+
+### ✒️ Code Style
+- [Kotlin Style Guide](https://developer.android.com/kotlin/style-guide)
+- Remember to always
+  - Remove any unnecessary comments, empty lines, imports and whitespace
+  - Use `val` instead of `var` whenever possible
+  - Use `when` instead of `if` whenever possible
+  - Use brackets for `if`, `for` and `while` blocks even if they are not required
+    - Exception for `if`: conditionals that are in a single line
+  - Use simple yet well defined names for variables, functions, classes, etc.
+
+---
