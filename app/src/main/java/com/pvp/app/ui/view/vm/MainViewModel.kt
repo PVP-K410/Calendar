@@ -13,7 +13,7 @@ class MainViewModel @Inject constructor(
 
     suspend fun bootstrap() {
         // FIXME: Temporary user creation. Once actual login process is implemented, this will be removed
-        userService.getOrResolveCurrent().collect {
+        userService.getCurrent().collect {
             if (it == null) {
                 userService.merge(
                     User("fake@email@gmail@com", 0, 0, 0, "current")

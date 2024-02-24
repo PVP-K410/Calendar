@@ -13,42 +13,37 @@ class UserServiceImpl @Inject constructor(
     private val database: FirebaseFirestore
 ) : UserService {
 
-    override suspend fun get(username: String): Flow<User?> {
+    override suspend fun get(email: String): Flow<User?> {
         return database
             .collection(identifier)
-            .document(username)
+            .document(email)
             .snapshots()
             .map { it.toObject(User::class.java) }
     }
 
-    override suspend fun getOrResolveCurrent(): Flow<User?> {
+    override suspend fun getCurrent(): Flow<User?> {
         return database
             .collection(identifier)
             // TODO:
             //  Implement the logic to get the current user when login process is implemented
-            .document("current")
             .snapshots()
             .map {
-                if (it.exists()) {
-                    return@map it.toObject(User::class.java)!!
-                }
-
-                return@map null
+                it.documents.firstOrNull()?.toObject(User::class.java)
             }
     }
 
     override suspend fun merge(user: User) {
         database
             .collection(identifier)
-            .document(user.username)
+            .document(user.email)
             .set(user)
             .await()
     }
 
-    override suspend fun remove(username: String) {
+    override suspend fun remove(email: String) {
         database
             .collection(identifier)
-            .document(username)
+            .document(email)
             .delete()
             .await()
     }

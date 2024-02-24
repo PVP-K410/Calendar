@@ -9,15 +9,14 @@ interface UserService : DocumentsCollection {
         get() = "users"
 
     /**
-     * Gets user by its username. In case it is not found, null is returned.
+     * Gets user by its email. In case it is not found, null is returned.
      */
-    suspend fun get(username: String): Flow<User?>
+    suspend fun get(email: String): Flow<User?>
 
     /**
-     * Gets, if already resolved, or resolves a current user of the application and returns it.
-     * In case of failure an exception is thrown.
+     * Gets current application user. In case it cannot be found or resolved, null is returned.
      */
-    suspend fun getOrResolveCurrent(): Flow<User?>
+    suspend fun getCurrent(): Flow<User?>
 
     /**
      * Creates or updates the user in the database.
@@ -25,7 +24,7 @@ interface UserService : DocumentsCollection {
     suspend fun merge(user: User)
 
     /**
-     * Removes an user from the database with all associated data.
+     * Removes an user from the database with all associated children data.
      */
-    suspend fun remove(username: String)
+    suspend fun remove(email: String)
 }
