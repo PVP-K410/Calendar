@@ -1,4 +1,4 @@
-package com.pvp.app.ui.route
+package com.pvp.app.ui
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.material.icons.Icons
@@ -10,7 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.pvp.app.R
-import com.pvp.app.ui.view.component.calendar.Week
+import com.pvp.app.ui.screen.calendar.CalendarScreen
 
 @Composable
 fun Router(
@@ -50,8 +50,6 @@ sealed class Routes(
         Icons.Outlined.CalendarMonth,
         "calendar",
         R.string.route_calendar,
-        {
-            Week()
-        }
+        { CalendarScreen() }
     )
 }
