@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PVP_Project"
+rootProject.name = "Calendar"
 include(":app")
  
