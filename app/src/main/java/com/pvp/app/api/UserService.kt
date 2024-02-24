@@ -9,13 +9,6 @@ interface UserService : DocumentsCollection {
         get() = "users"
 
     /**
-     * Should create an user object and return it. Nothing is done regarding persisting
-     * it to the database. In case of invalid parameters, method shall throw an
-     * exception.
-     */
-    fun create(email: String, height: Int, mass: Int, username: String): User
-
-    /**
      * Gets user by its username. In case it is not found, null is returned.
      */
     suspend fun get(username: String): Flow<User?>

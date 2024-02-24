@@ -13,10 +13,6 @@ class UserServiceImpl @Inject constructor(
     private val database: FirebaseFirestore
 ) : UserService {
 
-    override fun create(email: String, height: Int, mass: Int, username: String): User {
-        return User(email, height, mass, 0, username)
-    }
-
     override suspend fun get(username: String): Flow<User?> {
         return database
             .collection(identifier)

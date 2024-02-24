@@ -2,6 +2,7 @@ package com.pvp.app.ui.view.vm
 
 import androidx.lifecycle.ViewModel
 import com.pvp.app.api.UserService
+import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -15,7 +16,7 @@ class MainViewModel @Inject constructor(
         userService.getOrResolveCurrent().collect {
             if (it == null) {
                 userService.merge(
-                    userService.create("fake@email@gmail@com", 0, 0, "current")
+                    User("fake@email@gmail@com", 0, 0, 0, "current")
                 )
             }
         }
