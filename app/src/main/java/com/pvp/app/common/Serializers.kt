@@ -9,23 +9,27 @@ import kotlinx.serialization.encoding.Encoder
 import java.time.Duration
 import java.time.LocalDateTime
 
-class DurationSerializer : KSerializer<Duration> {
+object DurationSerializer : KSerializer<Duration?> {
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
         "java.time.Duration",
         PrimitiveKind.STRING
     )
 
-    override fun serialize(encoder: Encoder, value: Duration) {
-        encoder.encodeString(value.toString())
+    override fun serialize(encoder: Encoder, value: Duration?) {
+        value?.let { encoder.encodeString(it.toString()) }
     }
 
-    override fun deserialize(decoder: Decoder): Duration {
-        return Duration.parse(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): Duration? {
+        return try {
+            Duration.parse(decoder.decodeString())
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 
-class LocalDateTimeSerializer : KSerializer<LocalDateTime> {
+object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
         "java.time.LocalDateTime",

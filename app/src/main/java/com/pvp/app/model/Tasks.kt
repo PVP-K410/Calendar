@@ -1,15 +1,8 @@
-@file:UseSerializers(
-    DurationSerializer::class,
-    LocalDateTimeSerializer::class,
-    SportActivitySerializer::class
-)
-
 package com.pvp.app.model
 
 import com.pvp.app.common.DurationSerializer
 import com.pvp.app.common.LocalDateTimeSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.UseSerializers
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -22,11 +15,11 @@ class MealTask : Task {
         description: String? = null,
         duration: Duration? = null,
         id: String? = null,
-        isCompleted: Boolean = false,
-        recipe: String = "",
-        scheduledAt: LocalDateTime = LocalDateTime.now(),
-        title: String = "",
-        userEmail: String = ""
+        isCompleted: Boolean,
+        recipe: String,
+        scheduledAt: LocalDateTime,
+        title: String,
+        userEmail: String
     ) : super(
         description,
         duration,
@@ -38,6 +31,10 @@ class MealTask : Task {
     ) {
         this.recipe = recipe
     }
+
+    override fun toString(): String {
+        return "MealTask(recipe='$recipe') && " + super.toString()
+    }
 }
 
 @Serializable
@@ -47,15 +44,15 @@ class SportTask : Task {
     var distance: Double?
 
     constructor(
-        activity: SportActivity? = null,
+        activity: SportActivity,
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
         id: String? = null,
-        isCompleted: Boolean = false,
-        scheduledAt: LocalDateTime = LocalDateTime.now(),
-        title: String = "",
-        userEmail: String = ""
+        isCompleted: Boolean,
+        scheduledAt: LocalDateTime,
+        title: String,
+        userEmail: String
     ) : super(
         description,
         duration,
@@ -68,15 +65,25 @@ class SportTask : Task {
         this.activity = activity
         this.distance = distance
     }
+
+    override fun toString(): String {
+        return "SportTask(activity=$activity, distance=$distance) && " + super.toString()
+    }
 }
 
 @Serializable
 open class Task(
     var description: String? = null,
+    @Serializable(DurationSerializer::class)
     var duration: Duration? = null,
     val id: String? = null,
-    var isCompleted: Boolean = false,
-    var scheduledAt: LocalDateTime = LocalDateTime.now(),
-    var title: String = "",
-    val userEmail: String = ""
-)
+    var isCompleted: Boolean,
+    @Serializable(LocalDateTimeSerializer::class)
+    var scheduledAt: LocalDateTime,
+    var title: String,
+    val userEmail: String
+) {
+    override fun toString(): String {
+        return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail')"
+    }
+}

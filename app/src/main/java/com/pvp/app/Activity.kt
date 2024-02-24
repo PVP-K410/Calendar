@@ -29,7 +29,7 @@ class Activity : ComponentActivity() {
 
     private fun bootstrap() {
         lifecycleScope.launch {
-            // FIXME: Temporary user creation. Once actual login process is implemented, this will refactored
+            // FIXME: Temporary user creation. Once actual login process is implemented, this will be refactored
             userService.getCurrent().collect {
                 if (it == null) {
                     userService.merge(
