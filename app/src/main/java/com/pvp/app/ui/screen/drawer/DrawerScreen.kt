@@ -91,8 +91,8 @@ fun DrawerHeader(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier,
         horizontalArrangement = Arrangement.Start,
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {

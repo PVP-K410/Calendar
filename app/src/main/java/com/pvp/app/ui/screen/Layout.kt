@@ -79,7 +79,11 @@ fun HeaderNavigationIcon(
         IconButton(onClick = {
             scope.launch {
                 state.apply {
-                    if (isClosed) open() else close()
+                    if (isClosed) {
+                        open()
+                    } else {
+                        close()
+                    }
                 }
             }
         }) {
