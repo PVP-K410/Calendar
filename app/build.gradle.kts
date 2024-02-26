@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 
     kotlin("kapt")
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 android {
@@ -71,6 +72,9 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // Kotlinx
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // Database (Firebase)
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
