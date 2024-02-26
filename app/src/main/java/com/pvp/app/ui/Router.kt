@@ -1,6 +1,9 @@
 package com.pvp.app.ui
 
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.runtime.Composable
@@ -19,26 +22,39 @@ fun Router(
 ) {
     run {
         // Initialize singleton beforehand, else values are not set fast enough.
-        Routes.routes
+        Route.routes
     }
 
     NavHost(
+        enterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { -it },
+                animationSpec = tween(500)
+            )
+        },
+        exitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(500)
+            )
+        },
         modifier = modifier,
         navController = controller,
-        startDestination = Routes.Calendar.route
+        startDestination = Route.Calendar.route
     ) {
-        Routes.routes.forEach { r ->
-            composable(r.route) {
+        Route.routes.forEach { r ->
+            composable(route = r.route) {
                 r.screen(this)
             }
         }
     }
 }
 
-sealed class Routes(
+sealed class Route(
     val icon: ImageVector,
+    val iconDescription: String,
+    val resourceTitleId: Int,
     val route: String,
-    val routeNameId: Int,
     val screen: @Composable AnimatedContentScope.() -> Unit
 ) {
 
@@ -46,10 +62,11 @@ sealed class Routes(
         val routes = listOf(Calendar)
     }
 
-    data object Calendar : Routes(
+    data object Calendar : Route(
         Icons.Outlined.CalendarMonth,
-        "calendar",
+        "Calendar page button icon",
         R.string.route_calendar,
+        "calendar",
         { CalendarScreen() }
     )
 }
