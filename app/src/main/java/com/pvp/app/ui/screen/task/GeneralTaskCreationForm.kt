@@ -1,4 +1,4 @@
-package com.pvp.app.ui.view.component.task
+package com.pvp.app.ui.screen.task
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,11 +31,6 @@ data class GeneralPersonalTask(val id: Int, val title: String, val description: 
                                val frequency: Int )
 
 class TaskViewModel : ViewModel() {
-/*
-    private val sharedPreferences =
-        application.getSharedPreferences("tasks_prefs", Context.MODE_PRIVATE)
-*/
-
     private val _tasks = mutableStateListOf<GeneralPersonalTask>()
     val tasks: List<GeneralPersonalTask> get() = _tasks
 
@@ -46,18 +41,13 @@ class TaskViewModel : ViewModel() {
         _tasks.add(task)
     }
 
-/*    private fun saveTasks() {
-        val tasksJson = Gson().toJson(_tasks)
-        sharedPreferences.edit().putString("tasks", tasksJson).apply()
+    private fun saveTasks() {
+
     }
 
     private fun loadTasks() {
-        val tasksJson = sharedPreferences.getString("tasks", null)
-        tasksJson?.let {
-            val typeToken = object : TypeToken<List<GeneralPersonalTask>>() {}.type
-            _tasks.addAll(Gson().fromJson(it, typeToken))
-        }
-    }*/
+
+    }
 }
 
 @Composable
