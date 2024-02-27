@@ -6,6 +6,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Task
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -14,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.pvp.app.R
 import com.pvp.app.ui.screen.calendar.CalendarScreen
+import com.pvp.app.ui.screen.task.CreateMealTaskForm
 
 @Composable
 fun Router(
@@ -59,7 +61,7 @@ sealed class Route(
 ) {
 
     companion object {
-        val routes = listOf(Calendar)
+        val routes = listOf(Calendar, CreateMeal)
     }
 
     data object Calendar : Route(
@@ -68,5 +70,12 @@ sealed class Route(
         R.string.route_calendar,
         "calendar",
         { CalendarScreen() }
+    )
+    object CreateMeal : Route(
+        Icons.Outlined.Task,
+        "Meal creation page button icon",
+        R.string.route_meal_CreationForm,
+        "Meal task creation",
+        screen = { CreateMealTaskForm() }
     )
 }
