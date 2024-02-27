@@ -1,10 +1,17 @@
-package com.pvp.app.ui.view.component.task
+package com.pvp.app.ui.screen.task
 
 import androidx.compose.runtime.Composable
 import com.pvp.app.model.Task
 
 @Composable
-fun Task(
+fun TaskBox(
+    task: Task
+) {
+
+}
+
+@Composable
+fun TaskScreen(
     task: Task
 ) {
 
