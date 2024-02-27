@@ -71,7 +71,8 @@ sealed class Route(
         "calendar",
         { CalendarScreen() }
     )
-    object CreateMeal : Route(
+
+    data object CreateMeal : Route(
         Icons.Outlined.Task,
         "Meal creation page button icon",
         R.string.route_meal_CreationForm,
