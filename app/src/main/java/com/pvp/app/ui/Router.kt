@@ -75,7 +75,7 @@ sealed class Route(
         Icons.Outlined.Task,
         "Meal creation page button icon",
         R.string.route_meal_CreationForm,
-        "Meal task creation",
+        "tasks/create/meal",
         screen = { CreateMealTaskForm() }
     )
 }

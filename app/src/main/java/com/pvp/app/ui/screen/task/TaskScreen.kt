@@ -27,16 +27,16 @@ import androidx.compose.foundation.rememberScrollState
 
 @Composable
 fun CreateMealTaskForm() {
-    var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(0) }
     var ingredients by remember { mutableStateOf("") }
     var preparation by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
             .background(color = Color.White)
+            .fillMaxSize()
     ) {
         Column(
             modifier = Modifier
@@ -46,12 +46,11 @@ fun CreateMealTaskForm() {
             Text(
                 stringResource(R.string.meal_Title),
                 style = TextStyle(
+                    color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
-                    color = Color.Black
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
@@ -61,9 +60,14 @@ fun CreateMealTaskForm() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 20.dp)
-                    .background(color = Color.White)
-                    .background(color = Color.White, shape = RoundedCornerShape(5.dp))
-                    .border(0.5.dp, Color.Black, shape = RoundedCornerShape(5.dp)),
+                    .background(
+                        color = Color.White,
+                        shape = RoundedCornerShape(5.dp)
+                    )
+                    .border(0.5.dp,
+                        Color.Black,
+                        shape = RoundedCornerShape(5.dp)
+                    ),
                 textStyle = TextStyle(
                     fontSize = 15.sp,
                     color = Color.Black
@@ -73,9 +77,9 @@ fun CreateMealTaskForm() {
             Text(
                 stringResource(R.string.meal_Duration),
                 style = TextStyle(
+                    color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
-                    color = Color.Black
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,7 +125,11 @@ fun CreateMealTaskForm() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 20.dp)
-                    .border(0.5.dp, Color.Black, shape = RoundedCornerShape(5.dp)),
+                    .border(
+                        0.5.dp,
+                        Color.Black,
+                        shape = RoundedCornerShape(5.dp)
+                    ),
                 textStyle = TextStyle(
                     fontSize = 15.sp
                 )
@@ -145,7 +153,11 @@ fun CreateMealTaskForm() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 20.dp)
-                    .border(0.5.dp, Color.Black, shape = RoundedCornerShape(5.dp)),
+                    .border(
+                        0.5.dp,
+                        Color.Black,
+                        shape = RoundedCornerShape(5.dp)
+                    ),
                 textStyle = TextStyle(
                     fontSize = 15.sp
                 )
@@ -154,9 +166,9 @@ fun CreateMealTaskForm() {
             Text(
                 stringResource(R.string.meal_Description),
                 style = TextStyle(
+                    color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
-                    color = Color.Black
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -169,7 +181,11 @@ fun CreateMealTaskForm() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 20.dp)
-                    .border(0.5.dp, Color.Black, shape = RoundedCornerShape(5.dp)),
+                    .border(
+                        0.5.dp,
+                        Color.Black,
+                        shape = RoundedCornerShape(5.dp)
+                    ),
                 textStyle = TextStyle(
                     fontSize = 15.sp
                 )
