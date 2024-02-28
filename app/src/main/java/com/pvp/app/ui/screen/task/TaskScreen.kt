@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pvp.app.common.getDurationString
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -255,34 +256,21 @@ fun CreateMealTaskForm() {
         }
     }
 }
-
-// Parses Duration object to a string
-// Format <HH> h <mm> min
-fun getDurationString(duration: Duration): String {
-    val hours = duration.toHours()
-    val minutes = duration.minusHours(hours).toMinutes()
-
-    return buildString {
-        if (hours > 0) append("$hours h")
-        if (minutes > 0) append("${if (hours > 0) " " else ""}$minutes min")
-    }
-}
 @Composable
 fun MealTaskBoxBody(
-    mealTask: MealTask
-){
-
+    task: MealTask
+) {
     Text(
-        "Main ingredient: " + mealTask.recipe,
+        "Main ingredient: " + task.recipe,
         textAlign = TextAlign.Left,
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 8.dp)
     )
 
-    if(mealTask.duration != null){
+    if (task.duration != null) {
         Text(
-            "Duration: " + getDurationString(mealTask.duration!!),
+            "Duration: " + getDurationString(task.duration!!),
             textAlign = TextAlign.Left,
             modifier = Modifier
                 .fillMaxWidth()
@@ -290,20 +278,21 @@ fun MealTaskBoxBody(
         )
     }
 }
+
 @Composable
 fun SportTaskBoxBody(
-    sportTask: SportTask
+    task: SportTask
 ) {
-
-    sportTask.activity?.let { activity ->
+    task.activity?.let { activity ->
         val activityText = buildString {
             append(activity.title)
-            when {
-                sportTask.distance != null ->
-                    append(" for ${sportTask.distance} km")
 
-                sportTask.duration != null ->
-                    append(" for ${getDurationString(sportTask.duration!!)}")
+            when {
+                task.distance != null ->
+                    append(" for ${task.distance} km")
+
+                task.duration != null ->
+                    append(" for ${getDurationString(task.duration!!)}")
             }
         }
 
@@ -321,7 +310,6 @@ fun SportTaskBoxBody(
 fun TaskBoxBody(
     task: Task
 ) {
-
     task.description?.let { description ->
         Text(
             text = description,
@@ -342,11 +330,11 @@ fun TaskBoxBody(
         )
     }
 }
+
 @Composable
 fun TaskBox(
     task: Task
 ) {
-
     // Later task.isCompleted should be used
     var checked by remember {
         mutableStateOf(false)
@@ -356,22 +344,22 @@ fun TaskBox(
         shape = RectangleShape,
         modifier = Modifier
             .fillMaxWidth()
-            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline))
+            .border(BorderStroke(1.dp,
+                MaterialTheme.colorScheme.outline))
     ) {
 
-        Column(
-        ) {
-
+        Column() {
             Row(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Checkbox(
                     checked = checked,
-                    onCheckedChange = {checked = it},
+                    onCheckedChange = { checked = it },
                     modifier = Modifier
                         .size(36.dp)
                         .align(CenterVertically)
                 )
+
                 Text(
                     task.title,
                     textAlign = TextAlign.Center,
@@ -384,20 +372,21 @@ fun TaskBox(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            when(task){
+            when (task) {
                 is SportTask -> SportTaskBoxBody(task)
                 is MealTask -> MealTaskBoxBody(task)
                 else -> TaskBoxBody(task)
             }
 
-            val timeString = "Scheduled at ${task.scheduledAt
-                .toLocalTime()
-                .format(DateTimeFormatter.ofPattern("HH:mm"))}"
+            val timeString = "Scheduled at ${
+                task.scheduledAt
+                    .toLocalTime()
+                    .format(DateTimeFormatter.ofPattern("HH:mm"))
+            }"
 
             Text(
                 timeString,
-                modifier = Modifier
-                    .padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp)
             )
         }
     }
