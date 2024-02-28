@@ -213,8 +213,6 @@ fun CreateMealTaskForm() {
     }
 }
 
-
-
 @Composable
 fun TaskBox(
     task: Task
