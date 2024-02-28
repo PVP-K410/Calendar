@@ -208,9 +208,3 @@ fun DatePicker(
         }
     }
 }
-
-@Preview
-@Composable
-fun SimpleComposablePreview() {
-    SportTaskForm()
-}
