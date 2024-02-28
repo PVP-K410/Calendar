@@ -63,27 +63,29 @@ fun SportTaskForm() {
                 .padding(16.dp)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
-            //horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 16.dp)
             ) {
-            Checkbox(
-                checked = supportsDistanceMetrics,
-                onCheckedChange = { supportsDistanceMetrics = it },
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Text (
-                text = "Supports distance metrics",
-                modifier = Modifier.padding(start = 16.dp)
-            )}
+                Checkbox(
+                    checked = supportsDistanceMetrics,
+                    onCheckedChange = { supportsDistanceMetrics = it },
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Text(
+                    text = "Supports distance metrics",
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
 
             TextField(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Title") },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             )
 
             TextField(
@@ -91,15 +93,19 @@ fun SportTaskForm() {
                 onValueChange = { duration = it },
                 label = { Text("Duration") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             )
 
             DatePicker(
                 selectedDate = startDate,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             )
 
-            Button(onClick = { /* ???? */ }) {
+            Button(onClick = { /* TODO: Implement creation logic */ }) {
                 Text("Submit")
             }
         }
@@ -119,28 +125,40 @@ fun DatePicker(
 
     Column(modifier) {
         Text("Start Date")
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Year:")
+
             Spacer(modifier = Modifier.width(8.dp))
+
             OutlinedTextField(
                 value = year.toString(),
                 onValueChange = { },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f)
             )
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Text("Month:")
+
             Spacer(modifier = Modifier.width(8.dp))
+
             OutlinedTextField(
                 value = (month + 1).toString(),
                 onValueChange = { },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f)
             )
+
             Spacer(modifier = Modifier.width(16.dp))
+
             Text("Day:")
+
             Spacer(modifier = Modifier.width(8.dp))
+
             OutlinedTextField(
                 value = day.toString(),
                 onValueChange = { },
@@ -149,11 +167,4 @@ fun DatePicker(
             )
         }
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    SportTaskForm()
 }
