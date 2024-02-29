@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import com.pvp.app.R
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.task.CreateMealTaskForm
+import com.pvp.app.ui.screen.task.TaskFormAndList
 
 @Composable
 fun Router(
@@ -61,7 +62,7 @@ sealed class Route(
 ) {
 
     companion object {
-        val routes = listOf(Calendar, CreateMeal)
+        val routes = listOf(Calendar, CreateMeal, GeneralPersonalTask)
     }
 
     data object Calendar : Route(
@@ -78,5 +79,13 @@ sealed class Route(
         R.string.route_meal_CreationForm,
         "tasks/create/meal",
         screen = { CreateMealTaskForm() }
+    )
+
+    data object GeneralPersonalTask : Route(
+        Icons.Outlined.Task,
+        "General personal task creation page button icon",
+        R.string.route_GeneralTask_CreationForm,
+        "tasks/create/general",
+        screen = { TaskFormAndList() }
     )
 }
