@@ -2,14 +2,18 @@ package com.pvp.app.ui.screen.task
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -19,19 +23,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.TextButton
 import com.pvp.app.model.Task
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 class GeneralTasksManager {
 
     private val _tasks = mutableStateListOf<Task>()
     val tasks: List<Task> get() = _tasks
 
-    fun addTask(title: String, description: String) {
+    fun addTask(title: String, description: String, startDate: LocalDateTime) {
         if (title.isEmpty() || description.isEmpty()) {
             return
         }
@@ -39,7 +49,7 @@ class GeneralTasksManager {
         val task = Task(
             description = description,
             isCompleted = false,
-            scheduledAt = LocalDateTime.now(),
+            scheduledAt = startDate,
             title = title,
             userEmail = "TODO"
         )
@@ -49,16 +59,19 @@ class GeneralTasksManager {
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskForm(generalTasksManager: GeneralTasksManager) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var startDate by remember { mutableStateOf(LocalDateTime.now()) }
+    val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+    val isDatePickerDialogOpen = remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
-            .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        modifier = Modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Create a General Task",
@@ -88,14 +101,74 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                 .padding(8.dp)
         )
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Text(
+                text = "Start Date: ${startDate.toLocalDate()}",
+                style = TextStyle(fontSize = 16.sp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            )
+
+            Button(
+                onClick = {
+                    isDatePickerDialogOpen.value = true
+                },
+                modifier = Modifier.wrapContentWidth()
+            ) {
+                Text("Pick Date")
+            }
+        }
+
+        if (isDatePickerDialogOpen.value) {
+            DatePickerDialog(
+                onDismissRequest = {
+                    isDatePickerDialogOpen.value = false
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            isDatePickerDialogOpen.value = false
+                            val instant = datePickerState.selectedDateMillis?.let {
+                                Instant.ofEpochMilli(it)
+                            }
+                            startDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+                        }
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            isDatePickerDialogOpen.value = false
+                        }
+                    ) {
+                        Text("CANCEL")
+                    }
+                }
+            ) {
+                DatePicker(
+                    state = datePickerState
+                )
+            }
+        }
+
         Button(
             onClick = {
                 generalTasksManager.addTask(
                     title = title,
-                    description = description
+                    description = description,
+                    startDate = startDate
                 )
                 title = ""
                 description = ""
+                startDate = LocalDateTime.now()
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -136,7 +209,12 @@ fun TaskList(tasks: List<Task>) {
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Column {
                             Text(
                                 text = task.title,
@@ -145,6 +223,11 @@ fun TaskList(tasks: List<Task>) {
 
                             task.description?.let { Text(text = it) }
                         }
+
+                        Text(
+                            text = "${task.scheduledAt.toLocalDate()}",
+                            fontStyle = FontStyle.Italic
+                        )
                     }
                 }
             }
@@ -152,8 +235,6 @@ fun TaskList(tasks: List<Task>) {
     }
 }
 
-
-@Preview(showSystemUi = true)
 @Composable
 fun TaskFormAndList() {
     val generalTasksManager = GeneralTasksManager()
