@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.task
 
+import android.app.TimePickerDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,31 +31,40 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.Slider
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import com.pvp.app.model.Task
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
 class GeneralTasksManager {
 
-    private val _tasks = mutableStateListOf<Task>()
-    val tasks: List<Task> get() = _tasks
+    val tasks = mutableStateListOf<Task>()
 
-    fun addTask(title: String, description: String, startDate: LocalDateTime) {
+    fun addTask(
+        title: String,
+        description: String,
+        startDate: LocalDateTime,
+        duration: Int
+    ) {
         if (title.isEmpty() || description.isEmpty()) {
             return
         }
 
         val task = Task(
             description = description,
+            duration = Duration.ofMinutes(duration.toLong()),
             isCompleted = false,
             scheduledAt = startDate,
             title = title,
             userEmail = "TODO"
         )
 
-        _tasks.add(task)
+        tasks.add(task)
     }
 
 }
@@ -65,6 +75,7 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var startDate by remember { mutableStateOf(LocalDateTime.now()) }
+    var duration by remember { mutableStateOf(0) }
     val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
     val isDatePickerDialogOpen = remember { mutableStateOf(false) }
 
@@ -125,6 +136,27 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
             }
         }
 
+        Slider(
+            value = duration.toFloat(),
+            onValueChange = { newValue -> duration = newValue.toInt() },
+            valueRange = 1f..180f,
+            steps = 180,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp)
+        )
+
+        Text(
+            text = "Duration: $duration minutes",
+            style = TextStyle(
+                fontSize = 15.sp,
+                color = Color.Black
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+        )
+
         if (isDatePickerDialogOpen.value) {
             DatePickerDialog(
                 onDismissRequest = {
@@ -134,9 +166,11 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                     TextButton(
                         onClick = {
                             isDatePickerDialogOpen.value = false
+
                             val instant = datePickerState.selectedDateMillis?.let {
                                 Instant.ofEpochMilli(it)
                             }
+
                             startDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
                         }
                     ) {
@@ -164,11 +198,14 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                 generalTasksManager.addTask(
                     title = title,
                     description = description,
-                    startDate = startDate
+                    startDate = startDate,
+                    duration = duration
                 )
+
                 title = ""
                 description = ""
                 startDate = LocalDateTime.now()
+                duration = 0
             },
             modifier = Modifier
                 .fillMaxWidth()
