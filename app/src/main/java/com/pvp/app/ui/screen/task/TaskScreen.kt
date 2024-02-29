@@ -54,14 +54,20 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
+import java.time.Duration
+import java.time.LocalDateTime
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun CreateMealTaskForm() {
+fun CreateMealTaskForm(
+    model: TaskViewModel = hiltViewModel()
+) {
     var description by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(0) }
     var ingredients by remember { mutableStateOf("") }
     var preparation by remember { mutableStateOf("") }
     var title by remember { mutableStateOf("") }
+    var recipeValue by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -224,7 +230,37 @@ fun CreateMealTaskForm() {
 
             Button(
                 onClick = {
-                    /*TODO: Functionality */
+                    val descriptionValue = description.trim()
+                    val durationValue = duration.toLong()
+                    val ingredientsValue = ingredients.trim()
+                    val preparationValue = preparation.trim()
+                    val titleValue = title.trim()
+
+                    if (
+                        titleValue.isNotEmpty() &&
+                        durationValue > 0 &&
+                        (ingredientsValue.isNotEmpty() || preparationValue.isNotEmpty()) &&
+                        descriptionValue.isNotEmpty()
+                    ) {
+                        recipeValue = if (ingredientsValue.isNotEmpty() && preparationValue.isNotEmpty()) {
+                            "$ingredientsValue\n$preparationValue"
+                        } else if (ingredientsValue.isNotEmpty() && preparationValue.isEmpty()) {
+                            ingredientsValue
+                        } else {
+                            preparationValue
+                        }
+                        model.createTaskMeal(
+                            description = descriptionValue,
+                            duration = Duration.ofMinutes(durationValue),
+                            recipe = recipeValue,
+                            scheduledAt = LocalDateTime.now(),
+                            title = titleValue,
+                            userEmail = "fake@email@gmail@com"
+                        )
+                    }
+                    else {
+                        /* TODO: errors (wrong input, empty lines) implementation */
+                    }
                 },
                 modifier = Modifier
                     .width(120.dp)
