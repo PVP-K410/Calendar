@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,13 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pvp.app.R
 import com.pvp.app.model.Task
-import java.util.Calendar
-import java.util.Date
+import java.time.LocalDateTime
 
 @Composable
 fun CreateMealTaskForm() {
     var description by remember { mutableStateOf("") }
-    var duration by remember { mutableStateOf(0) }
+    var duration by remember { mutableIntStateOf(0) }
     var ingredients by remember { mutableStateOf("") }
     var preparation by remember { mutableStateOf("") }
     var title by remember { mutableStateOf("") }
@@ -250,7 +250,7 @@ fun SportTaskForm() {
     var description by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var startDate by remember { mutableStateOf(Date()) }
+    var startDate by remember { mutableStateOf(LocalDateTime.now()) }
     var supportsDistanceMetrics by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
 
@@ -345,16 +345,9 @@ fun SportTaskForm() {
 
 @Composable
 fun DatePicker(
-    selectedDate: Date,
+    selectedDate: LocalDateTime,
     modifier: Modifier = Modifier
 ) {
-    val calendar = Calendar.getInstance()
-
-    calendar.time = selectedDate
-
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-    val month = calendar.get(Calendar.MONTH)
-    val year = calendar.get(Calendar.YEAR)
 
     Column(modifier) {
         Text("Start Date")
@@ -367,7 +360,7 @@ fun DatePicker(
             Spacer(modifier = Modifier.width(8.dp))
 
             OutlinedTextField(
-                value = year.toString(),
+                value = selectedDate.year.toString(),
                 onValueChange = { },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f)
@@ -380,7 +373,7 @@ fun DatePicker(
             Spacer(modifier = Modifier.width(8.dp))
 
             OutlinedTextField(
-                value = (month + 1).toString(),
+                value = selectedDate.month.value.toString(),
                 onValueChange = { },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f)
@@ -393,7 +386,7 @@ fun DatePicker(
             Spacer(modifier = Modifier.width(8.dp))
 
             OutlinedTextField(
-                value = day.toString(),
+                value = selectedDate.dayOfMonth.toString(),
                 onValueChange = { },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f)
