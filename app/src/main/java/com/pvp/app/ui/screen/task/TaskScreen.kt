@@ -368,11 +368,12 @@ fun TaskBoxBody(
 
 @Composable
 fun TaskBox(
-    task: Task
+    task: Task,
+    model: TaskViewModel = hiltViewModel()
 ) {
     // Later task.isCompleted should be used
     var checked by remember {
-        mutableStateOf(false)
+        mutableStateOf(task.isCompleted)
     }
 
     Card(
@@ -393,7 +394,11 @@ fun TaskBox(
             ) {
                 Checkbox(
                     checked = checked,
-                    onCheckedChange = { checked = it },
+                    onCheckedChange = {
+                        checked = it
+                        task.isCompleted = checked
+                        model.updateTask(task)
+                                      },
                     modifier = Modifier
                         .size(36.dp)
                         .align(CenterVertically)

@@ -6,7 +6,9 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
+import com.pvp.app.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
@@ -70,5 +72,13 @@ class TaskViewModel @Inject constructor(
         }
 
         return task
+    }
+
+    fun updateTask(
+        task: Task
+    ) {
+        viewModelScope.launch {
+            taskService.merge(task)
+        }
     }
 }
