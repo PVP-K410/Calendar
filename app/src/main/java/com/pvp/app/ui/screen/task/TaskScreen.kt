@@ -22,6 +22,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,9 +41,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pvp.app.R
-import com.pvp.app.model.Task
 import java.util.Calendar
 import java.util.Date
+import androidx.compose.ui.Alignment.Companion.CenterVertically
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.style.TextAlign
+import com.pvp.app.common.getDurationString
+import com.pvp.app.model.MealTask
+import com.pvp.app.model.SportActivity
+import com.pvp.app.model.SportTask
+import com.pvp.app.model.Task
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 
 @Composable
 fun CreateMealTaskForm() {
@@ -231,17 +246,140 @@ fun CreateMealTaskForm() {
 }
 
 @Composable
-fun TaskBox(
-    task: Task
+fun MealTaskBoxBody(
+    task: MealTask
 ) {
+    Text(
+        "Main ingredient: " + task.recipe,
+        textAlign = TextAlign.Left,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp)
+    )
 
+    if (task.duration != null) {
+        Text(
+            "Duration: " + getDurationString(task.duration!!),
+            textAlign = TextAlign.Left,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp)
+        )
+    }
 }
 
 @Composable
-fun TaskScreen(
+fun SportTaskBoxBody(
+    task: SportTask
+) {
+    task.activity?.let { activity ->
+        val activityText = buildString {
+            append(activity.title)
+
+            when {
+                task.distance != null ->
+                    append(" for ${task.distance} km")
+
+                task.duration != null ->
+                    append(" for ${getDurationString(task.duration!!)}")
+            }
+        }
+
+        Text(
+            text = activityText,
+            textAlign = TextAlign.Left,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp)
+        )
+    }
+}
+
+@Composable
+fun TaskBoxBody(
     task: Task
 ) {
+    task.description?.let { description ->
+        Text(
+            text = description,
+            textAlign = TextAlign.Left,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp)
+        )
+    }
 
+    task.duration?.let { duration ->
+        Text(
+            text = "Duration: ${getDurationString(duration)}",
+            textAlign = TextAlign.Left,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp)
+        )
+    }
+}
+
+@Composable
+fun TaskBox(
+    task: Task
+) {
+    // Later task.isCompleted should be used
+    var checked by remember {
+        mutableStateOf(false)
+    }
+
+    Card(
+        shape = RectangleShape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.outline))
+    ) {
+
+        Column() {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = { checked = it },
+                    modifier = Modifier
+                        .size(36.dp)
+                        .align(CenterVertically)
+                )
+
+                Text(
+                    task.title,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(CenterVertically)
+                        .weight(1f),
+                    fontSize = 20.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            when (task) {
+                is SportTask -> SportTaskBoxBody(task)
+                is MealTask -> MealTaskBoxBody(task)
+                else -> TaskBoxBody(task)
+            }
+
+            val timeString = "Scheduled at ${
+                task.scheduledAt
+                    .toLocalTime()
+                    .format(DateTimeFormatter.ofPattern("HH:mm"))
+            }"
+
+            Text(
+                timeString,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -400,4 +538,46 @@ fun DatePicker(
             )
         }
     }
+}
+
+@Composable
+fun TaskScreen(
+    task: Task
+) {
+    // Only for testing purposes, delete later
+    // To add preview, comment out task: Task from constructor.
+    val mealTask = MealTask(
+        description = "Prepare dinner",
+        duration = Duration.ofMinutes(48),
+        id = "1",
+        isCompleted = false,
+        recipe = "Chicken breast",
+        scheduledAt = LocalDateTime.now(),
+        title = "Cook Dinner",
+        userEmail = "example@example.com"
+    )
+
+    val sportTask = SportTask(
+        activity = SportActivity.Running,
+        description = "Run in the park",
+        distance = 5.0,
+        duration = Duration.ofMinutes(65),
+        id = "2",
+        isCompleted = false,
+        scheduledAt = LocalDateTime.now(),
+        title = "Morning Run",
+        userEmail = "example@example.com"
+    )
+
+    val task = Task(
+        description = "Complete project tasks",
+        duration = Duration.ofHours(2),
+        id = "3",
+        isCompleted = false,
+        scheduledAt = LocalDateTime.now(),
+        title = "Project Tasks",
+        userEmail = "example@example.com"
+    )
+
+    TaskBox(task)
 }
