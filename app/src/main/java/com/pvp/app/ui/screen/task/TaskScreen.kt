@@ -22,11 +22,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposableTarget
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,11 +43,13 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -57,6 +65,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 
+
 @Composable
 fun CreateMealTaskForm(
     model: TaskViewModel = hiltViewModel()
@@ -66,6 +75,7 @@ fun CreateMealTaskForm(
     var ingredients by remember { mutableStateOf("") }
     var preparation by remember { mutableStateOf("") }
     var title by remember { mutableStateOf("") }
+    var recipeValue by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -250,7 +260,6 @@ fun CreateMealTaskForm(
                         } else {
                             preparationValue
                         }
-
                         model.createTaskMeal(
                             description = descriptionValue,
                             duration = Duration.ofMinutes(durationValue),
@@ -259,7 +268,8 @@ fun CreateMealTaskForm(
                             title = titleValue,
                             userEmail = "fake@email@gmail@com"
                         )
-                    } else {
+                    }
+                    else {
                         /* TODO: errors (wrong input, empty lines) implementation */
                     }
                 },
@@ -421,15 +431,28 @@ fun TaskBox(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateSportTaskForm() {
-    var activity by remember { mutableStateOf("") }
+fun CreateSportTaskForm(
+    model: TaskViewModel = hiltViewModel(),
+    //onTaskSubmit: (SportActivity) -> Unit
+) {
+    val sportActivities = listOf(
+        SportActivity.Cycling,
+        SportActivity.Gym,
+        SportActivity.Running,
+        SportActivity.Swimming,
+        SportActivity.Walking,
+        SportActivity.Yoga
+    )
+
+    var activity by remember { mutableStateOf<SportActivity>(sportActivities[0]) }
     var description by remember { mutableStateOf("") }
-    var duration by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+    var duration by remember { mutableStateOf(0) }
     var startDate by remember { mutableStateOf(Date()) }
     var supportsDistanceMetrics by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
+    var isExpanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -451,14 +474,38 @@ fun CreateSportTaskForm() {
                     .padding(bottom = 16.dp)
             )
 
-            TextField(
-                value = activity,
-                onValueChange = { activity = it },
-                label = { Text("Activity") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
+            Spacer(modifier = Modifier.height((16.dp)))
+
+            ExposedDropdownMenuBox(
+                expanded = isExpanded,
+                onExpandedChange = { isExpanded = !isExpanded }
+            ) {
+                TextField(
+                    modifier = Modifier.menuAnchor(),
+                    value = activity.title,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                    }
+                )
+
+                ExposedDropdownMenu(
+                    expanded = isExpanded,
+                    onDismissRequest = { isExpanded = false }
+                ) {
+                    sportActivities.forEach { activityItem ->
+                        DropdownMenuItem(
+                            text = { Text(text = activityItem.title) },
+                            onClick = {
+                                activity = activityItem
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height((32.dp)))
 
             TextField(
                 value = description,
@@ -469,42 +516,28 @@ fun CreateSportTaskForm() {
                     .padding(bottom = 16.dp)
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                Checkbox(
-                    checked = supportsDistanceMetrics,
-                    onCheckedChange = { supportsDistanceMetrics = it },
-                    modifier = Modifier.padding(bottom = 16.dp)
+            if (activity.supportsDistanceMetrics) {
+                Text(
+                    text = "Duration: $duration minutes",
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        color = Color.Black
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
                 )
 
-                Text(
-                    text = "Supports distance metrics",
-                    modifier = Modifier.padding(start = 16.dp)
+                Slider(
+                    value = duration.toFloat(),
+                    onValueChange = { newValue -> duration = newValue.toInt() },
+                    valueRange = 1f..180f,
+                    steps = 180,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
                 )
             }
-
-            TextField(
-                value = duration,
-                onValueChange = { duration = it },
-                label = { Text("Duration") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-
-            TextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
 
             DatePicker(
                 selectedDate = startDate,
@@ -513,8 +546,25 @@ fun CreateSportTaskForm() {
                     .padding(bottom = 16.dp)
             )
 
-            Button(onClick = { /* TODO: Implement creation logic */ }) {
-                Text("Submit")
+            Button(onClick = {
+                val activityValue = activity
+                val descriptionValue = description.trim()
+                val durationValue = duration.toLong()
+                val supportsDistanceMetricsValue = supportsDistanceMetrics
+                val startDateValue = startDate
+                val titleValue = title.trim()
+
+                model.createTaskSport(
+                    activity = activityValue,
+                    description = descriptionValue,
+                    duration = Duration.ofMinutes(durationValue),
+                    scheduledAt = LocalDateTime.now(),
+                    title = titleValue,
+                    userEmail = "fake@email@gmail@com",
+                    isCompleted = false
+                )
+            }) {
+                Text("Create")
             }
         }
     }
