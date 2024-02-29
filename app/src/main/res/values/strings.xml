@@ -1,11 +1,12 @@
 <resources>
     <string name="app_name">Calendar</string>
     <string name="route_calendar">Calendar</string>
-    <string name="route_meal_CreationForm">Meal task creation</string>
-    <string name="route_GeneralTask_CreationForm">General task creation</string>
-    <string name="meal_Title">Meal title</string>
-    <string name="meal_Duration">Preparation time</string>
-    <string name="meal_Ingredients">Ingredients</string>
-    <string name="meal_Preparation">Preparation</string>
-    <string name="meal_Description">Description</string>
+    <string name="route_tasks_create_general">Create general task</string>
+    <string name="route_tasks_create_meal">Create meal task</string>
+    <string name="route_tasks_create_sport">Create sport task</string>
+    <string name="form_create_meal_description">Description</string>
+    <string name="form_create_meal_duration">Preparation time</string>
+    <string name="form_create_meal_ingredients">Ingredients</string>
+    <string name="form_create_meal_preparation">Preparation</string>
+    <string name="form_create_meal_title">Meal title</string>
 </resources>
