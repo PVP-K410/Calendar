@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.R
 import com.pvp.app.common.getDurationString
 import com.pvp.app.model.MealTask
@@ -54,19 +56,16 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
-import java.time.Duration
-import java.time.LocalDateTime
-import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun CreateMealTaskForm(
     model: TaskViewModel = hiltViewModel()
 ) {
-    var description = ""
-    var duration = 0
-    var ingredients = ""
-    var preparation = ""
-    var title = ""
+    var description by remember { mutableStateOf("") }
+    var duration by remember { mutableIntStateOf(0) }
+    var ingredients by remember { mutableStateOf("") }
+    var preparation by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -241,7 +240,10 @@ fun CreateMealTaskForm(
                         (ingredientsValue.isNotEmpty() || preparationValue.isNotEmpty()) &&
                         descriptionValue.isNotEmpty()
                     ) {
-                        val recipeValue = if (ingredientsValue.isNotEmpty() && preparationValue.isNotEmpty()) {
+                        val recipeValue = if (
+                            ingredientsValue.isNotEmpty() &&
+                            preparationValue.isNotEmpty()
+                        ) {
                             "$ingredientsValue\n$preparationValue"
                         } else if (ingredientsValue.isNotEmpty() && preparationValue.isEmpty()) {
                             ingredientsValue
@@ -257,8 +259,7 @@ fun CreateMealTaskForm(
                             title = titleValue,
                             userEmail = "fake@email@gmail@com"
                         )
-                    }
-                    else {
+                    } else {
                         /* TODO: errors (wrong input, empty lines) implementation */
                     }
                 },
