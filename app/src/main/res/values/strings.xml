@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Calendar</string>
     <string name="route_calendar">Calendar</string>
+    <string name="route_meal_CreationForm">Meal task creation</string>
+    <string name="meal_Title">Meal title</string>
+    <string name="meal_Duration">Preparation time</string>
+    <string name="meal_Ingredients">Ingredients</string>
+    <string name="meal_Preparation">Preparation</string>
+    <string name="meal_Description">Description</string>
 </resources>
