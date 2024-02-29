@@ -1,8 +1,7 @@
 package com.pvp.app.common
 
 import java.time.Duration
-
-/***
+/**
  * Parses Duration object to a string
  * Format <HH> h <mm> min
  */

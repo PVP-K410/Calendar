@@ -23,18 +23,9 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,9 +46,6 @@ import java.util.Date
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.pvp.app.common.getDurationString
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
@@ -256,6 +244,7 @@ fun CreateMealTaskForm() {
         }
     }
 }
+
 @Composable
 fun MealTaskBoxBody(
     task: MealTask
@@ -344,7 +333,8 @@ fun TaskBox(
         shape = RectangleShape,
         modifier = Modifier
             .fillMaxWidth()
-            .border(BorderStroke(1.dp,
+            .border(BorderStroke(
+                1.dp,
                 MaterialTheme.colorScheme.outline))
     ) {
 
@@ -391,6 +381,7 @@ fun TaskBox(
         }
     }
 }
+
 @Composable
 fun SportTaskForm() {
     var activity by remember { mutableStateOf("") }
@@ -489,6 +480,7 @@ fun SportTaskForm() {
         }
     }
 }
+
 @Composable
 fun DatePicker(
     selectedDate: Date,
@@ -548,7 +540,6 @@ fun DatePicker(
     }
 }
 
-@Preview
 @Composable
 fun TaskScreen(
     task: Task
