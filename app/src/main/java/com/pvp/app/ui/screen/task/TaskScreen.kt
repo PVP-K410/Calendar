@@ -62,12 +62,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun CreateMealTaskForm(
     model: TaskViewModel = hiltViewModel()
 ) {
-    var description by remember { mutableStateOf("") }
-    var duration by remember { mutableStateOf(0) }
-    var ingredients by remember { mutableStateOf("") }
-    var preparation by remember { mutableStateOf("") }
-    var title by remember { mutableStateOf("") }
-    var recipeValue by remember { mutableStateOf("") }
+    var description = ""
+    var duration = 0
+    var ingredients = ""
+    var preparation = ""
+    var title = ""
 
     Box(
         modifier = Modifier
@@ -242,13 +241,14 @@ fun CreateMealTaskForm(
                         (ingredientsValue.isNotEmpty() || preparationValue.isNotEmpty()) &&
                         descriptionValue.isNotEmpty()
                     ) {
-                        recipeValue = if (ingredientsValue.isNotEmpty() && preparationValue.isNotEmpty()) {
+                        val recipeValue = if (ingredientsValue.isNotEmpty() && preparationValue.isNotEmpty()) {
                             "$ingredientsValue\n$preparationValue"
                         } else if (ingredientsValue.isNotEmpty() && preparationValue.isEmpty()) {
                             ingredientsValue
                         } else {
                             preparationValue
                         }
+
                         model.createTaskMeal(
                             description = descriptionValue,
                             duration = Duration.ofMinutes(durationValue),
@@ -266,7 +266,7 @@ fun CreateMealTaskForm(
                     .width(120.dp)
                     .height(70.dp)
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = 30.dp),
+                    .padding(top = 30.dp)
             ) {
                 Text(
                     "Create",
