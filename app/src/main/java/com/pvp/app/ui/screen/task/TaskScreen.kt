@@ -32,7 +32,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ComposableTarget
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +63,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
+import androidx.hilt.navigation.compose.hiltViewModel
+import java.time.ZoneId
 
 
 @Composable
@@ -450,7 +451,6 @@ fun CreateSportTaskForm(
     var description by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(0) }
     var startDate by remember { mutableStateOf(Date()) }
-    var supportsDistanceMetrics by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -550,7 +550,6 @@ fun CreateSportTaskForm(
                 val activityValue = activity
                 val descriptionValue = description.trim()
                 val durationValue = duration.toLong()
-                val supportsDistanceMetricsValue = supportsDistanceMetrics
                 val startDateValue = startDate
                 val titleValue = title.trim()
 
@@ -558,10 +557,12 @@ fun CreateSportTaskForm(
                     activity = activityValue,
                     description = descriptionValue,
                     duration = Duration.ofMinutes(durationValue),
-                    scheduledAt = LocalDateTime.now(),
-                    title = titleValue,
+                    isCompleted = false,
+                    scheduledAt = startDateValue.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(),
                     userEmail = "fake@email@gmail@com",
-                    isCompleted = false
+                    title = titleValue
                 )
             }) {
                 Text("Create")
