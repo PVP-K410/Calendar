@@ -79,7 +79,6 @@ class GeneralTasksManager {
 
         tasks.add(task)
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -337,7 +336,7 @@ fun TimePickerDialog(
         onDismissRequest = onCancel,
         properties = DialogProperties(
             usePlatformDefaultWidth = false
-        ),
+        )
     ) {
         Surface(
             shape = MaterialTheme.shapes.extraLarge,
@@ -348,7 +347,7 @@ fun TimePickerDialog(
                 .background(
                     shape = MaterialTheme.shapes.extraLarge,
                     color = MaterialTheme.colorScheme.surface
-                ),
+                )
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -361,20 +360,29 @@ fun TimePickerDialog(
                     text = title,
                     style = MaterialTheme.typography.labelMedium
                 )
+
                 content()
+
                 Row(
                     modifier = Modifier
                         .height(40.dp)
                         .fillMaxWidth()
                 ) {
                     toggle()
+
                     Spacer(modifier = Modifier.weight(1f))
+
                     TextButton(
                         onClick = onCancel
-                    ) { Text("Cancel") }
+                    ) {
+                        Text("Cancel")
+                    }
+
                     TextButton(
                         onClick = onConfirm
-                    ) { Text("OK") }
+                    ) {
+                        Text("OK")
+                    }
                 }
             }
         }
@@ -383,11 +391,11 @@ fun TimePickerDialog(
 
 @Composable
 fun TaskFormAndList() {
-    val generalTasksManager = GeneralTasksManager()
+    val manager = GeneralTasksManager()
 
     Column {
-        TaskForm(generalTasksManager)
+        TaskForm(manager)
 
-        TaskList(generalTasksManager.tasks)
+        TaskList(manager.tasks)
     }
 }
