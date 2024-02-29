@@ -1,11 +1,15 @@
 package com.pvp.app.ui.screen.task
 
-import android.app.TimePickerDialog
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,15 +35,24 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.pvp.app.model.Task
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+
+val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
 class GeneralTasksManager {
 
@@ -75,9 +88,15 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var startDate by remember { mutableStateOf(LocalDateTime.now()) }
-    var duration by remember { mutableStateOf(0) }
+    var duration by remember { mutableFloatStateOf(0.0f) }
     val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
-    val isDatePickerDialogOpen = remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val timePickerState = rememberTimePickerState(
+        initialHour = startDate.hour,
+        initialMinute = startDate.minute,
+        is24Hour = true
+    )
+    var showTimePicker by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.padding(16.dp),
@@ -119,53 +138,69 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                 .padding(8.dp)
         ) {
             Text(
-                text = "Start Date: ${startDate.toLocalDate()}",
+                text = "Start Date:\n${startDate.format(dateFormatter)}",
                 style = TextStyle(fontSize = 16.sp),
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = 8.dp)
+                    .fillMaxWidth()
             )
 
             Button(
                 onClick = {
-                    isDatePickerDialogOpen.value = true
+                    showDatePicker = true
                 },
                 modifier = Modifier.wrapContentWidth()
             ) {
-                Text("Pick Date")
+                Text("Set Date")
+            }
+
+            Button(
+                onClick = {
+                    showTimePicker = true
+                },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(2.dp)
+            ) {
+                Text("Set Time")
             }
         }
 
+        Text(
+            text = "Duration: ${duration.toInt()} minutes",
+            style = TextStyle(fontSize = 16.sp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 8.dp,
+                    end = 8.dp,
+                    top = 8.dp
+                )
+        )
+
         Slider(
-            value = duration.toFloat(),
-            onValueChange = { newValue -> duration = newValue.toInt() },
+            value = duration,
+            onValueChange = { duration = it },
             valueRange = 1f..180f,
             steps = 180,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp)
+                .padding(
+                    start = 8.dp,
+                    end = 8.dp,
+                    bottom = 8.dp
+                )
         )
 
-        Text(
-            text = "Duration: $duration minutes",
-            style = TextStyle(
-                fontSize = 15.sp,
-                color = Color.Black
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp)
-        )
-
-        if (isDatePickerDialogOpen.value) {
+        if (showDatePicker) {
             DatePickerDialog(
                 onDismissRequest = {
-                    isDatePickerDialogOpen.value = false
+                    showDatePicker = false
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            isDatePickerDialogOpen.value = false
+                            showDatePicker = false
 
                             val instant = datePickerState.selectedDateMillis?.let {
                                 Instant.ofEpochMilli(it)
@@ -180,7 +215,7 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            isDatePickerDialogOpen.value = false
+                            showDatePicker = false
                         }
                     ) {
                         Text("CANCEL")
@@ -193,19 +228,37 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
             }
         }
 
+        if (showTimePicker) {
+            TimePickerDialog(
+                onCancel = { showTimePicker = false },
+                onConfirm = {
+                    showTimePicker = false
+
+                    startDate = startDate
+                        .withHour(timePickerState.hour)
+                        .withMinute(timePickerState.minute)
+                },
+            ) {
+                TimeInput(state = timePickerState)
+            }
+        }
+
         Button(
             onClick = {
                 generalTasksManager.addTask(
                     title = title,
                     description = description,
                     startDate = startDate,
-                    duration = duration
+                    duration = duration.toInt()
                 )
 
                 title = ""
                 description = ""
                 startDate = LocalDateTime.now()
-                duration = 0
+                datePickerState.setSelection(
+                    startDate.atZone(ZoneOffset.systemDefault())?.toInstant()?.toEpochMilli()
+                )
+                duration = 0.0f
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -262,10 +315,66 @@ fun TaskList(tasks: List<Task>) {
                         }
 
                         Text(
-                            text = "${task.scheduledAt.toLocalDate()}",
+                            text = task.scheduledAt.format(dateFormatter),
                             fontStyle = FontStyle.Italic
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TimePickerDialog(
+    title: String = "Select Time",
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+    toggle: @Composable () -> Unit = {},
+    content: @Composable () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onCancel,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        ),
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min)
+                .background(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surface
+                ),
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    text = title,
+                    style = MaterialTheme.typography.labelMedium
+                )
+                content()
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
+                ) {
+                    toggle()
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(
+                        onClick = onCancel
+                    ) { Text("Cancel") }
+                    TextButton(
+                        onClick = onConfirm
+                    ) { Text("OK") }
                 }
             }
         }
