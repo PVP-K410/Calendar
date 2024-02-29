@@ -269,8 +269,7 @@ fun CreateMealTaskForm(
                             title = titleValue,
                             userEmail = "fake@email@gmail@com"
                         )
-                    }
-                    else {
+                    } else {
                         /* TODO: errors (wrong input, empty lines) implementation */
                     }
                 },
@@ -436,7 +435,6 @@ fun TaskBox(
 @Composable
 fun CreateSportTaskForm(
     model: TaskViewModel = hiltViewModel(),
-    //onTaskSubmit: (SportActivity) -> Unit
 ) {
     val sportActivities = listOf(
         SportActivity.Cycling,
