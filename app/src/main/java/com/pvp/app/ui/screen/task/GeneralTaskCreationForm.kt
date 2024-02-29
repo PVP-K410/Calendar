@@ -119,26 +119,39 @@ fun TaskList(tasks: List<Task>) {
                     .padding(16.dp)
             )
         }
-        items(tasks) { task ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Column {
-                        Text(
-                            text = task.title,
-                            fontWeight = FontWeight.Bold
-                        )
 
-                        task.description?.let { Text(text = it) }
+        if (tasks.isEmpty()) {
+            item {
+                Text(
+                    text = "No tasks available",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+            }
+        } else {
+            items(tasks) { task ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Column {
+                            Text(
+                                text = task.title,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            task.description?.let { Text(text = it) }
+                        }
                     }
                 }
             }
         }
     }
 }
+
 
 @Preview(showSystemUi = true)
 @Composable
