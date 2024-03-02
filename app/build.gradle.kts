@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("com.google.dagger.hilt.android")
@@ -8,26 +11,53 @@ plugins {
     kotlin("plugin.serialization") version "1.9.22"
 }
 
+val configuration = Properties()
+    .apply {
+        load(FileInputStream(project.file("configuration.properties")))
+    }
+
 android {
-    namespace = "com.pvp.app"
     compileSdk = 34
+    namespace = "com.pvp.app"
 
     defaultConfig {
         applicationId = "com.pvp.app"
         minSdk = 28
         targetSdk = 34
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables {
             useSupportLibrary = true
         }
     }
 
+    signingConfigs {
+        create("_debug") {
+            keyAlias = configuration.getProperty("debug.signing.key.alias")
+            keyPassword = configuration.getProperty("debug.signing.key.password")
+            storeFile = file(configuration.getProperty("debug.signing.store.file"))
+            storePassword = configuration.getProperty("debug.signing.store.password")
+        }
+
+        create("_release") {
+            keyAlias = configuration.getProperty("release.signing.key.alias")
+            keyPassword = configuration.getProperty("release.signing.key.password")
+            storeFile = file(configuration.getProperty("release.signing.store.file"))
+            storePassword = configuration.getProperty("release.signing.store.password")
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("_debug")
+        }
+
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("_release")
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -63,7 +93,7 @@ android {
 dependencies {
     // Android & Compose
     implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.02.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -79,7 +109,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // Database (Firebase)
-    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
+    implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
     implementation("com.google.firebase:firebase-firestore")
 
     // Dependency Injection (Dagger-Hilt)
@@ -94,7 +124,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
     // Compose
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

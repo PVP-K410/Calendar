@@ -2,13 +2,14 @@
 .gradle/
 build/
 
-# Local configuration file (sdk path, etc)
+# Configuration Files (sdk path, etc)
+**/configuration.properties
 local.properties
 
 # Log/OS Files
 *.log
 
-# Android Studio generated files and folders
+# Android Studio Generated Files And Folders
 captures/
 .externalNativeBuild/
 .cxx/
@@ -22,7 +23,7 @@ misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
 
-# Keystore files
+# Keystore Files
 *.jks
 *.keystore
 
