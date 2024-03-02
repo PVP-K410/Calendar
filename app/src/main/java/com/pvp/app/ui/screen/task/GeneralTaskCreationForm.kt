@@ -15,12 +15,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,16 +42,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DisplayMode
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimeInput
-import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.pvp.app.model.Task
@@ -81,21 +81,23 @@ class GeneralTasksManager {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskForm(generalTasksManager: GeneralTasksManager) {
-    var title by remember { mutableStateOf("") }
+@OptIn(ExperimentalMaterial3Api::class)
+fun TaskForm(
+    manager: GeneralTasksManager
+) {
     var description by remember { mutableStateOf("") }
-    var startDate by remember { mutableStateOf(LocalDateTime.now()) }
     var duration by remember { mutableFloatStateOf(0.0f) }
-    val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
-    var showDatePicker by remember { mutableStateOf(false) }
-    val timePickerState = rememberTimePickerState(
-        initialHour = startDate.hour,
-        initialMinute = startDate.minute,
+    var now by remember { mutableStateOf(LocalDateTime.now()) }
+    var showPickerDate by remember { mutableStateOf(false) }
+    var showPickerTime by remember { mutableStateOf(false) }
+    val stateDate = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+    val stateTime = rememberTimePickerState(
+        initialHour = now.hour,
+        initialMinute = now.minute,
         is24Hour = true
     )
-    var showTimePicker by remember { mutableStateOf(false) }
+    var title by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.padding(16.dp),
@@ -137,7 +139,7 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                 .padding(8.dp)
         ) {
             Text(
-                text = "Start Date:\n${startDate.format(dateFormatter)}",
+                text = "Start Date:\n${now.format(dateFormatter)}",
                 style = TextStyle(fontSize = 16.sp),
                 modifier = Modifier
                     .weight(1f)
@@ -146,7 +148,7 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
 
             Button(
                 onClick = {
-                    showDatePicker = true
+                    showPickerDate = true
                 },
                 modifier = Modifier.wrapContentWidth()
             ) {
@@ -155,7 +157,7 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
 
             Button(
                 onClick = {
-                    showTimePicker = true
+                    showPickerTime = true
                 },
                 modifier = Modifier
                     .wrapContentWidth()
@@ -191,21 +193,21 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                 )
         )
 
-        if (showDatePicker) {
+        if (showPickerDate) {
             DatePickerDialog(
                 onDismissRequest = {
-                    showDatePicker = false
+                    showPickerDate = false
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            showDatePicker = false
+                            showPickerDate = false
 
-                            val instant = datePickerState.selectedDateMillis?.let {
+                            val instant = stateDate.selectedDateMillis?.let {
                                 Instant.ofEpochMilli(it)
                             }
 
-                            startDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+                            now = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
                         }
                     ) {
                         Text("OK")
@@ -214,7 +216,7 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            showDatePicker = false
+                            showPickerDate = false
                         }
                     ) {
                         Text("CANCEL")
@@ -222,42 +224,43 @@ fun TaskForm(generalTasksManager: GeneralTasksManager) {
                 }
             ) {
                 DatePicker(
-                    state = datePickerState
+                    state = stateDate
                 )
             }
         }
 
-        if (showTimePicker) {
+        if (showPickerTime) {
             TimePickerDialog(
-                onCancel = { showTimePicker = false },
+                onCancel = { showPickerTime = false },
                 onConfirm = {
-                    showTimePicker = false
+                    showPickerTime = false
 
-                    startDate = startDate
-                        .withHour(timePickerState.hour)
-                        .withMinute(timePickerState.minute)
+                    now = now
+                        .withHour(stateTime.hour)
+                        .withMinute(stateTime.minute)
                 },
             ) {
-                TimeInput(state = timePickerState)
+                TimeInput(state = stateTime)
             }
         }
 
         Button(
             onClick = {
-                generalTasksManager.addTask(
+                manager.addTask(
                     title = title,
                     description = description,
-                    startDate = startDate,
+                    startDate = now,
                     duration = duration.toInt()
                 )
 
-                title = ""
                 description = ""
-                startDate = LocalDateTime.now()
-                datePickerState.setSelection(
-                    startDate.atZone(ZoneOffset.systemDefault())?.toInstant()?.toEpochMilli()
-                )
                 duration = 0.0f
+                now = LocalDateTime.now()
+                stateDate.selectedDateMillis = now
+                    .atZone(ZoneOffset.systemDefault())
+                    ?.toInstant()
+                    ?.toEpochMilli()
+                title = ""
             },
             modifier = Modifier
                 .fillMaxWidth()
