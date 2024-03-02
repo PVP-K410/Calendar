@@ -1,9 +1,9 @@
 package com.pvp.app.ui.screen.task
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,14 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -32,27 +30,22 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.R
+import com.pvp.app.common.InputValidator
 import com.pvp.app.common.getDurationString
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
@@ -63,229 +56,275 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.yourapp.ui.components.TextFieldWithErrors
 import java.time.ZoneId
 
-
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun CreateMealTaskForm(
     model: TaskViewModel = hiltViewModel()
 ) {
+    var title by remember { mutableStateOf("") }
+    var titleError by remember { mutableStateOf(true) }
+
     var description by remember { mutableStateOf("") }
-    var duration by remember { mutableIntStateOf(0) }
+    var descriptionError by remember { mutableStateOf(true) }
+
     var ingredients by remember { mutableStateOf("") }
     var preparation by remember { mutableStateOf("") }
-    var title by remember { mutableStateOf("") }
-    var recipeValue by remember { mutableStateOf("") }
+    var duration by remember { mutableStateOf(0) }
 
-    Box(
+    val isFormValid by derivedStateOf {
+        !titleError && !descriptionError && duration > 0
+    }
+
+    Column(
         modifier = Modifier
-            .background(color = Color.White)
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        Column(
-            modifier = Modifier
-                .padding(10.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Text(
-                stringResource(R.string.form_create_meal_title),
-                style = TextStyle(
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
 
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-                    .background(
-                        color = Color.White,
-                        shape = RoundedCornerShape(5.dp)
-                    )
-                    .border(
-                        0.5.dp,
-                        Color.Black,
-                        shape = RoundedCornerShape(5.dp)
-                    ),
-                textStyle = TextStyle(
-                    fontSize = 15.sp,
-                    color = Color.Black
-                )
-            )
+        TextFieldWithErrors(
+            value = title,
+            onValueChange = { newText, errors ->
+                title = newText
+                titleError = errors.isNotEmpty()
+            },
+            validationPolicies = { input -> InputValidator.validateBlank(input, "Title") },
+            label = { Text("Meal Title") },
+        )
 
-            Text(
-                stringResource(R.string.form_create_meal_duration),
-                style = TextStyle(
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp)
-            )
+        Spacer(modifier = Modifier.height((16.dp)))
 
-            Slider(
-                value = duration.toFloat(),
-                onValueChange = { newValue -> duration = newValue.toInt() },
-                valueRange = 1f..180f,
-                steps = 180,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-            )
+        TextFieldWithErrors(
+            value = description,
+            onValueChange = { newText, errors ->
+                description = newText
+                descriptionError = errors.isNotEmpty()
+            },
+            validationPolicies = { input -> InputValidator.validateBlank(input, "Description") },
+            label = { Text("Description") },
+        )
 
-            Text(
-                text = "Duration: $duration minutes",
-                style = TextStyle(
-                    fontSize = 15.sp,
-                    color = Color.Black
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            )
+        Spacer(modifier = Modifier.height((16.dp)))
 
-            Text(
-                stringResource(R.string.form_create_meal_ingredients),
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    color = Color.Black
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp)
-            )
+        TextFieldWithErrors(
+            value = ingredients,
+            onValueChange = { newText, _ ->
+                ingredients = newText
+            },
+            label = { Text("Ingredients") },
+        )
 
-            OutlinedTextField(
-                value = ingredients,
-                onValueChange = { ingredients = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-                    .border(
-                        0.5.dp,
-                        Color.Black,
-                        shape = RoundedCornerShape(5.dp)
-                    ),
-                textStyle = TextStyle(
-                    fontSize = 15.sp
-                )
-            )
+        Spacer(modifier = Modifier.height((16.dp)))
 
-            Text(
-                stringResource(R.string.form_create_meal_preparation),
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    color = Color.Black
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp)
-            )
+        TextFieldWithErrors(
+            value = preparation,
+            onValueChange = { newText, _ ->
+                preparation = newText
+            },
+            label = { Text("Preparation") },
+        )
 
-            OutlinedTextField(
-                value = preparation,
-                onValueChange = { preparation = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-                    .border(
-                        0.5.dp,
-                        Color.Black,
-                        shape = RoundedCornerShape(5.dp)
-                    ),
-                textStyle = TextStyle(
-                    fontSize = 15.sp
-                )
-            )
+        Spacer(modifier = Modifier.height((16.dp)))
 
-            Text(
-                stringResource(R.string.form_create_meal_description),
-                style = TextStyle(
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp)
-            )
+        Text("Duration (minutes): $duration", modifier = Modifier.padding(vertical = 8.dp))
 
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-                    .border(
-                        0.5.dp,
-                        Color.Black,
-                        shape = RoundedCornerShape(5.dp)
-                    ),
-                textStyle = TextStyle(
-                    fontSize = 15.sp
-                )
-            )
+        Slider(
+            value = duration.toFloat(),
+            onValueChange = { duration = it.toInt() },
+            valueRange = 1f..180f,
+            steps = 179,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
 
             Button(
                 onClick = {
-                    val descriptionValue = description.trim()
-                    val durationValue = duration.toLong()
-                    val ingredientsValue = ingredients.trim()
-                    val preparationValue = preparation.trim()
-                    val titleValue = title.trim()
-
-                    if (
-                        titleValue.isNotEmpty() &&
-                        durationValue > 0 &&
-                        (ingredientsValue.isNotEmpty() || preparationValue.isNotEmpty()) &&
-                        descriptionValue.isNotEmpty()
+                    val recipe = if (
+                        ingredients.isNotEmpty() &&
+                        preparation.isNotEmpty()
                     ) {
-                        val recipeValue = if (
-                            ingredientsValue.isNotEmpty() &&
-                            preparationValue.isNotEmpty()
-                        ) {
-                            "$ingredientsValue\n$preparationValue"
-                        } else if (ingredientsValue.isNotEmpty() && preparationValue.isEmpty()) {
-                            ingredientsValue
-                        } else {
-                            preparationValue
-                        }
-                        model.createTaskMeal(
-                            description = descriptionValue,
-                            duration = Duration.ofMinutes(durationValue),
-                            recipe = recipeValue,
-                            scheduledAt = LocalDateTime.now(),
-                            title = titleValue,
-                            userEmail = "fake@email@gmail@com"
-                        )
+                        "$ingredients\n$preparation"
+                    } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
+                        ingredients
                     } else {
-                        /* TODO: errors (wrong input, empty lines) implementation */
+                        preparation
                     }
+                    model.createTaskMeal(
+                        description = description,
+                        duration = Duration.ofMinutes(duration.toLong()),
+                        recipe = recipe,
+                        scheduledAt = LocalDateTime.now(),
+                        title = title,
+                        userEmail = "fake@email@gmail@com"
+                    )
                 },
+                enabled = isFormValid,
                 modifier = Modifier
-                    .width(120.dp)
-                    .height(70.dp)
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = 30.dp)
+                    .padding(top = 20.dp)
             ) {
+                Text("Submit",
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateSportTaskForm(
+    model: TaskViewModel = hiltViewModel(),
+) {
+    val sportActivities = listOf(
+        SportActivity.Cycling,
+        SportActivity.Gym,
+        SportActivity.Running,
+        SportActivity.Swimming,
+        SportActivity.Walking,
+        SportActivity.Yoga
+    )
+
+    var title by remember { mutableStateOf("") }
+    var titleError by remember { mutableStateOf(true) }
+
+    var description by remember { mutableStateOf("") }
+    var descriptionError by remember { mutableStateOf(true) }
+
+    var activity by remember { mutableStateOf<SportActivity>(sportActivities[0]) }
+    var duration by remember { mutableStateOf(0) }
+    var startDate by remember { mutableStateOf(Date()) }
+    var isExpanded by remember { mutableStateOf(false) }
+
+    val isFormValid by derivedStateOf {
+        !titleError && !descriptionError && duration > 0
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+
+
+            TextFieldWithErrors(
+                value = title,
+                onValueChange = { newText, errors ->
+                    title = newText
+                    titleError = errors.isNotEmpty()
+                } ,
+                validationPolicies = {input -> InputValidator.validateBlank(input, "Title")},
+                label = { Text("Title") },
+            )
+
+            Spacer(modifier = Modifier.height((16.dp)))
+
+            ExposedDropdownMenuBox(
+                expanded = isExpanded,
+                onExpandedChange = { isExpanded = !isExpanded },
+            ) {
+                TextField(
+                    modifier = Modifier.menuAnchor(),
+                    value = activity.title,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                    }
+                )
+
+                ExposedDropdownMenu(
+                    expanded = isExpanded,
+                    onDismissRequest = { isExpanded = false }
+                ) {
+                    sportActivities.forEach { activityItem ->
+                        DropdownMenuItem(
+                            text = { Text(text = activityItem.title) },
+                            onClick = {
+                                activity = activityItem
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height((16.dp)))
+
+            TextFieldWithErrors(
+                value = description,
+                onValueChange = { newText, errors ->
+                    description = newText
+                    descriptionError = errors.isNotEmpty()
+                } ,
+                validationPolicies = {input -> InputValidator.validateBlank(input, "Description")},
+                label = { Text("Description") },
+            )
+
+            if (activity.supportsDistanceMetrics) {
                 Text(
-                    "Create",
+                    text = "Duration: $duration minutes",
                     style = TextStyle(
                         fontSize = 15.sp,
-                        color = Color.White
-                    )
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
                 )
+
+                Slider(
+                    value = duration.toFloat(),
+                    onValueChange = { newValue -> duration = newValue.toInt() },
+                    valueRange = 1f..180f,
+                    steps = 180,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                )
+            }
+
+            DatePicker(
+                selectedDate = startDate,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            Button(onClick = {
+                val activityValue = activity
+                val descriptionValue = description.trim()
+                val durationValue = duration.toLong()
+                val startDateValue = startDate
+                val titleValue = title.trim()
+
+                model.createTaskSport(
+                    activity = activityValue,
+                    description = descriptionValue,
+                    duration = Duration.ofMinutes(durationValue),
+                    isCompleted = false,
+                    scheduledAt = startDateValue.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime(),
+                    userEmail = "fake@email@gmail@com",
+                    title = titleValue
+                )
+            },
+                enabled = isFormValid,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 20.dp)
+            ) {
+                Text("Submit")
             }
         }
     }
@@ -435,145 +474,6 @@ fun TaskBox(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CreateSportTaskForm(
-    model: TaskViewModel = hiltViewModel(),
-) {
-    val sportActivities = listOf(
-        SportActivity.Cycling,
-        SportActivity.Gym,
-        SportActivity.Running,
-        SportActivity.Swimming,
-        SportActivity.Walking,
-        SportActivity.Yoga
-    )
-
-    var activity by remember { mutableStateOf<SportActivity>(sportActivities[0]) }
-    var description by remember { mutableStateOf("") }
-    var duration by remember { mutableStateOf(0) }
-    var startDate by remember { mutableStateOf(Date()) }
-    var title by remember { mutableStateOf("") }
-    var isExpanded by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.White)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            TextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Title") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-
-            Spacer(modifier = Modifier.height((16.dp)))
-
-            ExposedDropdownMenuBox(
-                expanded = isExpanded,
-                onExpandedChange = { isExpanded = !isExpanded }
-            ) {
-                TextField(
-                    modifier = Modifier.menuAnchor(),
-                    value = activity.title,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-                    }
-                )
-
-                ExposedDropdownMenu(
-                    expanded = isExpanded,
-                    onDismissRequest = { isExpanded = false }
-                ) {
-                    sportActivities.forEach { activityItem ->
-                        DropdownMenuItem(
-                            text = { Text(text = activityItem.title) },
-                            onClick = {
-                                activity = activityItem
-                            }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height((32.dp)))
-
-            TextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Description") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-
-            if (activity.supportsDistanceMetrics) {
-                Text(
-                    text = "Duration: $duration minutes",
-                    style = TextStyle(
-                        fontSize = 15.sp,
-                        color = Color.Black
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp)
-                )
-
-                Slider(
-                    value = duration.toFloat(),
-                    onValueChange = { newValue -> duration = newValue.toInt() },
-                    valueRange = 1f..180f,
-                    steps = 180,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp)
-                )
-            }
-
-            DatePicker(
-                selectedDate = startDate,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-
-            Button(onClick = {
-                val activityValue = activity
-                val descriptionValue = description.trim()
-                val durationValue = duration.toLong()
-                val startDateValue = startDate
-                val titleValue = title.trim()
-
-                model.createTaskSport(
-                    activity = activityValue,
-                    description = descriptionValue,
-                    duration = Duration.ofMinutes(durationValue),
-                    isCompleted = false,
-                    scheduledAt = startDateValue.toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime(),
-                    userEmail = "fake@email@gmail@com",
-                    title = titleValue
-                )
-            }) {
-                Text("Create")
-            }
-        }
-    }
-}
-
 @Composable
 fun DatePicker(
     selectedDate: Date,
