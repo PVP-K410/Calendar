@@ -27,7 +27,7 @@ fun TextFieldWithErrors(
     label: @Composable () -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     modifier: Modifier = Modifier
-        .background(MaterialTheme.colorScheme.surface)
+        .background(MaterialTheme.colorScheme.onSurface)
         .fillMaxWidth()
 ) {
     var errors by remember { mutableStateOf(emptyList<String>()) }
@@ -49,7 +49,7 @@ fun TextFieldWithErrors(
                         Icon(Icons.Filled.Error, "Error")
                     }
                 },
-                keyboardOptions = keyboardOptions
+                keyboardOptions = keyboardOptions,
             )
         },
         messages = errors
