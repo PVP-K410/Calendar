@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -25,14 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.pvp.app.ui.Route
+import com.pvp.app.ui.router.RouteAuthenticated
 
 @Composable
 fun DrawerBody(
     modifier: Modifier = Modifier,
-    onClick: Route.() -> Unit,
-    routes: List<Route>,
-    screen: Route
+    onClick: RouteAuthenticated.() -> Unit,
+    routes: List<RouteAuthenticated>,
+    screen: RouteAuthenticated
 ) {
     LazyColumn(modifier = modifier) {
         items(routes) {
@@ -65,7 +65,7 @@ fun DrawerBody(
 @Composable
 fun DrawerBodyRow(
     modifier: Modifier = Modifier,
-    route: Route
+    route: RouteAuthenticated
 ) {
     Row(
         modifier = modifier,
@@ -112,9 +112,9 @@ fun DrawerHeader(
 @Composable
 fun DrawerScreen(
     modifier: Modifier = Modifier,
-    onClick: Route.() -> Unit,
-    routes: List<Route>,
-    screen: Route
+    onClick: RouteAuthenticated.() -> Unit,
+    routes: List<RouteAuthenticated>,
+    screen: RouteAuthenticated
 ) {
     ModalDrawerSheet(
         modifier = modifier
@@ -126,7 +126,7 @@ fun DrawerScreen(
                 .fillMaxHeight(0.1f)
         )
 
-        Divider()
+        HorizontalDivider()
 
         DrawerBody(
             modifier = Modifier

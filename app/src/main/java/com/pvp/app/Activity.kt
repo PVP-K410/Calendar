@@ -3,40 +3,25 @@ package com.pvp.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.lifecycle.lifecycleScope
-import com.pvp.app.api.UserService
-import com.pvp.app.model.User
-import com.pvp.app.ui.screen.Layout
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.compose.rememberNavController
+import com.pvp.app.ui.router.RouterUnauthenticated
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class Activity : ComponentActivity() {
 
-    @Inject
-    lateinit var userService: UserService
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        bootstrap()
-
         setContent {
-            Layout()
-        }
-    }
+            val controller = rememberNavController()
+            val scope = rememberCoroutineScope()
 
-    private fun bootstrap() {
-        lifecycleScope.launch {
-            // FIXME: Temporary user creation. Once actual login process is implemented, this will be refactored
-            userService.getCurrent().collect {
-                if (it == null) {
-                    userService.merge(
-                        User("fake@email@gmail@com", 0, 0, 0, "current")
-                    )
-                }
-            }
+            RouterUnauthenticated(
+                controller = controller,
+                scope = scope
+            )
         }
     }
 }

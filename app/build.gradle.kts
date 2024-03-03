@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.VariantDimension
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -31,6 +32,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigDefault()
     }
 
     signingConfigs {
@@ -76,6 +79,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
@@ -101,6 +105,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
@@ -109,6 +114,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // Database (Firebase)
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("com.google.firebase:firebase-auth")
     implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
     implementation("com.google.firebase:firebase-firestore")
 
@@ -132,4 +139,12 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+fun VariantDimension.buildConfigDefault() {
+    buildConfigField(
+        "String",
+        "GOOGLE_OAUTH_CLIENT_ID",
+        "\"${configuration.getProperty("google.oauth.client.id")}\""
+    )
 }
