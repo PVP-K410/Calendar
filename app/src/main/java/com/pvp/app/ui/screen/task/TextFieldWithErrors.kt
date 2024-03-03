@@ -3,6 +3,7 @@ package com.yourapp.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun TextFieldWithErrors(
@@ -23,6 +25,10 @@ fun TextFieldWithErrors(
     onValueChange: (String, List<String>) -> Unit = { _, _ -> },
     validationPolicies: (String) -> List<String> = { listOf<String>() },
     label: @Composable () -> Unit,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+    modifier: Modifier = Modifier
+        .background(MaterialTheme.colorScheme.surface)
+        .fillMaxWidth()
 ) {
     var errors by remember { mutableStateOf(emptyList<String>()) }
     var input by remember { mutableStateOf(value) }
@@ -37,14 +43,13 @@ fun TextFieldWithErrors(
                     onValueChange(it, errors)
                 },
                 label = label,
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surface)
-                    .fillMaxWidth(),
+                modifier = modifier,
                 trailingIcon = {
                     if (errors.isNotEmpty()) {
                         Icon(Icons.Filled.Error, "Error")
                     }
-                }
+                },
+                keyboardOptions = keyboardOptions
             )
         },
         messages = errors
