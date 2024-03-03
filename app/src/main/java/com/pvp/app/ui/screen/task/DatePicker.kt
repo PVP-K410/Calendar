@@ -319,8 +319,8 @@ fun ExpandableTimePicker(
                 textAlign = TextAlign.Center
             ),
             modifier = Modifier.clickable {
-                    transitionState.targetState = !transitionState.currentState
-                }
+                transitionState.targetState = !transitionState.currentState
+            }
         )
 
         AnimatedVisibility(
@@ -340,7 +340,7 @@ fun ExpandableTimePicker(
 fun DateAndTimePicker(
     dateTime: LocalDateTime,
     onDateTimeChanged: (LocalDateTime) -> Unit
-){
+) {
     var showPickerDate by remember { mutableStateOf(false) }
     val showPickerTime = remember { MutableTransitionState(false) }
     var selectedDateTime by remember { mutableStateOf(dateTime) }

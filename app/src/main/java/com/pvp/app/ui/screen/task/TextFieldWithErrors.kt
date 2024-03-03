@@ -19,6 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 
+
+/**
+ * @param value text field input text
+ * @param onValueChange (optional) callback triggered when text inside text field is updated
+ * @param validationPolicies (optional) how text inside should be validated,
+ *          should be specified via InputValidator
+ * @param label label displayed inside text container
+ * @param keyboardOptions (optional) software keyboard options that contains configuration such as KeyboardType and ImeAction.
+ * @param modifier (optional) the Modifier applies to the text field
+ */
 @Composable
 fun TextFieldWithErrors(
     value: String,
@@ -27,7 +37,7 @@ fun TextFieldWithErrors(
     label: @Composable () -> Unit,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     modifier: Modifier = Modifier
-        .background(MaterialTheme.colorScheme.onSurface)
+        .background(MaterialTheme.colorScheme.background)
         .fillMaxWidth()
 ) {
     var errors by remember { mutableStateOf(emptyList<String>()) }
@@ -51,8 +61,7 @@ fun TextFieldWithErrors(
                 },
                 keyboardOptions = keyboardOptions,
             )
-        },
-        messages = errors
+        }, messages = errors
     )
 }
 
@@ -68,8 +77,7 @@ fun ErrorField(
         Column {
             for (message in messages) {
                 Text(
-                    text = message,
-                    style = style
+                    text = message, style = style
                 )
             }
         }

@@ -65,10 +65,8 @@ fun CreateMealTaskForm(
 ) {
     var title by remember { mutableStateOf("") }
     var titleError by remember { mutableStateOf(true) }
-
     var description by remember { mutableStateOf("") }
     var descriptionError by remember { mutableStateOf(true) }
-
     var ingredients by remember { mutableStateOf("") }
     var preparation by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(0) }
@@ -200,19 +198,13 @@ fun CreateSportTaskForm(
 
     var title by remember { mutableStateOf("") }
     var titleError by remember { mutableStateOf(true) }
-
     var description by remember { mutableStateOf("") }
     var descriptionError by remember { mutableStateOf(true) }
-
     var activity by remember { mutableStateOf<SportActivity>(sportActivities[0]) }
-
     var distance by remember { mutableStateOf("") }
     var distanceError by remember { mutableStateOf(true) }
-
     var duration by remember { mutableStateOf(0) }
     var durationError by remember { mutableStateOf(true) }
-
-    var startDate by remember { mutableStateOf(Date()) }
     var selectedDateTime by remember { mutableStateOf(LocalDateTime.now()) }
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -572,7 +564,6 @@ fun TaskBox(
                 )
             )
     ) {
-
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),

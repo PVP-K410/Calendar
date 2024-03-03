@@ -9,7 +9,6 @@ object InputValidator {
         }
     }
 
-
     fun validateLength(input: String, minLength: Int, fieldName: String): List<String>{
         return if (input.length < minLength) {
             listOf("$fieldName must be at least $minLength characters long")
@@ -26,5 +25,4 @@ object InputValidator {
             listOf("$fieldName must be a valid number")
         }
     }
-
 }
