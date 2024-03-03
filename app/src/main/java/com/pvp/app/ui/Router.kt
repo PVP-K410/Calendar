@@ -15,9 +15,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.pvp.app.R
 import com.pvp.app.ui.screen.calendar.CalendarScreen
+import com.pvp.app.ui.screen.task.CreateGeneralTaskForm
 import com.pvp.app.ui.screen.task.CreateMealTaskForm
 import com.pvp.app.ui.screen.task.CreateSportTaskForm
-import com.pvp.app.ui.screen.task.TaskFormAndList
 
 @Composable
 fun Router(
@@ -92,7 +92,7 @@ sealed class Route(
         "General task creation page button icon",
         R.string.route_tasks_create_general,
         "tasks/create/general",
-        screen = { TaskFormAndList() }
+        screen = { CreateGeneralTaskForm() }
     )
 
     data object CreateTaskSport : Route(
