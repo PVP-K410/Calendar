@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,12 +15,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,10 +31,15 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,6 +65,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import com.yourapp.ui.components.TextFieldWithErrors
+import java.time.Instant
 import java.time.ZoneId
 
 @SuppressLint("UnrememberedMutableState")
@@ -73,6 +82,9 @@ fun CreateMealTaskForm(
     var ingredients by remember { mutableStateOf("") }
     var preparation by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(0) }
+    var selectedDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+    var showPickerDate by remember { mutableStateOf(false) }
+    var showPickerTime by remember { mutableStateOf(false) }
 
     val isFormValid by derivedStateOf {
         !titleError && !descriptionError && duration > 0
@@ -140,37 +152,88 @@ fun CreateMealTaskForm(
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
+        Text(
+            text = "Task Date:\n${selectedDateTime.format(dateFormatter)}",
+            style = TextStyle(
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
             Button(
-                onClick = {
-                    val recipe = if (
-                        ingredients.isNotEmpty() &&
-                        preparation.isNotEmpty()
-                    ) {
-                        "$ingredients\n$preparation"
-                    } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
-                        ingredients
-                    } else {
-                        preparation
-                    }
-                    model.createTaskMeal(
-                        description = description,
-                        duration = Duration.ofMinutes(duration.toLong()),
-                        recipe = recipe,
-                        scheduledAt = LocalDateTime.now(),
-                        title = title,
-                        userEmail = "fake@email@gmail@com"
-                    )
-                },
-                enabled = isFormValid,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp)
+                onClick = { showPickerDate = true },
+                modifier = Modifier.wrapContentWidth()
             ) {
-                Text("Submit",
-                    modifier = Modifier.padding(8.dp)
-                )
+                Text("Set Date")
             }
 
+            Button(
+                onClick = { showPickerTime = true },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(2.dp)
+            ) {
+                Text("Set Time")
+            }
+        }
+
+        DatePickerDialog(
+            showPicker = showPickerDate,
+            onDismiss = { showPickerDate = false },
+            onDateSelected = { selectedDate ->
+                selectedDateTime = selectedDate
+            },
+        )
+
+        TimePickerDialog(
+            showPicker = showPickerTime,
+            onDismiss = { showPickerTime = false },
+            onTimeSelected = { hour, minute ->
+                selectedDateTime = selectedDateTime.withHour(hour).withMinute(minute)
+            },
+            initialHour = selectedDateTime.hour,
+            initialMinute = selectedDateTime.minute
+        )
+
+        Button(
+            onClick = {
+                val recipe = if (
+                    ingredients.isNotEmpty() &&
+                    preparation.isNotEmpty()
+                ) {
+                    "$ingredients\n$preparation"
+                } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
+                    ingredients
+                } else {
+                    preparation
+                }
+                model.createTaskMeal(
+                    description = description,
+                    duration = Duration.ofMinutes(duration.toLong()),
+                    recipe = recipe,
+                    scheduledAt = selectedDateTime,
+                    title = title,
+                    userEmail = "fake@email@gmail@com"
+                )
+            },
+            enabled = isFormValid,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 20.dp)
+        ) {
+            Text("Submit",
+                modifier = Modifier.padding(8.dp)
+            )
+        }
     }
 }
 
@@ -191,17 +254,21 @@ fun CreateSportTaskForm(
 
     var title by remember { mutableStateOf("") }
     var titleError by remember { mutableStateOf(true) }
-
     var description by remember { mutableStateOf("") }
     var descriptionError by remember { mutableStateOf(true) }
-
     var activity by remember { mutableStateOf<SportActivity>(sportActivities[0]) }
+    var distance by remember { mutableStateOf("") }
+    var distanceError by remember { mutableStateOf(true) }
     var duration by remember { mutableStateOf(0) }
+    var durationError by remember { mutableStateOf(true) }
     var startDate by remember { mutableStateOf(Date()) }
+    var selectedDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+    var showPickerDate by remember { mutableStateOf(false) }
+    var showPickerTime by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
 
     val isFormValid by derivedStateOf {
-        !titleError && !descriptionError && duration > 0
+        !titleError && !descriptionError && (!durationError || !distanceError)
     }
 
     Box(
@@ -216,8 +283,6 @@ fun CreateSportTaskForm(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-
-
             TextFieldWithErrors(
                 value = title,
                 onValueChange = { newText, errors ->
@@ -235,7 +300,9 @@ fun CreateSportTaskForm(
                 onExpandedChange = { isExpanded = !isExpanded },
             ) {
                 TextField(
-                    modifier = Modifier.menuAnchor(),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
                     value = activity.title,
                     onValueChange = {},
                     readOnly = true,
@@ -253,6 +320,7 @@ fun CreateSportTaskForm(
                             text = { Text(text = activityItem.title) },
                             onClick = {
                                 activity = activityItem
+                                isExpanded = false
                             }
                         )
                     }
@@ -271,7 +339,28 @@ fun CreateSportTaskForm(
                 label = { Text("Description") },
             )
 
+            Spacer(modifier = Modifier.height((16.dp)))
+
             if (activity.supportsDistanceMetrics) {
+                duration = 0
+                TextFieldWithErrors(
+                    value = distance,
+                    onValueChange = { newText, errors ->
+                        distance = newText
+                        distanceError = errors.isNotEmpty()
+                    } ,
+                    validationPolicies = {input ->
+                        InputValidator.validateBlank(input, "Distance") +
+                                InputValidator.validateFloat(input, "Distance")
+                    },
+                    label = { Text("Distance (m)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surface)
+                        .width(200.dp)
+                )
+            } else {
+                distance = ""
                 Text(
                     text = "Duration: $duration minutes",
                     style = TextStyle(
@@ -284,7 +373,10 @@ fun CreateSportTaskForm(
 
                 Slider(
                     value = duration.toFloat(),
-                    onValueChange = { newValue -> duration = newValue.toInt() },
+                    onValueChange = {
+                        newValue -> duration = newValue.toInt()
+                        durationError = false
+                    },
                     valueRange = 1f..180f,
                     steps = 180,
                     modifier = Modifier
@@ -293,11 +385,58 @@ fun CreateSportTaskForm(
                 )
             }
 
-            DatePicker(
-                selectedDate = startDate,
+            Spacer(modifier = Modifier.height((16.dp)))
+
+            Text(
+                text = "Task Date:\n${selectedDateTime.format(dateFormatter)}",
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+            )
+
+            Row(
+                verticalAlignment = CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Button(
+                    onClick = { showPickerDate = true },
+                    modifier = Modifier.wrapContentWidth()
+                ) {
+                    Text("Set Date")
+                }
+
+                Button(
+                    onClick = { showPickerTime = true },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(2.dp)
+                ) {
+                    Text("Set Time")
+                }
+            }
+
+            DatePickerDialog(
+                showPicker = showPickerDate,
+                onDismiss = { showPickerDate = false },
+                onDateSelected = { selectedDate ->
+                    selectedDateTime = selectedDate
+                },
+            )
+
+            TimePickerDialog(
+                showPicker = showPickerTime,
+                onDismiss = { showPickerTime = false },
+                onTimeSelected = { hour, minute ->
+                    selectedDateTime = selectedDateTime.withHour(hour).withMinute(minute)
+                },
+                initialHour = selectedDateTime.hour,
+                initialMinute = selectedDateTime.minute
             )
 
             Button(onClick = {
@@ -306,10 +445,16 @@ fun CreateSportTaskForm(
                 val durationValue = duration.toLong()
                 val startDateValue = startDate
                 val titleValue = title.trim()
+                val distanceValue = if (distance != "") {
+                    distance.toDouble()
+                } else {
+                    0.0f.toDouble()
+                }
 
                 model.createTaskSport(
                     activity = activityValue,
                     description = descriptionValue,
+                    distance = distanceValue,
                     duration = Duration.ofMinutes(durationValue),
                     isCompleted = false,
                     scheduledAt = startDateValue.toInstant()
@@ -326,6 +471,220 @@ fun CreateSportTaskForm(
             ) {
                 Text("Submit")
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerDialog(
+    showPicker: Boolean,
+    onDismiss: () -> Unit,
+    onDateSelected: (LocalDateTime) -> Unit,
+    //initialDateTime: LocalDateTime
+) {
+    val stateDate = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+
+    if (showPicker) {
+        androidx.compose.material3.DatePickerDialog(
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDismiss()
+
+                        val instant = stateDate.selectedDateMillis?.let {
+                            Instant.ofEpochMilli(it)
+                        }
+
+                        instant?.let {
+                            onDateSelected(LocalDateTime.ofInstant(it, ZoneId.systemDefault()))
+                        }
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("CANCEL")
+                }
+            }
+        ) {
+            androidx.compose.material3.DatePicker(state = stateDate)
+        }
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@Composable
+fun CreateGeneralTaskForm(
+    model: TaskViewModel = hiltViewModel()
+) {
+    var title by remember { mutableStateOf("") }
+    var titleError by remember { mutableStateOf(true) }
+    var description by remember { mutableStateOf("") }
+    var descriptionError by remember { mutableStateOf(true) }
+    var duration by remember { mutableFloatStateOf(0.0f) }
+    var selectedDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+    var showPickerDate by remember { mutableStateOf(false) }
+    var showPickerTime by remember { mutableStateOf(false) }
+
+    val isFormValid by derivedStateOf {
+        !titleError && !descriptionError
+    }
+
+    Column(
+        modifier = Modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        TextFieldWithErrors(
+            value = title,
+            onValueChange = { newText, errors ->
+                title = newText
+                titleError = errors.isNotEmpty()
+            } ,
+            validationPolicies = {input -> InputValidator.validateBlank(input, "Title")},
+            label = { Text("Title") },
+        )
+
+        Spacer(modifier = Modifier.height((16.dp)))
+
+        TextFieldWithErrors(
+            value = description,
+            onValueChange = { newText, errors ->
+                description = newText
+                descriptionError = errors.isNotEmpty()
+            } ,
+            validationPolicies = {input -> InputValidator.validateBlank(input, "Description")},
+            label = { Text("Description") },
+        )
+
+        Spacer(modifier = Modifier.height((16.dp)))
+
+        Text(
+            text = "Duration: ${duration.toInt()} minutes",
+            style = TextStyle(fontSize = 16.sp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 8.dp,
+                    end = 8.dp,
+                    top = 8.dp
+                )
+        )
+
+        Slider(
+            value = duration,
+            onValueChange = { duration = it },
+            valueRange = 1f..180f,
+            steps = 180,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 8.dp,
+                    end = 8.dp,
+                    bottom = 8.dp
+                )
+        )
+
+        Text(
+            text = "Task Date:\n${selectedDateTime.format(dateFormatter)}",
+            style = TextStyle(
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Button(
+                onClick = { showPickerDate = true },
+                modifier = Modifier.wrapContentWidth()
+            ) {
+                Text("Set Date")
+            }
+
+            Button(
+                onClick = { showPickerTime = true },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(2.dp)
+            ) {
+                Text("Set Time")
+            }
+        }
+
+        DatePickerDialog(
+            showPicker = showPickerDate,
+            onDismiss = { showPickerDate = false },
+            onDateSelected = { selectedDate ->
+                selectedDateTime = selectedDate
+            },
+        )
+
+        TimePickerDialog(
+            showPicker = showPickerTime,
+            onDismiss = { showPickerTime = false },
+            onTimeSelected = { hour, minute ->
+                selectedDateTime = selectedDateTime.withHour(hour).withMinute(minute)
+            },
+            initialHour = selectedDateTime.hour,
+            initialMinute = selectedDateTime.minute
+        )
+
+        Button(
+            onClick = {
+                model.createTask(
+                    description = description,
+                    duration = Duration.ofMinutes(duration.toLong()),
+                    isCompleted = false,
+                    scheduledAt = selectedDateTime,
+                    title = title,
+                    userEmail = "fake@email@gmail@com"
+                )
+            },
+            enabled = isFormValid,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 20.dp)
+        ) {
+            Text("Submit")
+        }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerDialog(
+    showPicker: Boolean,
+    onDismiss: () -> Unit,
+    onTimeSelected: (Int, Int) -> Unit,
+    initialHour: Int,
+    initialMinute: Int
+) {
+    val stateTime = rememberTimePickerState(
+        initialHour = initialHour,
+        initialMinute = initialMinute,
+        is24Hour = true
+    )
+
+    if (showPicker) {
+        TimePickerDialog(
+            onCancel = onDismiss,
+            onConfirm = {
+                onDismiss()
+                onTimeSelected(stateTime.hour, stateTime.minute)
+            },
+        ) {
+            TimeInput(state = stateTime)
         }
     }
 }
