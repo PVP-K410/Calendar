@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -52,6 +54,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.common.InputValidator
 import com.pvp.app.common.getDurationString
@@ -474,48 +478,6 @@ fun CreateSportTaskForm(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DatePickerDialog(
-    showPicker: Boolean,
-    onDismiss: () -> Unit,
-    onDateSelected: (LocalDateTime) -> Unit,
-    //initialDateTime: LocalDateTime
-) {
-    val stateDate = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
-
-    if (showPicker) {
-        androidx.compose.material3.DatePickerDialog(
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDismiss()
-
-                        val instant = stateDate.selectedDateMillis?.let {
-                            Instant.ofEpochMilli(it)
-                        }
-
-                        instant?.let {
-                            onDateSelected(LocalDateTime.ofInstant(it, ZoneId.systemDefault()))
-                        }
-                    }
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("CANCEL")
-                }
-            }
-        ) {
-            androidx.compose.material3.DatePicker(state = stateDate)
-        }
-    }
-}
-
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun CreateGeneralTaskForm(
@@ -658,33 +620,6 @@ fun CreateGeneralTaskForm(
                 .padding(top = 20.dp)
         ) {
             Text("Submit")
-        }
-    }
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TimePickerDialog(
-    showPicker: Boolean,
-    onDismiss: () -> Unit,
-    onTimeSelected: (Int, Int) -> Unit,
-    initialHour: Int,
-    initialMinute: Int
-) {
-    val stateTime = rememberTimePickerState(
-        initialHour = initialHour,
-        initialMinute = initialMinute,
-        is24Hour = true
-    )
-
-    if (showPicker) {
-        TimePickerDialog(
-            onCancel = onDismiss,
-            onConfirm = {
-                onDismiss()
-                onTimeSelected(stateTime.hour, stateTime.minute)
-            },
-        ) {
-            TimeInput(state = stateTime)
         }
     }
 }
