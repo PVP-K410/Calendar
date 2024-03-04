@@ -44,6 +44,7 @@ class TaskViewModel @Inject constructor(
 
         return task
     }
+
     fun createTaskSport(
         activity: SportActivity,
         description: String? = null,
@@ -59,6 +60,32 @@ class TaskViewModel @Inject constructor(
             activity,
             description,
             distance,
+            duration,
+            id,
+            isCompleted,
+            scheduledAt,
+            title,
+            userEmail
+        )
+
+        viewModelScope.launch {
+            taskService.merge(task)
+        }
+
+        return task
+    }
+
+    fun createTask(
+        description: String? = null,
+        duration: Duration? = null,
+        id: String? = null,
+        isCompleted: Boolean,
+        scheduledAt: LocalDateTime,
+        title: String,
+        userEmail: String
+    ): Task {
+        val task = Task(
+            description,
             duration,
             id,
             isCompleted,
