@@ -1,46 +1,80 @@
 package com.pvp.app.ui.screen.authentication
 
+import android.app.Activity.RESULT_OK
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import com.pvp.app.model.AuthenticationState
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import com.pvp.app.ui.common.navigateTo
+import com.pvp.app.ui.router.Route
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignInScreen(
-    onSignIn: () -> Unit,
-    state: AuthenticationState
+    controller: NavHostController,
+    scope: CoroutineScope,
+    viewModel: AuthenticationViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+    if (viewModel.isAuthenticated()) {
+        controller.navigateTo(Route.Calendar.route)
 
-    LaunchedEffect(key1 = state.messageError) {
-        state.messageError?.let {
+        return
+    }
+
+    val context = LocalContext.current
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key1 = state.isSuccessful) {
+        if (state.isSuccessful) {
             Toast
                 .makeText(
                     context,
-                    it,
-                    Toast.LENGTH_SHORT
+                    "Signed in successfully",
+                    Toast.LENGTH_LONG
+                )
+                .show()
+
+            controller.navigateTo(Route.Calendar.route)
+        } else if (state.messageError != null) {
+            Toast
+                .makeText(
+                    context,
+                    state.messageError,
+                    Toast.LENGTH_LONG
                 )
                 .show()
         }
     }
 
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Button(onClick = onSignIn) {
-            Text("Sign In")
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if (result.resultCode == RESULT_OK) {
+                scope.launch {
+                    viewModel.signIn(result.data ?: return@launch)
+                }
+            }
         }
-    }
+    )
+
+    AuthenticationBox(
+        isSignIn = true,
+        onSignIn = {
+            scope.launch {
+                launcher.launch(
+                    viewModel.buildSignInRequest()
+                )
+            }
+        },
+        onSignUp = {
+            controller.navigateTo(Route.SignUp.route)
+        }
+    )
 }

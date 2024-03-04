@@ -25,14 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.pvp.app.ui.router.RouteAuthenticated
+import com.pvp.app.ui.router.Route
 
 @Composable
 fun DrawerBody(
     modifier: Modifier = Modifier,
-    onClick: RouteAuthenticated.() -> Unit,
-    routes: List<RouteAuthenticated>,
-    screen: RouteAuthenticated
+    onClick: Route.() -> Unit,
+    routes: List<Route>,
+    screen: Route
 ) {
     LazyColumn(modifier = modifier) {
         items(routes) {
@@ -65,18 +65,20 @@ fun DrawerBody(
 @Composable
 fun DrawerBodyRow(
     modifier: Modifier = Modifier,
-    route: RouteAuthenticated
+    route: Route
 ) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            contentDescription = route.iconDescription,
-            imageVector = route.icon
-        )
+        route.icon?.let {
+            Icon(
+                contentDescription = route.iconDescription,
+                imageVector = it
+            )
 
-        Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
+        }
 
         Text(
             modifier = Modifier.weight(1f),
@@ -112,9 +114,9 @@ fun DrawerHeader(
 @Composable
 fun DrawerScreen(
     modifier: Modifier = Modifier,
-    onClick: RouteAuthenticated.() -> Unit,
-    routes: List<RouteAuthenticated>,
-    screen: RouteAuthenticated
+    onClick: Route.() -> Unit,
+    routes: List<Route>,
+    screen: Route
 ) {
     ModalDrawerSheet(
         modifier = modifier

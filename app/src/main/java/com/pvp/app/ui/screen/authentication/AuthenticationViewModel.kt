@@ -21,7 +21,7 @@ class AuthenticationViewModel @Inject constructor(
     private val authenticationService: AuthenticationService,
     private val userService: UserService
 ) : ViewModel() {
-
+    
     private val _state = MutableStateFlow(AuthenticationState())
     private val _user = MutableStateFlow<User?>(null)
     val state = _state.asStateFlow()

@@ -11,15 +11,14 @@ import androidx.navigation.compose.composable
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun RouterAuthenticated(
-    controllerAuthenticated: NavHostController,
-    controllerUnauthenticated: NavHostController,
+fun Router(
+    controller: NavHostController,
     modifier: Modifier = Modifier,
     scope: CoroutineScope
 ) {
     run {
         // Initialize beforehand or values are not set fast enough.
-        RouteAuthenticated.routes
+        Route.routes
     }
 
     NavHost(
@@ -36,36 +35,10 @@ fun RouterAuthenticated(
             )
         },
         modifier = modifier,
-        navController = controllerAuthenticated,
-        startDestination = RouteAuthenticated.Calendar.route
-    ) {
-        RouteAuthenticated.routes.forEach { r ->
-            composable(route = r.route) {
-                r.screen(
-                    controllerAuthenticated,
-                    controllerUnauthenticated,
-                    scope
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun RouterUnauthenticated(
-    controller: NavHostController,
-    scope: CoroutineScope
-) {
-    run {
-        // Initialize beforehand or values are not set fast enough.
-        RouteUnauthenticated.routes
-    }
-
-    NavHost(
         navController = controller,
-        startDestination = RouteUnauthenticated.Unauthenticated.route
+        startDestination = Route.SignIn.route
     ) {
-        RouteUnauthenticated.routes.forEach { r ->
+        Route.routes.forEach { r ->
             composable(route = r.route) {
                 r.screen(
                     controller,

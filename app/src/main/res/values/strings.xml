@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Calendar</string>
+    <string name="authentication_sign_in">Sign In</string>
+    <string name="authentication_sign_in_to_sign_up">Not Signed Up? Sign Up</string>
+    <string name="authentication_sign_up">Sign Up</string>
+    <string name="authentication_sign_up_to_sign_in">Already Signed Up? Sign In</string>
+    <string name="route_authentication_sign_in">Sign In</string>
+    <string name="route_authentication_sign_up">Sign Up</string>
     <string name="route_calendar">Calendar</string>
+    <string name="route_profile">Profile</string>
     <string name="route_tasks_create_general">Create general task</string>
     <string name="route_tasks_create_meal">Create meal task</string>
     <string name="route_tasks_create_sport">Create sport task</string>

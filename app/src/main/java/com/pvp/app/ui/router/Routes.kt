@@ -3,90 +3,95 @@ package com.pvp.app.ui.router
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddTask
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import com.pvp.app.R
-import com.pvp.app.model.RouteComposeAuthenticated
-import com.pvp.app.model.RouteComposeUnauthenticated
-import com.pvp.app.model.RouteShowcased
-import com.pvp.app.ui.screen.authentication.AuthenticatedScreen
-import com.pvp.app.ui.screen.authentication.UnauthenticatedScreen
+import com.pvp.app.ui.screen.authentication.SignInScreen
+import com.pvp.app.ui.screen.authentication.SignUpScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
+import com.pvp.app.ui.screen.profile.ProfileScreen
 import com.pvp.app.ui.screen.task.CreateGeneralTaskForm
 import com.pvp.app.ui.screen.task.CreateMealTaskForm
 import com.pvp.app.ui.screen.task.CreateSportTaskForm
 import kotlinx.coroutines.CoroutineScope
 
-sealed class RouteAuthenticated(
-    override val icon: ImageVector,
-    override val iconDescription: String,
-    override val resourceTitleId: Int,
-    override val route: String,
-    override val screen: @Composable (NavHostController, NavHostController, CoroutineScope) -> Unit
-) : RouteComposeAuthenticated, RouteShowcased {
+sealed class Route(
+    val icon: ImageVector? = null,
+    val iconDescription: String? = null,
+    val resourceTitleId: Int,
+    val route: String,
+    val screen: @Composable (NavHostController, CoroutineScope) -> Unit
+) {
 
     companion object {
+
         val routes = listOf(
             Calendar,
             CreateTaskGeneral,
             CreateTaskMeal,
-            CreateTaskSport
+            CreateTaskSport,
+            Profile,
+            SignIn,
+            SignUp
+        )
+
+        val routesDrawer = listOf(
+            Calendar,
+            Profile
         )
     }
 
-    data object Calendar : RouteAuthenticated(
-        Icons.Outlined.CalendarMonth,
-        "Calendar page button icon",
-        R.string.route_calendar,
-        "calendar",
-        { _, _, _ -> CalendarScreen() }
+    data object Calendar : Route(
+        icon = Icons.Outlined.CalendarMonth,
+        iconDescription = "Calendar page button icon",
+        resourceTitleId = R.string.route_calendar,
+        route = "calendar",
+        screen = { _, _ -> CalendarScreen() }
     )
 
-    data object CreateTaskMeal : RouteAuthenticated(
-        Icons.Outlined.AddTask,
-        "Meal task creation page button icon",
-        R.string.route_tasks_create_meal,
-        "tasks/create/meal",
-        screen = { _, _, _ -> CreateMealTaskForm() }
+    data object CreateTaskMeal : Route(
+        icon = Icons.Outlined.AddTask,
+        iconDescription = "Meal task creation page button icon",
+        resourceTitleId = R.string.route_tasks_create_meal,
+        route = "tasks/create/meal",
+        screen = { _, _ -> CreateMealTaskForm() }
     )
 
-    data object CreateTaskGeneral : RouteAuthenticated(
-        Icons.Outlined.AddTask,
-        "General task creation page button icon",
+    data object CreateTaskGeneral : Route(
+        icon = Icons.Outlined.AddTask,
+        iconDescription = "General task creation page button icon",
         R.string.route_tasks_create_general,
-        "tasks/create/general",
-        screen = { _, _, _ -> CreateGeneralTaskForm() }
+        route = "tasks/create/general",
+        screen = { _, _ -> CreateGeneralTaskForm() }
     )
 
-    data object CreateTaskSport : RouteAuthenticated(
-        Icons.Outlined.AddTask,
-        "Sport task creation page button icon",
-        R.string.route_tasks_create_sport,
-        "tasks/create/sport",
-        screen = { _, _, _ -> CreateSportTaskForm() }
-    )
-}
-
-sealed class RouteUnauthenticated(
-    override val route: String,
-    override val screen: @Composable (NavHostController, CoroutineScope) -> Unit
-) : RouteComposeUnauthenticated {
-
-    companion object {
-        val routes = listOf(
-            Authenticated,
-            Unauthenticated,
-        )
-    }
-
-    data object Authenticated : RouteUnauthenticated(
-        "authenticated",
-        { c, s -> AuthenticatedScreen(c, s) }
+    data object CreateTaskSport : Route(
+        icon = Icons.Outlined.AddTask,
+        iconDescription = "Sport task creation page button icon",
+        resourceTitleId = R.string.route_tasks_create_sport,
+        route = "tasks/create/sport",
+        screen = { _, _ -> CreateSportTaskForm() }
     )
 
-    data object Unauthenticated : RouteUnauthenticated(
-        "unauthenticated",
-        { c, s -> UnauthenticatedScreen(c, s) }
+    data object Profile : Route(
+        icon = Icons.Outlined.EditNote,
+        iconDescription = "Profile page button icon",
+        resourceTitleId = R.string.route_profile,
+        route = "profile",
+        screen = { c, _ -> ProfileScreen(c) }
+    )
+
+    data object SignIn : Route(
+        route = "authentication/sign-in",
+        resourceTitleId = R.string.route_authentication_sign_in,
+        screen = { c, s -> SignInScreen(c, s) }
+    )
+
+    data object SignUp : Route(
+        route = "authentication/sign-up",
+        resourceTitleId = R.string.route_authentication_sign_up,
+        screen = { c, s -> SignUpScreen(c, s) }
     )
 }
