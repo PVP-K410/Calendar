@@ -56,9 +56,9 @@ import java.time.format.DateTimeFormatter
 fun DatePickerDialog(
     showPicker: Boolean,
     onDismiss: () -> Unit,
-    onDateSelected: (LocalDateTime) -> Unit,
+    onDateSelected: (LocalDateTime) -> Unit
 ) {
-    val stateDate = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+    val date = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
 
     if (showPicker) {
         androidx.compose.material3.DatePickerDialog(
@@ -68,7 +68,7 @@ fun DatePickerDialog(
                     onClick = {
                         onDismiss()
 
-                        val instant = stateDate.selectedDateMillis?.let {
+                        val instant = date.selectedDateMillis?.let {
                             Instant.ofEpochMilli(it)
                         }
 
@@ -77,16 +77,16 @@ fun DatePickerDialog(
                         }
                     }
                 ) {
-                    Text("OK")
+                    Text("Ok")
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismiss) {
-                    Text("CANCEL")
+                    Text("Cancel")
                 }
             }
         ) {
-            androidx.compose.material3.DatePicker(state = stateDate)
+            androidx.compose.material3.DatePicker(state = date)
         }
     }
 }
@@ -100,7 +100,7 @@ fun TimePickerDialog(
     initialHour: Int,
     initialMinute: Int
 ) {
-    val stateTime = rememberTimePickerState(
+    val state = rememberTimePickerState(
         initialHour = initialHour,
         initialMinute = initialMinute,
         is24Hour = true
@@ -111,10 +111,14 @@ fun TimePickerDialog(
             onCancel = onDismiss,
             onConfirm = {
                 onDismiss()
-                onTimeSelected(stateTime.hour, stateTime.minute)
+
+                onTimeSelected(
+                    state.hour,
+                    state.minute
+                )
             },
         ) {
-            TimeInput(state = stateTime)
+            TimeInput(state = state)
         }
     }
 }
@@ -125,7 +129,7 @@ fun TimePicker(
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
     toggle: @Composable () -> Unit = {},
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     Dialog(
         onDismissRequest = onCancel,
@@ -186,10 +190,10 @@ fun TimePicker(
 
 @Composable
 fun ScrollableTimePicker(
-    selectedDateTime: LocalDateTime,
-    onDateTimeChanged: (LocalDateTime) -> Unit
+    selectedTime: LocalDateTime,
+    onTimeChanged: (LocalDateTime) -> Unit
 ) {
-    var dateTime by remember { mutableStateOf(selectedDateTime) }
+    var time by remember { mutableStateOf(selectedTime) }
 
     Row(
         modifier = Modifier
@@ -201,10 +205,11 @@ fun ScrollableTimePicker(
         Box(modifier = Modifier.weight(1f)) {
             TimePickerColumn(
                 range = 0..23,
-                selectedValue = selectedDateTime.hour,
+                selectedValue = selectedTime.hour,
                 onValueChange = { hour ->
-                    dateTime = dateTime.withHour(hour)
-                    onDateTimeChanged(dateTime)
+                    time = time.withHour(hour)
+
+                    onTimeChanged(time)
                 }
             )
         }
@@ -214,10 +219,11 @@ fun ScrollableTimePicker(
         Box(modifier = Modifier.weight(1f)) {
             TimePickerColumn(
                 range = 0..59,
-                selectedValue = selectedDateTime.minute,
+                selectedValue = selectedTime.minute,
                 onValueChange = { minute ->
-                    dateTime = dateTime.withMinute(minute)
-                    onDateTimeChanged(dateTime)
+                    time = time.withMinute(minute)
+
+                    onTimeChanged(time)
                 }
             )
         }
@@ -234,10 +240,11 @@ fun TimePickerColumn(
     val itemCount = range.count()
     val extendedRange = (range.first - itemCount)..(range.last + itemCount)
     val initialIndex = itemCount + selectedValue - (visibleItemCount / 2)
-
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
+
     LaunchedEffect(key1 = selectedValue) {
         val scrollToIndex = itemCount + selectedValue - (visibleItemCount / 2)
+
         listState.scrollToItem(scrollToIndex)
     }
 
@@ -245,6 +252,7 @@ fun TimePickerColumn(
         snapshotFlow { listState.firstVisibleItemIndex }
             .map { firstVisibleItemIndex ->
                 val correctedIndex = (firstVisibleItemIndex % itemCount) + range.first
+
                 correctedIndex + (visibleItemCount / 2)
             }
             .distinctUntilChanged()
@@ -270,11 +278,12 @@ fun TimePickerColumn(
                     value > range.last -> value - itemCount
                     else -> value
                 }
+
                 if (displayValue in range) {
                     TimePickerItem(
                         value = displayValue,
                         isSelected = displayValue == selectedValue
-                    ) {}
+                    )
                 }
             }
         }
@@ -282,7 +291,11 @@ fun TimePickerColumn(
 }
 
 @Composable
-fun TimePickerItem(value: Int, isSelected: Boolean, onItemSelected: () -> Unit) {
+fun TimePickerItem(
+    value: Int,
+    isSelected: Boolean,
+    onItemSelected: () -> Unit = {}
+) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -302,7 +315,7 @@ fun TimePickerItem(value: Int, isSelected: Boolean, onItemSelected: () -> Unit) 
 
 @Composable
 fun ExpandableTimePicker(
-    transitionState: MutableTransitionState<Boolean>,
+    state: MutableTransitionState<Boolean>,
     selectedDateTime: LocalDateTime,
     onDateTimeChanged: (LocalDateTime) -> Unit
 ) {
@@ -319,25 +332,25 @@ fun ExpandableTimePicker(
                 textAlign = TextAlign.Center
             ),
             modifier = Modifier.clickable {
-                transitionState.targetState = !transitionState.currentState
+                state.targetState = !state.currentState
             }
         )
 
         AnimatedVisibility(
-            visibleState = transitionState,
+            visibleState = state,
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
             ScrollableTimePicker(
-                selectedDateTime = selectedDateTime,
-                onDateTimeChanged = onDateTimeChanged
+                selectedTime = selectedDateTime,
+                onTimeChanged = onDateTimeChanged
             )
         }
     }
 }
 
 @Composable
-fun DateAndTimePicker(
+fun DateTimePicker(
     dateTime: LocalDateTime,
     onDateTimeChanged: (LocalDateTime) -> Unit
 ) {
@@ -352,8 +365,7 @@ fun DateAndTimePicker(
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold
         ),
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     )
 
     Spacer(modifier = Modifier.height((8.dp)))
@@ -371,10 +383,11 @@ fun DateAndTimePicker(
     )
 
     ExpandableTimePicker(
-        transitionState = showPickerTime,
+        state = showPickerTime,
         selectedDateTime = selectedDateTime,
         onDateTimeChanged = { newDateTime ->
             selectedDateTime = newDateTime
+
             onDateTimeChanged(selectedDateTime)
         }
     )
@@ -386,7 +399,8 @@ fun DateAndTimePicker(
             selectedDateTime = selectedDate
                 .withHour(selectedDateTime.hour)
                 .withMinute(selectedDateTime.minute)
+
             onDateTimeChanged(selectedDateTime)
-        },
+        }
     )
 }

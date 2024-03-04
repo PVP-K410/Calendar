@@ -44,6 +44,7 @@ class TaskViewModel @Inject constructor(
 
         return task
     }
+
     fun createTaskSport(
         activity: SportActivity,
         description: String? = null,
@@ -73,6 +74,7 @@ class TaskViewModel @Inject constructor(
 
         return task
     }
+
     fun createTask(
         description: String? = null,
         duration: Duration? = null,

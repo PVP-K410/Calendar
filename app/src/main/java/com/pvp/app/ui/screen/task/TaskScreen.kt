@@ -55,8 +55,7 @@ import com.pvp.app.model.Task
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
-import com.yourapp.ui.components.TextFieldWithErrors
+import com.yourapp.ui.components.TextField
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -84,7 +83,7 @@ fun CreateMealTaskForm(
             .verticalScroll(rememberScrollState())
     ) {
 
-        TextFieldWithErrors(
+        TextField(
             value = title,
             onValueChange = { newText, errors ->
                 title = newText
@@ -96,7 +95,7 @@ fun CreateMealTaskForm(
 
         Spacer(modifier = Modifier.height((16.dp)))
 
-        TextFieldWithErrors(
+        TextField(
             value = description,
             onValueChange = { newText, errors ->
                 description = newText
@@ -108,7 +107,7 @@ fun CreateMealTaskForm(
 
         Spacer(modifier = Modifier.height((16.dp)))
 
-        TextFieldWithErrors(
+        TextField(
             value = ingredients,
             onValueChange = { newText, _ ->
                 ingredients = newText
@@ -118,7 +117,7 @@ fun CreateMealTaskForm(
 
         Spacer(modifier = Modifier.height((16.dp)))
 
-        TextFieldWithErrors(
+        TextField(
             value = preparation,
             onValueChange = { newText, _ ->
                 preparation = newText
@@ -140,7 +139,7 @@ fun CreateMealTaskForm(
 
         Spacer(modifier = Modifier.height((16.dp)))
 
-        DateAndTimePicker(
+        DateTimePicker(
             dateTime = selectedDateTime,
             onDateTimeChanged = { newDateTime ->
                 selectedDateTime = newDateTime
@@ -224,7 +223,7 @@ fun CreateSportTaskForm(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            TextFieldWithErrors(
+            TextField(
                 value = title,
                 onValueChange = { newText, errors ->
                     title = newText
@@ -270,7 +269,7 @@ fun CreateSportTaskForm(
 
             Spacer(modifier = Modifier.height((16.dp)))
 
-            TextFieldWithErrors(
+            TextField(
                 value = description,
                 onValueChange = { newText, errors ->
                     description = newText
@@ -289,7 +288,7 @@ fun CreateSportTaskForm(
 
             if (activity.supportsDistanceMetrics) {
                 duration = 0
-                TextFieldWithErrors(
+                TextField(
                     value = distance,
                     onValueChange = { newText, errors ->
                         distance = newText
@@ -333,7 +332,7 @@ fun CreateSportTaskForm(
 
             Spacer(modifier = Modifier.height((32.dp)))
 
-            DateAndTimePicker(
+            DateTimePicker(
                 dateTime = selectedDateTime,
                 onDateTimeChanged = { newDateTime ->
                     selectedDateTime = newDateTime
@@ -391,7 +390,7 @@ fun CreateGeneralTaskForm(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        TextFieldWithErrors(
+        TextField(
             value = title,
             onValueChange = { newText, errors ->
                 title = newText
@@ -403,7 +402,7 @@ fun CreateGeneralTaskForm(
 
         Spacer(modifier = Modifier.height((16.dp)))
 
-        TextFieldWithErrors(
+        TextField(
             value = description,
             onValueChange = { newText, errors ->
                 description = newText
@@ -441,7 +440,7 @@ fun CreateGeneralTaskForm(
                 )
         )
 
-        DateAndTimePicker(
+        DateTimePicker(
             dateTime = selectedDateTime,
             onDateTimeChanged = { newDateTime ->
                 selectedDateTime = newDateTime

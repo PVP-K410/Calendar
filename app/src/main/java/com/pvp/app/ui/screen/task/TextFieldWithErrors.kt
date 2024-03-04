@@ -30,7 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
  * @param modifier (optional) the Modifier applies to the text field
  */
 @Composable
-fun TextFieldWithErrors(
+fun TextField(
     value: String,
     onValueChange: (String, List<String>) -> Unit = { _, _ -> },
     validationPolicies: (String) -> List<String> = { listOf<String>() },
@@ -61,7 +61,8 @@ fun TextFieldWithErrors(
                 },
                 keyboardOptions = keyboardOptions,
             )
-        }, messages = errors
+        },
+        messages = errors
     )
 }
 
@@ -77,7 +78,8 @@ fun ErrorField(
         Column {
             for (message in messages) {
                 Text(
-                    text = message, style = style
+                    text = message,
+                    style = style
                 )
             }
         }

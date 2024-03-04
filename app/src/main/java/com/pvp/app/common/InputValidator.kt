@@ -1,15 +1,16 @@
 package com.pvp.app.common
 
 object InputValidator {
-    fun validateBlank(input: String, fieldName: String): List<String>{
+
+    fun validateBlank(input: String, fieldName: String): List<String> {
         return if (input.isBlank()) {
-             listOf("$fieldName cannot be empty")
+            listOf("$fieldName cannot be empty")
         } else {
             emptyList()
         }
     }
 
-    fun validateLength(input: String, minLength: Int, fieldName: String): List<String>{
+    fun validateLengthMin(input: String, minLength: Int, fieldName: String): List<String> {
         return if (input.length < minLength) {
             listOf("$fieldName must be at least $minLength characters long")
         } else {
@@ -17,9 +18,10 @@ object InputValidator {
         }
     }
 
-    fun validateFloat(input: String, fieldName: String) : List<String>{
+    fun validateFloat(input: String, fieldName: String): List<String> {
         return try {
             input.toFloat()
+
             emptyList<String>()
         } catch (e: NumberFormatException) {
             listOf("$fieldName must be a valid number")
