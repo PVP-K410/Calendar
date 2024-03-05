@@ -1,12 +1,23 @@
 <resources>
     <string name="app_name">Calendar</string>
-    <string name="route_calendar">Calendar</string>
-    <string name="route_tasks_create_general">Create general task</string>
-    <string name="route_tasks_create_meal">Create meal task</string>
-    <string name="route_tasks_create_sport">Create sport task</string>
+    <string name="authentication_sign_in">Sign In</string>
+    <string name="authentication_sign_in_to_sign_up">Not Signed Up? Sign Up</string>
+    <string name="authentication_sign_up">Sign Up</string>
+    <string name="authentication_sign_up_to_sign_in">Already Signed Up? Sign In</string>
     <string name="form_create_meal_description">Description</string>
     <string name="form_create_meal_duration">Preparation time</string>
     <string name="form_create_meal_ingredients">Ingredients</string>
     <string name="form_create_meal_preparation">Preparation</string>
     <string name="form_create_meal_title">Meal title</string>
+    <string name="route_authentication_sign_in">Sign In</string>
+    <string name="route_authentication_sign_up">Sign Up</string>
+    <string name="route_calendar">Calendar</string>
+    <string name="route_profile">Profile</string>
+    <string name="route_tasks_create_general">Create general task</string>
+    <string name="route_tasks_create_meal">Create meal task</string>
+    <string name="route_tasks_create_sport">Create sport task</string>
+    <string name="screen_profile_button_sign_out">Sign Out</string>
+    <string name="screen_profile_toast_success_sign_out">Signed out. See you later!</string>
+    <string name="screen_sign_in_toast_success">Welcome back</string>
+    <string name="screen_sign_up_toast_success">Welcome! We are happy to have you here</string>
 </resources>

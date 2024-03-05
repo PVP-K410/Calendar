@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.pvp.app.ui.Route
+import com.pvp.app.ui.router.Route
 
 @Composable
 fun DrawerBody(
@@ -71,12 +71,14 @@ fun DrawerBodyRow(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            contentDescription = route.iconDescription,
-            imageVector = route.icon
-        )
+        route.icon?.let {
+            Icon(
+                contentDescription = route.iconDescription,
+                imageVector = it
+            )
 
-        Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
+        }
 
         Text(
             modifier = Modifier.weight(1f),
@@ -126,7 +128,7 @@ fun DrawerScreen(
                 .fillMaxHeight(0.1f)
         )
 
-        Divider()
+        HorizontalDivider()
 
         DrawerBody(
             modifier = Modifier
