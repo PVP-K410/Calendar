@@ -48,9 +48,15 @@ fun SignUpScreen(
         },
         onSignUp = {
             scope.launch {
-                launcher.launch(
-                    viewModel.buildSignInRequest()
-                )
+                val request = viewModel.buildSignInRequest()
+
+                if (request == null) {
+                    context.showToast(message = "Error has occurred. Make sure you have a google account!")
+
+                    return@launch
+                }
+
+                launcher.launch(request)
             }
         }
     )
