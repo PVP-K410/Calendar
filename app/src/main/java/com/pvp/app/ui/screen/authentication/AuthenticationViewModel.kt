@@ -25,6 +25,15 @@ class AuthenticationViewModel @Inject constructor(
             .build()
     }
 
+    suspend fun signIn(
+        intent: Intent,
+        onSignIn: suspend (AuthenticationResult) -> Unit = {}
+    ) {
+        val result = authenticationService.signIn(intent)
+
+        onSignIn(result)
+    }
+
     suspend fun signUp(
         intent: Intent,
         onSignUp: suspend (AuthenticationResult) -> Unit = {}

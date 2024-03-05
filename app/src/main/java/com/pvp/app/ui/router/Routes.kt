@@ -89,7 +89,7 @@ sealed class Route(
     data object SignIn : Route(
         route = "authentication/sign-in",
         resourceTitleId = R.string.route_authentication_sign_in,
-        screen = { c, _ -> SignInScreen(c) }
+        screen = { c, s -> SignInScreen(c, s) }
     )
 
     data object SignUp : Route(
