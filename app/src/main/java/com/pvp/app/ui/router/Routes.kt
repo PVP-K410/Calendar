@@ -27,19 +27,22 @@ sealed class Route(
 
     companion object {
 
-        val routes = listOf(
+        val routesAuthenticated = listOf(
             Calendar,
             CreateTaskGeneral,
             CreateTaskMeal,
             CreateTaskSport,
-            Profile,
-            SignIn,
-            SignUp
+            Profile
         )
 
         val routesDrawer = listOf(
             Calendar,
             Profile
+        )
+
+        val routesUnauthenticated = listOf(
+            SignIn,
+            SignUp
         )
     }
 
@@ -80,13 +83,13 @@ sealed class Route(
         iconDescription = "Profile page button icon",
         resourceTitleId = R.string.route_profile,
         route = "profile",
-        screen = { c, _ -> ProfileScreen(c) }
+        screen = { _, _ -> ProfileScreen() }
     )
 
     data object SignIn : Route(
         route = "authentication/sign-in",
         resourceTitleId = R.string.route_authentication_sign_in,
-        screen = { c, s -> SignInScreen(c, s) }
+        screen = { c, _ -> SignInScreen(c) }
     )
 
     data object SignUp : Route(

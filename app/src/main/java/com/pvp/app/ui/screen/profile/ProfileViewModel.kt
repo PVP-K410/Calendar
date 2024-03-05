@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.SignOutResult
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,9 +30,9 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun signOut() {
+    fun signOut(onSignOut: (SignOutResult) -> Unit) {
         viewModelScope.launch {
-            authenticationService.signOut()
+            authenticationService.signOut(onSignOut)
         }
     }
 }

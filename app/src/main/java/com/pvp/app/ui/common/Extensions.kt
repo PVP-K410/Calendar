@@ -1,5 +1,7 @@
 package com.pvp.app.ui.common
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 
@@ -10,7 +12,7 @@ import androidx.navigation.NavHostController
  *
  * @param route The route to navigate to.
  */
-fun @Composable NavHostController.navigateTo(route: String) {
+fun @Composable NavHostController.navigateWithPopUp(route: String) {
     val graph = this.graph
 
     navigate(
@@ -23,4 +25,32 @@ fun @Composable NavHostController.navigateTo(route: String) {
         launchSingleTop = true
         restoreState = true
     }
+}
+
+fun <T : Context> T.showToast(
+    duration: Int = Toast.LENGTH_LONG,
+    message: String
+) {
+    Toast
+        .makeText(
+            this,
+            message,
+            duration
+        )
+        .show()
+}
+
+fun <T : Context> T.showToast(
+    duration: Int = Toast.LENGTH_LONG,
+    isSuccess: Boolean,
+    messageError: String,
+    messageSuccess: String
+) {
+    Toast
+        .makeText(
+            this,
+            if (isSuccess) messageSuccess else messageError,
+            duration
+        )
+        .show()
 }

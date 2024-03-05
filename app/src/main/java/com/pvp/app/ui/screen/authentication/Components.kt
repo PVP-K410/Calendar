@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -55,19 +54,13 @@ fun AuthenticationBox(
                 .fillMaxHeight(0.3f)
                 .fillMaxWidth(0.75f)
                 .clip(MaterialTheme.shapes.large)
-                .backgroundGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.surfaceBright
-                    )
-                ),
+                .background(MaterialTheme.colorScheme.primaryContainer),
             verticalArrangement = Arrangement.Center,
         ) {
             Button(
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
-                    .clip(MaterialTheme.shapes.extraLarge)
-                    .background(MaterialTheme.colorScheme.surface),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 onClick = if (isSignIn) onSignIn else onSignUp
             ) {
                 Icon(
@@ -88,8 +81,7 @@ fun AuthenticationBox(
             Button(
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
-                    .clip(MaterialTheme.shapes.extraLarge)
-                    .background(MaterialTheme.colorScheme.surface),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 onClick = if (isSignIn) onSignUp else onSignIn
             ) {
                 Text(

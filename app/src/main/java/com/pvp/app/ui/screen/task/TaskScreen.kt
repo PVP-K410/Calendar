@@ -21,11 +21,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -52,10 +52,10 @@ import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
+import com.yourapp.ui.components.TextField
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import com.yourapp.ui.components.TextField
 
 @SuppressLint("UnrememberedMutableState")
 @Composable

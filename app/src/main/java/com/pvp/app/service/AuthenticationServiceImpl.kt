@@ -8,7 +8,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.model.AuthenticationResult
+import com.pvp.app.model.SignOutResult
 import com.pvp.app.model.UserProperties
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
@@ -19,7 +22,8 @@ class AuthenticationServiceImpl @Inject constructor(
     private val request: BeginSignInRequest
 ) : AuthenticationService {
 
-    override val user = auth.currentUser
+    private val _user = MutableStateFlow(auth.currentUser)
+    override val user = _user.asStateFlow()
 
     override suspend fun beginSignIn(): IntentSender? {
         val result = try {
@@ -39,7 +43,10 @@ class AuthenticationServiceImpl @Inject constructor(
         return result?.pendingIntent?.intentSender
     }
 
-    override suspend fun signIn(intent: Intent): AuthenticationResult {
+    override suspend fun signIn(
+        intent: Intent,
+        onSignIn: suspend (AuthenticationResult) -> Unit
+    ): AuthenticationResult {
         return try {
             val credentials = client.getSignInCredentialFromIntent(intent)
             val googleId = credentials.googleIdToken
@@ -49,15 +56,22 @@ class AuthenticationServiceImpl @Inject constructor(
                 .signInWithCredential(googleCredentials)
                 .await().user
 
-            AuthenticationResult(
+            val result = AuthenticationResult(
                 data = user?.run {
                     UserProperties(
                         email = email!!,
                         id = uid,
                         username = displayName ?: email!!.substringBefore("@")
                     )
-                }
+                },
+                isSuccess = true
             )
+
+            onSignIn(result)
+
+            _user.value = user
+
+            result
         } catch (e: Exception) {
             e.printStackTrace()
 
@@ -65,23 +79,41 @@ class AuthenticationServiceImpl @Inject constructor(
                 throw e
             }
 
-            AuthenticationResult(messageError = e.message)
+            val result = AuthenticationResult(messageError = e.message)
+
+            onSignIn(result)
+
+            result
         }
     }
 
-    override suspend fun signOut() {
-        try {
+    override suspend fun signOut(onSignOut: suspend (SignOutResult) -> Unit): SignOutResult {
+        return try {
             client
                 .signOut()
                 .await()
 
             auth.signOut()
+
+            val result = SignOutResult(isSuccess = true)
+
+            onSignOut(result)
+
+            _user.value = null
+
+            result
         } catch (e: Exception) {
             e.printStackTrace()
 
             if (e is CancellationException) {
                 throw e
             }
+
+            val result = SignOutResult(messageError = e.message)
+
+            onSignOut(result)
+
+            result
         }
     }
 }

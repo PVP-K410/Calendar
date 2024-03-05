@@ -13,14 +13,11 @@ import kotlinx.coroutines.CoroutineScope
 @Composable
 fun Router(
     controller: NavHostController,
+    destinationStart: Route,
     modifier: Modifier = Modifier,
+    routes: List<Route>,
     scope: CoroutineScope
 ) {
-    run {
-        // Initialize beforehand or values are not set fast enough.
-        Route.routes
-    }
-
     NavHost(
         enterTransition = {
             slideInHorizontally(
@@ -36,9 +33,9 @@ fun Router(
         },
         modifier = modifier,
         navController = controller,
-        startDestination = Route.SignIn.route
+        startDestination = destinationStart.route
     ) {
-        Route.routes.forEach { r ->
+        routes.forEach { r ->
             composable(route = r.route) {
                 r.screen(
                     controller,

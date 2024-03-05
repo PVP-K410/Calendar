@@ -6,6 +6,7 @@ import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.User
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -25,7 +26,10 @@ class UserServiceImpl @Inject constructor(
     }
 
     override suspend fun getCurrent(): Flow<User?> {
-        return authenticationService.user?.run { email?.run { get(this) } } ?: flowOf(null)
+        return authenticationService.user
+            .firstOrNull()
+            ?.run { email?.run { get(this) } }
+            ?: flowOf(null)
     }
 
     override suspend fun merge(user: User) {

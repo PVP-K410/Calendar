@@ -13,16 +13,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
+import com.pvp.app.R
 import com.pvp.app.model.User
-import com.pvp.app.ui.common.navigateTo
-import com.pvp.app.ui.router.Route
+import com.pvp.app.ui.common.showToast
 
 @Composable
-fun ProfileBody(
+private fun ProfileBody(
     modifier: Modifier = Modifier,
     user: State<User?>
 ) {
@@ -54,10 +55,12 @@ fun ProfileBody(
 }
 
 @Composable
-fun ProfileFooter(
+private fun ProfileFooter(
     modifier: Modifier = Modifier,
     onSignOut: () -> Unit
 ) {
+    val textSignOut = stringResource(R.string.screen_profile_button_sign_out)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
@@ -67,7 +70,7 @@ fun ProfileFooter(
             onClick = onSignOut
         ) {
             Text(
-                text = "Sign Out",
+                text = textSignOut,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -75,7 +78,7 @@ fun ProfileFooter(
 }
 
 @Composable
-fun ProfileHeader(
+private fun ProfileHeader(
     modifier: Modifier = Modifier,
     user: State<User?>
 ) {
@@ -98,10 +101,10 @@ fun ProfileHeader(
 
 @Composable
 fun ProfileScreen(
-    controller: NavHostController,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val user = viewModel.user.collectAsStateWithLifecycle()
+    val textSignOut = stringResource(R.string.screen_profile_toast_success_sign_out)
 
     Column(
         modifier = Modifier
@@ -123,14 +126,20 @@ fun ProfileScreen(
             user = user
         )
 
+        val context = LocalContext.current
+
         ProfileFooter(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.15f),
             onSignOut = {
-                viewModel.signOut()
-
-                controller.navigateTo(Route.SignIn.route)
+                viewModel.signOut {
+                    context.showToast(
+                        isSuccess = it.isSuccess,
+                        messageError = it.messageError ?: "Error has occurred while signing out",
+                        messageSuccess = textSignOut
+                    )
+                }
             }
         )
     }

@@ -2,10 +2,10 @@ package com.pvp.app.ui.screen.layout
 
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,19 +25,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pvp.app.model.User
-import com.pvp.app.ui.common.navigateTo
+import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
 import com.pvp.app.ui.screen.drawer.DrawerScreen
@@ -46,23 +42,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun LayoutScreen(
+fun LayoutScreenAuthenticated(
     controller: NavHostController,
-    modifier: Modifier = Modifier,
     scope: CoroutineScope,
-    viewModel: LayoutViewModel = hiltViewModel()
+    user: User?
 ) {
     CalendarTheme {
-        Surface(modifier = modifier) {
+        Surface(modifier = Modifier.fillMaxSize()) {
             val destination = controller.currentBackStackEntryAsState().value?.destination
-            val screen = Route.routes.find { it.route == destination?.route } ?: Route.SignIn
+
+            val screen = Route.routesAuthenticated
+                .find { it.route == destination?.route }
+                ?: Route.SignIn
+
             val stateDrawer = rememberDrawerState(initialValue = DrawerValue.Closed)
 
             ModalNavigationDrawer(
                 drawerContent = {
                     DrawerScreen(
                         onClick = {
-                            controller.navigateTo(route)
+                            controller.navigateWithPopUp(route)
 
                             scope.launch {
                                 stateDrawer.close()
@@ -74,12 +73,9 @@ fun LayoutScreen(
                 },
                 drawerState = stateDrawer
             ) {
-                val user by viewModel.user.collectAsStateWithLifecycle()
-
                 Scaffold(topBar = {
                     Header(
                         controller = controller,
-                        modifier = user?.run { Modifier } ?: Modifier.background(Color.Transparent),
                         route = screen,
                         scope = scope,
                         state = stateDrawer,
@@ -88,7 +84,9 @@ fun LayoutScreen(
                 }) {
                     Router(
                         controller = controller,
+                        destinationStart = Route.Calendar,
                         modifier = Modifier.padding(it),
+                        routes = Route.routesAuthenticated,
                         scope = scope
                     )
                 }
@@ -99,7 +97,7 @@ fun LayoutScreen(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun Header(
+private fun Header(
     controller: NavHostController,
     modifier: Modifier = Modifier,
     route: Route,
@@ -119,7 +117,7 @@ fun Header(
                             RoundedCornerShape(36.dp)
                         ),
                     onClick = {
-                        controller.navigateTo(Route.Profile.route)
+                        controller.navigateWithPopUp(Route.Profile.route)
                     }
                 ) {
                     Icon(
@@ -146,7 +144,7 @@ fun Header(
 }
 
 @Composable
-fun HeaderNavigationIcon(
+private fun HeaderNavigationIcon(
     scope: CoroutineScope,
     state: DrawerState
 ) {
@@ -169,7 +167,7 @@ fun HeaderNavigationIcon(
 }
 
 @Composable
-fun HeaderTitle(
+private fun HeaderTitle(
     route: Route
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
