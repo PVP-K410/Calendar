@@ -38,15 +38,16 @@
         │               ├── ui
         │               │   ├── common        # Common Use: Components, Handlers, Utilities, ...
         │               │   │   └── ...
+        │               │   ├── router        # Routing Configurations
+        │               │   │   └── ...
         │               │   ├── screen        # Screens
         │               │   │   ├── calendar
         │               │   │   │   ├── CalendarScreen.kt
         │               │   │   │   ├── CalendarViewModel.kt
         │               │   │   │   └── ...
         │               │   │   └── ...
-        │               │   ├── theme         # Theme Configurations
-        │               │   │   └── ...
-        │               │   └── Router.kt     # Screens Navigation Router
+        │               │   └── theme         # Theme Configurations
+        │               │       └── ...
         │               ├── worker            # Background Workers
         │               │   └── ...
         │               ├── Activity.kt
@@ -100,6 +101,9 @@
 - [Kotlin Style Guide](https://developer.android.com/kotlin/style-guide)
 - Remember to always
   - Remove any unnecessary comments, empty lines, imports and whitespace
+  - Separate functions, classes, different parts of the code with a single empty line
+    - Groups of the same type of code can stay together without an empty line
+    - Multi-line code blocks should be separated by an empty line, even if they are of the same type
   - Use `val` instead of `var` whenever possible
   - Use `when` instead of `if` whenever possible
   - Use brackets for `if`, `for` and `while` blocks even if they are not required
