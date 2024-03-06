@@ -1,4 +1,6 @@
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.VariantDimension
+import org.gradle.configurationcache.extensions.capitalized
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -27,7 +29,7 @@ android {
         targetSdk = 34
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionCode = 1
-        versionName = "1.0"
+        versionName = "dev-1.0.0.0"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -54,18 +56,28 @@ android {
 
     buildTypes {
         debug {
-            signingConfig = signingConfigs.getByName("_debug")
+            val alias = "debug"
+
+            signingConfig = signingConfigs.getByName("_$alias")
+            versionNameSuffix = "-$alias"
+
+            withApplicationName("${rootProject.name} (${alias.capitalized()})")
         }
 
         release {
+            val alias = "release"
+
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("_release")
+            signingConfig = signingConfigs.getByName("_$alias")
+            versionNameSuffix = "-$alias"
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            withApplicationName(rootProject.name)
         }
     }
 
@@ -139,6 +151,10 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+fun ApplicationBuildType.withApplicationName(name: String) {
+    manifestPlaceholders["applicationName"] = name
 }
 
 fun VariantDimension.buildConfigDefault() {

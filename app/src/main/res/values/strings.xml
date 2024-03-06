@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Calendar</string>
+    <string name="application_name">Calendar</string>
     <string name="authentication_sign_in">Sign In</string>
     <string name="authentication_sign_in_to_sign_up">Not Signed Up? Sign Up</string>
     <string name="authentication_sign_up">Sign Up</string>
