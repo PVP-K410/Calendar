@@ -2,11 +2,16 @@ package com.pvp.app.service
 
 import android.content.Intent
 import android.content.IntentSender
+import android.util.Log
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.pvp.app.api.AuthenticationService
+import com.pvp.app.di.AuthenticationModule
 import com.pvp.app.model.AuthenticationResult
 import com.pvp.app.model.SignOutResult
 import com.pvp.app.model.UserProperties
@@ -15,23 +20,35 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
+import javax.inject.Named
 
 class AuthenticationServiceImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val client: SignInClient,
+    @Named(AuthenticationModule.INTENT_GOOGLE_SIGN_IN)
+    private val intent: Intent,
     private val request: BeginSignInRequest
 ) : AuthenticationService {
 
     private val _user = MutableStateFlow(auth.currentUser)
     override val user = _user.asStateFlow()
 
-    override suspend fun beginSignIn(): IntentSender? {
+    companion object {
+
+        private const val TAG = "AuthenticationService"
+    }
+
+    override suspend fun beginSignIn(): Intent {
+        return intent
+    }
+
+    override suspend fun beginSignInOneTap(): IntentSender? {
         val result = try {
             client
                 .beginSignIn(request)
                 .await()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Begin sign in failed: ${e.message}")
 
             if (e is CancellationException) {
                 throw e
@@ -43,47 +60,57 @@ class AuthenticationServiceImpl @Inject constructor(
         return result?.pendingIntent?.intentSender
     }
 
+    private fun resolveAuthenticationResult(
+        user: FirebaseUser?
+    ): AuthenticationResult {
+        return AuthenticationResult(
+            isSuccess = user != null,
+            properties = user?.run {
+                UserProperties(
+                    email = email!!,
+                    id = uid,
+                    username = displayName ?: email!!.substringBefore("@")
+                )
+            }
+        )
+    }
+
+    private suspend fun resolveUser(
+        intent: Intent,
+        isOneTap: Boolean
+    ): FirebaseUser? {
+        val token = if (!isOneTap) {
+            GoogleSignIn
+                .getSignedInAccountFromIntent(intent)
+                .await().idToken
+        } else {
+            client.getSignInCredentialFromIntent(intent).googleIdToken
+        }
+
+        return auth
+            .signInWithCredential(GoogleAuthProvider.getCredential(token, null))
+            .await().user
+    }
+
     override suspend fun signIn(
         intent: Intent,
+        isOneTap: Boolean,
         onSignIn: suspend (AuthenticationResult) -> Unit
     ): AuthenticationResult {
         return try {
-            val credentials = client.getSignInCredentialFromIntent(intent)
-            val googleId = credentials.googleIdToken
-            val googleCredentials = GoogleAuthProvider.getCredential(googleId, null)
+            resolveUser(intent, isOneTap).run {
+                resolveAuthenticationResult(this)
+                    .also {
+                        onSignIn(it)
 
-            val user = auth
-                .signInWithCredential(googleCredentials)
-                .await().user
-
-            val result = AuthenticationResult(
-                data = user?.run {
-                    UserProperties(
-                        email = email!!,
-                        id = uid,
-                        username = displayName ?: email!!.substringBefore("@")
-                    )
-                },
-                isSuccess = true
-            )
-
-            onSignIn(result)
-
-            _user.value = user
-
-            result
-        } catch (e: Exception) {
-            e.printStackTrace()
-
-            if (e is CancellationException) {
-                throw e
+                        _user.value = this
+                    }
             }
+        } catch (e: ApiException) {
+            Log.e(TAG, "Sign in failed: ${e.message}")
 
-            val result = AuthenticationResult(messageError = e.message)
-
-            onSignIn(result)
-
-            result
+            AuthenticationResult(messageError = e.message)
+                .also { onSignIn(it) }
         }
     }
 
@@ -95,25 +122,21 @@ class AuthenticationServiceImpl @Inject constructor(
 
             auth.signOut()
 
-            val result = SignOutResult(isSuccess = true)
+            SignOutResult(isSuccess = true)
+                .also {
+                    onSignOut(it)
 
-            onSignOut(result)
-
-            _user.value = null
-
-            result
+                    _user.value = null
+                }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Sign out failed: ${e.message}")
 
             if (e is CancellationException) {
                 throw e
             }
 
-            val result = SignOutResult(messageError = e.message)
-
-            onSignOut(result)
-
-            result
+            SignOutResult(messageError = e.message)
+                .also { onSignOut(it) }
         }
     }
 }

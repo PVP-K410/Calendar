@@ -21,18 +21,35 @@ fun SignUpScreen(
     viewModel: AuthenticationViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val textError = stringResource(R.string.screen_sign_up_toast_error)
     val textSuccess = stringResource(R.string.screen_sign_up_toast_success)
 
     val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = { result ->
+            if (result.resultCode == RESULT_OK) {
+                scope.launch {
+                    viewModel.signUp(result.data ?: return@launch, false) {
+                        context.showToast(
+                            isSuccess = it.isSuccess,
+                            messageError = it.messageError ?: textError,
+                            messageSuccess = textSuccess
+                        )
+                    }
+                }
+            }
+        }
+    )
+
+    val launcherOneTap = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
             if (result.resultCode == RESULT_OK) {
                 scope.launch {
-                    viewModel.signUp(result.data ?: return@launch) {
+                    viewModel.signUp(result.data ?: return@launch, true) {
                         context.showToast(
                             isSuccess = it.isSuccess,
-                            messageError = it.messageError
-                                ?: "Error has occurred while signing up. Please try again later",
+                            messageError = it.messageError ?: textError,
                             messageSuccess = textSuccess
                         )
                     }
@@ -48,15 +65,17 @@ fun SignUpScreen(
         },
         onSignUp = {
             scope.launch {
-                val request = viewModel.buildSignInRequest()
+                val requestOneTap = viewModel.buildSignInRequestOneTap()
 
-                if (request == null) {
-                    context.showToast(message = "Error has occurred. Make sure you have a google account!")
+                if (requestOneTap == null) {
+                    val request = viewModel.buildSignInRequest()
+
+                    launcher.launch(request)
 
                     return@launch
                 }
 
-                launcher.launch(request)
+                launcherOneTap.launch(requestOneTap)
             }
         }
     )

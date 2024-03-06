@@ -18,6 +18,8 @@
     <string name="route_tasks_create_sport">Create sport task</string>
     <string name="screen_profile_button_sign_out">Sign Out</string>
     <string name="screen_profile_toast_success_sign_out">Signed out. See you later!</string>
+    <string name="screen_sign_in_toast_error">Error has occurred while signing in. Try again</string>
     <string name="screen_sign_in_toast_success">Welcome back</string>
+    <string name="screen_sign_up_toast_error">Error has occurred while signing up. Try again</string>
     <string name="screen_sign_up_toast_success">Welcome! We are happy to have you here</string>
 </resources>

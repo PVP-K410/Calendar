@@ -15,23 +15,41 @@ interface AuthenticationService {
     val user: Flow<FirebaseUser?>
 
     /**
+     * Begins the authentication process. If the authentication process is started successfully,
+     * the returned [Intent] can be used to proceed with the authentication flow. This method is
+     * used to start the standard google authentication process.
+     *
+     * Returned [Intent] should be passed into the [androidx.activity.result.ActivityResultLauncher.launch]
+     * method to start the authentication flow.
+     *
+     * @return an [Intent]
+     */
+    suspend fun beginSignIn(): Intent
+
+    /**
      *  Begins the authentication process. If the authentication process is started successfully,
-     *  the returned [IntentSender] can be used to start the sign-up or sign-in flow.
+     *  the returned [IntentSender] can be used to proceed with the authentication flow. This method
+     *  is used to start the google One Tap authentication process.
+     *
+     *  Returned [IntentSender] should be passed into the [androidx.activity.result.ActivityResultLauncher.launch]
+     *  method to start the authentication flow.
      *
      *  @return an [IntentSender] if the authentication process is started successfully, otherwise
      *  returns null.
      */
-    suspend fun beginSignIn(): IntentSender?
+    suspend fun beginSignInOneTap(): IntentSender?
 
     /**
      * Completes the sign-in process.
      *
-     * @param intent The [Intent] that contains the reference to the user's data.
+     * @param intent The [Intent] that contains the reference to the user's data from following any of the sign-in flows.
+     * @param isOneTap A flag that indicates whether the sign-in process is completed using the One Tap or standard sign-in flow.
      * @param onSignIn A callback that is called when the sign-in process is completed, but before
      * the user flow is triggered.
      */
     suspend fun signIn(
         intent: Intent,
+        isOneTap: Boolean,
         onSignIn: suspend (AuthenticationResult) -> Unit = {}
     ): AuthenticationResult
 

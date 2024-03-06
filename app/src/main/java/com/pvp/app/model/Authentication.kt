@@ -1,12 +1,7 @@
 package com.pvp.app.model
 
 data class AuthenticationResult(
-    val data: UserProperties? = null,
-    val isSuccess: Boolean = false,
-    val messageError: String? = null
-)
-
-data class AuthenticationState(
+    val properties: UserProperties? = null,
     val isSuccess: Boolean = false,
     val messageError: String? = null
 )

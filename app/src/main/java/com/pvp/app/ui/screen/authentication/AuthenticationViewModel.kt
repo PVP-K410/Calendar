@@ -17,47 +17,55 @@ class AuthenticationViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
 
-    suspend fun buildSignInRequest(): IntentSenderRequest? {
-        val intentSender = authenticationService.beginSignIn() ?: return null
+    suspend fun buildSignInRequest(): Intent {
+        return authenticationService.beginSignIn()
+    }
+
+    suspend fun buildSignInRequestOneTap(): IntentSenderRequest? {
+        val sender = authenticationService.beginSignInOneTap() ?: return null
 
         return IntentSenderRequest
-            .Builder(intentSender)
+            .Builder(sender)
             .build()
+    }
+
+    private suspend fun handleSignUpResult(
+        result: AuthenticationResult
+    ) {
+        if (!result.isSuccess || result.properties?.email == null) {
+            return
+        }
+
+        val user = userService
+            .get(result.properties.email)
+            .firstOrNull()
+
+        if (user == null) {
+            userService.merge(
+                User(
+                    email = result.properties.email,
+                    height = 0,
+                    mass = 0,
+                    points = 0,
+                    username = result.properties.username
+                )
+            )
+        }
     }
 
     suspend fun signIn(
         intent: Intent,
+        isOneTap: Boolean,
         onSignIn: suspend (AuthenticationResult) -> Unit = {}
     ) {
-        val result = authenticationService.signIn(intent)
-
-        onSignIn(result)
+        onSignIn(authenticationService.signIn(intent, isOneTap))
     }
 
     suspend fun signUp(
         intent: Intent,
+        isOneTap: Boolean,
         onSignUp: suspend (AuthenticationResult) -> Unit = {}
     ) {
-        val result = authenticationService.signIn(intent) { result ->
-            if (result.isSuccess && result.data?.email != null) {
-                val user = userService
-                    .get(result.data.email)
-                    .firstOrNull()
-
-                if (user == null) {
-                    userService.merge(
-                        User(
-                            email = result.data.email,
-                            height = 0,
-                            mass = 0,
-                            points = 0,
-                            username = result.data.username
-                        )
-                    )
-                }
-            }
-        }
-
-        onSignUp(result)
+        onSignUp(authenticationService.signIn(intent, isOneTap) { handleSignUpResult(it) })
     }
 }
