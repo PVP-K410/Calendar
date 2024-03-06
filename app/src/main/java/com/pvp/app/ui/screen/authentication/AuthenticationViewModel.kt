@@ -8,7 +8,6 @@ import com.pvp.app.api.UserService
 import com.pvp.app.model.AuthenticationResult
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,25 +31,19 @@ class AuthenticationViewModel @Inject constructor(
     private suspend fun handleSignUpResult(
         result: AuthenticationResult
     ) {
-        if (!result.isSuccess || result.properties?.email == null) {
+        if (!result.isSuccess) {
             return
         }
 
-        val user = userService
-            .get(result.properties.email)
-            .firstOrNull()
-
-        if (user == null) {
-            userService.merge(
-                User(
-                    email = result.properties.email,
-                    height = 0,
-                    mass = 0,
-                    points = 0,
-                    username = result.properties.username
-                )
+        userService.merge(
+            User(
+                email = result.properties?.email!!,
+                height = 0,
+                mass = 0,
+                points = 0,
+                username = result.properties.username
             )
-        }
+        )
     }
 
     suspend fun signIn(
@@ -58,7 +51,13 @@ class AuthenticationViewModel @Inject constructor(
         isOneTap: Boolean,
         onSignIn: suspend (AuthenticationResult) -> Unit = {}
     ) {
-        onSignIn(authenticationService.signIn(intent, isOneTap))
+        onSignIn(
+            authenticationService.signIn(
+                intent = intent,
+                isOneTap = isOneTap,
+                onValidate = authenticationService::validateSignIn
+            )
+        )
     }
 
     suspend fun signUp(
@@ -66,6 +65,13 @@ class AuthenticationViewModel @Inject constructor(
         isOneTap: Boolean,
         onSignUp: suspend (AuthenticationResult) -> Unit = {}
     ) {
-        onSignUp(authenticationService.signIn(intent, isOneTap) { handleSignUpResult(it) })
+        onSignUp(
+            authenticationService.signIn(
+                intent = intent,
+                isOneTap = isOneTap,
+                onSignIn = { handleSignUpResult(it) },
+                onValidate = authenticationService::validateSignUp
+            )
+        )
     }
 }

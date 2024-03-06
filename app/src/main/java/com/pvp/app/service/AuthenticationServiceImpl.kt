@@ -6,17 +6,18 @@ import android.util.Log
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.pvp.app.api.AuthenticationService
+import com.pvp.app.api.UserService
 import com.pvp.app.di.AuthenticationModule
 import com.pvp.app.model.AuthenticationResult
 import com.pvp.app.model.SignOutResult
 import com.pvp.app.model.UserProperties
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
@@ -27,7 +28,8 @@ class AuthenticationServiceImpl @Inject constructor(
     private val client: SignInClient,
     @Named(AuthenticationModule.INTENT_GOOGLE_SIGN_IN)
     private val intent: Intent,
-    private val request: BeginSignInRequest
+    private val request: BeginSignInRequest,
+    private val userService: UserService
 ) : AuthenticationService {
 
     private val _user = MutableStateFlow(auth.currentUser)
@@ -60,9 +62,7 @@ class AuthenticationServiceImpl @Inject constructor(
         return result?.pendingIntent?.intentSender
     }
 
-    private fun resolveAuthenticationResult(
-        user: FirebaseUser?
-    ): AuthenticationResult {
+    private fun resolveAuthenticationResult(user: FirebaseUser?): AuthenticationResult {
         return AuthenticationResult(
             isSuccess = user != null,
             properties = user?.run {
@@ -75,16 +75,25 @@ class AuthenticationServiceImpl @Inject constructor(
         )
     }
 
-    private suspend fun resolveUser(
+    private suspend fun resolveAndValidateUser(
         intent: Intent,
-        isOneTap: Boolean
+        isOneTap: Boolean,
+        onValidate: suspend (String) -> Unit
     ): FirebaseUser? {
         val token = if (!isOneTap) {
-            GoogleSignIn
+            val client = GoogleSignIn
                 .getSignedInAccountFromIntent(intent)
-                .await().idToken
+                .await()
+
+            onValidate(client.email!!)
+
+            client.idToken
         } else {
-            client.getSignInCredentialFromIntent(intent).googleIdToken
+            val client = client.getSignInCredentialFromIntent(intent)
+
+            onValidate(client.id)
+
+            client.googleIdToken
         }
 
         return auth
@@ -95,10 +104,15 @@ class AuthenticationServiceImpl @Inject constructor(
     override suspend fun signIn(
         intent: Intent,
         isOneTap: Boolean,
-        onSignIn: suspend (AuthenticationResult) -> Unit
+        onSignIn: suspend (AuthenticationResult) -> Unit,
+        onValidate: suspend (String) -> Unit
     ): AuthenticationResult {
         return try {
-            resolveUser(intent, isOneTap).run {
+            resolveAndValidateUser(
+                intent,
+                isOneTap,
+                onValidate
+            ).run {
                 resolveAuthenticationResult(this)
                     .also {
                         onSignIn(it)
@@ -106,7 +120,7 @@ class AuthenticationServiceImpl @Inject constructor(
                         _user.value = this
                     }
             }
-        } catch (e: ApiException) {
+        } catch (e: Exception) {
             Log.e(TAG, "Sign in failed: ${e.message}")
 
             AuthenticationResult(messageError = e.message)
@@ -138,5 +152,21 @@ class AuthenticationServiceImpl @Inject constructor(
             SignOutResult(messageError = e.message)
                 .also { onSignOut(it) }
         }
+    }
+
+    override suspend fun validateSignIn(email: String) {
+        userService
+            .get(email)
+            .firstOrNull()
+            ?: throw IllegalStateException("Registered user not found. Please sign up first")
+    }
+
+    override suspend fun validateSignUp(email: String) {
+        userService
+            .get(email)
+            .firstOrNull()
+            ?.run {
+                throw IllegalStateException("User already exists. Please sign in instead")
+            }
     }
 }
