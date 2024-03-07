@@ -18,17 +18,18 @@ object HealthClientModule {
     @Provides
     @Singleton
     fun provideHealthClient(@ApplicationContext context: Context): HealthConnectClient {
-        val providerPackageName = "com.google.android.apps.healthdata"
+        val provider = "com.google.android.apps.healthdata"
+        val status = HealthConnectClient.getSdkStatus(context, provider)
 
-        val availabilityStatus = HealthConnectClient.getSdkStatus(context, providerPackageName)
-
-        if (availabilityStatus == HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
+        if (status == HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
             val uriString =
-                "market://details?id=$providerPackageName&url=healthconnect%3A%2F%2Fonboarding"
+                "market://details?id=$provider&url=healthconnect%3A%2F%2Fonboarding"
             context.startActivity(
                 Intent(Intent.ACTION_VIEW).apply {
                     setPackage("com.android.vending")
+
                     data = Uri.parse(uriString)
+
                     putExtra("overlay", true)
                     putExtra("callerId", context.packageName)
                 }

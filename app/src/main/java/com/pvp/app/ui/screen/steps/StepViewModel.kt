@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.steps
 
 import androidx.health.connect.client.records.StepsRecord
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
@@ -21,8 +22,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StepViewModel @Inject constructor(
-    private val healthConnectClient: HealthConnectClient,
-    private val healthConnectService: HealthConnectService
+    private val client: HealthConnectClient,
+    private val service: HealthConnectService
 ) : ViewModel() {
 
     val PERMISSIONS = setOf(
@@ -33,31 +34,28 @@ class StepViewModel @Inject constructor(
     private val _stepsCount = MutableStateFlow(0)
     val stepsCount = _stepsCount.asStateFlow()
 
-    val permissionsLauncher = PermissionController.createRequestPermissionResultContract()
-
     suspend fun permissionsGranted(): Boolean {
-        val granted = healthConnectClient.permissionController.getGrantedPermissions()
+        val granted = client.permissionController.getGrantedPermissions()
+
         return granted.containsAll(PERMISSIONS)
     }
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun updateTodaysSteps() {
         viewModelScope.launch {
-            val endTime = Instant.now()
-            val startTime = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
+            val end = Instant.now()
+            val start = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
 
             try {
-                val stepsRecords: List<StepsRecord> = healthConnectService.readActivityData(
-                    recordClass = StepsRecord::class,
-                    startTime = startTime,
-                    endTime = endTime
+                val records: List<StepsRecord> = service.readActivityData(
+                    record = StepsRecord::class,
+                    start = start,
+                    end = end
                 )
 
-                val totalSteps = stepsRecords.sumOf { it.count.toInt() }
-
-                _stepsCount.value = totalSteps
+                _stepsCount.value = records.sumOf { it.count.toInt() }
             } catch (e: Exception) {
-
+                // Exception should be handled by showing a Toast
                 e.printStackTrace()
             }
         }

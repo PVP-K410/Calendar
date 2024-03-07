@@ -21,18 +21,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Alignment
+import androidx.health.connect.client.PermissionController
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun StepCounter(
     viewModel: StepViewModel = hiltViewModel()
 ) {
-    /**
-     * Required for checking whether user has permissions before entering the window,
-     * as users can revoke permissions at any time
-     */
-    val permissionsLauncher =
-        rememberLauncherForActivityResult(viewModel.permissionsLauncher) {
+
+    // Required for checking whether user has permissions before entering the window,
+    // as users can revoke permissions at any time
+    val permissionContract = PermissionController.createRequestPermissionResultContract()
+
+    val launcher =
+        rememberLauncherForActivityResult(permissionContract) {
             viewModel.updateTodaysSteps()
         }
 
@@ -40,14 +42,14 @@ fun StepCounter(
         if (viewModel.permissionsGranted()) {
             viewModel.updateTodaysSteps()
         } else {
-            permissionsLauncher.launch(viewModel.PERMISSIONS)
+            launcher.launch(viewModel.PERMISSIONS)
         }
     }
 
-    val stepsCount = viewModel.stepsCount.collectAsStateWithLifecycle()
+    val steps = viewModel.stepsCount.collectAsStateWithLifecycle()
 
     Text(
-        stepsCount.value.toString(),
+        steps.value.toString(),
         textAlign = TextAlign.Center,
         fontSize = 36.sp
     )

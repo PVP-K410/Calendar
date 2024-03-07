@@ -9,19 +9,19 @@ import javax.inject.Inject
 import kotlin.reflect.KClass
 
 class HealthConnectServiceImpl @Inject constructor(
-    private val healthConnectClient: HealthConnectClient
+    private val client: HealthConnectClient
 ) : HealthConnectService {
 
     override suspend fun <T : Record> readActivityData(
-        recordClass: KClass<T>,
-        startTime: java.time.Instant,
-        endTime: java.time.Instant
+        record: KClass<T>,
+        start: java.time.Instant,
+        end: java.time.Instant
     ): List<T> {
         val request = ReadRecordsRequest(
-            recordType = recordClass,
-            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+            recordType = record,
+            timeRangeFilter = TimeRangeFilter.between(start, end)
         )
-        val response = healthConnectClient.readRecords(request)
-        return response.records
+
+        return client.readRecords(request).records
     }
 }
