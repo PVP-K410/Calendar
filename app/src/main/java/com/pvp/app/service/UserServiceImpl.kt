@@ -11,9 +11,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Provider
 
 class UserServiceImpl @Inject constructor(
-    private val authenticationService: AuthenticationService,
+    private val authenticationServiceProvider: Provider<AuthenticationService>,
     private val database: FirebaseFirestore
 ) : UserService {
 
@@ -26,7 +27,8 @@ class UserServiceImpl @Inject constructor(
     }
 
     override suspend fun getCurrent(): Flow<User?> {
-        return authenticationService.user
+        return authenticationServiceProvider
+            .get().user
             .firstOrNull()
             ?.run { email?.run { get(this) } }
             ?: flowOf(null)
