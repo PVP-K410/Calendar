@@ -8,5 +8,6 @@ data class User(
     var height: Int = 0,
     var mass: Int = 0,
     var points: Int = 0,
-    var username: String = ""
+    var username: String = "",
+    var activities: List<String> = emptyList()
 )

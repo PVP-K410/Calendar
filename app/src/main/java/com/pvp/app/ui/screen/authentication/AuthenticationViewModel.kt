@@ -41,7 +41,8 @@ class AuthenticationViewModel @Inject constructor(
                 height = 0,
                 mass = 0,
                 points = 0,
-                username = result.properties.username
+                username = result.properties.username,
+                activities = emptyList()
             )
         )
     }
