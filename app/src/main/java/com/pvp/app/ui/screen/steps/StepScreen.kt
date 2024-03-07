@@ -26,23 +26,25 @@ import androidx.compose.ui.Alignment
 @Composable
 fun StepCounter(
     viewModel: StepViewModel = hiltViewModel()
-){
+) {
+    /**
+     * Required for checking whether user has permissions before entering the window,
+     * as users can revoke permissions at any time
+     */
     val permissionsLauncher =
         rememberLauncherForActivityResult(viewModel.permissionsLauncher) {
             viewModel.updateTodaysSteps()
         }
 
-
     LaunchedEffect(Unit) {
-        if(viewModel.permissionsGranted(viewModel.PERMISSIONS)){
+        if (viewModel.permissionsGranted()) {
             viewModel.updateTodaysSteps()
-        }else{
+        } else {
             permissionsLauncher.launch(viewModel.PERMISSIONS)
         }
     }
 
     val stepsCount = viewModel.stepsCount.collectAsStateWithLifecycle()
-
 
     Text(
         stepsCount.value.toString(),
@@ -51,9 +53,13 @@ fun StepCounter(
     )
 }
 
+/**
+ * Simple screen for testing the API
+ * Later step counter will be moved to daily calendar view
+ */
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun StepScreen(){
+fun StepScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()

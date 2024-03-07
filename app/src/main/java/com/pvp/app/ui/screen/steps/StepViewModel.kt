@@ -32,15 +32,16 @@ class StepViewModel @Inject constructor(
 
     private val _stepsCount = MutableStateFlow(0)
     val stepsCount = _stepsCount.asStateFlow()
+
     val permissionsLauncher = PermissionController.createRequestPermissionResultContract()
 
-    suspend fun permissionsGranted(PERMISSIONS: Set<String>): Boolean {
+    suspend fun permissionsGranted(): Boolean {
         val granted = healthConnectClient.permissionController.getGrantedPermissions()
         return granted.containsAll(PERMISSIONS)
     }
+
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    fun updateTodaysSteps() : Int {
-        var count = 0
+    fun updateTodaysSteps() {
         viewModelScope.launch {
             val endTime = Instant.now()
             val startTime = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
@@ -53,13 +54,12 @@ class StepViewModel @Inject constructor(
                 )
 
                 val totalSteps = stepsRecords.sumOf { it.count.toInt() }
+
                 _stepsCount.value = totalSteps
             } catch (e: Exception) {
 
                 e.printStackTrace()
             }
         }
-
-        return count
     }
 }

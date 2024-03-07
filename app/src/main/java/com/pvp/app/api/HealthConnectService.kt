@@ -4,6 +4,7 @@ import androidx.health.connect.client.records.Record
 import kotlin.reflect.KClass
 
 interface HealthConnectService {
+
     /**
      * @param recordClass Specifies what kind of data needs to be read (steps, heart rate, etc.)
      * @param startTime Specifies from what time should the data be read
