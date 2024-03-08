@@ -1,8 +1,12 @@
 package com.pvp.app.ui.router
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.AddTask
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.runtime.Composable
@@ -13,6 +17,7 @@ import com.pvp.app.ui.screen.authentication.SignInScreen
 import com.pvp.app.ui.screen.authentication.SignUpScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.profile.ProfileScreen
+import com.pvp.app.ui.screen.steps.StepScreen
 import com.pvp.app.ui.screen.task.CreateGeneralTaskForm
 import com.pvp.app.ui.screen.task.CreateMealTaskForm
 import com.pvp.app.ui.screen.task.CreateSportTaskForm
@@ -35,13 +40,15 @@ sealed class Route(
             CreateTaskGeneral,
             CreateTaskMeal,
             CreateTaskSport,
-            Profile
+            Profile,
+            Steps
         )
 
         val routesDrawer = listOf(
             ActivitiesFilter,
             Calendar,
-            Profile
+            Profile,
+            Steps
         )
 
         val routesUnauthenticated = listOf(
@@ -96,6 +103,14 @@ sealed class Route(
         resourceTitleId = R.string.route_profile,
         route = "profile",
         screen = { _, _ -> ProfileScreen() }
+    )
+
+    data object Steps : Route(
+        icon = Icons.AutoMirrored.Outlined.DirectionsWalk,
+        iconDescription = "Step counter page button icon",
+        resourceTitleId = R.string.route_steps,
+        route = "steps",
+        screen = { _, _ -> StepScreen() }
     )
 
     data object SignIn : Route(
