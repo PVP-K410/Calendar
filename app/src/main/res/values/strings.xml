@@ -12,6 +12,7 @@
     <string name="route_authentication_sign_in">Sign In</string>
     <string name="route_authentication_sign_up">Sign Up</string>
     <string name="route_calendar">Calendar</string>
+    <string name="route_filters_edit_activities">Edit activities filter</string>
     <string name="route_profile">Profile</string>
     <string name="route_tasks_create_general">Create general task</string>
     <string name="route_tasks_create_meal">Create meal task</string>
@@ -22,5 +23,4 @@
     <string name="screen_sign_in_toast_success">Welcome back</string>
     <string name="screen_sign_up_toast_error">Error has occurred while signing up. Try again</string>
     <string name="screen_sign_up_toast_success">Welcome! We are happy to have you here</string>
-    <string name="route_filters_edit_activities">Edit activities filter</string>
 </resources>

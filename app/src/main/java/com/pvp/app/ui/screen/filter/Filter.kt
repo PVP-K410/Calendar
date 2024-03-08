@@ -17,25 +17,30 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ActivitiesFilter(
     model: FilterViewModel = hiltViewModel()
 ) {
-    val availableActivities = listOf("Cycling", "Gym", "Running", "Swimming", "Walking", "Yoga")
+    val allActivities = listOf("Cycling", "Gym", "Running", "Swimming", "Walking", "Yoga")
     var selectedActivities by remember { mutableStateOf(emptyList<String>()) }
-    var unselectedActivities by remember { mutableStateOf(availableActivities) }
+    var unselectedActivities by remember { mutableStateOf(emptyList<String>()) }
+    val user = model.user.collectAsStateWithLifecycle()
+
+    LaunchedEffect(user.value) {
+        selectedActivities = user.value?.activities ?: emptyList()
+        unselectedActivities = allActivities - selectedActivities
+    }
 
     Column(
         modifier = Modifier
@@ -47,7 +52,7 @@ fun ActivitiesFilter(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -55,7 +60,7 @@ fun ActivitiesFilter(
             ) {
                 Text(
                     text = "Selected activities",
-                    style = TextStyle(fontSize = 20.sp),
+                    style = TextStyle(fontSize = 18.sp),
                     modifier = Modifier.padding(8.dp)
                 )
                 FlowRow(
@@ -65,10 +70,12 @@ fun ActivitiesFilter(
                 ) {
                     selectedActivities.sorted().forEach { activity ->
                         Card(
-                            modifier = Modifier.padding(8.dp),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .background(MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium),
                             onClick = {
-                                unselectedActivities += activity
-                                selectedActivities = selectedActivities.filter { it != activity }
+                                selectedActivities = selectedActivities.minus(activity)
+                                unselectedActivities = unselectedActivities.plus(activity)
                             }
                         ) {
                             Text(
@@ -81,12 +88,12 @@ fun ActivitiesFilter(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -94,7 +101,7 @@ fun ActivitiesFilter(
             ) {
                 Text(
                     text = "Available activities",
-                    style = TextStyle(fontSize = 20.sp),
+                    style = TextStyle(fontSize = 18.sp),
                     modifier = Modifier.padding(8.dp)
                 )
                 FlowRow(
@@ -104,10 +111,12 @@ fun ActivitiesFilter(
                 ) {
                     unselectedActivities.sorted().forEach { activity ->
                         Card(
-                            modifier = Modifier.padding(8.dp),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .background(MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium),
                             onClick = {
-                                selectedActivities += activity
-                                unselectedActivities = unselectedActivities.filter { it != activity }
+                                unselectedActivities = unselectedActivities.minus(activity)
+                                selectedActivities = selectedActivities.plus(activity)
                             }
                         ) {
                             Text(
@@ -120,13 +129,18 @@ fun ActivitiesFilter(
                 }
             }
         }
+
         Button(
             onClick = {
                 model.updateUserActivities(selectedActivities)
+                /* TODO: redirect back to profile? page */
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text(text = "Update")
+            Text(
+                text = "Update",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

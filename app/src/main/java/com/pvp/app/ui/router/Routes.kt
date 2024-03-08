@@ -50,6 +50,14 @@ sealed class Route(
         )
     }
 
+    data object ActivitiesFilter : Route(
+        icon = Icons.Outlined.FilterList,
+        iconDescription = "Activities filter edit page button icon",
+        resourceTitleId = R.string.route_filters_edit_activities,
+        route = "filters/edit/activities",
+        screen = { _, _ -> ActivitiesFilter() }
+    )
+
     data object Calendar : Route(
         icon = Icons.Outlined.CalendarMonth,
         iconDescription = "Calendar page button icon",
@@ -100,13 +108,5 @@ sealed class Route(
         route = "authentication/sign-up",
         resourceTitleId = R.string.route_authentication_sign_up,
         screen = { c, s -> SignUpScreen(c, s) }
-    )
-
-    data object ActivitiesFilter : Route(
-        icon = Icons.Outlined.FilterList,
-        iconDescription = "Activities filter edit page button icon",
-        resourceTitleId = R.string.route_filters_edit_activities,
-        route = "filters/edit/activities",
-        screen = { _, _ -> ActivitiesFilter() }
     )
 }
