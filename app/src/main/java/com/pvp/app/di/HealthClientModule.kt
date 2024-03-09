@@ -2,6 +2,7 @@ package com.pvp.app.di
 
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
 import androidx.health.connect.client.HealthConnectClient
 import dagger.Module
@@ -26,6 +27,8 @@ object HealthClientModule {
                 "market://details?id=$provider&url=healthconnect%3A%2F%2Fonboarding"
             context.startActivity(
                 Intent(Intent.ACTION_VIEW).apply {
+                    addFlags(FLAG_ACTIVITY_NEW_TASK)
+
                     setPackage("com.android.vending")
 
                     data = Uri.parse(uriString)
