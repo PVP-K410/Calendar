@@ -26,20 +26,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.LaunchedEffect
+import com.pvp.app.model.SportActivity
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ActivitiesFilter(
     model: FilterViewModel = hiltViewModel()
 ) {
-    val allActivities = listOf("Cycling", "Gym", "Running", "Swimming", "Walking", "Yoga")
+    val activities: List<String> = SportActivity.values().map { it.title }
     var selectedActivities by remember { mutableStateOf(emptyList<String>()) }
     var unselectedActivities by remember { mutableStateOf(emptyList<String>()) }
     val user = model.user.collectAsStateWithLifecycle()
 
     LaunchedEffect(user.value) {
         selectedActivities = user.value?.activities ?: emptyList()
-        unselectedActivities = allActivities - selectedActivities
+        unselectedActivities = activities - selectedActivities
     }
 
     Column(
@@ -48,87 +48,23 @@ fun ActivitiesFilter(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(8.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = "Selected activities",
-                    style = TextStyle(fontSize = 18.sp),
-                    modifier = Modifier.padding(8.dp)
-                )
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    selectedActivities.sorted().forEach { activity ->
-                        Card(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .background(MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium),
-                            onClick = {
-                                selectedActivities = selectedActivities.minus(activity)
-                                unselectedActivities = unselectedActivities.plus(activity)
-                            }
-                        ) {
-                            Text(
-                                text = activity,
-                                style = TextStyle(fontSize = 16.sp),
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-                }
+        ActivitiesBox(
+            title = "Selected activities",
+            activities = selectedActivities,
+            onClick = { activity ->
+                selectedActivities = selectedActivities.minus(activity)
+                unselectedActivities = unselectedActivities.plus(activity)
             }
-        }
+        )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(8.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = "Available activities",
-                    style = TextStyle(fontSize = 18.sp),
-                    modifier = Modifier.padding(8.dp)
-                )
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    unselectedActivities.sorted().forEach { activity ->
-                        Card(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .background(MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium),
-                            onClick = {
-                                unselectedActivities = unselectedActivities.minus(activity)
-                                selectedActivities = selectedActivities.plus(activity)
-                            }
-                        ) {
-                            Text(
-                                text = activity,
-                                style = TextStyle(fontSize = 16.sp),
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-                }
+        ActivitiesBox(
+            title = "Available activities",
+            activities = unselectedActivities,
+            onClick = { activity ->
+                unselectedActivities = unselectedActivities.minus(activity)
+                selectedActivities = selectedActivities.plus(activity)
             }
-        }
+        )
 
         Button(
             onClick = {
@@ -145,5 +81,52 @@ fun ActivitiesFilter(
     }
 }
 
-
-
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ActivitiesBox(
+    title: String,
+    activities: List<String>,
+    onClick: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = title,
+                style = TextStyle(fontSize = 18.sp),
+                modifier = Modifier.padding(8.dp)
+            )
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                activities
+                    .sorted()
+                    .forEach { activity ->
+                    Card(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .background(
+                                MaterialTheme.colorScheme.secondary,
+                                MaterialTheme.shapes.medium
+                            ),
+                        onClick = { onClick(activity) }
+                    ) {
+                        Text(
+                            text = activity,
+                            style = TextStyle(fontSize = 16.sp),
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
