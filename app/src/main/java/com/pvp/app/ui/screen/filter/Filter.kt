@@ -93,7 +93,7 @@ fun FilterScreen(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text(
-                text = "Save",
+                text = "Update",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
