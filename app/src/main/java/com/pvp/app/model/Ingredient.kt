@@ -13,23 +13,23 @@ enum class Ingredient(
     val title: String
 ) {
 
-    Chicken("Chicken"),
-    Beef("Beef"),
-    Pork("Pork"),
-    Fish("Fish"),
-    Shrimp("Shrimp"),
     Beans("Beans"),
-    Onions("Onions"),
-    Garlic("Garlic"),
-    Tomatoes("Tomatoes"),
-    Carrots("Carrots"),
+    Beef("Beef"),
     Broccoli("Broccoli"),
-    Spinach("Spinach"),
+    Carrots("Carrots"),
+    Cheese("Cheese"),
+    Chicken("Chicken"),
+    Fish("Fish"),
+    Garlic("Garlic"),
+    Milk("Milk"),
     Mushrooms("Mushrooms"),
+    Onions("Onions"),
+    Pork("Pork"),
     Potatoes("Potatoes"),
     Rice("Rice"),
-    Cheese("Cheese"),
-    Milk("Milk");
+    Shrimp("Shrimp"),
+    Spinach("Spinach"),
+    Tomatoes("Tomatoes");
 
     companion object {
 
