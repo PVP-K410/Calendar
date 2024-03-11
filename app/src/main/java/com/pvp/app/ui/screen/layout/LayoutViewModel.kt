@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -47,13 +48,21 @@ class LayoutViewModel @Inject constructor(
                 userAppFlow,
                 userFirebaseFlow
             ) { userApp, userFirebase ->
-                LayoutState(
-                    isLoading = false,
-                    userApp = MutableStateFlow(userApp).asStateFlow(),
-                    userFirebase = MutableStateFlow(userFirebase).asStateFlow()
-                )
+                _state.update {
+                    LayoutState(
+                        isLoading = false,
+                        userApp = MutableStateFlow(userApp).asStateFlow(),
+                        userFirebase = MutableStateFlow(userFirebase).asStateFlow()
+                    )
+                }
             }
-                .collect { _state.value = it }
+                .launchIn(viewModelScope)
         }
+    }
+
+    fun areDetailsSurveyed(): Boolean {
+        val user = _state.value.userApp.value!!
+
+        return user.mass != 0 && user.height != 0
     }
 }
