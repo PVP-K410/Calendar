@@ -31,7 +31,9 @@ class FilterViewModel @Inject constructor(
         viewModelScope.launch {
             val currentUser = user.value ?: return@launch
             val updatedUser = currentUser.copy(activities = activities)
+
             userService.merge(updatedUser)
+
             _user.emit(updatedUser)
         }
     }
