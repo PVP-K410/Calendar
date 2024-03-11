@@ -8,6 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.pvp.app.ui.common.ProgressIndicator
+import com.pvp.app.ui.screen.survey.DetailsSurveyScreen
 
 @Composable
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -27,6 +28,12 @@ fun LayoutScreenBootstrap(
             controller = rememberNavController(),
             scope = rememberCoroutineScope()
         )
+
+        return
+    }
+
+    if (!viewModel.areDetailsSurveyed()) {
+        DetailsSurveyScreen()
 
         return
     }
