@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun Button(
@@ -74,6 +75,40 @@ fun ErrorFieldWrapper(
                     style = style
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun LabelFieldWrapper(
+    content: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    putBelow: Boolean = false,
+    style: TextStyle = MaterialTheme.typography.titleMedium,
+    text: String,
+    textAlign: TextAlign = TextAlign.Start
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        if (!putBelow) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                style = style,
+                text = text,
+                textAlign = textAlign
+            )
+        }
+
+        content()
+
+        if (putBelow) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                style = style,
+                text = text,
+                textAlign = textAlign
+            )
         }
     }
 }
