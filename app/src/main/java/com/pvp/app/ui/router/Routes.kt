@@ -23,6 +23,7 @@ import com.pvp.app.ui.screen.task.CreateMealTaskForm
 import com.pvp.app.ui.screen.task.CreateSportTaskForm
 import kotlinx.coroutines.CoroutineScope
 import com.pvp.app.ui.screen.filter.ActivitiesFilter
+import com.pvp.app.ui.screen.filter.IngredientsFilter
 
 sealed class Route(
     val icon: ImageVector? = null,
@@ -40,6 +41,7 @@ sealed class Route(
             CreateTaskGeneral,
             CreateTaskMeal,
             CreateTaskSport,
+            IngredientsFilter,
             Profile,
             Steps
         )
@@ -47,6 +49,7 @@ sealed class Route(
         val routesDrawer = listOf(
             ActivitiesFilter,
             Calendar,
+            IngredientsFilter,
             Profile,
             Steps
         )
@@ -95,6 +98,15 @@ sealed class Route(
         resourceTitleId = R.string.route_tasks_create_sport,
         route = "tasks/create/sport",
         screen = { _, _ -> CreateSportTaskForm() }
+    )
+
+
+    data object IngredientsFilter : Route(
+        icon = Icons.Outlined.FilterList,
+        iconDescription = "Ingredients filter edit page button icon",
+        resourceTitleId = R.string.route_filters_edit_ingredients,
+        route = "filters/edit/ingredients",
+        screen = { _, _ -> IngredientsFilter() }
     )
 
     data object Profile : Route(

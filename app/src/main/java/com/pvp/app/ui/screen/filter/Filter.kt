@@ -26,21 +26,34 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import com.pvp.app.model.SportActivity
+import com.pvp.app.ui.common.showToast
 
 val activities: List<String> = SportActivity.values().map { it.title }
+val ingredients = listOf(
+    "Chicken", "Beef", "Pork", "Fish", "Shrimp", "Beans", "Onions", "Garlic", "Tomatoes",
+    "Carrots", "Broccoli", "Spinach", "Mushrooms", "Potatoes", "Rice", "Cheese", "Milk"
+)
 
 @Composable
-fun ActivitiesFilter(
+fun FilterScreen(
+    title: String,
+    isActivities: Boolean,
     model: FilterViewModel = hiltViewModel()
 ) {
-    var selectedActivities by remember { mutableStateOf(emptyList<String>()) }
-    var unselectedActivities by remember { mutableStateOf(emptyList<String>()) }
+    var selectedFilters by remember { mutableStateOf(emptyList<String>()) }
+    var unselectedFilters by remember { mutableStateOf(emptyList<String>()) }
     val user = model.user.collectAsStateWithLifecycle()
 
     LaunchedEffect(user.value) {
-        selectedActivities = user.value?.activities ?: emptyList()
-        unselectedActivities = activities - selectedActivities
+        if (isActivities) {
+            selectedFilters = user.value?.activities ?: emptyList()
+            unselectedFilters = activities - selectedFilters
+        } else {
+            selectedFilters = user.value?.ingredients ?: emptyList()
+            unselectedFilters = ingredients - selectedFilters
+        }
     }
 
     Column(
@@ -49,33 +62,38 @@ fun ActivitiesFilter(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        ActivitiesBox(
-            title = "Selected activities",
-            activities = selectedActivities,
-            onClick = { activity ->
-                selectedActivities = selectedActivities.minus(activity)
-                unselectedActivities = unselectedActivities.plus(activity)
+        FiltersBox(
+            title = "Selected " + title,
+            filters = selectedFilters,
+            onClick = { filter ->
+                selectedFilters = selectedFilters.minus(filter)
+                unselectedFilters = unselectedFilters.plus(filter)
             }
         )
 
-        ActivitiesBox(
-            title = "Available activities",
-            activities = unselectedActivities,
-            onClick = { activity ->
-                unselectedActivities = unselectedActivities.minus(activity)
-                selectedActivities = selectedActivities.plus(activity)
+        FiltersBox(
+            title = "Available " + title,
+            filters = unselectedFilters,
+            onClick = { filter ->
+                unselectedFilters = unselectedFilters.minus(filter)
+                selectedFilters = selectedFilters.plus(filter)
             }
         )
+
+        val context = LocalContext.current
 
         Button(
             onClick = {
-                model.updateUserActivities(selectedActivities)
+                model.updateUserFilters(selectedFilters, isActivities)
+
+                context.showToast(message = "Your $title have been updated!")
+
                 /* TODO: redirect back to profile? page */
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text(
-                text = "Update",
+                text = "Save",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -84,9 +102,9 @@ fun ActivitiesFilter(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ActivitiesBox(
+fun FiltersBox(
     title: String,
-    activities: List<String>,
+    filters: List<String>,
     onClick: (String) -> Unit
 ) {
     Box(
@@ -109,9 +127,9 @@ fun ActivitiesBox(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                activities
+                filters
                     .sorted()
-                    .forEach { activity ->
+                    .forEach { filter ->
                         Card(
                             modifier = Modifier
                                 .padding(8.dp)
@@ -119,10 +137,10 @@ fun ActivitiesBox(
                                     MaterialTheme.colorScheme.secondary,
                                     MaterialTheme.shapes.medium
                                 ),
-                            onClick = { onClick(activity) }
+                            onClick = { onClick(filter) }
                         ) {
                             Text(
-                                text = activity,
+                                text = filter,
                                 style = TextStyle(fontSize = 16.sp),
                                 modifier = Modifier.padding(16.dp)
                             )
@@ -131,4 +149,26 @@ fun ActivitiesBox(
             }
         }
     }
+}
+
+@Composable
+fun ActivitiesFilter(
+    model: FilterViewModel = hiltViewModel()
+) {
+    LaunchedEffect(model) {
+        model.fetchUserData()
+    }
+
+    FilterScreen(title = "activities", isActivities = true, model = model)
+}
+
+@Composable
+fun IngredientsFilter(
+    model: FilterViewModel = hiltViewModel()
+) {
+    LaunchedEffect(model) {
+        model.fetchUserData()
+    }
+
+    FilterScreen(title = "ingredients", isActivities = false, model = model)
 }
