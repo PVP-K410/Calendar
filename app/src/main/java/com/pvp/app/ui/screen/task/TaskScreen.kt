@@ -28,7 +28,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -52,7 +51,8 @@ import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
-import com.yourapp.ui.components.TextField
+import com.pvp.app.ui.common.DateTimePicker
+import com.pvp.app.ui.common.TextField
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -239,7 +239,7 @@ fun CreateSportTaskForm(
                 expanded = isExpanded,
                 onExpandedChange = { isExpanded = !isExpanded },
             ) {
-                TextField(
+                androidx.compose.material3.TextField(
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
