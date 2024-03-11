@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.pvp.app.model.SportActivity
+import com.pvp.app.model.Ingredient
 
 @HiltViewModel
 class FilterViewModel @Inject constructor(
@@ -19,7 +21,7 @@ class FilterViewModel @Inject constructor(
     private val _user = MutableStateFlow<User?>(null)
     val user = _user.asStateFlow()
 
-    init {
+    fun fetchUserData() {
         viewModelScope.launch {
             _user.value = userService
                 .getCurrent()
@@ -27,10 +29,14 @@ class FilterViewModel @Inject constructor(
         }
     }
 
-    fun updateUserActivities(activities: List<String>) {
+    fun updateUserFilters(filters: List<String>, isActivities: Boolean) {
         viewModelScope.launch {
             val currentUser = user.value ?: return@launch
-            val updatedUser = currentUser.copy(activities = activities)
+            val updatedUser = if (isActivities) {
+                currentUser.copy(activities = filters.mapNotNull { SportActivity.fromTitle(it) })
+            } else {
+                currentUser.copy(ingredients = filters.mapNotNull { Ingredient.fromTitle(it) })
+            }
 
             userService.merge(updatedUser)
 
