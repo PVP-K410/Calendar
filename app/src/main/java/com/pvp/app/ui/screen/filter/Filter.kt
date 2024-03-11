@@ -28,13 +28,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.pvp.app.model.SportActivity
+import com.pvp.app.model.Ingredient
 import com.pvp.app.ui.common.showToast
 
-val activities: List<String> = SportActivity.values().map { it.title }
-val ingredients = listOf(
-    "Chicken", "Beef", "Pork", "Fish", "Shrimp", "Beans", "Onions", "Garlic", "Tomatoes",
-    "Carrots", "Broccoli", "Spinach", "Mushrooms", "Potatoes", "Rice", "Cheese", "Milk"
-)
+val activities = SportActivity
+    .values()
+    .map { it.title }
+
+val ingredients = Ingredient
+    .values()
+    .map { it.title }
 
 @Composable
 fun FilterScreen(
@@ -48,10 +51,10 @@ fun FilterScreen(
 
     LaunchedEffect(user.value) {
         if (isActivities) {
-            selectedFilters = user.value?.activities ?: emptyList()
+            selectedFilters = user.value?.activities?.map { it.title } ?: emptyList()
             unselectedFilters = activities - selectedFilters
         } else {
-            selectedFilters = user.value?.ingredients ?: emptyList()
+            selectedFilters = user.value?.ingredients?.map { it.title } ?: emptyList()
             unselectedFilters = ingredients - selectedFilters
         }
     }
@@ -159,7 +162,11 @@ fun ActivitiesFilter(
         model.fetchUserData()
     }
 
-    FilterScreen(title = "activities", isActivities = true, model = model)
+    FilterScreen(
+        title = "activities",
+        isActivities = true,
+        model = model
+    )
 }
 
 @Composable
@@ -170,5 +177,9 @@ fun IngredientsFilter(
         model.fetchUserData()
     }
 
-    FilterScreen(title = "ingredients", isActivities = false, model = model)
+    FilterScreen(
+        title = "ingredients",
+        isActivities = false,
+        model = model
+    )
 }
