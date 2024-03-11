@@ -28,11 +28,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.LaunchedEffect
 import com.pvp.app.model.SportActivity
 
+val activities: List<String> = SportActivity.values().map { it.title }
+
 @Composable
 fun ActivitiesFilter(
     model: FilterViewModel = hiltViewModel()
 ) {
-    val activities: List<String> = SportActivity.values().map { it.title }
     var selectedActivities by remember { mutableStateOf(emptyList<String>()) }
     var unselectedActivities by remember { mutableStateOf(emptyList<String>()) }
     val user = model.user.collectAsStateWithLifecycle()
@@ -102,6 +103,7 @@ fun ActivitiesBox(
                 style = TextStyle(fontSize = 18.sp),
                 modifier = Modifier.padding(8.dp)
             )
+
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -110,22 +112,22 @@ fun ActivitiesBox(
                 activities
                     .sorted()
                     .forEach { activity ->
-                    Card(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .background(
-                                MaterialTheme.colorScheme.secondary,
-                                MaterialTheme.shapes.medium
-                            ),
-                        onClick = { onClick(activity) }
-                    ) {
-                        Text(
-                            text = activity,
-                            style = TextStyle(fontSize = 16.sp),
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        Card(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.secondary,
+                                    MaterialTheme.shapes.medium
+                                ),
+                            onClick = { onClick(activity) }
+                        ) {
+                            Text(
+                                text = activity,
+                                style = TextStyle(fontSize = 16.sp),
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
                     }
-                }
             }
         }
     }
