@@ -37,6 +37,7 @@ class AuthenticationViewModel @Inject constructor(
 
         userService.merge(
             User(
+                activities = emptyList(),
                 email = result.properties?.email!!,
                 height = 0,
                 mass = 0,

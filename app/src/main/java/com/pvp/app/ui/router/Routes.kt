@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.AddTask
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
@@ -21,6 +22,7 @@ import com.pvp.app.ui.screen.task.CreateGeneralTaskForm
 import com.pvp.app.ui.screen.task.CreateMealTaskForm
 import com.pvp.app.ui.screen.task.CreateSportTaskForm
 import kotlinx.coroutines.CoroutineScope
+import com.pvp.app.ui.screen.filter.ActivitiesFilter
 
 sealed class Route(
     val icon: ImageVector? = null,
@@ -33,6 +35,7 @@ sealed class Route(
     companion object {
 
         val routesAuthenticated = listOf(
+            ActivitiesFilter,
             Calendar,
             CreateTaskGeneral,
             CreateTaskMeal,
@@ -42,6 +45,7 @@ sealed class Route(
         )
 
         val routesDrawer = listOf(
+            ActivitiesFilter,
             Calendar,
             Profile,
             Steps
@@ -52,6 +56,14 @@ sealed class Route(
             SignUp
         )
     }
+
+    data object ActivitiesFilter : Route(
+        icon = Icons.Outlined.FilterList,
+        iconDescription = "Activities filter edit page button icon",
+        resourceTitleId = R.string.route_filters_edit_activities,
+        route = "filters/edit/activities",
+        screen = { _, _ -> ActivitiesFilter() }
+    )
 
     data object Calendar : Route(
         icon = Icons.Outlined.CalendarMonth,

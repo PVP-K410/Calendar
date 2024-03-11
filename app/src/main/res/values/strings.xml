@@ -12,6 +12,7 @@
     <string name="route_authentication_sign_in">Sign In</string>
     <string name="route_authentication_sign_up">Sign Up</string>
     <string name="route_calendar">Calendar</string>
+    <string name="route_filters_edit_activities">Edit activities filter</string>
     <string name="route_profile">Profile</string>
     <string name="route_steps">Steps</string>
     <string name="route_tasks_create_general">Create general task</string>
