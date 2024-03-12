@@ -3,7 +3,6 @@ package com.pvp.app.ui.router
 import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
-import androidx.compose.material.icons.outlined.AddTask
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.FilterList
@@ -14,15 +13,12 @@ import com.pvp.app.R
 import com.pvp.app.ui.screen.authentication.SignInScreen
 import com.pvp.app.ui.screen.authentication.SignUpScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
+import com.pvp.app.ui.screen.filter.ActivitiesFilter
+import com.pvp.app.ui.screen.filter.IngredientsFilter
 import com.pvp.app.ui.screen.profile.ProfileScreen
 import com.pvp.app.ui.screen.steps.StepScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
-import com.pvp.app.ui.screen.task.CreateGeneralTaskForm
-import com.pvp.app.ui.screen.task.CreateMealTaskForm
-import com.pvp.app.ui.screen.task.CreateSportTaskForm
 import kotlinx.coroutines.CoroutineScope
-import com.pvp.app.ui.screen.filter.ActivitiesFilter
-import com.pvp.app.ui.screen.filter.IngredientsFilter
 
 sealed class Route(
     val icon: ImageVector? = null,
@@ -43,9 +39,6 @@ sealed class Route(
         val routesAuthenticated = listOf(
             ActivitiesFilter,
             Calendar,
-            CreateTaskGeneral,
-            CreateTaskMeal,
-            CreateTaskSport,
             IngredientsFilter,
             Profile,
             Steps
@@ -94,30 +87,6 @@ sealed class Route(
         resourceTitleId = R.string.route_calendar,
         route = "calendar",
         screen = { _, _ -> CalendarScreen() }
-    )
-
-    data object CreateTaskMeal : Route(
-        icon = Icons.Outlined.AddTask,
-        iconDescription = "Meal task creation page button icon",
-        resourceTitleId = R.string.route_tasks_create_meal,
-        route = "tasks/create/meal",
-        screen = { _, _ -> CreateMealTaskForm() }
-    )
-
-    data object CreateTaskGeneral : Route(
-        icon = Icons.Outlined.AddTask,
-        iconDescription = "General task creation page button icon",
-        R.string.route_tasks_create_general,
-        route = "tasks/create/general",
-        screen = { _, _ -> CreateGeneralTaskForm() }
-    )
-
-    data object CreateTaskSport : Route(
-        icon = Icons.Outlined.AddTask,
-        iconDescription = "Sport task creation page button icon",
-        resourceTitleId = R.string.route_tasks_create_sport,
-        route = "tasks/create/sport",
-        screen = { _, _ -> CreateSportTaskForm() }
     )
 
 
