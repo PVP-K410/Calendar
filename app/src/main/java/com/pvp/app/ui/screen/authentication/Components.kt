@@ -21,7 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.pvp.app.R
-import com.pvp.app.ui.common.backgroundGradient
+import com.pvp.app.ui.common.backgroundGradientRadial
 
 @Composable
 fun AuthenticationBox(
@@ -45,7 +45,7 @@ fun AuthenticationBox(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .backgroundGradient(),
+            .backgroundGradientRadial(),
         verticalArrangement = Arrangement.Center
     ) {
         Column(
