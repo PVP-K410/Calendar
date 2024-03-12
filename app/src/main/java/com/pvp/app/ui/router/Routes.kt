@@ -40,6 +40,7 @@ sealed class Route(
         val routesAuthenticated = listOf(
             ActivitiesFilter,
             Calendar,
+            MonthlyCalendar,
             IngredientsFilter,
             Profile,
             Steps
@@ -54,8 +55,9 @@ sealed class Route(
          * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
          */
         val routesDrawer = listOf(
-            ActivitiesFilter,
             Calendar,
+            MonthlyCalendar,
+            ActivitiesFilter,
             IngredientsFilter,
             Profile,
             Steps
