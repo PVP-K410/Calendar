@@ -15,40 +15,68 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.CalendarUiState
+import com.pvp.app.model.Task
 import com.pvp.app.ui.screen.calendar.CalendarViewModel
 import com.pvp.app.ui.screen.calendar.DateUtil
+import com.pvp.app.ui.screen.calendar.Day
 import com.pvp.app.ui.screen.calendar.getDisplayName
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
 fun MonthlyCalendarScreen(
-    viewModel: CalendarViewModel = hiltViewModel()
+    viewModel: CalendarViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
 
     MonthlyCalendar(
         days = DateUtil.daysOfWeek,
-        month = uiState.month,
+        month = uiState.yearMonth,
         dates = uiState.dates,
-        onClickListener = {
-            // TODO
+        onClickListener = { date ->
+            showDialog = true
+            selectedDate = date.date
         }
     )
+
+    if (showDialog) {
+        DayDialog(
+            date = selectedDate,
+            onDismissRequest = { showDialog = false }
+        )
+    }
+}
+
+@Composable
+fun DayDialog(date: LocalDate, tasks: List<Task> = listOf(), onDismissRequest: () -> Unit) {
+    Dialog(
+        onDismissRequest = { onDismissRequest() },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Day(name = date.toString(), tasks = tasks)
+    }
 }
 
 @Composable
 fun MonthlyCalendar(
     days: Array<String>,
     month: YearMonth,
-    dates: List<CalendarUiState.Date>,
-    onClickListener: (CalendarUiState.Date) -> Unit,
+    dates: List<CalendarUiState.DateEntry>,
+    onClickListener: (CalendarUiState.DateEntry) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -120,8 +148,8 @@ fun DayItem(day: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun Content(
-    dates: List<CalendarUiState.Date>,
-    onClickListener: (CalendarUiState.Date) -> Unit,
+    dates: List<CalendarUiState.DateEntry>,
+    onClickListener: (CalendarUiState.DateEntry) -> Unit,
 ) {
     Column {
         var index = 0
@@ -129,7 +157,7 @@ fun Content(
             if (index >= dates.size) return@repeat
             Row {
                 repeat(7) {
-                    val item = if (index < dates.size) dates[index] else CalendarUiState.Date.Empty
+                    val item = if (index < dates.size) dates[index] else CalendarUiState.DateEntry.Empty
                     ContentItem(
                         date = item,
                         onClickListener = onClickListener,
@@ -144,10 +172,18 @@ fun Content(
 
 @Composable
 fun ContentItem(
-    date: CalendarUiState.Date,
-    onClickListener: (CalendarUiState.Date) -> Unit,
+    date: CalendarUiState.DateEntry,
+    onClickListener: (CalendarUiState.DateEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var text = date.date.dayOfMonth.toString()
+    var clickable = true
+    // If date is a default value used to fill up the list so that first month day starts on correct
+    // week date, we ensure that it is not clickable and is an empty string
+    if(date.date.isEqual(LocalDate.MIN)){
+        text = ""
+        clickable = false
+    }
     Box(
         modifier = modifier
             .background(
@@ -157,12 +193,12 @@ fun ContentItem(
                     Color.Transparent
                 }
             )
-            .clickable {
+            .clickable(enabled = clickable) {
                 onClickListener(date)
             }
     ) {
         Text(
-            text = date.dayOfMonth,
+            text = text,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .align(Alignment.Center)

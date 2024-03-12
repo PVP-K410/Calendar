@@ -1,23 +1,24 @@
 package com.pvp.app.model
 
+import java.time.LocalDate
 import java.time.YearMonth
 
 data class CalendarUiState(
-    val month: YearMonth,
-    val dates: List<Date>
+    val yearMonth: YearMonth,
+    val dates: List<DateEntry>
 ) {
     companion object {
         val Init = CalendarUiState(
-            month = YearMonth.now(),
+            yearMonth = YearMonth.now(),
             dates = emptyList()
         )
     }
-    data class Date(
-        val dayOfMonth: String,
+    data class DateEntry(
+        val date: LocalDate,
         val isSelected: Boolean
     ) {
         companion object {
-            val Empty = Date("", false)
+            val Empty = DateEntry(LocalDate.now(), false)
         }
     }
 }
