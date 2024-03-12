@@ -1,5 +1,6 @@
 package com.pvp.app.ui.router
 
+import MonthlyCalendarScreen
 import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
@@ -38,8 +39,12 @@ sealed class Route(
          */
         val routesAuthenticated = listOf(
             ActivitiesFilter,
-            Calendar,
             IngredientsFilter,
+            Calendar,
+            MonthlyCalendar,
+            CreateTaskGeneral,
+            CreateTaskMeal,
+            CreateTaskSport,
             Profile,
             Steps
         )
@@ -55,6 +60,7 @@ sealed class Route(
         val routesDrawer = listOf(
             ActivitiesFilter,
             Calendar,
+            MonthlyCalendar,
             IngredientsFilter,
             Profile,
             Steps
@@ -89,6 +95,38 @@ sealed class Route(
         screen = { _, _ -> CalendarScreen() }
     )
 
+
+    data object MonthlyCalendar : Route(
+        icon = Icons.Outlined.CalendarMonth,
+        iconDescription = "Calendar page button icon",
+        resourceTitleId = R.string.route_calendar_monthly,
+        route = "calendar/monthly",
+        screen = { _, _ -> MonthlyCalendarScreen() }
+    )
+
+    data object CreateTaskMeal : Route(
+        icon = Icons.Outlined.AddTask,
+        iconDescription = "Meal task creation page button icon",
+        resourceTitleId = R.string.route_tasks_create_meal,
+        route = "tasks/create/meal",
+        screen = { _, _ -> CreateMealTaskForm() }
+    )
+
+    data object CreateTaskGeneral : Route(
+        icon = Icons.Outlined.AddTask,
+        iconDescription = "General task creation page button icon",
+        R.string.route_tasks_create_general,
+        route = "tasks/create/general",
+        screen = { _, _ -> CreateGeneralTaskForm() }
+    )
+
+    data object CreateTaskSport : Route(
+        icon = Icons.Outlined.AddTask,
+        iconDescription = "Sport task creation page button icon",
+        resourceTitleId = R.string.route_tasks_create_sport,
+        route = "tasks/create/sport",
+        screen = { _, _ -> CreateSportTaskForm() }
+    )
 
     data object IngredientsFilter : Route(
         icon = Icons.Outlined.FilterList,
