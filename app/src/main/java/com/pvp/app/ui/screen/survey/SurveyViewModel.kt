@@ -67,10 +67,10 @@ enum class Form(
         { m, vm ->
             BodyMassIndexSurvey(
                 modifier = m,
-                onSubmit = { mass, height ->
+                onSubmit = { height, mass ->
                     vm.updateBodyMassIndex(
-                        mass,
-                        height
+                        height = height,
+                        mass = mass
                     )
                 }
             )
