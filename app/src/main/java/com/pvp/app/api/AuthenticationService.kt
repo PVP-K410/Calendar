@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.Flow
 interface AuthenticationService {
 
     /**
-     * @return the currently signed-in user if the user is authenticated, otherwise returns null.
+     * @return flow of currently signed-in user if the user is authenticated, otherwise returns
+     * flow of null.
      */
     val user: Flow<FirebaseUser?>
 

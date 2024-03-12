@@ -1,6 +1,12 @@
 package com.pvp.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
+
+val BackgroundGradientDefault = listOf(
+    Color("#FF5A6148".toColorInt()),
+    Color("#FF396660".toColorInt())
+)
 
 val DarkPrimary = Color(0xFFACD458)
 val DarkSecondary = Color(0xFFC2CAAB)

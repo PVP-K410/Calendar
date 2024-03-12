@@ -1,4 +1,6 @@
 <resources>
+    <string name="action_continue">Continue</string>
+    <string name="action_submit">Submit</string>
     <string name="application_name">Calendar</string>
     <string name="authentication_sign_in">Sign In</string>
     <string name="authentication_sign_in_to_sign_up">Not Signed Up? Sign Up</string>
@@ -9,8 +11,10 @@
     <string name="form_create_meal_ingredients">Ingredients</string>
     <string name="form_create_meal_preparation">Preparation</string>
     <string name="form_create_meal_title">Meal title</string>
+    <string name="form_survey_toast_error">Submission was not successful</string>
     <string name="route_authentication_sign_in">Sign In</string>
     <string name="route_authentication_sign_up">Sign Up</string>
+    <string name="route_survey">Survey</string>
     <string name="route_calendar">Calendar</string>
     <string name="route_filters_edit_activities">Edit activities filter</string>
     <string name="route_filters_edit_ingredients">Edit ingredients filter</string>
