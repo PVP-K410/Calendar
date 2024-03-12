@@ -138,6 +138,9 @@ dependencies {
     // Health connect
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
 
+    // Images
+    implementation("com.caverock:androidsvg-aar:1.4")
+
     // JUnit
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
