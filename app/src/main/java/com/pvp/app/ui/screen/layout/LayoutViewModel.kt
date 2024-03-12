@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.layout
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
@@ -32,22 +33,24 @@ class LayoutViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val userFirebaseFlow = authenticationService.user
+            val flowUserFirebase = authenticationService.user
 
-            val userAppFlow = userFirebaseFlow
+            val flowUserApp = flowUserFirebase
                 .filterNotNull()
                 .flatMapLatest { userService.get(it.email!!) }
 
             combine(
-                userAppFlow,
-                userFirebaseFlow
+                flowUserApp,
+                flowUserFirebase
             ) { userApp, userFirebase ->
                 _state.update {
                     LayoutState(
                         isAuthenticated = userFirebase != null,
                         isSurveyFilled = userApp?.let { isSurveyFilled(it) },
-                        user = MutableStateFlow(userApp)
-                            .asStateFlow()
+                        user = userApp,
+                        userAvatar = userApp?.let {
+                            userService.resolveAvatar(it.email)
+                        }
                     )
                 }
             }
@@ -66,5 +69,6 @@ data class LayoutState(
     val isAuthenticated: Boolean = false,
     val isLoading: Boolean = false,
     val isSurveyFilled: Boolean? = null,
-    val user: StateFlow<User?> = MutableStateFlow(null),
+    val user: User? = null,
+    val userAvatar: ImageBitmap? = null
 )

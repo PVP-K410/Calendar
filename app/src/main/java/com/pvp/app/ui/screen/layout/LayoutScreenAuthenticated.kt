@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.layout
 
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Dehaze
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,14 +25,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.pvp.app.model.User
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
@@ -45,7 +49,7 @@ import kotlinx.coroutines.launch
 fun LayoutScreenAuthenticated(
     controller: NavHostController,
     scope: CoroutineScope,
-    user: User?
+    viewModel: LayoutViewModel = hiltViewModel()
 ) {
     CalendarTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -73,13 +77,15 @@ fun LayoutScreenAuthenticated(
                 },
                 drawerState = stateDrawer
             ) {
+                val stateLayout by viewModel.state.collectAsStateWithLifecycle()
+
                 Scaffold(topBar = {
                     Header(
                         controller = controller,
                         route = screen,
                         scope = scope,
                         state = stateDrawer,
-                        user = user
+                        userAvatar = stateLayout.userAvatar!!
                     )
                 }) {
                     Router(
@@ -103,39 +109,34 @@ private fun Header(
     route: Route,
     scope: CoroutineScope,
     state: DrawerState,
-    user: User?
+    userAvatar: ImageBitmap
 ) {
     TopAppBar(
         actions = {
-            user?.let {
-                IconButton(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(36.dp))
-                        .border(
-                            BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceContainerHighest),
-                            RoundedCornerShape(36.dp)
-                        ),
-                    onClick = {
-                        controller.navigateWithPopUp(Route.Profile.route)
-                    }
-                ) {
-                    Icon(
-                        contentDescription = "Profile screen icon",
-                        imageVector = Icons.Outlined.Person
-                    )
+            IconButton(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clip(RoundedCornerShape(36.dp))
+                    .border(
+                        BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceContainerHighest),
+                        RoundedCornerShape(36.dp)
+                    ),
+                onClick = {
+                    controller.navigateWithPopUp(Route.Profile.route)
                 }
+            ) {
+                Image(
+                    contentDescription = "Profile screen icon",
+                    painter = BitmapPainter(userAvatar),
+                )
             }
-
         },
         modifier = modifier,
         navigationIcon = {
-            user?.let {
-                HeaderNavigationIcon(
-                    scope = scope,
-                    state = state
-                )
-            }
+            HeaderNavigationIcon(
+                scope = scope,
+                state = state
+            )
         },
         title = {
             HeaderTitle(route = route)
