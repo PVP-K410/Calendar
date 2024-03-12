@@ -20,9 +20,6 @@
     <string name="route_filters_edit_ingredients">Edit ingredients filter</string>
     <string name="route_profile">Profile</string>
     <string name="route_steps">Steps</string>
-    <string name="route_tasks_create_general">Create general task</string>
-    <string name="route_tasks_create_meal">Create meal task</string>
-    <string name="route_tasks_create_sport">Create sport task</string>
     <string name="screen_profile_button_sign_out">Sign Out</string>
     <string name="screen_profile_toast_success_sign_out">Signed out. See you later!</string>
     <string name="screen_sign_in_toast_error">Error has occurred while signing in. Try again</string>
