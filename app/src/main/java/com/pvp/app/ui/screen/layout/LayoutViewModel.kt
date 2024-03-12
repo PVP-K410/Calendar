@@ -2,7 +2,6 @@ package com.pvp.app.ui.screen.layout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseUser
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.User
@@ -19,12 +18,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class LayoutState(
-    val isLoading: Boolean = false,
-    val userApp: StateFlow<User?> = MutableStateFlow(null),
-    val userFirebase: StateFlow<FirebaseUser?> = MutableStateFlow(null)
-)
-
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class LayoutViewModel @Inject constructor(
@@ -40,6 +33,7 @@ class LayoutViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             val userFirebaseFlow = authenticationService.user
+
             val userAppFlow = userFirebaseFlow
                 .filterNotNull()
                 .flatMapLatest { userService.get(it.email!!) }
@@ -50,19 +44,27 @@ class LayoutViewModel @Inject constructor(
             ) { userApp, userFirebase ->
                 _state.update {
                     LayoutState(
-                        isLoading = false,
-                        userApp = MutableStateFlow(userApp).asStateFlow(),
-                        userFirebase = MutableStateFlow(userFirebase).asStateFlow()
+                        isAuthenticated = userFirebase != null,
+                        isSurveyFilled = userApp?.let { isSurveyFilled(it) },
+                        user = MutableStateFlow(userApp)
+                            .asStateFlow()
                     )
                 }
             }
                 .launchIn(viewModelScope)
+
+            _state.update { it.copy(isLoading = false) }
         }
     }
 
-    fun areDetailsSurveyed(): Boolean {
-        val user = _state.value.userApp.value!!
-
+    private fun isSurveyFilled(user: User): Boolean {
         return user.mass != 0 && user.height != 0
     }
 }
+
+data class LayoutState(
+    val isAuthenticated: Boolean = false,
+    val isLoading: Boolean = false,
+    val isSurveyFilled: Boolean? = null,
+    val user: StateFlow<User?> = MutableStateFlow(null),
+)

@@ -8,7 +8,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.pvp.app.ui.common.ProgressIndicator
-import com.pvp.app.ui.screen.survey.DetailsSurveyScreen
 
 @Composable
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -23,17 +22,13 @@ fun LayoutScreenBootstrap(
         return
     }
 
-    if (state.userFirebase.value == null) {
+    if (!state.isAuthenticated || state.isSurveyFilled == false) {
         LayoutScreenUnauthenticated(
             controller = rememberNavController(),
+            isAuthenticated = state.isAuthenticated,
+            isSurveyFilled = state.isSurveyFilled,
             scope = rememberCoroutineScope()
         )
-
-        return
-    }
-
-    if (!viewModel.areDetailsSurveyed()) {
-        DetailsSurveyScreen()
 
         return
     }
@@ -41,6 +36,6 @@ fun LayoutScreenBootstrap(
     LayoutScreenAuthenticated(
         controller = rememberNavController(),
         scope = rememberCoroutineScope(),
-        user = state.userApp.value
+        user = state.user.value
     )
 }

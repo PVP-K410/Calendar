@@ -1,12 +1,10 @@
 package com.pvp.app.ui.router
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.AddTask
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.runtime.Composable
@@ -18,6 +16,7 @@ import com.pvp.app.ui.screen.authentication.SignUpScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.profile.ProfileScreen
 import com.pvp.app.ui.screen.steps.StepScreen
+import com.pvp.app.ui.screen.survey.SurveyScreen
 import com.pvp.app.ui.screen.task.CreateGeneralTaskForm
 import com.pvp.app.ui.screen.task.CreateMealTaskForm
 import com.pvp.app.ui.screen.task.CreateSportTaskForm
@@ -35,6 +34,12 @@ sealed class Route(
 
     companion object {
 
+        /**
+         * These routes are used when user state is set to **authenticated** and all required
+         * surveys are filled.
+         *
+         * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
+         */
         val routesAuthenticated = listOf(
             ActivitiesFilter,
             Calendar,
@@ -46,6 +51,14 @@ sealed class Route(
             Steps
         )
 
+        /**
+         * These routes are used for simple navigation drawer implementation. Routes that are
+         * provided here, will be displayed in the navigation drawer. Navigation drawer is only
+         * available for authenticated users, hence all routes that are under this list should
+         * also be under [routesAuthenticated] list.
+         *
+         * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
+         */
         val routesDrawer = listOf(
             ActivitiesFilter,
             Calendar,
@@ -54,9 +67,16 @@ sealed class Route(
             Steps
         )
 
+        /**
+         * These routes are used when user state is set to **unauthenticated** or when user has
+         * any surveys that are not filled yet, but **must** be.
+         *
+         * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenUnauthenticated] layout.
+         */
         val routesUnauthenticated = listOf(
             SignIn,
-            SignUp
+            SignUp,
+            Survey
         )
     }
 
@@ -117,6 +137,7 @@ sealed class Route(
         screen = { _, _ -> ProfileScreen() }
     )
 
+    @SuppressLint("NewApi")
     data object Steps : Route(
         icon = Icons.AutoMirrored.Outlined.DirectionsWalk,
         iconDescription = "Step counter page button icon",
@@ -135,5 +156,11 @@ sealed class Route(
         route = "authentication/sign-up",
         resourceTitleId = R.string.route_authentication_sign_up,
         screen = { c, s -> SignUpScreen(c, s) }
+    )
+
+    data object Survey : Route(
+        route = "survey",
+        resourceTitleId = R.string.route_survey,
+        screen = { _, _ -> SurveyScreen() }
     )
 }

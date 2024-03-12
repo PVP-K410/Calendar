@@ -35,10 +35,13 @@ import kotlinx.coroutines.flow.map
 class PickerState<T>(initialValue: T) {
 
     var value by mutableStateOf<T>(initialValue)
-}
 
-@Composable
-fun <T> rememberPickerState(initialValue: T) = remember { PickerState(initialValue) }
+    companion object {
+
+        @Composable
+        fun <T> rememberPickerState(initialValue: T) = remember { PickerState(initialValue) }
+    }
+}
 
 @Composable
 fun <T : Number> NumberPicker(
