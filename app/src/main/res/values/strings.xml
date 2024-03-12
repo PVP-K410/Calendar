@@ -16,7 +16,6 @@
     <string name="route_authentication_sign_up">Sign Up</string>
     <string name="route_survey">Survey</string>
     <string name="route_calendar">Calendar</string>
-    <string name="route_calendar_monthly">Monthly calendar</string>
     <string name="route_filters_edit_activities">Edit activities filter</string>
     <string name="route_filters_edit_ingredients">Edit ingredients filter</string>
     <string name="route_profile">Profile</string>
@@ -27,4 +26,5 @@
     <string name="screen_sign_in_toast_success">Welcome back</string>
     <string name="screen_sign_up_toast_error">Error has occurred while signing up. Try again</string>
     <string name="screen_sign_up_toast_success">Welcome! We are happy to have you here</string>
+    <string name="route_calendar_monthly">Monthly calendar\n</string>
 </resources>

@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,22 +27,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.model.CalendarUiState
+import com.pvp.app.ui.screen.calendar.CalendarUiState
 import com.pvp.app.model.Task
-import com.pvp.app.ui.screen.calendar.CalendarViewModel
 import com.pvp.app.ui.screen.calendar.DateUtil
 import com.pvp.app.ui.screen.calendar.Day
+import com.pvp.app.ui.screen.calendar.MonthlyCalendarViewModel
 import com.pvp.app.ui.screen.calendar.getDisplayName
 import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
 fun MonthlyCalendarScreen(
-    viewModel: CalendarViewModel = hiltViewModel(),
+    model: MonthlyCalendarViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by model.uiState.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var dateTasks by remember { mutableStateOf<List<Task>>(emptyList()) }
 
     MonthlyCalendar(
         days = DateUtil.daysOfWeek,
@@ -50,19 +52,25 @@ fun MonthlyCalendarScreen(
         onClickListener = { date ->
             showDialog = true
             selectedDate = date.date
+            dateTasks = date.tasks
         }
     )
 
     if (showDialog) {
         DayDialog(
             date = selectedDate,
+            tasks = dateTasks,
             onDismissRequest = { showDialog = false }
         )
     }
 }
 
 @Composable
-fun DayDialog(date: LocalDate, tasks: List<Task> = listOf(), onDismissRequest: () -> Unit) {
+fun DayDialog(
+    date: LocalDate,
+    tasks: List<Task> = listOf(),
+    onDismissRequest: () -> Unit
+) {
     Dialog(
         onDismissRequest = { onDismissRequest() },
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -76,7 +84,7 @@ fun MonthlyCalendar(
     days: Array<String>,
     month: YearMonth,
     dates: List<CalendarUiState.DateEntry>,
-    onClickListener: (CalendarUiState.DateEntry) -> Unit,
+    onClickListener: (CalendarUiState.DateEntry) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -89,9 +97,11 @@ fun MonthlyCalendar(
                 DayItem(item, modifier = Modifier.weight(1f))
             }
         }
+
         Header(
             month = month,
         )
+
         Content(
             dates = dates,
             onClickListener = onClickListener
@@ -102,17 +112,18 @@ fun MonthlyCalendar(
 @Composable
 fun Header(
     month: YearMonth,
-    viewModel: CalendarViewModel = hiltViewModel()
+    model: MonthlyCalendarViewModel = hiltViewModel()
 ) {
     Row {
         IconButton(onClick = {
-            viewModel.changeMonth(month.minusMonths(1))
+            model.changeMonth(month.minusMonths(1))
         }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                 contentDescription = "Back"
             )
         }
+
         Text(
             text = month.getDisplayName(),
             textAlign = TextAlign.Center,
@@ -121,8 +132,9 @@ fun Header(
                 .weight(1f)
                 .align(Alignment.CenterVertically)
         )
+
         IconButton(onClick = {
-            viewModel.changeMonth(month.plusMonths(1))
+            model.changeMonth(month.plusMonths(1))
         }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -153,16 +165,28 @@ fun Content(
 ) {
     Column {
         var index = 0
+
         repeat(6) {
-            if (index >= dates.size) return@repeat
+            if (index >= dates.size) {
+                Log.e("CONTENT DATE FILTER", dates.size.toString())
+                return@repeat
+            }
+
             Row {
                 repeat(7) {
-                    val item = if (index < dates.size) dates[index] else CalendarUiState.DateEntry.Empty
+                    val item =
+                        if (index < dates.size) {
+                            dates[index]
+                        } else {
+                            CalendarUiState.DateEntry.Empty
+                        }
+
                     ContentItem(
                         date = item,
                         onClickListener = onClickListener,
                         modifier = Modifier.weight(1f)
                     )
+
                     index++
                 }
             }
@@ -178,16 +202,22 @@ fun ContentItem(
 ) {
     var text = date.date.dayOfMonth.toString()
     var clickable = true
+    var color = MaterialTheme.colorScheme.onPrimaryContainer
+
     // If date is a default value used to fill up the list so that first month day starts on correct
     // week date, we ensure that it is not clickable and is an empty string
-    if(date.date.isEqual(LocalDate.MIN)){
+    if (date.date.isEqual(LocalDate.MIN)) {
         text = ""
         clickable = false
+    } else if (date.tasks.isEmpty()) {
+        color = Color.Gray
+        clickable = false
     }
+
     Box(
         modifier = modifier
             .background(
-                color = if (date.isSelected) {
+                color = if (date.isHighlighted) {
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
@@ -200,6 +230,7 @@ fun ContentItem(
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
+            color = color,
             modifier = Modifier
                 .align(Alignment.Center)
                 .padding(10.dp)
