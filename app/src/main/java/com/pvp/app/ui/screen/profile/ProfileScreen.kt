@@ -2,54 +2,133 @@ package com.pvp.app.ui.screen.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
 import com.pvp.app.model.User
 import com.pvp.app.ui.common.showToast
+import com.pvp.app.ui.common.underline
 
 @Composable
 private fun ProfileBody(
     modifier: Modifier = Modifier,
-    user: State<User?>
+    user: State<User?>,
+    onUpdateMass: (Int) -> Unit,
+    onUpdateHeight: (Int) -> Unit,
 ) {
+    val context = LocalContext.current
+
+    var heightDisplay by remember { mutableIntStateOf(user.value?.height ?: 0) }
+    var heightEditing by remember { mutableStateOf(user.value?.height.toString()) }
+    var massDisplay by remember { mutableIntStateOf(user.value?.mass ?: 0) }
+    var massEditing by remember { mutableStateOf(user.value?.mass.toString()) }
+
+    LaunchedEffect(user.value) {
+        heightDisplay = user.value?.height ?: 0
+        heightEditing = user.value?.height.toString()
+        massDisplay = user.value?.mass ?: 0
+        massEditing = user.value?.mass.toString()
+    }
+
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
         modifier = modifier,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = "Email: ${user.value?.email}",
-            style = MaterialTheme.typography.bodyMedium
+        UserInfoItem(
+            label = "Your mass:",
+            value = "$massDisplay kg",
+            dialogTitle = { Text("Editing Mass") },
+            dialogContent = {
+                OutlinedTextField(
+                    value = massEditing,
+                    onValueChange = { massEditing = it },
+                    label = { Text("Mass") },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+            },
+            onConfirmClick = {
+                val newMass = massEditing.toIntOrNull() ?: 0
+
+                if (newMass in 2..700) {
+                    massDisplay = newMass
+
+                    onUpdateMass(newMass)
+                    context.showToast(message = "Your mass has been updated!")
+                } else {
+                    context.showToast(message = "Please enter a valid mass!")
+                }
+            }
         )
 
-        Text(
-            text = "Points: ${user.value?.points}",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        UserInfoItem(
+            label = "Your height:",
+            value = "$heightDisplay cm",
+            dialogTitle = { Text("Editing Height") },
+            dialogContent = {
+                OutlinedTextField(
+                    value = heightEditing,
+                    onValueChange = { heightEditing = it },
+                    label = { Text("Height") },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+            },
+            onConfirmClick = {
+                val newHeight = heightEditing.toIntOrNull() ?: 0
 
-        Text(
-            text = "Height: ${user.value?.height}",
-            style = MaterialTheme.typography.bodyMedium
-        )
+                if (newHeight in 40..300) {
+                    heightDisplay = newHeight
 
-        Text(
-            text = "Mass: ${user.value?.mass}",
-            style = MaterialTheme.typography.bodyMedium
+                    onUpdateHeight(newHeight)
+                    context.showToast(message = "Your height has been updated!")
+                } else {
+                    context.showToast(message = "Please enter a valid height!")
+                }
+            }
         )
     }
 }
@@ -80,22 +159,119 @@ private fun ProfileFooter(
 @Composable
 private fun ProfileHeader(
     modifier: Modifier = Modifier,
-    user: State<User?>
+    user: State<User?>,
+    onUpdateUsername: (String) -> Unit
 ) {
+    val context = LocalContext.current
+
+    var userNameDisplay by remember { mutableStateOf(user.value?.username ?: "") }
+    var userNameEditing by remember { mutableStateOf(user.value?.username ?: "") }
+
+    LaunchedEffect(user.value) {
+        userNameDisplay = user.value?.username ?: ""
+        userNameEditing = user.value?.username ?: ""
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
-        Text(
-            text = "Hey, ${user.value?.username}!",
-            style = MaterialTheme.typography.titleLarge
-        )
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.underline()
+        ) {
+            Text(
+                text = "Welcome, ${userNameDisplay}!",
+                style = MaterialTheme.typography.titleLarge,
+                fontStyle = FontStyle.Italic
+            )
+
+            IconButtonWithDialog(
+                icon = Icons.Default.Edit,
+                dialogTitle = { Text("Editing Username") },
+                dialogContent = {
+                    OutlinedTextField(
+                        value = userNameEditing,
+                        onValueChange = { userNameEditing = it },
+                        label = { Text("Username") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
+                },
+                onConfirmClick = {
+                    if (userNameEditing.isNotEmpty()) {
+                        userNameDisplay = userNameEditing
+
+                        onUpdateUsername(userNameEditing)
+                        context.showToast(message = "Your username has been updated!")
+                    } else {
+                        context.showToast(message = "Username cannot be empty!")
+                    }
+                }
+            )
+        }
 
         Text(
-            text = "It is your profile",
-            style = MaterialTheme.typography.bodyMedium
+            text = "${user.value?.email}",
+            style = MaterialTheme.typography.bodyMedium,
+            fontStyle = FontStyle.Italic
         )
+    }
+}
+
+@Composable
+private fun UserInfoItem(
+    label: String,
+    value: String,
+    dialogTitle: @Composable () -> Unit,
+    dialogContent: @Composable () -> Unit,
+    onConfirmClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = label,
+                    fontStyle = FontStyle.Italic,
+                    modifier = Modifier.underline()
+                )
+
+                Text(
+                    text = value,
+                    fontStyle = FontStyle.Italic
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Center
+            ) {
+                IconButtonWithDialog(
+                    icon = Icons.Default.Edit,
+                    dialogTitle = dialogTitle,
+                    dialogContent = dialogContent,
+                    onConfirmClick = onConfirmClick
+                )
+            }
+        }
     }
 }
 
@@ -115,15 +291,25 @@ fun ProfileScreen(
         ProfileHeader(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.15f),
-            user = user
+                .weight(0.15f)
+                .padding(bottom = 8.dp),
+            user = user,
+            onUpdateUsername = {
+                viewModel.updateUsername(it)
+            }
         )
 
         ProfileBody(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.7f),
-            user = user
+            user = user,
+            onUpdateMass = {
+                viewModel.updateMass(it)
+            },
+            onUpdateHeight = {
+                viewModel.updateHeight(it)
+            }
         )
 
         val context = LocalContext.current
@@ -142,5 +328,62 @@ fun ProfileScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun IconButtonWithDialog(
+    icon: ImageVector,
+    dialogTitle: @Composable () -> Unit,
+    dialogContent: @Composable () -> Unit,
+    onConfirmClick: () -> Unit
+) {
+    val showDialog = remember { mutableStateOf(false) }
+
+    Box {
+        IconButton(
+            onClick = {
+                showDialog.value = true
+            },
+            modifier = Modifier
+                .size(35.dp)
+                .padding(5.dp),
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null
+            )
+        }
+
+        if (showDialog.value) {
+            AlertDialog(
+                modifier = Modifier.padding(8.dp),
+                title = dialogTitle,
+                text = dialogContent,
+                onDismissRequest = {
+                    showDialog.value = false
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            onConfirmClick()
+
+                            showDialog.value = false
+                        }
+                    ) {
+                        Text(text = "Edit")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            showDialog.value = false
+                        },
+                    ) {
+                        Text(text = "Cancel")
+                    }
+                }
+            )
+        }
     }
 }
