@@ -11,7 +11,7 @@ interface TaskService : DocumentsCollection {
     /**
      * Gets all tasks for the given user by its email.
      */
-    suspend fun get(userEmail: String): Flow<Collection<Task>>
+    suspend fun get(userEmail: String): Flow<List<Task>>
 
     /**
      * Creates or updates the task in the database.

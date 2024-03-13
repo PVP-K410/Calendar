@@ -32,7 +32,7 @@ private val heightRange = (10..300).toList()
 @SuppressLint("ComposableNaming")
 fun BodyMassIndexSurvey(
     modifier: Modifier = Modifier,
-    onSubmit: (mass: Int, height: Int) -> Unit
+    onSubmit: (height: Int, mass: Int) -> Unit
 ): () -> Boolean {
     val stateMass = rememberPickerState(massRange[0])
     val stateHeight = rememberPickerState(heightRange[0])
@@ -69,7 +69,7 @@ fun BodyMassIndexSurvey(
 
     return {
         try {
-            onSubmit(stateMass.value, stateHeight.value)
+            onSubmit(stateHeight.value, stateMass.value)
 
             true
         } catch (e: Exception) {

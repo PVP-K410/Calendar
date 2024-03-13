@@ -35,7 +35,6 @@ fun LayoutScreenBootstrap(
 
     LayoutScreenAuthenticated(
         controller = rememberNavController(),
-        scope = rememberCoroutineScope(),
-        user = state.user.value
+        scope = rememberCoroutineScope()
     )
 }

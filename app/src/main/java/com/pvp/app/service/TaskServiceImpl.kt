@@ -32,7 +32,7 @@ class TaskServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun get(userEmail: String): Flow<Collection<Task>> {
+    override suspend fun get(userEmail: String): Flow<List<Task>> {
         return database
             .collection(identifier)
             .whereEqualTo(Task::userEmail.name, userEmail)
