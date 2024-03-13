@@ -221,6 +221,7 @@ fun Day(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // TODO add step counter
                 Text(
                     "Steps",
                     textAlign = TextAlign.Center,
