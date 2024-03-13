@@ -90,8 +90,9 @@ private fun ProfileBody(
                 val newMass = massEditing.toIntOrNull() ?: 0
 
                 if (newMass in 2..700) {
-                    onUpdateMass(newMass)
                     massDisplay = newMass
+
+                    onUpdateMass(newMass)
                     context.showToast(message = "Your mass has been updated!")
                 } else {
                     context.showToast(message = "Please enter a valid mass!")
@@ -120,8 +121,9 @@ private fun ProfileBody(
                 val newHeight = heightEditing.toIntOrNull() ?: 0
 
                 if (newHeight in 40..300) {
-                    onUpdateHeight(newHeight)
                     heightDisplay = newHeight
+
+                    onUpdateHeight(newHeight)
                     context.showToast(message = "Your height has been updated!")
                 } else {
                     context.showToast(message = "Please enter a valid height!")
@@ -201,8 +203,9 @@ private fun ProfileHeader(
                 },
                 onConfirmClick = {
                     if (userNameEditing.isNotEmpty()) {
-                        onUpdateUsername(userNameEditing)
                         userNameDisplay = userNameEditing
+
+                        onUpdateUsername(userNameEditing)
                         context.showToast(message = "Your username has been updated!")
                     } else {
                         context.showToast(message = "Username cannot be empty!")

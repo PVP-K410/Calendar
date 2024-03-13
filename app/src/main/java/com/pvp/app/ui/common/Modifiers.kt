@@ -92,12 +92,14 @@ fun Modifier.fadingEdge(brush: Brush) = this
         )
     }
 
-fun Modifier.underline(): Modifier = this
+fun Modifier.underline(
+    color: Color = Color.Black
+): Modifier = this
     .drawBehind {
         val verticalOffset = size.height - 2.sp.toPx()
 
         drawLine(
-            color = Color.Black,
+            color = color,
             strokeWidth = 1.dp.toPx(),
             start = Offset(
                 0f,
