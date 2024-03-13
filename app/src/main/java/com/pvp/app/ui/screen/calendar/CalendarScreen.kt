@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -186,8 +187,10 @@ fun Day(
         Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
-                .height(200.dp)
-                .width(200.dp)
+                .size(
+                    height = 200.dp,
+                    width = 200.dp
+                )
                 .border(
                     BorderStroke(
                         1.dp,
@@ -283,9 +286,9 @@ private fun filterTasks(
 
 enum class TaskFilter(val displayName: String) {
     //Daily("daily"), TODO add daily tasks
-    General("general"),
-    Sports("sports"),
-    Meal("meal")
+    General("General"),
+    Sports("Sports"),
+    Meal("Meal")
 }
 
 @Composable

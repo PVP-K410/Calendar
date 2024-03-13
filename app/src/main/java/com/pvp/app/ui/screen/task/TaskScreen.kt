@@ -555,7 +555,6 @@ fun TaskBox(
                     MaterialTheme.colorScheme.outline
                 )
             )
-
     ) {
         Column {
             Row(
