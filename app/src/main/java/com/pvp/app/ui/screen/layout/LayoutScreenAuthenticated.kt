@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,8 +56,8 @@ fun LayoutScreenAuthenticated(
         Surface(modifier = Modifier.fillMaxSize()) {
             val destination = controller.currentBackStackEntryAsState().value?.destination
 
-            val screen = Route.routesAuthenticated
-                .find { it.route == destination?.route }
+            val route = Route.routesAuthenticated
+                .find { it.path == destination?.route }
                 ?: Route.SignIn
 
             val stateDrawer = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -64,15 +65,16 @@ fun LayoutScreenAuthenticated(
             ModalNavigationDrawer(
                 drawerContent = {
                     DrawerScreen(
+                        modifier = Modifier.fillMaxWidth((2 / 3.0).toFloat()),
                         onClick = {
-                            controller.navigateWithPopUp(route)
+                            controller.navigateWithPopUp(this.path)
 
                             scope.launch {
                                 stateDrawer.close()
                             }
                         },
+                        route = route,
                         routes = Route.routesDrawer,
-                        screen = screen
                     )
                 },
                 drawerState = stateDrawer
@@ -82,7 +84,7 @@ fun LayoutScreenAuthenticated(
                 Scaffold(topBar = {
                     Header(
                         controller = controller,
-                        route = screen,
+                        route = route,
                         scope = scope,
                         state = stateDrawer,
                         userAvatar = stateLayout.userAvatar!!
@@ -122,7 +124,7 @@ private fun Header(
                         RoundedCornerShape(36.dp)
                     ),
                 onClick = {
-                    controller.navigateWithPopUp(Route.Profile.route)
+                    controller.navigateWithPopUp(Route.Profile.path)
                 }
             ) {
                 Image(
