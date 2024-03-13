@@ -26,4 +26,5 @@
     <string name="screen_sign_in_toast_success">Welcome back</string>
     <string name="screen_sign_up_toast_error">Error has occurred while signing up. Try again</string>
     <string name="screen_sign_up_toast_success">Welcome! We are happy to have you here</string>
+    <string name="route_calendar_monthly">Monthly calendar</string>
 </resources>
