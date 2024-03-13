@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,17 +21,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.pvp.app.ui.router.Route
 
 @Composable
-fun DrawerBody(
+private fun DrawerBody(
     modifier: Modifier = Modifier,
     onClick: Route.() -> Unit,
     routes: List<Route>,
-    screen: Route
+    route: Route
 ) {
     LazyColumn(modifier = modifier) {
         items(routes) {
@@ -40,19 +40,17 @@ fun DrawerBody(
                 modifier = Modifier
                     .height(48.dp)
                     .background(
-                        color = if (screen.route == it.route) {
-                            MaterialTheme.colorScheme.background
+                        color = if (route.path == it.path) {
+                            MaterialTheme.colorScheme.surfaceContainerHighest
                         } else {
-                            Color.Unspecified
+                            Color.Transparent
                         },
-                        shape = MaterialTheme.shapes.small
+                        shape = MaterialTheme.shapes.extraSmall
                     )
                     .padding(8.dp)
                     .clickable(
-                        enabled = screen.route != it.route,
-                        onClick = {
-                            onClick.invoke(it)
-                        },
+                        enabled = route.path != it.path,
+                        onClick = { onClick.invoke(it) },
                         onClickLabel = "Navigate to ${stringResource(it.resourceTitleId)}",
                         role = Role.Button
                     ),
@@ -63,7 +61,7 @@ fun DrawerBody(
 }
 
 @Composable
-fun DrawerBodyRow(
+private fun DrawerBodyRow(
     modifier: Modifier = Modifier,
     route: Route
 ) {
@@ -89,7 +87,7 @@ fun DrawerBodyRow(
 }
 
 @Composable
-fun DrawerHeader(
+private fun DrawerHeader(
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -99,12 +97,12 @@ fun DrawerHeader(
     ) {
         Column {
             Text(
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.displaySmall,
                 text = "Calendar"
             )
 
             Text(
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 text = "Schedule Your Day"
             )
         }
@@ -116,27 +114,35 @@ fun DrawerScreen(
     modifier: Modifier = Modifier,
     onClick: Route.() -> Unit,
     routes: List<Route>,
-    screen: Route
+    route: Route
 ) {
     ModalDrawerSheet(
-        modifier = modifier
+        modifier = modifier,
+        drawerShape = RectangleShape
     ) {
-        DrawerHeader(
-            Modifier
-                .padding(24.dp)
-                .fillMaxWidth()
-                .fillMaxHeight(0.1f)
-        )
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            DrawerHeader(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(0.1f)
+            )
 
-        HorizontalDivider()
+            Spacer(modifier = Modifier.padding(4.dp))
 
-        DrawerBody(
-            modifier = Modifier
-                .padding(24.dp)
-                .fillMaxWidth(),
-            onClick = onClick,
-            routes = routes,
-            screen = screen
-        )
+            HorizontalDivider()
+
+            Spacer(modifier = Modifier.padding(4.dp))
+
+            DrawerBody(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.9f),
+                onClick = onClick,
+                routes = routes,
+                route = route
+            )
+        }
     }
 }

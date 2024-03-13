@@ -15,18 +15,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.Card
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,107 +48,7 @@ import java.time.DayOfWeek
 import kotlin.reflect.KClass
 
 @Composable
-fun CalendarScreen(
-    viewModel: CalendarViewModel = hiltViewModel()
-) {
-    var isOpen by remember { mutableStateOf(false) }
-
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.primary,
-                onClick = { isOpen = !isOpen },
-                shape = CircleShape
-            ) {
-                Icon(
-                    contentDescription = "Add task",
-                    imageVector = Icons.Outlined.Add
-                )
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) {
-            val state by viewModel.state.collectAsStateWithLifecycle()
-
-            Week(tasks = state.tasksWeek)
-
-            if (!isOpen) {
-                return@Column
-            }
-
-            Dialog(onDismissRequest = { isOpen = false }) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                        .padding(8.dp)
-                ) {
-                    var target by remember { mutableStateOf(Task::class as KClass<out Task>) }
-
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CreateTaskFormSelector(
-                            isSelected = target == Task::class,
-                            onSelect = { target = Task::class },
-                            text = "General"
-                        )
-
-                        CreateTaskFormSelector(
-                            isSelected = target == MealTask::class,
-                            onSelect = { target = MealTask::class },
-                            text = "Meal"
-                        )
-
-                        CreateTaskFormSelector(
-                            isSelected = target == SportTask::class,
-                            onSelect = { target = SportTask::class },
-                            text = "Sport"
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.padding(4.dp))
-
-                    HorizontalDivider()
-
-                    Spacer(modifier = Modifier.padding(4.dp))
-
-                    val modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(8.dp)
-                        .verticalScroll(rememberScrollState())
-
-                    when (target) {
-                        MealTask::class -> CreateTaskMealForm(
-                            modifier = modifier,
-                            onCreate = { isOpen = false }
-                        )
-
-                        SportTask::class -> CreateTaskSportForm(
-                            modifier = modifier,
-                            onCreate = { isOpen = false }
-                        )
-
-                        Task::class -> CreateTaskGeneralForm(
-                            modifier = modifier,
-                            onCreate = { isOpen = false }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CreateTaskFormSelector(
+private fun ButtonTaskSelector(
     isSelected: Boolean,
     onSelect: () -> Unit,
     text: String
@@ -170,6 +65,99 @@ private fun CreateTaskFormSelector(
             style = MaterialTheme.typography.labelLarge,
             text = text
         )
+    }
+}
+
+@Composable
+fun CalendarScreen(
+    viewModel: CalendarViewModel = hiltViewModel()
+) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        Week(tasks = state.tasksWeek)
+    }
+}
+
+@Composable
+fun CreateTaskDialog(
+    onClose: () -> Unit,
+    isOpen: Boolean,
+    shouldCloseOnSubmit: Boolean
+) {
+    if (!isOpen) {
+        return
+    }
+
+    Dialog(onDismissRequest = onClose) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(8.dp)
+        ) {
+            var target by remember { mutableStateOf(Task::class as KClass<out Task>) }
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ButtonTaskSelector(
+                    isSelected = target == Task::class,
+                    onSelect = { target = Task::class },
+                    text = "General"
+                )
+
+                ButtonTaskSelector(
+                    isSelected = target == MealTask::class,
+                    onSelect = { target = MealTask::class },
+                    text = "Meal"
+                )
+
+                ButtonTaskSelector(
+                    isSelected = target == SportTask::class,
+                    onSelect = { target = SportTask::class },
+                    text = "Sport"
+                )
+            }
+
+            Spacer(modifier = Modifier.padding(4.dp))
+
+            HorizontalDivider()
+
+            Spacer(modifier = Modifier.padding(4.dp))
+
+            val modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(8.dp)
+                .verticalScroll(rememberScrollState())
+
+            val closeIfShould = {
+                if (shouldCloseOnSubmit) {
+                    onClose()
+                }
+            }
+
+            when (target) {
+                MealTask::class -> CreateTaskMealForm(
+                    modifier = modifier,
+                    onCreate = closeIfShould
+                )
+
+                SportTask::class -> CreateTaskSportForm(
+                    modifier = modifier,
+                    onCreate = closeIfShould
+                )
+
+                Task::class -> CreateTaskGeneralForm(
+                    modifier = modifier,
+                    onCreate = closeIfShould
+                )
+            }
+        }
     }
 }
 
