@@ -33,10 +33,10 @@ fun Router(
         },
         modifier = modifier,
         navController = controller,
-        startDestination = destinationStart.route
+        startDestination = destinationStart.path
     ) {
         routes.forEach { r ->
-            composable(route = r.route) {
+            composable(route = r.path) {
                 r.screen(
                     controller,
                     scope

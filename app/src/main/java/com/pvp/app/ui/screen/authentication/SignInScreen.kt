@@ -76,7 +76,7 @@ fun SignInScreen(
             }
         },
         onSignUp = {
-            controller.navigate(Route.SignUp.route)
+            controller.navigate(Route.SignUp.path)
         }
     )
 }
