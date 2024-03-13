@@ -95,10 +95,8 @@ fun MonthlyCalendar(
     ) {
         Row {
             repeat(days.size) {
-                val item = days[it]
-
                 DayItem(
-                    day = item,
+                    day = days[it],
                     modifier = Modifier.weight(1f)
                 )
             }
