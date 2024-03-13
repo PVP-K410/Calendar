@@ -1,6 +1,5 @@
 package com.pvp.app.ui.router
 
-import MonthlyCalendarScreen
 import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
@@ -14,6 +13,7 @@ import com.pvp.app.R
 import com.pvp.app.ui.screen.authentication.SignInScreen
 import com.pvp.app.ui.screen.authentication.SignUpScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
+import com.pvp.app.ui.screen.calendar.MonthlyCalendarScreen
 import com.pvp.app.ui.screen.filter.ActivitiesFilter
 import com.pvp.app.ui.screen.filter.IngredientsFilter
 import com.pvp.app.ui.screen.profile.ProfileScreen
