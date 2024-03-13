@@ -99,7 +99,13 @@ fun Modifier.underline(): Modifier = this
         drawLine(
             color = Color.Black,
             strokeWidth = 1.dp.toPx(),
-            start = Offset(0f, verticalOffset),
-            end = Offset(size.width, verticalOffset)
+            start = Offset(
+                0f,
+                verticalOffset
+            ),
+            end = Offset(
+                size.width,
+                verticalOffset
+            )
         )
     }

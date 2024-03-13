@@ -32,9 +32,9 @@ class ProfileViewModel @Inject constructor(
 
     fun updateUsername(newUsername: String) {
         viewModelScope.launch {
-            _user.value?.username = newUsername
-
             _user.value?.let {
+                it.username = newUsername
+
                 userService.merge(it)
             }
         }
@@ -42,9 +42,9 @@ class ProfileViewModel @Inject constructor(
 
     fun updateMass(newMass: Int) {
         viewModelScope.launch {
-            _user.value?.mass = newMass
-
             _user.value?.let {
+                it.mass = newMass
+
                 userService.merge(it)
             }
         }
@@ -52,9 +52,9 @@ class ProfileViewModel @Inject constructor(
 
     fun updateHeight(newHeight: Int) {
         viewModelScope.launch {
-            _user.value?.height = newHeight
-
             _user.value?.let {
+                it.height = newHeight
+
                 userService.merge(it)
             }
         }

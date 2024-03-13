@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -51,16 +50,18 @@ private fun ProfileBody(
     onUpdateMass: (Int) -> Unit,
     onUpdateHeight: (Int) -> Unit,
 ) {
+    val context = LocalContext.current
+
     var heightDisplay by remember { mutableIntStateOf(user.value?.height ?: 0) }
-    var heightEditing by remember { mutableIntStateOf(user.value?.height ?: 0) }
+    var heightEditing by remember { mutableStateOf(user.value?.height.toString()) }
     var massDisplay by remember { mutableIntStateOf(user.value?.mass ?: 0) }
-    var massEditing by remember { mutableIntStateOf(user.value?.mass ?: 0) }
+    var massEditing by remember { mutableStateOf(user.value?.mass.toString()) }
 
     LaunchedEffect(user.value) {
         heightDisplay = user.value?.height ?: 0
-        heightEditing = user.value?.height ?: 0
+        heightEditing = user.value?.height.toString()
         massDisplay = user.value?.mass ?: 0
-        massEditing = user.value?.mass ?: 0
+        massEditing = user.value?.mass.toString()
     }
 
     Column(
@@ -71,13 +72,11 @@ private fun ProfileBody(
         UserInfoItem(
             label = "Your mass:",
             value = "$massDisplay kg",
-            dialogTitle = {
-                Text("Editing Mass")
-            },
+            dialogTitle = { Text("Editing Mass") },
             dialogContent = {
                 OutlinedTextField(
-                    value = massEditing.toString(),
-                    onValueChange = { massEditing = it.toIntOrNull() ?: 0 },
+                    value = massEditing,
+                    onValueChange = { massEditing = it },
                     label = { Text("Mass") },
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
@@ -88,21 +87,26 @@ private fun ProfileBody(
                 )
             },
             onConfirmClick = {
-                onUpdateMass(massEditing)
-                massDisplay = massEditing
+                val newMass = massEditing.toIntOrNull() ?: 0
+
+                if (newMass in 2..700) {
+                    onUpdateMass(newMass)
+                    massDisplay = newMass
+                    context.showToast(message = "Your mass has been updated!")
+                } else {
+                    context.showToast(message = "Please enter a valid mass!")
+                }
             }
         )
 
         UserInfoItem(
             label = "Your height:",
             value = "$heightDisplay cm",
-            dialogTitle = {
-                Text("Editing Height")
-            },
+            dialogTitle = { Text("Editing Height") },
             dialogContent = {
                 OutlinedTextField(
-                    value = heightEditing.toString(),
-                    onValueChange = { heightEditing = it.toIntOrNull() ?: 0 },
+                    value = heightEditing,
+                    onValueChange = { heightEditing = it },
                     label = { Text("Height") },
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
@@ -113,8 +117,15 @@ private fun ProfileBody(
                 )
             },
             onConfirmClick = {
-                onUpdateHeight(heightEditing)
-                heightDisplay = heightEditing
+                val newHeight = heightEditing.toIntOrNull() ?: 0
+
+                if (newHeight in 40..300) {
+                    onUpdateHeight(newHeight)
+                    heightDisplay = newHeight
+                    context.showToast(message = "Your height has been updated!")
+                } else {
+                    context.showToast(message = "Please enter a valid height!")
+                }
             }
         )
     }
@@ -149,6 +160,8 @@ private fun ProfileHeader(
     user: State<User?>,
     onUpdateUsername: (String) -> Unit
 ) {
+    val context = LocalContext.current
+
     var userNameDisplay by remember { mutableStateOf(user.value?.username ?: "") }
     var userNameEditing by remember { mutableStateOf(user.value?.username ?: "") }
 
@@ -162,7 +175,7 @@ private fun ProfileHeader(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
     ) {
-        Row (
+        Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.underline()
@@ -175,9 +188,7 @@ private fun ProfileHeader(
 
             IconButtonWithDialog(
                 icon = Icons.Default.Edit,
-                dialogTitle = {
-                    Text("Editing Username")
-                },
+                dialogTitle = { Text("Editing Username") },
                 dialogContent = {
                     OutlinedTextField(
                         value = userNameEditing,
@@ -189,8 +200,13 @@ private fun ProfileHeader(
                     )
                 },
                 onConfirmClick = {
-                    onUpdateUsername(userNameEditing)
-                    userNameDisplay = userNameEditing
+                    if (userNameEditing.isNotEmpty()) {
+                        onUpdateUsername(userNameEditing)
+                        userNameDisplay = userNameEditing
+                        context.showToast(message = "Your username has been updated!")
+                    } else {
+                        context.showToast(message = "Username cannot be empty!")
+                    }
                 }
             )
         }
@@ -214,13 +230,14 @@ private fun UserInfoItem(
     Box(
         modifier = Modifier
             .background(
-                color = Color.LightGray,
-                shape = RoundedCornerShape(8.dp))
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            )
             .padding(8.dp)
             .fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(), // Apply fillMaxWidth() to Row
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -230,14 +247,13 @@ private fun UserInfoItem(
             ) {
                 Text(
                     text = label,
-                    color = Color.Black,
                     fontStyle = FontStyle.Italic,
                     modifier = Modifier.underline()
                 )
 
                 Text(
                     text = value,
-                    color = Color.Black
+                    fontStyle = FontStyle.Italic
                 )
             }
 
@@ -347,8 +363,9 @@ fun IconButtonWithDialog(
                 confirmButton = {
                     Button(
                         onClick = {
-                            showDialog.value = false
                             onConfirmClick()
+
+                            showDialog.value = false
                         }
                     ) {
                         Text(text = "Edit")
