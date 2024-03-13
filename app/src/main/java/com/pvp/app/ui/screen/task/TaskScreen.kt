@@ -548,6 +548,7 @@ fun TaskBox(
         shape = RectangleShape,
         modifier = Modifier
             .fillMaxWidth()
+            .padding(8.dp)
             .border(
                 BorderStroke(
                     1.dp,

@@ -23,7 +23,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -72,8 +74,10 @@ fun DayDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Day(
-            name = date.toString(),
-            tasks = tasks
+            "${date.month.toString().toLowerCase().capitalize()} ${date.dayOfMonth}",
+            tasks = tasks,
+            date = date,
+            expandedUponCreation = true
         )
     }
 }

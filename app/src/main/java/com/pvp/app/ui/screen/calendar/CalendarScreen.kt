@@ -3,22 +3,26 @@ package com.pvp.app.ui.screen.calendar
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,8 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,6 +52,7 @@ import com.pvp.app.ui.screen.task.CreateTaskMealForm
 import com.pvp.app.ui.screen.task.CreateTaskSportForm
 import com.pvp.app.ui.screen.task.TaskBox
 import java.time.DayOfWeek
+import java.time.LocalDate
 import kotlin.reflect.KClass
 
 @Composable
@@ -68,6 +76,7 @@ private fun ButtonTaskSelector(
     }
 }
 
+@Preview
 @Composable
 fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel()
@@ -163,36 +172,175 @@ fun CreateTaskDialog(
 
 @Composable
 fun Day(
-    name: String,
-    tasks: List<Task>
+    name: String = "Day",
+    date: LocalDate = LocalDate.MIN,
+    tasks: List<Task> = emptyList(),
+    expandedUponCreation: Boolean = false
 ) {
-    Column(
-        modifier = Modifier
-            .width(150.dp)
-            .padding(8.dp)
-    ) {
-        Card(
-            shape = RectangleShape,
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline))
-        ) {
-            Text(
-                name,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+    var expand by remember { mutableStateOf(expandedUponCreation) }
+    var selectedFilter by remember { mutableStateOf(TaskFilter.General) }
+    val filteredTasks = filterTasks(tasks, selectedFilter)
 
-        LazyColumn(
+    Column(
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline))
+                .background(MaterialTheme.colorScheme.surface)
+                .size(
+                    height = 200.dp,
+                    width = 200.dp
+                )
+                .border(
+                    BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                )
+                .clickable { expand = !expand }
+                .align(Alignment.CenterHorizontally),
         ) {
-            items(tasks) {
-                TaskBox(task = it)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(10.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .height(50.dp)
+                        .fillMaxWidth()
+                        .clickable { expand = !expand }
+                ) {
+                    Text(
+                        name,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // TODO add step counter
+                Text(
+                    "Steps",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+
+                // Don't display date if no value was supplied
+                if (!date.isEqual(LocalDate.MIN)) {
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Text(
+                        date.toString(),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
             }
         }
+
+        if (expand) {
+            Spacer(modifier = Modifier.padding(8.dp))
+
+            TaskFilterBar(selectedFilter) { filter ->
+                selectedFilter = filter
+            }
+
+            // Fixed to take up the whole screen for now as it bugs out in Weekly view,
+            // replace Modifier.width with Modifier.fillMaxWidth() later
+            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+            LazyColumn(
+                modifier = Modifier.width(screenWidth)
+            ) {
+                items(filteredTasks) {
+                    Spacer(modifier = Modifier.padding(8.dp))
+
+                    TaskBox(task = it)
+                }
+            }
+        }
+    }
+}
+
+private fun filterTasks(
+    tasks: List<Task>,
+    filter: TaskFilter
+): List<Task> {
+    return when (filter) {
+        //TaskFilter.Daily -> tasks.filter {  } TODO add daily tasks
+        TaskFilter.Sports -> tasks.filterIsInstance<SportTask>()
+        TaskFilter.Meal -> tasks.filterIsInstance<MealTask>()
+        TaskFilter.General -> tasks.filter { task -> task !is SportTask && task !is MealTask }
+    }
+}
+
+enum class TaskFilter(val displayName: String) {
+    //Daily("daily"), TODO add daily tasks
+    General("General"),
+    Sports("Sports"),
+    Meal("Meal")
+}
+
+@Composable
+fun TaskFilterBar(
+    selectedFilter: TaskFilter,
+    onClick: (TaskFilter) -> Unit
+) {
+    // Fixed to take up the whole screen for now as it bugs out in Weekly view,
+    // replace Modifier.width with Modifier.weigh(1f)
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val chipWidth = screenWidth / TaskFilter.values().size
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        TaskFilter.entries.forEach { filter ->
+            FilterBox(
+                filter = filter,
+                isSelected = selectedFilter == filter,
+                onClick = { onClick(filter) },
+                modifier = Modifier
+                    .width(chipWidth)
+                    .height(40.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun FilterBox(
+    filter: TaskFilter,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clickable { onClick() }
+            .background(
+                if (isSelected) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    Color.Transparent
+                }
+            )
+    ) {
+        Text(text = filter.displayName)
     }
 }
 
@@ -202,7 +350,9 @@ fun Week(
     tasks: List<Task>
 ) {
     Row(
-        modifier = modifier.horizontalScroll(rememberScrollState())
+        modifier = modifier
+            .horizontalScroll(rememberScrollState())
+            .fillMaxWidth()
     ) {
         (1..7).forEach {
             Day(
