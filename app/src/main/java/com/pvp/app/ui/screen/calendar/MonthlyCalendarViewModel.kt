@@ -45,13 +45,14 @@ class MonthlyCalendarViewModel @Inject constructor(
                         tasks = tasks
                     )
                 }
-            }.launchIn(viewModelScope)
+            }
+                .launchIn(viewModelScope)
 
         }
     }
 
     fun changeMonth(nextMonth: YearMonth) {
-        _uiState.update {currentState ->
+        _uiState.update { currentState ->
             currentState.copy(
                 yearMonth = nextMonth,
                 dates = getDates(nextMonth, currentState.tasks)
