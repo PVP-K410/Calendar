@@ -72,10 +72,24 @@ fun DayDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Day(
-            name = date.toString(),
-            tasks = tasks
+            "${date.month.toString().capitalizeFirstLetter()} ${date.dayOfMonth}",
+            tasks = tasks,
+            date = date,
+            expandedUponCreation = true
         )
     }
+}
+
+fun String.capitalizeFirstLetter(): String {
+    if (this.isEmpty()) return this
+    return this.lowercase()
+        .replaceFirstChar {
+            if (it.isLowerCase()) {
+                it.titlecase()
+            } else {
+                it.toString()
+            }
+        }
 }
 
 @Composable
