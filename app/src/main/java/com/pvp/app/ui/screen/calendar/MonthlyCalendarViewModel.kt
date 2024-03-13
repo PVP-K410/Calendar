@@ -25,13 +25,12 @@ class MonthlyCalendarViewModel @Inject constructor(
     private val taskService: TaskService,
     private val userService: UserService
 ) : ViewModel() {
-
+    private val _currentYearMonth = MutableStateFlow(YearMonth.now())
     private val _uiState = MutableStateFlow(CalendarUiState.Init)
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-
             val flowUser = userService.getCurrent()
             val flowTasks = flowUser.flatMapLatest { user ->
                 user
@@ -43,30 +42,20 @@ class MonthlyCalendarViewModel @Inject constructor(
                 _uiState.update { currentState ->
                     currentState.copy(
                         dates = getDates(currentState.yearMonth, tasks),
+                        tasks = tasks
                     )
                 }
             }.launchIn(viewModelScope)
-        }
 
+        }
     }
 
     fun changeMonth(nextMonth: YearMonth) {
-        viewModelScope.launch {
-            val flowUser = userService.getCurrent()
-            val flowTasks = flowUser.flatMapLatest { user ->
-                user
-                    ?.let { taskService.get(user.email) }
-                    ?: flowOf(listOf())
-            }
-
-            combine(flowUser, flowTasks) { user, tasks ->
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        yearMonth = nextMonth,
-                        dates = getDates(nextMonth, tasks),
-                    )
-                }
-            }.launchIn(viewModelScope)
+        _uiState.update {currentState ->
+            currentState.copy(
+                yearMonth = nextMonth,
+                dates = getDates(nextMonth, currentState.tasks)
+            )
         }
     }
 
@@ -101,13 +90,15 @@ class MonthlyCalendarViewModel @Inject constructor(
 }
 
 data class CalendarUiState(
-    val yearMonth: YearMonth = YearMonth.now(),
-    val dates: List<DateEntry> = emptyList(),
+    val yearMonth: YearMonth,
+    val dates: List<DateEntry>,
+    val tasks: List<Task>
 ) {
     companion object {
         val Init = CalendarUiState(
             yearMonth = YearMonth.now(),
             dates = emptyList(),
+            tasks = emptyList()
         )
     }
 
