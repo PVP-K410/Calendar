@@ -2,6 +2,7 @@ package com.pvp.app.ui.common
 
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -10,6 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.pvp.app.ui.theme.BackgroundGradientDefault
 
 private fun colorsToPairs(
@@ -86,5 +89,17 @@ fun Modifier.fadingEdge(brush: Brush) = this
         drawRect(
             brush = brush,
             blendMode = BlendMode.DstIn
+        )
+    }
+
+fun Modifier.underline(): Modifier = this
+    .drawBehind {
+        val verticalOffset = size.height - 2.sp.toPx()
+
+        drawLine(
+            color = Color.Black,
+            strokeWidth = 1.dp.toPx(),
+            start = Offset(0f, verticalOffset),
+            end = Offset(size.width, verticalOffset)
         )
     }
