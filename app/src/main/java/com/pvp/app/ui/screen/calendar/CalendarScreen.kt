@@ -1,5 +1,8 @@
 package com.pvp.app.ui.screen.calendar
 
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,12 +25,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
+import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,13 +46,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.screen.steps.StepViewModel
 import com.pvp.app.ui.screen.task.CreateTaskGeneralForm
 import com.pvp.app.ui.screen.task.CreateTaskMealForm
 import com.pvp.app.ui.screen.task.CreateTaskSportForm
@@ -199,7 +208,7 @@ fun Day(
                     shape = RoundedCornerShape(10.dp)
                 )
                 .clickable { expand = !expand }
-                .align(Alignment.CenterHorizontally),
+                .align(Alignment.CenterHorizontally)
         ) {
             Column(
                 modifier = Modifier
@@ -222,19 +231,18 @@ fun Day(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // TODO add step counter
-                Text(
-                    "Steps",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                )
-
-                // Don't display date if no value was supplied
+                // Don't display date and steps if no date was supplied
                 if (!date.isEqual(LocalDate.MIN)) {
+                    Text(
+                        "Steps",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
+
+                    StepCounter(date = date)
+
                     Spacer(modifier = Modifier.weight(1f))
 
                     Text(
@@ -289,6 +297,37 @@ enum class TaskFilter(val displayName: String) {
     General("General"),
     Sports("Sports"),
     Meal("Meal")
+}
+
+@Composable
+fun StepCounter(
+    model: CalendarViewModel = hiltViewModel(),
+    date: LocalDate
+) {
+    // Required for checking whether user has permissions before entering the window,
+    // as users can revoke permissions at any time
+    val permissionContract = PermissionController.createRequestPermissionResultContract()
+
+    val launcher =
+        rememberLauncherForActivityResult(permissionContract) {
+            model.getDaysSteps(date)
+        }
+
+    LaunchedEffect(Unit) {
+        if (model.permissionsGranted()) {
+            model.getDaysSteps(date)
+        } else {
+            launcher.launch(PERMISSIONS)
+        }
+    }
+
+    val steps = model.stepsCount.collectAsStateWithLifecycle()
+
+    Text(
+        steps.value.toString(),
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable
