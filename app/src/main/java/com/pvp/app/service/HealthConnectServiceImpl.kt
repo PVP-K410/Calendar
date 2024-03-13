@@ -2,6 +2,8 @@ package com.pvp.app.service
 
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.Record
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import com.pvp.app.api.HealthConnectService
@@ -23,5 +25,23 @@ class HealthConnectServiceImpl @Inject constructor(
         )
 
         return client.readRecords(request).records
+    }
+
+    override suspend fun aggregateSteps(
+        start: java.time.Instant,
+        end: java.time.Instant
+    ) : Long {
+        return try{
+            val response = client.aggregate(
+                AggregateRequest(
+                    metrics = setOf(StepsRecord.COUNT_TOTAL),
+                    timeRangeFilter = TimeRangeFilter.between(start,  end)
+                )
+            )
+
+            response[StepsRecord.COUNT_TOTAL] ?: 0L
+        } catch (e: Exception){
+            0L
+        }
     }
 }
