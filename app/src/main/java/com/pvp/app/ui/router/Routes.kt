@@ -1,5 +1,6 @@
 package com.pvp.app.ui.router
 
+import MonthlyCalendarScreen
 import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
@@ -39,6 +40,7 @@ sealed class Route(
         val routesAuthenticated = listOf(
             ActivitiesFilter,
             Calendar,
+            MonthlyCalendar,
             IngredientsFilter,
             Profile,
             Steps
@@ -53,8 +55,9 @@ sealed class Route(
          * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
          */
         val routesDrawer = listOf(
-            ActivitiesFilter,
             Calendar,
+            MonthlyCalendar,
+            ActivitiesFilter,
             IngredientsFilter,
             Profile,
             Steps
@@ -73,14 +76,6 @@ sealed class Route(
         )
     }
 
-    data object ActivitiesFilter : Route(
-        icon = Icons.Outlined.FilterList,
-        iconDescription = "Activities filter edit page button icon",
-        resourceTitleId = R.string.route_filters_edit_activities,
-        route = "filters/edit/activities",
-        screen = { _, _ -> ActivitiesFilter() }
-    )
-
     data object Calendar : Route(
         icon = Icons.Outlined.CalendarMonth,
         iconDescription = "Calendar page button icon",
@@ -89,6 +84,21 @@ sealed class Route(
         screen = { _, _ -> CalendarScreen() }
     )
 
+    data object MonthlyCalendar : Route(
+        icon = Icons.Outlined.CalendarMonth,
+        iconDescription = "Calendar page button icon",
+        resourceTitleId = R.string.route_calendar_monthly,
+        route = "calendar/monthly",
+        screen = { _, _ -> MonthlyCalendarScreen() }
+    )
+
+    data object ActivitiesFilter : Route(
+        icon = Icons.Outlined.FilterList,
+        iconDescription = "Activities filter edit page button icon",
+        resourceTitleId = R.string.route_filters_edit_activities,
+        route = "filters/edit/activities",
+        screen = { _, _ -> ActivitiesFilter() }
+    )
 
     data object IngredientsFilter : Route(
         icon = Icons.Outlined.FilterList,

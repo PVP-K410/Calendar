@@ -30,6 +30,36 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun updateUsername(newUsername: String) {
+        viewModelScope.launch {
+            _user.value?.let {
+                it.username = newUsername
+
+                userService.merge(it)
+            }
+        }
+    }
+
+    fun updateMass(newMass: Int) {
+        viewModelScope.launch {
+            _user.value?.let {
+                it.mass = newMass
+
+                userService.merge(it)
+            }
+        }
+    }
+
+    fun updateHeight(newHeight: Int) {
+        viewModelScope.launch {
+            _user.value?.let {
+                it.height = newHeight
+
+                userService.merge(it)
+            }
+        }
+    }
+
     fun signOut(onSignOut: (SignOutResult) -> Unit) {
         viewModelScope.launch {
             authenticationService.signOut(onSignOut)
