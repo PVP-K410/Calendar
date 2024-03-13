@@ -24,9 +24,10 @@ class MonthlyCalendarViewModel @Inject constructor(
     private val taskService: TaskService,
     private val userService: UserService
 ) : ViewModel() {
+
     private val _currentYearMonth = MutableStateFlow(YearMonth.now())
-    private val _uiState = MutableStateFlow(CalendarUiState.Init)
-    val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(CalendarUiState.Init)
+    val state: StateFlow<CalendarUiState> = _state.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -38,29 +39,38 @@ class MonthlyCalendarViewModel @Inject constructor(
             }
 
             combine(flowUser, flowTasks) { user, tasks ->
-                _uiState.update { currentState ->
+                _state.update { currentState ->
                     currentState.copy(
-                        dates = getDates(currentState.yearMonth, tasks),
+                        dates = getDates(
+                            currentState.yearMonth,
+                            tasks
+                        ),
                         tasks = tasks
                     )
                 }
             }
                 .launchIn(viewModelScope)
-
         }
     }
 
     fun changeMonth(nextMonth: YearMonth) {
-        _uiState.update { currentState ->
+        _state.update { currentState ->
             currentState.copy(
                 yearMonth = nextMonth,
-                dates = getDates(nextMonth, currentState.tasks)
+                dates = getDates(
+                    nextMonth,
+                    currentState.tasks
+                )
             )
         }
     }
 
-    private fun getDates(yearMonth: YearMonth, tasks: List<Task>): List<CalendarUiState.DateEntry> {
-        return yearMonth.getDayOfMonthStartingFromMonday()
+    private fun getDates(
+        yearMonth: YearMonth,
+        tasks: List<Task>
+    ): List<CalendarUiState.DateEntry> {
+        return yearMonth
+            .getDays()
             .map { date ->
                 if (date.month == yearMonth.month) {
                     CalendarUiState.DateEntry(

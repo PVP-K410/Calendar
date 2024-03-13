@@ -1,4 +1,3 @@
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -40,15 +39,15 @@ import java.time.YearMonth
 fun MonthlyCalendarScreen(
     model: MonthlyCalendarViewModel = hiltViewModel(),
 ) {
-    val uiState by model.uiState.collectAsState()
+    val state by model.state.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var dateTasks by remember { mutableStateOf<List<Task>>(emptyList()) }
 
     MonthlyCalendar(
         days = DateUtil.daysOfWeek,
-        month = uiState.yearMonth,
-        dates = uiState.dates,
+        month = state.yearMonth,
+        dates = state.dates,
         onClickListener = { date ->
             showDialog = true
             selectedDate = date.date
@@ -75,7 +74,10 @@ fun DayDialog(
         onDismissRequest = { onDismissRequest() },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Day(name = date.toString(), tasks = tasks)
+        Day(
+            name = date.toString(),
+            tasks = tasks
+        )
     }
 }
 
@@ -94,7 +96,11 @@ fun MonthlyCalendar(
         Row {
             repeat(days.size) {
                 val item = days[it]
-                DayItem(item, modifier = Modifier.weight(1f))
+
+                DayItem(
+                    day = item,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
 
@@ -145,7 +151,10 @@ fun Header(
 }
 
 @Composable
-fun DayItem(day: String, modifier: Modifier = Modifier) {
+fun DayItem(
+    day: String,
+    modifier: Modifier = Modifier
+) {
     Box(modifier = modifier) {
         Text(
             text = day,
@@ -168,21 +177,19 @@ fun Content(
 
         repeat(6) {
             if (index >= dates.size) {
-                Log.e("CONTENT DATE FILTER", dates.size.toString())
                 return@repeat
             }
 
             Row {
                 repeat(7) {
-                    val item =
-                        if (index < dates.size) {
-                            dates[index]
-                        } else {
-                            CalendarUiState.DateEntry.Empty
-                        }
+                    val item = if (index < dates.size) {
+                        dates[index]
+                    } else {
+                        CalendarUiState.DateEntry.Empty
+                    }
 
                     ContentItem(
-                        date = item,
+                        entry = item,
                         onClickListener = onClickListener,
                         modifier = Modifier.weight(1f)
                     )
@@ -196,20 +203,20 @@ fun Content(
 
 @Composable
 fun ContentItem(
-    date: CalendarUiState.DateEntry,
+    entry: CalendarUiState.DateEntry,
     onClickListener: (CalendarUiState.DateEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var text = date.date.dayOfMonth.toString()
+    var text = entry.date.dayOfMonth.toString()
     var clickable = true
     var color = MaterialTheme.colorScheme.onPrimaryContainer
 
     // If date is a default value used to fill up the list so that first month day starts on correct
     // week date, we ensure that it is not clickable and is an empty string
-    if (date.date.isEqual(LocalDate.MIN)) {
+    if (entry.date.isEqual(LocalDate.MIN)) {
         text = ""
         clickable = false
-    } else if (date.tasks.isEmpty()) {
+    } else if (entry.tasks.isEmpty()) {
         color = Color.Gray
         clickable = false
     }
@@ -217,14 +224,14 @@ fun ContentItem(
     Box(
         modifier = modifier
             .background(
-                color = if (date.isHighlighted) {
+                color = if (entry.isHighlighted) {
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
                 }
             )
             .clickable(enabled = clickable) {
-                onClickListener(date)
+                onClickListener(entry)
             }
     ) {
         Text(
