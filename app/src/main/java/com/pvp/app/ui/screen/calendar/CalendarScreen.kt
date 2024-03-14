@@ -277,7 +277,7 @@ private fun filterTasks(
     filter: TaskFilter
 ): List<Task> {
     return when (filter) {
-        TaskFilter.Daily -> emptyList() //TaskFilter.Daily -> tasks.filter {  } TODO add daily tasks
+        TaskFilter.Daily -> emptyList()
         TaskFilter.Sports -> tasks.filterIsInstance<SportTask>()
         TaskFilter.Meal -> tasks.filterIsInstance<MealTask>()
         TaskFilter.General -> tasks.filter { task -> task !is SportTask && task !is MealTask }
