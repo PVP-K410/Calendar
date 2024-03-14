@@ -133,6 +133,7 @@ dependencies {
 
     // Dependency Injection (Dagger-Hilt)
     implementation("com.google.dagger:hilt-android:2.50")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
 
     // Health connect
@@ -153,6 +154,9 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // Notifications
+    implementation("com.google.accompanist:accompanist-permissions:0.31.1-alpha")
 }
 
 kapt {
