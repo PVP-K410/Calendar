@@ -1,8 +1,6 @@
 package com.pvp.app.ui.screen.calendar
 
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -26,8 +24,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
-import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -60,7 +56,6 @@ import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
-import com.pvp.app.ui.screen.steps.StepViewModel
 import com.pvp.app.ui.screen.task.CreateTaskGeneralForm
 import com.pvp.app.ui.screen.task.CreateTaskMealForm
 import com.pvp.app.ui.screen.task.CreateTaskSportForm
