@@ -195,6 +195,7 @@ fun Day(
     ) {
         Box(
             modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .size(
                     height = 250.dp,
