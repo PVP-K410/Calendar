@@ -61,7 +61,7 @@ fun SignUpScreen(
     AuthenticationBox(
         isSignIn = false,
         onSignIn = {
-            controller.navigate(Route.SignIn.route)
+            controller.navigate(Route.SignIn.path)
         },
         onSignUp = {
             scope.launch {
