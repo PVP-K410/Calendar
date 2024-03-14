@@ -187,7 +187,7 @@ fun Day(
     expandedUponCreation: Boolean = false
 ) {
     var expand by remember { mutableStateOf(expandedUponCreation) }
-    var selectedFilter by remember { mutableStateOf(TaskFilter.General) }
+    var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
     val filteredTasks = filterTasks(tasks, selectedFilter)
 
     Column(
