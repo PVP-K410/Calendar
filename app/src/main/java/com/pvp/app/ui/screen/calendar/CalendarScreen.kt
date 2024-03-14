@@ -232,7 +232,6 @@ fun Day(
                     )
                 }
 
-                // Don't display steps if no date was supplied
                 if (!date.isEqual(LocalDate.MIN)) {
                     Text(
                         text = "Steps of the day",
@@ -318,13 +317,10 @@ fun StepCounter(
     val goal = 10000f // TODO create way for user to set a step goal?
     val progress = steps.value / goal
 
-
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        // These have to be set here because for some reason MaterialTheme.colorScheme
-        // can't be used inside a Canvas ¯\_(ツ)_/¯
         val backgroundArcColor = MaterialTheme.colorScheme.primaryContainer
         val progressArcColor = MaterialTheme.colorScheme.primary
 
@@ -344,7 +340,10 @@ fun StepCounter(
                 useCenter = false,
                 topLeft = topLeft,
                 size = size,
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                style = Stroke(
+                    width = strokeWidth,
+                    cap = StrokeCap.Round
+                )
             )
 
             drawArc(
@@ -354,9 +353,13 @@ fun StepCounter(
                 useCenter = false,
                 topLeft = topLeft,
                 size = size,
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                style = Stroke(
+                    width = strokeWidth,
+                    cap = StrokeCap.Round
+                )
             )
         }
+
         Text(
             text = "${steps.value}",
             style = MaterialTheme.typography.titleSmall,

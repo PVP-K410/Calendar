@@ -30,17 +30,17 @@ class HealthConnectServiceImpl @Inject constructor(
     override suspend fun aggregateSteps(
         start: java.time.Instant,
         end: java.time.Instant
-    ) : Long {
-        return try{
+    ): Long {
+        return try {
             val response = client.aggregate(
                 AggregateRequest(
                     metrics = setOf(StepsRecord.COUNT_TOTAL),
-                    timeRangeFilter = TimeRangeFilter.between(start,  end)
+                    timeRangeFilter = TimeRangeFilter.between(start, end)
                 )
             )
 
             response[StepsRecord.COUNT_TOTAL] ?: 0L
-        } catch (e: Exception){
+        } catch (e: Exception) {
             0L
         }
     }

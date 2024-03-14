@@ -34,7 +34,6 @@ class CalendarViewModel @Inject constructor(
     private val userService: UserService,
     private val healtConnectService: HealthConnectService,
     private val client: HealthConnectClient
-
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CalendarState())
@@ -82,8 +81,13 @@ class CalendarViewModel @Inject constructor(
 
     fun getDaysSteps(date: LocalDate) {
         viewModelScope.launch {
-            val end = date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
-            val start = date.atStartOfDay(ZoneId.systemDefault()).toInstant()
+            val end = date
+                .plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+            val start = date
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
 
             _stepsCount.value = healtConnectService.aggregateSteps(start, end)
         }
