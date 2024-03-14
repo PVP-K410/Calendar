@@ -285,7 +285,7 @@ private fun filterTasks(
 }
 
 enum class TaskFilter(val displayName: String) {
-    Daily("Daily"), //TODO add daily tasks
+    Daily("Daily"),
     General("General"),
     Sports("Sports"),
     Meal("Meal")
