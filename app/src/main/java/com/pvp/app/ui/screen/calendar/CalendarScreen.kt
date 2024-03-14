@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,7 +42,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -197,8 +202,8 @@ fun Day(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
                 .size(
-                    height = 200.dp,
-                    width = 200.dp
+                    height = 250.dp,
+                    width = 300.dp
                 )
                 .border(
                     BorderStroke(
@@ -218,40 +223,33 @@ fun Day(
                 Box(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.secondaryContainer)
-                        .height(50.dp)
+                        .height(60.dp)
                         .fillMaxWidth()
                         .clickable { expand = !expand }
                 ) {
                     Text(
-                        name,
+                        text = name,
                         textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
                     )
                 }
 
-                // Don't display date and steps if no date was supplied
+                // Don't display steps if no date was supplied
                 if (!date.isEqual(LocalDate.MIN)) {
                     Text(
-                        "Steps",
+                        text = "Steps of the day",
                         textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    )
-
-                    StepCounter(date = date)
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Text(
-                        date.toString(),
-                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontSize = 20.sp,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
                     )
+
+                    StepCounter(date = date)
                 }
             }
         }
@@ -322,12 +320,55 @@ fun StepCounter(
     }
 
     val steps = model.stepsCount.collectAsStateWithLifecycle()
+    val goal = 10000f // TODO create way for user to set a step goal?
+    val progress = steps.value / goal
 
-    Text(
-        steps.value.toString(),
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
-    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // These have to be set here because for some reason MaterialTheme.colorScheme
+        // can't be used inside a Canvas ¯\_(ツ)_/¯
+        val backgroundArcColor = MaterialTheme.colorScheme.primaryContainer
+        val progressArcColor = MaterialTheme.colorScheme.primary
+
+        Canvas(modifier = Modifier.size(100.dp)) {
+            val strokeWidth = 6.dp.toPx()
+            val radius = 300f
+            val topLeft = Offset(
+                (size.width / 2) - (radius / 2),
+                (size.height / 2) - (radius / 2)
+            )
+            val size = Size(radius, radius)
+
+            drawArc(
+                color = backgroundArcColor,
+                startAngle = -90f,
+                sweepAngle = 360f,
+                useCenter = false,
+                topLeft = topLeft,
+                size = size,
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+            )
+
+            drawArc(
+                color = progressArcColor,
+                startAngle = -90f,
+                sweepAngle = 360f * progress,
+                useCenter = false,
+                topLeft = topLeft,
+                size = size,
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+            )
+        }
+        Text(
+            text = "${steps.value}",
+            style = MaterialTheme.typography.titleSmall,
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @Composable
