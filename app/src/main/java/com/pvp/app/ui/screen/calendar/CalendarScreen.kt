@@ -232,7 +232,7 @@ fun Day(
                     )
                 }
 
-                if (!date.isEqual(LocalDate.MIN)) {
+                if (!date.isEqual(LocalDate.MIN) && !date.isAfter(LocalDate.now())) {
                     Text(
                         text = "Steps of the day",
                         textAlign = TextAlign.Center,
