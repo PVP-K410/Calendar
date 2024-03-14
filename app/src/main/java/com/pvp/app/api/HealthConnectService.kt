@@ -28,5 +28,5 @@ interface HealthConnectService {
     suspend fun aggregateSteps(
         start: java.time.Instant,
         end: java.time.Instant
-    ) : Long
+    ): Long
 }
