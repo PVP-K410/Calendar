@@ -121,6 +121,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("com.google.accompanist:accompanist-permissions:0.31.1-alpha")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Kotlinx
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
@@ -152,11 +155,6 @@ dependencies {
     // Compose
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    // Notifications
-    implementation("com.google.accompanist:accompanist-permissions:0.31.1-alpha")
 }
 
 kapt {

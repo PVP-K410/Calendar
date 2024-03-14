@@ -8,6 +8,7 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class Application : Application() {
+
     companion object {
         lateinit var appContext: Context
             private set
@@ -15,6 +16,7 @@ class Application : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        
         appContext = applicationContext
     }
 }

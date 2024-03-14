@@ -92,9 +92,15 @@ open class Task(
         return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail')"
     }
 
-    fun scheduleReminder(context: Context, minutesToReminder: Int) {
+    fun scheduleReminder(
+        context: Context,
+        minutesToReminder: Int)
+    {
         val now = LocalDateTime.now()
-        val timeDifference = ChronoUnit.SECONDS.between(now, scheduledAt)
+        val timeDifference = ChronoUnit.SECONDS.between(
+            now,
+            scheduledAt
+        )
         val reminderTime = timeDifference - minutesToReminder * 60
 
         if (reminderTime <= 0) {
@@ -104,6 +110,11 @@ open class Task(
         val text = "Task: '$title' is in ${minutesToReminder} minutes!"
         val notificationId = Random(System.currentTimeMillis()).nextInt()
 
-        scheduleNotification(context, text, reminderTime.toInt(), notificationId)
+        scheduleNotification(
+            context,
+            text,
+            reminderTime.toInt(),
+            notificationId
+        )
     }
 }
