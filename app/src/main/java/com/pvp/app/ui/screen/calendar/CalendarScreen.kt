@@ -1,15 +1,18 @@
 package com.pvp.app.ui.screen.calendar
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +23,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -43,6 +48,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -422,21 +428,46 @@ fun FilterBox(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Week(
     modifier: Modifier = Modifier,
     tasks: List<Task>
 ) {
-    Row(
-        modifier = modifier
-            .horizontalScroll(rememberScrollState())
-            .fillMaxWidth()
-    ) {
-        (1..7).forEach {
-            Day(
-                name = DayOfWeek.of(it).name,
-                tasks = tasks.filter { task -> task.scheduledAt.dayOfWeek.value == it }
-            )
+    val days = (1..7).map { DayOfWeek.of(it).name }
+    val pagerState = rememberPagerState(pageCount = { days.size })
+    val currentPage = pagerState.currentPage
+
+    @Composable
+    fun DayPage(day: String, pageIndex: Int) {
+        val tasksForDay = tasks.filter { task -> task.scheduledAt.dayOfWeek.name == day }
+        val scale = animateFloatAsState(
+            targetValue = if (pageIndex == currentPage) 1f else 0.8f,
+            animationSpec = spring(stiffness = 500f)
+        ).value
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer(scaleX = scale, scaleY = scale),
+            contentAlignment = Alignment.Center
+        ) {
+            Day(name = day, tasks = tasksForDay)
         }
+    }
+
+
+    @Composable
+    fun Page(pageIndex: Int) {
+        val day = days[pageIndex]
+        DayPage(day, pageIndex)
+    }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier.padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(start = 32.dp, end = 32.dp),
+    ) { page ->
+        Page(page)
     }
 }
