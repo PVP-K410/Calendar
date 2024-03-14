@@ -45,6 +45,7 @@ sealed class Route(
             IngredientsFilter,
             MonthlyCalendar,
             Profile,
+            Settings,
             Steps
         )
 
@@ -62,6 +63,7 @@ sealed class Route(
             IngredientsFilter,
             MonthlyCalendar,
             Profile,
+            Settings,
             Steps
         )
 
