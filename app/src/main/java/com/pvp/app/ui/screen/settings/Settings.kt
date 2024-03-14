@@ -66,7 +66,7 @@ fun CategoryRow(
         )
 
         Text(
-            text = " " + title,
+            text = " $title",
             style = MaterialTheme.typography.titleLarge,
         )
     }
@@ -92,7 +92,7 @@ fun SettingCard(
             ),
     ) {
         Text(
-            text = " " + title,
+            text = " $title",
             fontSize = 18.sp
         )
     }
