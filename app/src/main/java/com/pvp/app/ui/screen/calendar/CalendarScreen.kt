@@ -277,7 +277,7 @@ private fun filterTasks(
     filter: TaskFilter
 ): List<Task> {
     return when (filter) {
-        //TaskFilter.Daily -> tasks.filter {  } TODO add daily tasks
+        TaskFilter.Daily -> emptyList() //TaskFilter.Daily -> tasks.filter {  } TODO add daily tasks
         TaskFilter.Sports -> tasks.filterIsInstance<SportTask>()
         TaskFilter.Meal -> tasks.filterIsInstance<MealTask>()
         TaskFilter.General -> tasks.filter { task -> task !is SportTask && task !is MealTask }
@@ -285,7 +285,7 @@ private fun filterTasks(
 }
 
 enum class TaskFilter(val displayName: String) {
-    //Daily("daily"), TODO add daily tasks
+    Daily("Daily"), //TODO add daily tasks
     General("General"),
     Sports("Sports"),
     Meal("Meal")
@@ -382,7 +382,10 @@ fun TaskFilterBar(
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .background(
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
+            )
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
@@ -415,7 +418,8 @@ fun FilterBox(
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
-                }
+                },
+                MaterialTheme.shapes.medium
             )
     ) {
         Text(text = filter.displayName)
