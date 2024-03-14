@@ -449,24 +449,28 @@ fun Week(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .graphicsLayer(scaleX = scale, scaleY = scale),
+                .graphicsLayer(
+                    scaleX = scale,
+                    scaleY = scale
+                ),
             contentAlignment = Alignment.Center
         ) {
             Day(name = day, tasks = tasksForDay)
         }
     }
 
-
     @Composable
     fun Page(pageIndex: Int) {
-        val day = days[pageIndex]
-        DayPage(day, pageIndex)
+        DayPage(days[pageIndex], pageIndex)
     }
 
     HorizontalPager(
         state = pagerState,
         modifier = modifier.padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(start = 32.dp, end = 32.dp),
+        contentPadding = PaddingValues(
+            start = 32.dp,
+            end = 32.dp
+        ),
     ) { page ->
         Page(page)
     }
