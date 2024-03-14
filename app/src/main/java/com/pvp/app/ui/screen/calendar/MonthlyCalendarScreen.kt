@@ -1,3 +1,5 @@
+package com.pvp.app.ui.screen.calendar
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -27,11 +29,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.Task
-import com.pvp.app.ui.screen.calendar.CalendarUiState
-import com.pvp.app.ui.screen.calendar.DateUtil
-import com.pvp.app.ui.screen.calendar.Day
-import com.pvp.app.ui.screen.calendar.MonthlyCalendarViewModel
-import com.pvp.app.ui.screen.calendar.getDisplayName
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -72,11 +69,13 @@ fun DayDialog(
 ) {
     Dialog(
         onDismissRequest = { onDismissRequest() },
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Day(
-            name = date.toString(),
-            tasks = tasks
+            "${date.month.toString().toLowerCase().capitalize()} ${date.dayOfMonth}",
+            tasks = tasks,
+            date = date,
+            expandedUponCreation = true
         )
     }
 }
