@@ -17,12 +17,18 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+
+var reminderTimeMinutes by mutableIntStateOf(10)
 
 @Composable
 fun SettingsScreen() {
@@ -46,7 +52,8 @@ fun SettingsScreen() {
             title = "Notifications"
         )
 
-        SettingCard(title = "Placeholder")
+        ReminderSetting()
+
         SettingCard(title = "Placeholder")
         SettingCard(title = "Placeholder")
     }
@@ -70,6 +77,35 @@ fun CategoryRow(
             style = MaterialTheme.typography.titleLarge,
         )
     }
+
+    Divider(
+        color = MaterialTheme.colorScheme.tertiary,
+        thickness = 1.dp,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun ReminderSetting() {
+    Row {
+        Text(
+            text = "Reminder time",
+            style = MaterialTheme.typography.titleLarge,
+        )
+    }
+
+    Text(
+        modifier = Modifier.padding(vertical = 8.dp),
+        text = "Selected (minutes): $reminderTimeMinutes",
+    )
+
+    Slider(
+        value = reminderTimeMinutes.toFloat(),
+        onValueChange = { reminderTimeMinutes = it.toInt() },
+        valueRange = 1f..60f,
+        steps = 59,
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
 
     Divider(
         color = MaterialTheme.colorScheme.tertiary,
