@@ -22,11 +22,11 @@ fun LayoutScreenBootstrap(
         return
     }
 
-    if (!state.isAuthenticated || state.isSurveyFilled == false) {
+    if (!state.isAuthenticated || state.areSurveysFilled == false) {
         LayoutScreenUnauthenticated(
+            areSurveysFilled = state.areSurveysFilled,
             controller = rememberNavController(),
             isAuthenticated = state.isAuthenticated,
-            isSurveyFilled = state.isSurveyFilled,
             scope = rememberCoroutineScope()
         )
 

@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,11 +32,22 @@ private val heightRange = (10..300).toList()
 @Composable
 @SuppressLint("ComposableNaming")
 fun BodyMassIndexSurvey(
-    modifier: Modifier = Modifier,
-    onSubmit: (height: Int, mass: Int) -> Unit
-): () -> Boolean {
+    handler: (height: Int, mass: Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val stateMass = rememberPickerState(massRange[0])
     val stateHeight = rememberPickerState(heightRange[0])
+
+    LaunchedEffect(
+        handler,
+        stateMass.value,
+        stateHeight.value
+    ) {
+        handler(
+            stateHeight.value,
+            stateMass.value
+        )
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -64,16 +76,6 @@ fun BodyMassIndexSurvey(
                 textResult = { "$it cm (${it / 100.0} m)" },
                 textSelect = "Select your height",
             )
-        }
-    }
-
-    return {
-        try {
-            onSubmit(stateHeight.value, stateMass.value)
-
-            true
-        } catch (e: Exception) {
-            false
         }
     }
 }

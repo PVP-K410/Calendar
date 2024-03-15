@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
+import com.pvp.app.model.Survey
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.showToast
 
@@ -44,12 +45,15 @@ fun SurveyScreen(
             .padding(8.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        val form by viewModel.form.collectAsStateWithLifecycle()
+        var handler by remember { mutableStateOf({}) }
         var success by remember { mutableStateOf(true) }
 
-        val callback = form.content(
-            Modifier.weight(0.9f),
-            viewModel
+        SurveyInput(
+            handler = { onSubmit ->
+                handler = onSubmit
+            },
+            modifier = Modifier.weight(0.9f),
+            viewModel = viewModel
         )
 
         Row(
@@ -58,11 +62,13 @@ fun SurveyScreen(
             Button(
                 modifier = Modifier.fillMaxWidth(0.8f),
                 onClick = {
-                    success = callback()
+                    try {
+                        handler()
 
-                    if (success) {
                         viewModel.next()
-                    } else {
+                    } catch (e: Exception) {
+                        success = false
+
                         context.showToast(message = textError)
                     }
                 }
@@ -78,9 +84,36 @@ fun SurveyScreen(
 
                 Text(
                     style = MaterialTheme.typography.labelMedium,
-                    text = if (form.hasNext()) textContinue else textSubmit,
+                    text = if (viewModel.hasNext()) textContinue else textSubmit,
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SurveyInput(
+    handler: (onSubmit: () -> Unit) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: SurveyViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    when (state.current) {
+        Survey.BODY_MASS_INDEX -> {
+            BodyMassIndexSurvey(
+                modifier = modifier,
+                handler = { height, mass ->
+                    handler {
+                        viewModel.updateBodyMassIndex(
+                            height = height,
+                            mass = mass
+                        )
+                    }
+                }
+            )
+        }
+
+        else -> {}
     }
 }
