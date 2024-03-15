@@ -141,16 +141,30 @@ private fun BodyMassIndexPicker(
     )
 }
 
-private val activities = SportActivity.entries.map { it.title }
-private val ingredients = Ingredient.entries.map { it.title }
+private val activities = SportActivity
+    .entries
+    .map { it.title }
+
+private val ingredients = Ingredient
+    .entries
+    .map { it.title }
 
 @Composable
-fun FilterActivitiesSurvey(
+fun FilterSurvey(
     handler: (filters: List<String>) -> Unit,
-    modifier: Modifier = Modifier
+    isActivities: Boolean,
+    modifier: Modifier = Modifier,
+    title: String
 ) {
     var selectedFilters by remember { mutableStateOf(emptyList<String>()) }
-    var unselectedFilters by remember { mutableStateOf(activities - selectedFilters.toSet()) }
+    var unselectedFilters by remember { mutableStateOf(emptyList<String>()) }
+
+    if (isActivities) {
+        unselectedFilters = activities - selectedFilters.toSet()
+    } else {
+        unselectedFilters = ingredients - selectedFilters.toSet()
+    }
+
 
     LaunchedEffect(
         handler,
@@ -166,7 +180,7 @@ fun FilterActivitiesSurvey(
         verticalArrangement = Arrangement.Center
     ) {
         FiltersBox(
-            title = "Selected activities",
+            title = "Selected $title",
             filters = selectedFilters,
             onClick = { filter ->
                 selectedFilters = selectedFilters.minus(filter)
@@ -175,7 +189,7 @@ fun FilterActivitiesSurvey(
         )
 
         FiltersBox(
-            title = "Available activities",
+            title = "Available $title",
             filters = unselectedFilters,
             onClick = { filter ->
                 unselectedFilters = unselectedFilters.minus(filter)

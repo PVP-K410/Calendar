@@ -12,7 +12,8 @@ import kotlinx.serialization.encoding.Encoder
 enum class Survey {
 
     BODY_MASS_INDEX,
-    FILTER_ACTIVITIES;
+    FILTER_ACTIVITIES,
+    FILTER_INGREDIENTS;
 
     companion object {
 

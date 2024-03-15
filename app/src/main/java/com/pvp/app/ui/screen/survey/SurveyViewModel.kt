@@ -3,6 +3,7 @@ package com.pvp.app.ui.screen.survey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.UserService
+import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.Survey
 import com.pvp.app.model.User
@@ -64,16 +65,23 @@ class SurveyViewModel @Inject constructor(
     }
 
     fun updateUserFilters(
-        filters: List<String>
+        filters: List<String>,
+        isActivities: Boolean
     ) {
         viewModelScope.launch {
             _state.value.user.let { user ->
-                userService.merge(
+                val updatedUser = if (isActivities) {
                     user.copy(
                         activities = filters.mapNotNull { SportActivity.fromTitle(it) },
                         surveys = user.surveys + state.value.current!!
                     )
-                )
+                } else {
+                    user.copy(
+                        ingredients = filters.mapNotNull { Ingredient.fromTitle(it) },
+                        surveys = user.surveys + state.value.current!!
+                    )
+                }
+                userService.merge(updatedUser)
             }
         }
     }

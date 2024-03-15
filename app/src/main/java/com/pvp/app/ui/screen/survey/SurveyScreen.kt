@@ -117,18 +117,40 @@ fun SurveyInput(
         }
 
         Survey.FILTER_ACTIVITIES -> {
-            FilterActivitiesSurvey(
+            FilterSurvey(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState()),
+                isActivities = true,
                 handler = { filters ->
                     handler {
                         viewModel.updateUserFilters(
-                            filters = filters
+                            filters = filters,
+                            isActivities = true
                         )
                     }
-                }
+                },
+                title = "activities"
+            )
+        }
+
+        Survey.FILTER_INGREDIENTS -> {
+            FilterSurvey(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                isActivities = false,
+                handler = { filters ->
+                    handler {
+                        viewModel.updateUserFilters(
+                            filters = filters,
+                            isActivities = false
+                        )
+                    }
+                },
+                title = "ingredients"
             )
         }
 
