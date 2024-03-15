@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,17 +15,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DoorFront
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -34,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -98,6 +96,8 @@ private fun ProfileBody(
                     onUpdateMass(newMass)
                     context.showToast(message = "Your mass has been updated!")
                 } else {
+                    massEditing = massDisplay.toString()
+
                     context.showToast(message = "Please enter a valid mass!")
                 }
             },
@@ -132,6 +132,8 @@ private fun ProfileBody(
                     onUpdateHeight(newHeight)
                     context.showToast(message = "Your height has been updated!")
                 } else {
+                    massEditing = massDisplay.toString()
+
                     context.showToast(message = "Please enter a valid height!")
                 }
             },
@@ -148,32 +150,52 @@ private fun ProfileFooter(
 ) {
     val textSignOut = stringResource(R.string.screen_profile_button_sign_out)
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.Bottom
-    ) {
-        Button(
-            modifier = Modifier.padding(
+
+    ButtonWithDialog(
+        modifier = Modifier
+            .padding(
                 bottom = 10.dp,
                 end = 10.dp
-            ),
-            onClick = onSignOut
-        ) {
-            Text(
-                text = textSignOut,
-                style = MaterialTheme.typography.bodyMedium
             )
+            .fillMaxSize(),
+        contentAlignment = Alignment.BottomEnd,
+        mainButtonContent = {
+            Text(textSignOut)
+        },
+        dismissButtonContent = {
+            Text("Cancel")
+        },
+        confirmButtonContent = {
+            Text("Sign Out")
+        },
+        dialogTitle = {
+            Row {
+                Icon(
+                    imageVector = Icons.Default.DoorFront,
+                    contentDescription = "Sign Out Icon",
+                    modifier = Modifier
+                        .padding(
+                            end = 6.dp,
+                            top = 4.dp
+                        )
+                        .size(24.dp)
+                )
+                Text(text = "Sign Out?")
+            }
+        },
+        dialogContent = {
+            Text(text = "Are you sure you want to sign out?")
+        },
+        onConfirmClick = {
+            onSignOut()
         }
-    }
+    )
+
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun ProfileHeader(
     state: State<ProfileState>,
-    colorAvatarBorder: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
     context: Context = LocalContext.current,
     onUpdateUsername: (String) -> Unit
 ) {
@@ -219,11 +241,19 @@ private fun ProfileHeader(
                 modifier = Modifier
                     .padding(
                         start = 5.dp,
-                        top = 6.dp
+                        top = 4.dp
                     ),
                 icon = Icons.Default.Edit,
-                iconSize = 25.dp,
-                dialogTitle = { Text("Editing Username") },
+                iconSize = 30.dp,
+                confirmButtonContent = {
+                    Text("Edit")
+                },
+                dismissButtonContent = {
+                    Text("Cancel")
+                },
+                dialogTitle = {
+                    Text("Editing Username")
+                },
                 dialogContent = {
                     OutlinedTextField(
                         value = userNameEditing,
@@ -241,8 +271,12 @@ private fun ProfileHeader(
                         onUpdateUsername(userNameEditing)
                         context.showToast(message = "Your username has been updated!")
                     } else if (userNameEditing.length > 30) {
+                        userNameEditing = userNameDisplay
+
                         context.showToast(message = "Username cannot be longer than 30 characters")
                     } else {
+                        userNameEditing = userNameDisplay
+
                         context.showToast(message = "Username cannot be empty!")
                     }
                 },
@@ -305,12 +339,14 @@ private fun UserInfoItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 IconButtonWithDialog(
-                    modifier = Modifier.padding(
-                        top = 2.dp,
-                        start = 8.dp
-                    ),
                     icon = Icons.Default.Edit,
-                    iconSize = 25.dp,
+                    iconSize = 30.dp,
+                    confirmButtonContent = {
+                        Text("Edit")
+                    },
+                    dismissButtonContent = {
+                        Text("Cancel")
+                    },
                     dialogTitle = dialogTitle,
                     dialogContent = dialogContent,
                     onConfirmClick = onConfirmClick,
@@ -371,7 +407,6 @@ private fun UserFilterItem(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
@@ -398,14 +433,6 @@ fun ProfileScreen(
         ) {
             ProfileHeader(
                 state = state,
-                colorAvatarBorder = MaterialTheme.colorScheme.primaryContainer,
-                colors = TopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    scrolledContainerColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                ),
                 onUpdateUsername = {
                     viewModel.updateUserInformation(newUsername = it)
                 }
@@ -442,10 +469,12 @@ fun IconButtonWithDialog(
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Default.Edit,
     iconSize: Dp = 20.dp,
-    dialogTitle: @Composable () -> Unit,
-    dialogContent: @Composable () -> Unit,
-    onConfirmClick: () -> Unit,
-    onDismiss: () -> Unit
+    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
+    dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
+    dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
+    dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
+    onConfirmClick: () -> Unit = {},
+    onDismiss: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -463,40 +492,113 @@ fun IconButtonWithDialog(
                 contentDescription = null
             )
         }
+    }
 
-        if (showDialog) {
-            AlertDialog(
-                modifier = Modifier.padding(8.dp),
-                title = dialogTitle,
-                text = dialogContent,
-                onDismissRequest = {
-                    onDismiss()
+    if (showDialog) {
+        AlertDialog(
+            title = dialogTitle,
+            text = dialogContent,
+            onDismissRequest = {
+                onDismiss()
 
-                    showDialog = false
-                },
-                confirmButton = {
+                showDialog = false
+            },
+            confirmButton = {
+                Box(
+                    contentAlignment = Alignment.BottomStart
+                ) {
                     Button(
+                        content = confirmButtonContent,
                         onClick = {
                             onConfirmClick()
 
                             showDialog = false
                         }
-                    ) {
-                        Text(text = "Edit")
-                    }
-                },
-                dismissButton = {
+                    )
+                }
+
+            },
+            dismissButton = {
+                Box(
+                    contentAlignment = Alignment.BottomEnd
+                ) {
                     Button(
+                        content = dismissButtonContent,
+                        onClick = {
+                            onDismiss()
+
+                            showDialog = false
+                        }
+                    )
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ButtonWithDialog(
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
+    mainButtonContent: @Composable RowScope.() -> Unit = { Text("Open Dialog") },
+    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
+    dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
+    dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
+    dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
+    onConfirmClick: () -> Unit = {},
+    onDismiss: () -> Unit = {}
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = contentAlignment
+    ) {
+        Button(
+            content = mainButtonContent,
+            onClick = {
+                showDialog = true
+            }
+        )
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            title = dialogTitle,
+            text = dialogContent,
+            onDismissRequest = {
+                onDismiss()
+
+                showDialog = false
+            },
+            confirmButton = {
+                Box(
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    Button(
+                        content = confirmButtonContent,
+                        onClick = {
+                            onConfirmClick()
+
+                            showDialog = false
+                        }
+                    )
+                }
+            },
+            dismissButton = {
+                Box(
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    Button(
+                        content = dismissButtonContent,
                         onClick = {
                             onDismiss()
 
                             showDialog = false
                         },
-                    ) {
-                        Text(text = "Cancel")
-                    }
+                    )
                 }
-            )
-        }
+            }
+        )
     }
 }
