@@ -594,7 +594,7 @@ fun TaskBox(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(4.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.surface)
             .border(
@@ -607,7 +607,10 @@ fun TaskBox(
     ) {
 
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(
+                horizontal = 8.dp,
+                vertical = 16.dp
+            )
         ) {
             Row(
                 modifier = Modifier
