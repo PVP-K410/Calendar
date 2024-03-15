@@ -106,13 +106,7 @@ fun CalendarScreen(
     ) {
         val state by viewModel.state.collectAsStateWithLifecycle()
 
-        Week(
-            tasks = state.tasksWeek,
-            onSwipeDown = {
-                // TODO: route to MonthlyCalendarScreen
-                println("swipe down detected")
-            }
-        )
+        Week(tasks = state.tasksWeek)
     }
 }
 
@@ -482,8 +476,7 @@ fun DayPage(
 @Composable
 fun Week(
     modifier: Modifier = Modifier,
-    tasks: List<Task>,
-    onSwipeDown: () -> Unit
+    tasks: List<Task>
 ) {
     val days = (1..7).map { DayOfWeek.of(it).name }
     val today = LocalDate.now()
@@ -495,27 +488,16 @@ fun Week(
     )
     val currentPage = pagerState.currentPage
 
-    Box(
-        modifier = modifier.fillMaxSize()
-            .pointerInput(Unit) {
-                detectVerticalDragGestures { _, dragAmount ->
-                    if (dragAmount > 0) {
-                        onSwipeDown()
-                    }
-                }
-            }
-    ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = modifier.padding(horizontal = 16.dp)
-        ) { page ->
-            DayPage(
-                days[page],
-                page,
-                dates[page],
-                tasks,
-                currentPage
-            )
-        }
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier.padding(horizontal = 16.dp)
+    ) { page ->
+        DayPage(
+            days[page],
+            page,
+            dates[page],
+            tasks,
+            currentPage
+        )
     }
 }

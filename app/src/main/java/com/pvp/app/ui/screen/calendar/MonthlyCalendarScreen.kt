@@ -54,10 +54,6 @@ fun MonthlyCalendarScreen(
             showDialog = true
             selectedDate = date.date
             dateTasks = date.tasks
-        },
-        onSwipeUp = {
-            // TODO: route to CalendarScreen
-            println("swipe up detected")
         }
     )
 
@@ -94,20 +90,12 @@ fun MonthlyCalendar(
     days: Array<String>,
     month: YearMonth,
     dates: List<CalendarUiState.DateEntry>,
-    onClickListener: (CalendarUiState.DateEntry) -> Unit,
-    onSwipeUp: () -> Unit
+    onClickListener: (CalendarUiState.DateEntry) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .pointerInput(Unit) {
-                detectVerticalDragGestures { _, dragAmount ->
-                    if (dragAmount < 0) {
-                        onSwipeUp()
-                    }
-                }
-            }
     ) {
         Row {
             repeat(days.size) {
@@ -259,4 +247,3 @@ fun ContentItem(
         )
     }
 }
-

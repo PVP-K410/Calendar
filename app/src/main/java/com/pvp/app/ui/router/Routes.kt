@@ -1,6 +1,7 @@
 package com.pvp.app.ui.router
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -14,6 +15,7 @@ import com.pvp.app.ui.screen.authentication.SignInScreen
 import com.pvp.app.ui.screen.authentication.SignUpScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.calendar.MonthlyCalendarScreen
+import com.pvp.app.ui.screen.calendar.VerticalPagerScreen
 import com.pvp.app.ui.screen.profile.ProfileScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
@@ -78,7 +80,7 @@ sealed class Route(
         iconDescription = "Calendar page button icon",
         path = "calendar",
         resourceTitleId = R.string.route_calendar,
-        screen = { _, _ -> CalendarScreen() }
+        screen = { _, _ -> VerticalPagerScreen(currentPage = 1) }
     )
 
     data object MonthlyCalendar : Route(
@@ -86,7 +88,7 @@ sealed class Route(
         iconDescription = "Calendar page button icon",
         resourceTitleId = R.string.route_calendar_monthly,
         path = "calendar/monthly",
-        screen = { _, _ -> MonthlyCalendarScreen() }
+        screen = { _, _ -> VerticalPagerScreen(currentPage = 0) }
     )
 
     data object Profile : Route(
