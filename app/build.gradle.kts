@@ -133,6 +133,7 @@ dependencies {
 
     // Dependency Injection (Dagger-Hilt)
     implementation("com.google.dagger:hilt-android:2.50")
+    implementation("androidx.paging:paging-common-android:3.3.0-alpha04")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
 
     // Health connect
