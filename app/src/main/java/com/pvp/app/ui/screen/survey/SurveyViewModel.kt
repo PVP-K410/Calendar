@@ -3,6 +3,7 @@ package com.pvp.app.ui.screen.survey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.UserService
+import com.pvp.app.model.SportActivity
 import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -69,6 +70,21 @@ class SurveyViewModel @Inject constructor(
                     it.copy(
                         height = height,
                         mass = mass,
+                        surveys = it.surveys + state.value.current!!
+                    )
+                )
+            }
+        }
+    }
+
+    fun updateUserFilters(
+        filters: List<String>
+    ) {
+        viewModelScope.launch {
+            _state.value.user.let {
+                userService.merge(
+                    it.copy(
+                        activities = filters.mapNotNull { SportActivity.fromTitle(it) },
                         surveys = it.surveys + state.value.current!!
                     )
                 )

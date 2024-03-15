@@ -114,6 +114,19 @@ fun SurveyInput(
             )
         }
 
+        Survey.FILTER_ACTIVITIES -> {
+            FilterActivitiesSurvey(
+                modifier = modifier,
+                handler = { filters ->
+                    handler {
+                        viewModel.updateUserFilters(
+                            filters = filters
+                        )
+                    }
+                }
+            )
+        }
+
         else -> {}
     }
 }
