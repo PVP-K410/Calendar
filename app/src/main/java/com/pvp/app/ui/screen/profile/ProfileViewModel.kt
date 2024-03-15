@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SignOutResult
+import com.pvp.app.model.SportActivity
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,7 +55,9 @@ class ProfileViewModel @Inject constructor(
     fun updateUserInformation(
         newUsername: String? = null,
         newMass: Int? = null,
-        newHeight: Int? = null
+        newHeight: Int? = null,
+        newActivityFilters: List<String>? = null,
+        newIngredientFilters: List<String>? = null
     ) {
         viewModelScope.launch {
             newUsername?.let {
@@ -64,6 +68,14 @@ class ProfileViewModel @Inject constructor(
             }
             newHeight?.let {
                 _state.value.user.height = it
+            }
+            newActivityFilters?.let {
+                _state.value.user.activities =
+                    newActivityFilters.mapNotNull { SportActivity.fromTitle(it) }
+            }
+            newIngredientFilters?.let {
+                _state.value.user.ingredients =
+                    newIngredientFilters.mapNotNull { Ingredient.fromTitle(it) }
             }
 
             userService.merge(_state.value.user)
