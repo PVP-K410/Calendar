@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,12 +24,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.pvp.app.model.Task
+import com.pvp.app.ui.common.navigateWithPopUp
+import com.pvp.app.ui.router.Route
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -49,6 +54,10 @@ fun MonthlyCalendarScreen(
             showDialog = true
             selectedDate = date.date
             dateTasks = date.tasks
+        },
+        onSwipeUp = {
+            // TODO: route to CalendarScreen
+            println("swipe up detected")
         }
     )
 
@@ -85,12 +94,20 @@ fun MonthlyCalendar(
     days: Array<String>,
     month: YearMonth,
     dates: List<CalendarUiState.DateEntry>,
-    onClickListener: (CalendarUiState.DateEntry) -> Unit
+    onClickListener: (CalendarUiState.DateEntry) -> Unit,
+    onSwipeUp: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { _, dragAmount ->
+                    if (dragAmount < 0) {
+                        onSwipeUp()
+                    }
+                }
+            }
     ) {
         Row {
             repeat(days.size) {

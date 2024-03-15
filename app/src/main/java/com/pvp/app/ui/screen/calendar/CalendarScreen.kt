@@ -9,6 +9,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,10 +59,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.navigateWithPopUp
+import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.screen.task.CreateTaskGeneralForm
 import com.pvp.app.ui.screen.task.CreateTaskMealForm
 import com.pvp.app.ui.screen.task.CreateTaskSportForm
@@ -91,7 +97,6 @@ private fun ButtonTaskSelector(
     }
 }
 
-@Preview
 @Composable
 fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel()
@@ -101,7 +106,13 @@ fun CalendarScreen(
     ) {
         val state by viewModel.state.collectAsStateWithLifecycle()
 
-        Week(tasks = state.tasksWeek)
+        Week(
+            tasks = state.tasksWeek,
+            onSwipeDown = {
+                // TODO: route to MonthlyCalendarScreen
+                println("swipe down detected")
+            }
+        )
     }
 }
 
@@ -471,7 +482,8 @@ fun DayPage(
 @Composable
 fun Week(
     modifier: Modifier = Modifier,
-    tasks: List<Task>
+    tasks: List<Task>,
+    onSwipeDown: () -> Unit
 ) {
     val days = (1..7).map { DayOfWeek.of(it).name }
     val today = LocalDate.now()
@@ -483,17 +495,27 @@ fun Week(
     )
     val currentPage = pagerState.currentPage
 
-
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier.padding(horizontal = 16.dp)
-    ) { page ->
-        DayPage(
-            days[page],
-            page,
-            dates[page],
-            tasks,
-            currentPage
-        )
+    Box(
+        modifier = modifier.fillMaxSize()
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { _, dragAmount ->
+                    if (dragAmount > 0) {
+                        onSwipeDown()
+                    }
+                }
+            }
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = modifier.padding(horizontal = 16.dp)
+        ) { page ->
+            DayPage(
+                days[page],
+                page,
+                dates[page],
+                tasks,
+                currentPage
+            )
+        }
     }
 }
