@@ -28,7 +28,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pvp.app.ui.common.underline
-import com.pvp.app.ui.screen.profile.IconButtonWithDialog
+import com.pvp.app.ui.common.IconButtonWithDialog
+
 
 @Composable
 fun FiltersItem(
