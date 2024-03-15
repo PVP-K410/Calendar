@@ -1,7 +1,9 @@
 package com.pvp.app.ui.screen.task
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -595,7 +597,13 @@ fun TaskBox(
             .padding(8.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.surface)
-
+            .border(
+                BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.outlineVariant
+                ),
+                shape = RoundedCornerShape(10.dp)
+            )
     ) {
 
         Column(
