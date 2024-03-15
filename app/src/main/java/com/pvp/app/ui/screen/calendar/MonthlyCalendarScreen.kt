@@ -225,7 +225,8 @@ fun ContentItem(
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
-                }
+                },
+                MaterialTheme.shapes.medium
             )
             .clickable(enabled = clickable) {
                 onClickListener(entry)

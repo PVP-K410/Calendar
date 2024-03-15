@@ -1,12 +1,14 @@
 package com.pvp.app.ui.screen.calendar
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -43,6 +47,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +67,7 @@ import com.pvp.app.ui.screen.task.CreateTaskSportForm
 import com.pvp.app.ui.screen.task.TaskBox
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 import kotlin.reflect.KClass
 
 @Composable
@@ -187,7 +193,7 @@ fun Day(
     expandedUponCreation: Boolean = false
 ) {
     var expand by remember { mutableStateOf(expandedUponCreation) }
-    var selectedFilter by remember { mutableStateOf(TaskFilter.General) }
+    var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
     val filteredTasks = filterTasks(tasks, selectedFilter)
 
     Column(
@@ -195,6 +201,7 @@ fun Day(
     ) {
         Box(
             modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .size(
                     height = 250.dp,
@@ -277,7 +284,7 @@ private fun filterTasks(
     filter: TaskFilter
 ): List<Task> {
     return when (filter) {
-        //TaskFilter.Daily -> tasks.filter {  } TODO add daily tasks
+        TaskFilter.Daily -> emptyList()
         TaskFilter.Sports -> tasks.filterIsInstance<SportTask>()
         TaskFilter.Meal -> tasks.filterIsInstance<MealTask>()
         TaskFilter.General -> tasks.filter { task -> task !is SportTask && task !is MealTask }
@@ -285,7 +292,7 @@ private fun filterTasks(
 }
 
 enum class TaskFilter(val displayName: String) {
-    //Daily("daily"), TODO add daily tasks
+    Daily("Daily"),
     General("General"),
     Sports("Sports"),
     Meal("Meal")
@@ -296,26 +303,29 @@ fun StepCounter(
     model: CalendarViewModel = hiltViewModel(),
     date: LocalDate
 ) {
+    var steps by remember { mutableStateOf<Long>(0L) }
+    var launcherTriggered by remember { mutableStateOf<Boolean>(false) }
+
     // Required for checking whether user has permissions before entering the window,
     // as users can revoke permissions at any time
     val permissionContract = PermissionController.createRequestPermissionResultContract()
 
     val launcher =
         rememberLauncherForActivityResult(permissionContract) {
-            model.getDaysSteps(date)
+            launcherTriggered = !launcherTriggered
         }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(date, launcherTriggered) {
         if (model.permissionsGranted()) {
-            model.getDaysSteps(date)
+            steps = model.getDaysSteps(date)
+
         } else {
             launcher.launch(PERMISSIONS)
         }
     }
 
-    val steps = model.stepsCount.collectAsStateWithLifecycle()
     val goal = 10000f // TODO create way for user to set a step goal?
-    val progress = steps.value / goal
+    val progress = steps / goal
 
     Box(
         contentAlignment = Alignment.Center,
@@ -361,7 +371,7 @@ fun StepCounter(
         }
 
         Text(
-            text = "${steps.value}",
+            text = steps.toString(),
             style = MaterialTheme.typography.titleSmall,
             fontSize = 20.sp,
             textAlign = TextAlign.Center
@@ -382,7 +392,10 @@ fun TaskFilterBar(
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .background(
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
+            )
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
@@ -415,7 +428,8 @@ fun FilterBox(
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
-                }
+                },
+                MaterialTheme.shapes.medium
             )
     ) {
         Text(text = filter.displayName)
@@ -423,20 +437,59 @@ fun FilterBox(
 }
 
 @Composable
+fun DayPage(
+    day: String,
+    pageIndex: Int,
+    date: LocalDate,
+    tasks: List<Task>,
+    page: Int
+) {
+    val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == date }
+    val scale = animateFloatAsState(
+        targetValue = if (pageIndex == page) 1f else 0.8f,
+        animationSpec = spring(stiffness = 500f)
+    ).value
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer(
+                scaleX = scale,
+                scaleY = scale
+            ),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Day(
+            name = day,
+            tasks = tasksForDay,
+            date = date
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 fun Week(
     modifier: Modifier = Modifier,
     tasks: List<Task>
 ) {
-    Row(
-        modifier = modifier
-            .horizontalScroll(rememberScrollState())
-            .fillMaxWidth()
-    ) {
-        (1..7).forEach {
-            Day(
-                name = DayOfWeek.of(it).name,
-                tasks = tasks.filter { task -> task.scheduledAt.dayOfWeek.value == it }
-            )
-        }
+    val days = (1..7).map { DayOfWeek.of(it).name }
+    val pagerState = rememberPagerState(pageCount = { days.size })
+    val currentPage = pagerState.currentPage
+    val today = LocalDate.now()
+    val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier.padding(horizontal = 16.dp)
+    ) { page ->
+        DayPage(
+            days[page],
+            page,
+            dates[page],
+            tasks,
+            currentPage
+        )
     }
 }
