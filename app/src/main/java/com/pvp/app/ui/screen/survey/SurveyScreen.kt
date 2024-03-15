@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Icon
@@ -48,13 +50,14 @@ fun SurveyScreen(
         var handler by remember { mutableStateOf({}) }
         var success by remember { mutableStateOf(true) }
 
-        SurveyInput(
-            handler = { onSubmit ->
-                handler = onSubmit
-            },
-            modifier = Modifier.weight(0.9f),
-            viewModel = viewModel
-        )
+        Column(modifier = Modifier.weight(0.9f)) {
+            SurveyInput(
+                handler = { onSubmit ->
+                    handler = onSubmit
+                },
+                viewModel = viewModel
+            )
+        }
 
         Row(
             modifier = Modifier.weight(0.1f)
@@ -64,8 +67,6 @@ fun SurveyScreen(
                 onClick = {
                     try {
                         handler()
-
-                        viewModel.next()
                     } catch (e: Exception) {
                         success = false
 
@@ -73,6 +74,8 @@ fun SurveyScreen(
                     }
                 }
             ) {
+                val state by viewModel.state.collectAsStateWithLifecycle()
+
                 if (!success) {
                     Icon(
                         imageVector = Icons.Outlined.ErrorOutline,
@@ -84,7 +87,7 @@ fun SurveyScreen(
 
                 Text(
                     style = MaterialTheme.typography.labelMedium,
-                    text = if (viewModel.hasNext()) textContinue else textSubmit,
+                    text = if (state.surveys.size > 1) textContinue else textSubmit,
                 )
             }
         }
@@ -94,7 +97,6 @@ fun SurveyScreen(
 @Composable
 fun SurveyInput(
     handler: (onSubmit: () -> Unit) -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: SurveyViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -102,7 +104,7 @@ fun SurveyInput(
     when (state.current) {
         Survey.BODY_MASS_INDEX -> {
             BodyMassIndexSurvey(
-                modifier = modifier,
+                modifier = Modifier.fillMaxSize(),
                 handler = { height, mass ->
                     handler {
                         viewModel.updateBodyMassIndex(
@@ -116,7 +118,10 @@ fun SurveyInput(
 
         Survey.FILTER_ACTIVITIES -> {
             FilterActivitiesSurvey(
-                modifier = modifier,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
                 handler = { filters ->
                     handler {
                         viewModel.updateUserFilters(

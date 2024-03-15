@@ -9,11 +9,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Height
 import androidx.compose.material.icons.outlined.Scale
@@ -144,13 +141,8 @@ private fun BodyMassIndexPicker(
     )
 }
 
-private val activities = SportActivity
-    .values()
-    .map { it.title }
-
-private val ingredients = Ingredient
-    .values()
-    .map { it.title }
+private val activities = SportActivity.entries.map { it.title }
+private val ingredients = Ingredient.entries.map { it.title }
 
 @Composable
 fun FilterActivitiesSurvey(
@@ -158,26 +150,20 @@ fun FilterActivitiesSurvey(
     modifier: Modifier = Modifier
 ) {
     var selectedFilters by remember { mutableStateOf(emptyList<String>()) }
-    var unselectedFilters by remember { mutableStateOf(emptyList<String>()) }
-
-    unselectedFilters = activities - selectedFilters
-
+    var unselectedFilters by remember { mutableStateOf(activities - selectedFilters.toSet()) }
 
     LaunchedEffect(
         handler,
         selectedFilters,
         unselectedFilters
     ) {
-        handler(
-            selectedFilters
-        )
+        handler(selectedFilters)
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center
     ) {
         FiltersBox(
             title = "Selected activities",

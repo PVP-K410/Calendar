@@ -7,20 +7,20 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SurveyViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
-
-    private var index = 0
 
     private val _state = MutableStateFlow(SurveyState())
     val state = _state.asStateFlow()
@@ -29,11 +29,11 @@ class SurveyViewModel @Inject constructor(
         viewModelScope.launch {
             userService
                 .getCurrent()
-                .map {
+                .mapLatest {
                     it?.let { user ->
-                        val surveys = Survey.entries - user.surveys.toSet()
-
                         _state.update {
+                            val surveys = Survey.entries - user.surveys.toSet()
+
                             SurveyState(
                                 current = surveys.firstOrNull(),
                                 surveys = surveys,
@@ -43,20 +43,6 @@ class SurveyViewModel @Inject constructor(
                     }
                 }
                 .launchIn(viewModelScope)
-        }
-    }
-
-    fun hasNext(): Boolean {
-        return index < state.value.surveys.size - 1
-    }
-
-    fun next() {
-        state.value.current?.let {
-            _state.update {
-                it.copy(
-                    current = state.value.surveys[index++]
-                )
-            }
         }
     }
 
@@ -81,11 +67,11 @@ class SurveyViewModel @Inject constructor(
         filters: List<String>
     ) {
         viewModelScope.launch {
-            _state.value.user.let {
+            _state.value.user.let { user ->
                 userService.merge(
-                    it.copy(
+                    user.copy(
                         activities = filters.mapNotNull { SportActivity.fromTitle(it) },
-                        surveys = it.surveys + state.value.current!!
+                        surveys = user.surveys + state.value.current!!
                     )
                 )
             }
