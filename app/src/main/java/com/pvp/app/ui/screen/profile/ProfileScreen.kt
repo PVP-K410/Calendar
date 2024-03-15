@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -515,49 +516,9 @@ private fun UserFiltersItem(
     }
 }
 
-@Composable
-@OptIn(ExperimentalLayoutApi::class)
-private fun UserFiltersBox(
-    filters: List<String>
-) {
-    Box(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                filters
-                    .sorted()
-                    .forEach { filter ->
-                        Card(
-                            modifier = Modifier
-                                .padding(
-                                    end = 3.dp,
-                                    bottom = 3.dp
-                                ),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.background
-                            )
-                        ) {
-                            Text(
-                                text = filter,
-                                style = TextStyle(fontSize = 14.sp),
-                                modifier = Modifier.padding(8.dp)
-                            )
-                        }
-                    }
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun UserFiltersBoxInDialog(
+fun UserFiltersBox(
     title: String? = null,
     filters: List<String>,
     onClick: (String) -> Unit = {}
@@ -589,6 +550,9 @@ fun UserFiltersBoxInDialog(
                                     end = 3.dp,
                                     bottom = 3.dp
                                 ),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceDim,
+                            ),
                             border = BorderStroke(
                                 1.dp,
                                 MaterialTheme.colorScheme.background
@@ -598,9 +562,10 @@ fun UserFiltersBoxInDialog(
                             }
                         ) {
                             Text(
+                                modifier = Modifier
+                                    .padding(8.dp),
                                 text = filter,
                                 style = TextStyle(fontSize = 14.sp),
-                                modifier = Modifier.padding(8.dp)
                             )
                         }
                     }
@@ -624,7 +589,7 @@ fun UserFiltersDialog(
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        UserFiltersBoxInDialog(
+        UserFiltersBox(
             title = "Active filters:",
             filters = selectedFilters,
             onClick = { filter ->
@@ -635,7 +600,7 @@ fun UserFiltersDialog(
             }
         )
 
-        UserFiltersBoxInDialog(
+        UserFiltersBox(
             title = "Remaining filters:",
             filters = unselectedFilters,
             onClick = { filter ->
