@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,13 +14,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Straighten
+import androidx.compose.material.icons.outlined.Timelapse
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -34,7 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -464,6 +469,25 @@ fun CreateTaskGeneralForm(
 private fun MealTaskBoxBody(
     task: MealTask
 ) {
+    task.duration?.let { duration ->
+        Row(
+            modifier = Modifier.padding(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Timelapse,
+                contentDescription = "Duration"
+            )
+
+            Text(
+                text = getDurationString(duration),
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp)
+            )
+        }
+    }
+
     Text(
         "Main ingredient: " + task.recipe,
         textAlign = TextAlign.Left,
@@ -471,37 +495,51 @@ private fun MealTaskBoxBody(
             .fillMaxWidth()
             .padding(start = 8.dp)
     )
-
-    if (task.duration != null) {
-        Text(
-            "Duration: " + getDurationString(task.duration!!),
-            textAlign = TextAlign.Left,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 8.dp)
-        )
-    }
 }
 
 @Composable
 private fun SportTaskBoxBody(
     task: SportTask
 ) {
-    task.activity?.let { activity ->
-        val activityText = buildString {
-            append(activity.title)
+    if (task.distance != null && task.distance!! > 0) {
+        Row(
+            modifier = Modifier.padding(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Straighten,
+                contentDescription = "Distance"
+            )
 
-            when {
-                task.distance != null ->
-                    append(" for ${task.distance} km")
-
-                task.duration != null ->
-                    append(" for ${getDurationString(task.duration!!)}")
-            }
+            Text(
+                text = "${task.distance!! / 1000} km",
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp)
+            )
         }
+    } else if (task.duration != null) {
+        Row(
+            modifier = Modifier.padding(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Timelapse,
+                contentDescription = "Duration"
+            )
 
+            Text(
+                text = getDurationString(task.duration!!),
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp)
+            )
+        }
+    }
+
+    task.activity?.let { activity ->
         Text(
-            text = activityText,
+            text = activity.title,
             textAlign = TextAlign.Left,
             modifier = Modifier
                 .fillMaxWidth()
@@ -514,19 +552,28 @@ private fun SportTaskBoxBody(
 private fun TaskBoxBody(
     task: Task
 ) {
+    task.duration?.let { duration ->
+        Row(
+            modifier = Modifier.padding(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Timelapse,
+                contentDescription = "Duration"
+            )
+
+            Text(
+                text = getDurationString(duration),
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp)
+            )
+        }
+    }
+
     task.description?.let { description ->
         Text(
             text = description,
-            textAlign = TextAlign.Left,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 8.dp)
-        )
-    }
-
-    task.duration?.let { duration ->
-        Text(
-            text = "Duration: ${getDurationString(duration)}",
             textAlign = TextAlign.Left,
             modifier = Modifier
                 .fillMaxWidth()
@@ -544,21 +591,31 @@ fun TaskBox(
         mutableStateOf(task.isCompleted)
     }
 
-    Card(
-        shape = RectangleShape,
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(4.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surface)
             .border(
                 BorderStroke(
                     1.dp,
-                    MaterialTheme.colorScheme.outline
-                )
+                    MaterialTheme.colorScheme.outlineVariant
+                ),
+                shape = RoundedCornerShape(10.dp)
             )
     ) {
-        Column {
+
+        Column(
+            modifier = Modifier.padding(
+                horizontal = 8.dp,
+                vertical = 16.dp
+            )
+        ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
             ) {
                 Checkbox(
                     checked = checked,
@@ -573,7 +630,7 @@ fun TaskBox(
                 )
 
                 Text(
-                    task.title,
+                    text = task.title,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(CenterVertically)
@@ -582,24 +639,31 @@ fun TaskBox(
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Spacer(modifier = Modifier.height(4.dp))
 
-            when (task) {
-                is SportTask -> SportTaskBoxBody(task)
-                is MealTask -> MealTaskBoxBody(task)
-                else -> TaskBoxBody(task)
+                    when (task) {
+                        is SportTask -> SportTaskBoxBody(task)
+                        is MealTask -> MealTaskBoxBody(task)
+                        else -> TaskBoxBody(task)
+                    }
+                }
+
+                Text(
+                    text = task.scheduledAt
+                        .toLocalTime()
+                        .format(DateTimeFormatter.ofPattern("HH:mm")),
+                    modifier = Modifier.weight(0.3f),
+                    fontSize = 22.sp
+                )
             }
-
-            val timeString = "Scheduled at ${
-                task.scheduledAt
-                    .toLocalTime()
-                    .format(DateTimeFormatter.ofPattern("HH:mm"))
-            }"
-
-            Text(
-                timeString,
-                modifier = Modifier.padding(start = 8.dp)
-            )
         }
     }
 }
