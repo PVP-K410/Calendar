@@ -103,7 +103,9 @@ fun FiltersBox(
     onClick: (String) -> Unit = {}
 ) {
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -125,15 +127,18 @@ fun FiltersBox(
                         Card(
                             modifier = Modifier
                                 .padding(
-                                    end = 3.dp,
-                                    bottom = 3.dp
+                                    end = 4.dp,
+                                    bottom = 4.dp
                                 ),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceDim,
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            ),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = 8.dp
                             ),
                             border = BorderStroke(
                                 1.dp,
-                                MaterialTheme.colorScheme.background
+                                MaterialTheme.colorScheme.onTertiary
                             ),
                             onClick = {
                                 onClick(filter)
@@ -141,9 +146,14 @@ fun FiltersBox(
                         ) {
                             Text(
                                 modifier = Modifier
-                                    .padding(8.dp),
+                                    .padding(
+                                        top = 12.dp,
+                                        bottom = 12.dp,
+                                        start = 6.dp,
+                                        end = 6.dp
+                                    ),
                                 text = filter,
-                                style = TextStyle(fontSize = 14.sp),
+                                style = TextStyle(fontSize = 15.sp),
                             )
                         }
                     }
