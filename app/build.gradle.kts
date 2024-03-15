@@ -121,6 +121,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("com.google.accompanist:accompanist-permissions:0.31.1-alpha")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Kotlinx
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
@@ -133,6 +136,7 @@ dependencies {
 
     // Dependency Injection (Dagger-Hilt)
     implementation("com.google.dagger:hilt-android:2.50")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.paging:paging-common-android:3.3.0-alpha04")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
 
@@ -152,8 +156,6 @@ dependencies {
     // Compose
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 
 kapt {
