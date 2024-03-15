@@ -474,11 +474,15 @@ fun Week(
     tasks: List<Task>
 ) {
     val days = (1..7).map { DayOfWeek.of(it).name }
-    val pagerState = rememberPagerState(pageCount = { days.size })
-    val currentPage = pagerState.currentPage
     val today = LocalDate.now()
     val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
+    val pagerState = rememberPagerState(
+        initialPage = dates.indexOf(today),
+        pageCount = { days.size }
+    )
+    val currentPage = pagerState.currentPage
+
 
     HorizontalPager(
         state = pagerState,
