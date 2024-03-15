@@ -81,6 +81,7 @@ class SurveyViewModel @Inject constructor(
                         surveys = user.surveys + state.value.current!!
                     )
                 }
+
                 userService.merge(updatedUser)
             }
         }
