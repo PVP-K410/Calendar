@@ -1,5 +1,7 @@
 package com.pvp.app.ui.screen.profile
 
+import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,13 +17,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,44 +34,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
-import com.pvp.app.model.User
+import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.common.underline
 
 @Composable
 private fun ProfileBody(
     modifier: Modifier = Modifier,
-    user: State<User?>,
+    state: State<ProfileState>,
+    context: Context = LocalContext.current,
     onUpdateMass: (Int) -> Unit,
     onUpdateHeight: (Int) -> Unit,
 ) {
-    val context = LocalContext.current
-
-    var heightDisplay by remember { mutableIntStateOf(user.value?.height ?: 0) }
-    var heightEditing by remember { mutableStateOf(user.value?.height.toString()) }
-    var massDisplay by remember { mutableIntStateOf(user.value?.mass ?: 0) }
-    var massEditing by remember { mutableStateOf(user.value?.mass.toString()) }
-
-    LaunchedEffect(user.value) {
-        heightDisplay = user.value?.height ?: 0
-        heightEditing = user.value?.height.toString()
-        massDisplay = user.value?.mass ?: 0
-        massEditing = user.value?.mass.toString()
-    }
+    var heightDisplay by remember { mutableIntStateOf(state.value.user.height) }
+    var heightEditing by remember { mutableStateOf(heightDisplay.toString()) }
+    var massDisplay by remember { mutableIntStateOf(state.value.user.mass) }
+    var massEditing by remember { mutableStateOf(massDisplay.toString()) }
 
     Column(
-        horizontalAlignment = Alignment.Start,
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = modifier
+            .padding(
+                start = 30.dp,
+                end = 30.dp
+            ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         UserInfoItem(
             label = "Your mass:",
@@ -97,6 +100,9 @@ private fun ProfileBody(
                 } else {
                     context.showToast(message = "Please enter a valid mass!")
                 }
+            },
+            onDismiss = {
+                massEditing = massDisplay.toString()
             }
         )
 
@@ -128,6 +134,9 @@ private fun ProfileBody(
                 } else {
                     context.showToast(message = "Please enter a valid height!")
                 }
+            },
+            onDismiss = {
+                heightEditing = heightDisplay.toString()
             }
         )
     }
@@ -135,17 +144,20 @@ private fun ProfileBody(
 
 @Composable
 private fun ProfileFooter(
-    modifier: Modifier = Modifier,
     onSignOut: () -> Unit
 ) {
     val textSignOut = stringResource(R.string.screen_profile_button_sign_out)
 
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.Bottom
     ) {
         Button(
+            modifier = Modifier.padding(
+                bottom = 10.dp,
+                end = 10.dp
+            ),
             onClick = onSignOut
         ) {
             Text(
@@ -157,39 +169,60 @@ private fun ProfileFooter(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun ProfileHeader(
-    modifier: Modifier = Modifier,
-    user: State<User?>,
+    state: State<ProfileState>,
+    colorAvatarBorder: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(),
+    context: Context = LocalContext.current,
     onUpdateUsername: (String) -> Unit
 ) {
-    val context = LocalContext.current
-
-    var userNameDisplay by remember { mutableStateOf(user.value?.username ?: "") }
-    var userNameEditing by remember { mutableStateOf(user.value?.username ?: "") }
-
-    LaunchedEffect(user.value) {
-        userNameDisplay = user.value?.username ?: ""
-        userNameEditing = user.value?.username ?: ""
-    }
+    var userNameDisplay by remember { mutableStateOf(state.value.user.username) }
+    var userNameEditing by remember { mutableStateOf(userNameDisplay) }
+    val emailDisplay by remember { mutableStateOf(state.value.user.email) }
 
     Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = 30.dp,
+                end = 30.dp,
+                bottom = 15.dp
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
         verticalArrangement = Arrangement.Center,
     ) {
+        Image(
+            contentDescription = "Profile screen icon",
+            modifier = Modifier
+                .size(
+                    width = 200.dp,
+                    height = 200.dp
+                ),
+            painter = BitmapPainter(state.value.userAvatar),
+            alignment = Alignment.TopCenter,
+        )
+
         Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.underline()
+            modifier = Modifier
+                .padding(top = 15.dp)
+                .underline()
         ) {
             Text(
-                text = "Welcome, ${userNameDisplay}!",
+                text = "Welcome, $userNameDisplay",
                 style = MaterialTheme.typography.titleLarge,
-                fontStyle = FontStyle.Italic
+                fontStyle = FontStyle.Italic,
+                fontSize = 30.sp
             )
 
             IconButtonWithDialog(
+                modifier = Modifier
+                    .padding(
+                        start = 5.dp,
+                        top = 6.dp
+                    ),
                 icon = Icons.Default.Edit,
+                iconSize = 25.dp,
                 dialogTitle = { Text("Editing Username") },
                 dialogContent = {
                     OutlinedTextField(
@@ -207,15 +240,21 @@ private fun ProfileHeader(
 
                         onUpdateUsername(userNameEditing)
                         context.showToast(message = "Your username has been updated!")
+                    } else if (userNameEditing.length > 30) {
+                        context.showToast(message = "Username cannot be longer than 30 characters")
                     } else {
                         context.showToast(message = "Username cannot be empty!")
                     }
+                },
+                onDismiss = {
+                    userNameEditing = userNameDisplay
                 }
             )
         }
 
         Text(
-            text = "${user.value?.email}",
+            modifier = Modifier.padding(bottom = 20.dp),
+            text = emailDisplay,
             style = MaterialTheme.typography.bodyMedium,
             fontStyle = FontStyle.Italic
         )
@@ -228,7 +267,8 @@ private fun UserInfoItem(
     value: String,
     dialogTitle: @Composable () -> Unit,
     dialogContent: @Composable () -> Unit,
-    onConfirmClick: () -> Unit
+    onConfirmClick: () -> Unit,
+    onDismiss: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -265,10 +305,16 @@ private fun UserInfoItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 IconButtonWithDialog(
+                    modifier = Modifier.padding(
+                        top = 2.dp,
+                        start = 8.dp
+                    ),
                     icon = Icons.Default.Edit,
+                    iconSize = 25.dp,
                     dialogTitle = dialogTitle,
                     dialogContent = dialogContent,
-                    onConfirmClick = onConfirmClick
+                    onConfirmClick = onConfirmClick,
+                    onDismiss = onDismiss
                 )
             }
         }
@@ -276,48 +322,108 @@ private fun UserInfoItem(
 }
 
 @Composable
+private fun UserFilterItem(
+    label: String,
+    dialogTitle: @Composable () -> Unit,
+    dialogContent: @Composable () -> Unit,
+    onConfirmClick: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = label,
+                    fontStyle = FontStyle.Italic,
+                    modifier = Modifier.underline()
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Center
+            ) {
+                IconButtonWithDialog(
+                    icon = Icons.Default.Edit,
+                    dialogTitle = dialogTitle,
+                    dialogContent = dialogContent,
+                    onConfirmClick = onConfirmClick,
+                    onDismiss = onDismiss
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val user = viewModel.user.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsStateWithLifecycle()
+
     val textSignOut = stringResource(R.string.screen_profile_toast_success_sign_out)
+    val context = LocalContext.current
+
+    if (state.value.isLoading) {
+        ProgressIndicator()
+
+        return
+    }
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
+            .fillMaxWidth()
             .padding(8.dp)
     ) {
-        ProfileHeader(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.15f)
-                .padding(bottom = 8.dp),
-            user = user,
-            onUpdateUsername = {
-                viewModel.updateUsername(it)
-            }
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            ProfileHeader(
+                state = state,
+                colorAvatarBorder = MaterialTheme.colorScheme.primaryContainer,
+                colors = TopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    scrolledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                onUpdateUsername = {
+                    viewModel.updateUserInformation(newUsername = it)
+                }
+            )
+        }
 
         ProfileBody(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.7f),
-            user = user,
+            modifier = Modifier.fillMaxWidth(),
+            state = state,
             onUpdateMass = {
-                viewModel.updateMass(it)
+                viewModel.updateUserInformation(newMass = it)
             },
             onUpdateHeight = {
-                viewModel.updateHeight(it)
+                viewModel.updateUserInformation(newHeight = it)
             }
         )
 
-        val context = LocalContext.current
-
         ProfileFooter(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.15f),
             onSignOut = {
                 viewModel.signOut {
                     context.showToast(
@@ -333,21 +439,24 @@ fun ProfileScreen(
 
 @Composable
 fun IconButtonWithDialog(
-    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    icon: ImageVector = Icons.Default.Edit,
+    iconSize: Dp = 20.dp,
     dialogTitle: @Composable () -> Unit,
     dialogContent: @Composable () -> Unit,
-    onConfirmClick: () -> Unit
+    onConfirmClick: () -> Unit,
+    onDismiss: () -> Unit
 ) {
-    val showDialog = remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
-    Box {
+    Box(
+        modifier = modifier
+    ) {
         IconButton(
             onClick = {
-                showDialog.value = true
+                showDialog = true
             },
-            modifier = Modifier
-                .size(35.dp)
-                .padding(5.dp),
+            modifier = Modifier.size(iconSize)
         ) {
             Icon(
                 imageVector = icon,
@@ -355,20 +464,22 @@ fun IconButtonWithDialog(
             )
         }
 
-        if (showDialog.value) {
+        if (showDialog) {
             AlertDialog(
                 modifier = Modifier.padding(8.dp),
                 title = dialogTitle,
                 text = dialogContent,
                 onDismissRequest = {
-                    showDialog.value = false
+                    onDismiss()
+
+                    showDialog = false
                 },
                 confirmButton = {
                     Button(
                         onClick = {
                             onConfirmClick()
 
-                            showDialog.value = false
+                            showDialog = false
                         }
                     ) {
                         Text(text = "Edit")
@@ -377,7 +488,9 @@ fun IconButtonWithDialog(
                 dismissButton = {
                     Button(
                         onClick = {
-                            showDialog.value = false
+                            onDismiss()
+
+                            showDialog = false
                         },
                     ) {
                         Text(text = "Cancel")
