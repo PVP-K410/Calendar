@@ -9,16 +9,14 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.pvp.app.R
-import com.pvp.app.api.Configuration
 
-class NotificationReceiver(
-    private val configuration : Configuration
-) : BroadcastReceiver() {
+const val channelNotificationTasksReminderId: String = "Task Reminder"
+
+class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(
         context: Context,
         intent: Intent
@@ -40,19 +38,17 @@ class NotificationReceiver(
     ) {
         val notificationManager = NotificationManagerCompat.from(context)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                configuration.channelNotificationTasksReminderId,
-                "Task",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
+        val channel = NotificationChannel(
+            channelNotificationTasksReminderId,
+            "Task",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
 
-            notificationManager.createNotificationChannel(channel)
-        }
+        notificationManager.createNotificationChannel(channel)
 
         val notification = NotificationCompat.Builder(
             context,
-            configuration.channelNotificationTasksReminderId
+            channelNotificationTasksReminderId
         )
             .setContentTitle("Calendar reminder")
             .setContentText(text)
