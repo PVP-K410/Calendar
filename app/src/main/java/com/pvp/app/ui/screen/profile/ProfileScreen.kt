@@ -9,22 +9,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -38,12 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +43,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
+import com.pvp.app.ui.common.ButtonWithDialog
+import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicator
+import com.pvp.app.ui.common.UserInfoItem
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.common.underline
 import com.pvp.app.ui.screen.filters.FiltersDialog
@@ -246,7 +241,6 @@ private fun ProfileFooter(
 ) {
     val textSignOut = stringResource(R.string.screen_profile_button_sign_out)
 
-
     ButtonWithDialog(
         modifier = Modifier
             .padding(
@@ -393,67 +387,6 @@ private fun ProfileHeader(
 }
 
 @Composable
-private fun UserInfoItem(
-    label: String,
-    value: String,
-    dialogTitle: @Composable () -> Unit,
-    dialogContent: @Composable () -> Unit,
-    onConfirmClick: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = label,
-                    fontStyle = FontStyle.Italic,
-                    modifier = Modifier.underline()
-                )
-
-                Text(
-                    text = value,
-                    fontStyle = FontStyle.Italic
-                )
-            }
-
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButtonWithDialog(
-                    iconSize = 30.dp,
-                    confirmButtonContent = {
-                        Text("Edit")
-                    },
-                    dismissButtonContent = {
-                        Text("Cancel")
-                    },
-                    dialogTitle = dialogTitle,
-                    dialogContent = dialogContent,
-                    onConfirmClick = onConfirmClick,
-                    onDismiss = onDismiss
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
@@ -518,144 +451,5 @@ fun ProfileScreen(
                 }
             )
         }
-    }
-}
-
-@Composable
-fun IconButtonWithDialog(
-    modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Outlined.Edit,
-    iconSize: Dp = 20.dp,
-    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
-    dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
-    dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
-    dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
-    onConfirmClick: () -> Unit = {},
-    onDismiss: () -> Unit = {}
-) {
-    var showDialog by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = modifier
-    ) {
-        IconButton(
-            onClick = {
-                showDialog = true
-            },
-            modifier = Modifier.size(iconSize)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null
-            )
-        }
-    }
-
-    if (showDialog) {
-        AlertDialog(
-            title = dialogTitle,
-            text = dialogContent,
-            onDismissRequest = {
-                onDismiss()
-
-                showDialog = false
-            },
-            confirmButton = {
-                Box(
-                    contentAlignment = Alignment.BottomStart
-                ) {
-                    Button(
-                        content = confirmButtonContent,
-                        onClick = {
-                            onConfirmClick()
-
-                            showDialog = false
-                        }
-                    )
-                }
-
-            },
-            dismissButton = {
-                Box(
-                    contentAlignment = Alignment.BottomEnd
-                ) {
-                    Button(
-                        content = dismissButtonContent,
-                        onClick = {
-                            onDismiss()
-
-                            showDialog = false
-                        }
-                    )
-                }
-            }
-        )
-    }
-}
-
-@Composable
-fun ButtonWithDialog(
-    modifier: Modifier = Modifier,
-    contentAlignment: Alignment = Alignment.TopStart,
-    mainButtonContent: @Composable RowScope.() -> Unit = { Text("Open Dialog") },
-    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
-    dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
-    dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
-    dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
-    onConfirmClick: () -> Unit = {},
-    onDismiss: () -> Unit = {}
-) {
-    var showDialog by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = modifier,
-        contentAlignment = contentAlignment
-    ) {
-        Button(
-            content = mainButtonContent,
-            onClick = {
-                showDialog = true
-            }
-        )
-    }
-
-    if (showDialog) {
-        AlertDialog(
-            title = dialogTitle,
-            text = dialogContent,
-            onDismissRequest = {
-                onDismiss()
-
-                showDialog = false
-            },
-            confirmButton = {
-                Box(
-                    contentAlignment = Alignment.BottomEnd
-                ) {
-                    Button(
-                        content = confirmButtonContent,
-                        onClick = {
-                            onConfirmClick()
-
-                            showDialog = false
-                        }
-                    )
-                }
-            },
-            dismissButton = {
-                Box(
-                    contentAlignment = Alignment.BottomEnd
-                ) {
-                    Button(
-                        content = dismissButtonContent,
-                        onClick = {
-                            onDismiss()
-
-                            showDialog = false
-                        },
-                    )
-                }
-            }
-        )
     }
 }
