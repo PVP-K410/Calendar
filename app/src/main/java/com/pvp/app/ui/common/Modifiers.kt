@@ -1,6 +1,8 @@
 package com.pvp.app.ui.common
 
 import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
@@ -92,8 +94,9 @@ fun Modifier.fadingEdge(brush: Brush) = this
         )
     }
 
+@Composable
 fun Modifier.underline(
-    color: Color = Color.Black
+    color: Color = MaterialTheme.colorScheme.onPrimaryContainer
 ): Modifier = this
     .drawBehind {
         val verticalOffset = size.height - 2.sp.toPx()
