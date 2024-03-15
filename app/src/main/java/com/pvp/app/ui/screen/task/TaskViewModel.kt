@@ -1,7 +1,9 @@
 package com.pvp.app.ui.screen.task
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.Application.Companion.appContext
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.MealTask
@@ -21,7 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val taskService: TaskService,
-    private val userService: UserService
+    private val userService: UserService,
 ) : ViewModel() {
 
     private val user = MutableStateFlow<User?>(null)
@@ -59,6 +61,8 @@ class TaskViewModel @Inject constructor(
             taskService.merge(task)
         }
 
+        task.scheduleReminder(appContext, 10)
+
         return task
     }
 
@@ -88,6 +92,8 @@ class TaskViewModel @Inject constructor(
             taskService.merge(task)
         }
 
+        task.scheduleReminder(appContext, 10)
+
         return task
     }
 
@@ -112,6 +118,8 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch {
             taskService.merge(task)
         }
+
+        task.scheduleReminder(appContext, 10)
 
         return task
     }
