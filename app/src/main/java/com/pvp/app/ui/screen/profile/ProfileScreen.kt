@@ -1,17 +1,15 @@
+@file:Suppress("LocalVariableName")
+
 package com.pvp.app.ui.screen.profile
 
 import android.content.Context
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,12 +19,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DoorFront
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +41,6 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
@@ -59,6 +54,8 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.common.underline
+import com.pvp.app.ui.screen.filters.FiltersDialog
+import com.pvp.app.ui.screen.filters.FiltersItem
 
 @Composable
 private fun ProfileBody(
@@ -70,13 +67,16 @@ private fun ProfileBody(
     onUpdateIngredients: (List<String>) -> Unit,
     onUpdateActivities: (List<String>) -> Unit,
 ) {
-    val allActivities = SportActivity
-        .entries
-        .map { it.title }
-
-    val allIngredients = Ingredient
-        .entries
-        .map { it.title }
+    val allActivities = remember {
+        SportActivity
+            .entries
+            .map { it.title }
+    }
+    val allIngredients = remember {
+        Ingredient
+            .entries
+            .map { it.title }
+    }
 
     var heightDisplay by remember { mutableIntStateOf(state.value.user.height) }
     var heightEditing by remember { mutableStateOf(heightDisplay.toString()) }
@@ -84,20 +84,19 @@ private fun ProfileBody(
     var massDisplay by remember { mutableIntStateOf(state.value.user.mass) }
     var massEditing by remember { mutableStateOf(massDisplay.toString()) }
 
-    val _ingredients by remember { mutableStateOf(state.value.user.ingredients) }
-    val _selectedIngredients = _ingredients.map { it.title }
-    val _unselectedIngredients = allIngredients - _selectedIngredients.toSet()
+    val _ingredients = remember { state.value.user.ingredients }
+    val _selectedIngredients = remember { _ingredients.map { it.title } }
+    val _unselectedIngredients = remember { allIngredients - _selectedIngredients.toSet() }
     var ingredientsDisplay by remember { mutableStateOf(_selectedIngredients) }
     var ingredientsEditingSelected by remember { mutableStateOf(_selectedIngredients) }
     var ingredientsEditingUnselected by remember { mutableStateOf(_unselectedIngredients) }
 
-    val _activities by remember { mutableStateOf(state.value.user.activities) }
-    val _selectedActivities = _activities.map { it.title }
-    val _unselectedActivities = allActivities - _selectedActivities.toSet()
+    val _activities = remember { state.value.user.activities }
+    val _selectedActivities = remember { _activities.map { it.title } }
+    val _unselectedActivities = remember { allActivities - _selectedActivities.toSet() }
     var activitiesDisplay by remember { mutableStateOf(_selectedActivities) }
     var activitiesEditingSelected by remember { mutableStateOf(_selectedActivities) }
     var activitiesEditingUnselected by remember { mutableStateOf(_unselectedActivities) }
-
 
     Column(
         modifier = modifier
@@ -131,6 +130,7 @@ private fun ProfileBody(
                     massDisplay = newMass
 
                     onUpdateMass(newMass)
+
                     context.showToast(message = "Your mass has been updated!")
                 } else {
                     massEditing = massDisplay.toString()
@@ -167,6 +167,7 @@ private fun ProfileBody(
                     heightDisplay = newHeight
 
                     onUpdateHeight(newHeight)
+
                     context.showToast(message = "Your height has been updated!")
                 } else {
                     massEditing = massDisplay.toString()
@@ -179,16 +180,16 @@ private fun ProfileBody(
             }
         )
 
-        UserFiltersItem(
+        FiltersItem(
             title = "Sport activities filter:",
-            filters = activitiesDisplay,
+            selectedFilters = activitiesDisplay,
             dialogTitle = {
                 Text("Editing sport activities filter")
             },
             dialogContent = {
-                UserFiltersDialog(
-                    selected = activitiesEditingSelected,
-                    unselected = activitiesEditingUnselected,
+                FiltersDialog(
+                    selectedFilters = activitiesEditingSelected,
+                    unselectedFilters = activitiesEditingUnselected,
                     onValueChange = { newSelected, newUnselected ->
                         activitiesEditingSelected = newSelected
                         activitiesEditingUnselected = newUnselected
@@ -196,8 +197,9 @@ private fun ProfileBody(
                 )
             },
             onConfirmClick = {
-                onUpdateActivities(activitiesEditingSelected)
                 activitiesDisplay = activitiesEditingSelected
+
+                onUpdateActivities(activitiesEditingSelected)
 
                 context.showToast(message = "Your sport activities have been updated!")
             },
@@ -207,16 +209,16 @@ private fun ProfileBody(
             }
         )
 
-        UserFiltersItem(
+        FiltersItem(
             title = "Meal ingredients filter:",
-            filters = ingredientsDisplay,
+            selectedFilters = ingredientsDisplay,
             dialogTitle = {
                 Text("Editing meal ingredients filter")
             },
             dialogContent = {
-                UserFiltersDialog(
-                    selected = ingredientsEditingSelected,
-                    unselected = ingredientsEditingUnselected,
+                FiltersDialog(
+                    selectedFilters = ingredientsEditingSelected,
+                    unselectedFilters = ingredientsEditingUnselected,
                     onValueChange = { newSelected, newUnselected ->
                         ingredientsEditingSelected = newSelected
                         ingredientsEditingUnselected = newUnselected
@@ -224,8 +226,9 @@ private fun ProfileBody(
                 )
             },
             onConfirmClick = {
-                onUpdateIngredients(ingredientsEditingSelected)
                 ingredientsDisplay = ingredientsEditingSelected
+
+                onUpdateIngredients(ingredientsEditingSelected)
 
                 context.showToast(message = "Your sport activities have been updated!")
             },
@@ -265,7 +268,7 @@ private fun ProfileFooter(
         dialogTitle = {
             Row {
                 Icon(
-                    imageVector = Icons.Default.DoorFront,
+                    imageVector = Icons.AutoMirrored.Outlined.Logout,
                     contentDescription = "Sign Out Icon",
                     modifier = Modifier
                         .padding(
@@ -337,7 +340,6 @@ private fun ProfileHeader(
                         start = 5.dp,
                         top = 4.dp
                     ),
-                icon = Icons.Default.Edit,
                 iconSize = 30.dp,
                 confirmButtonContent = {
                     Text("Edit")
@@ -363,6 +365,7 @@ private fun ProfileHeader(
                         userNameDisplay = userNameEditing
 
                         onUpdateUsername(userNameEditing)
+
                         context.showToast(message = "Your username has been updated!")
                     } else if (userNameEditing.length > 30) {
                         userNameEditing = userNameDisplay
@@ -433,7 +436,6 @@ private fun UserInfoItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 IconButtonWithDialog(
-                    icon = Icons.Default.Edit,
                     iconSize = 30.dp,
                     confirmButtonContent = {
                         Text("Edit")
@@ -452,173 +454,10 @@ private fun UserInfoItem(
 }
 
 @Composable
-private fun UserFiltersItem(
-    title: String,
-    filters: List<String>,
-    dialogTitle: @Composable () -> Unit,
-    dialogContent: @Composable () -> Unit,
-    onConfirmClick: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        Column(
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = title,
-                        fontStyle = FontStyle.Italic,
-                        modifier = Modifier.underline()
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    IconButtonWithDialog(
-                        icon = Icons.Default.Edit,
-                        iconSize = 30.dp,
-                        confirmButtonContent = {
-                            Text("Edit")
-                        },
-                        dismissButtonContent = {
-                            Text("Cancel")
-                        },
-                        dialogTitle = dialogTitle,
-                        dialogContent = dialogContent,
-                        onConfirmClick = onConfirmClick,
-                        onDismiss = onDismiss
-                    )
-                }
-            }
-
-            UserFiltersBox(
-                filters = filters
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun UserFiltersBox(
-    title: String? = null,
-    filters: List<String>,
-    onClick: (String) -> Unit = {}
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            if (title != null) {
-                Text(
-                    text = title,
-                    style = TextStyle(fontSize = 18.sp),
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
-
-            FlowRow(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                filters
-                    .sorted()
-                    .forEach { filter ->
-                        Card(
-                            modifier = Modifier
-                                .padding(
-                                    end = 3.dp,
-                                    bottom = 3.dp
-                                ),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceDim,
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.background
-                            ),
-                            onClick = {
-                                onClick(filter)
-                            }
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(8.dp),
-                                text = filter,
-                                style = TextStyle(fontSize = 14.sp),
-                            )
-                        }
-                    }
-            }
-        }
-    }
-}
-
-@Composable
-fun UserFiltersDialog(
-    selected: List<String>,
-    unselected: List<String>,
-    onValueChange: (List<String>, List<String>) -> Unit
-) {
-    var selectedFilters by remember { mutableStateOf(selected) }
-    var unselectedFilters by remember { mutableStateOf(unselected) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.6f)
-    ) {
-        UserFiltersBox(
-            title = "Active filters:",
-            filters = selectedFilters,
-            onClick = { filter ->
-                selectedFilters = selectedFilters.minus(filter)
-                unselectedFilters = unselectedFilters.plus(filter)
-
-                onValueChange(selectedFilters, unselectedFilters)
-            }
-        )
-
-        UserFiltersBox(
-            title = "Remaining filters:",
-            filters = unselectedFilters,
-            onClick = { filter ->
-                unselectedFilters = unselectedFilters.minus(filter)
-                selectedFilters = selectedFilters.plus(filter)
-
-                onValueChange(selectedFilters, unselectedFilters)
-            }
-        )
-    }
-}
-
-@Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
-
     val textSignOut = stringResource(R.string.screen_profile_toast_success_sign_out)
     val context = LocalContext.current
 
@@ -685,7 +524,7 @@ fun ProfileScreen(
 @Composable
 fun IconButtonWithDialog(
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Default.Edit,
+    icon: ImageVector = Icons.Outlined.Edit,
     iconSize: Dp = 20.dp,
     confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },

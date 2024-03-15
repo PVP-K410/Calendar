@@ -13,11 +13,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -36,19 +36,18 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val user = userService
+            userService
                 .getCurrent()
-                .first()
-                ?: return@launch
-            val avatar = userService.resolveAvatar(user.email)
-
-            _state.update {
-                ProfileState(
-                    isLoading = false,
-                    user = user,
-                    userAvatar = avatar
-                )
-            }
+                .map { user ->
+                    _state.update {
+                        ProfileState(
+                            isLoading = false,
+                            user = user ?: User(),
+                            userAvatar = userService.resolveAvatar(user?.email ?: "")
+                        )
+                    }
+                }
+                .launchIn(viewModelScope)
         }
     }
 
@@ -63,16 +62,20 @@ class ProfileViewModel @Inject constructor(
             newUsername?.let {
                 _state.value.user.username = it
             }
+
             newMass?.let {
                 _state.value.user.mass = it
             }
+
             newHeight?.let {
                 _state.value.user.height = it
             }
+
             newActivityFilters?.let {
                 _state.value.user.activities =
                     newActivityFilters.mapNotNull { SportActivity.fromTitle(it) }
             }
+
             newIngredientFilters?.let {
                 _state.value.user.ingredients =
                     newIngredientFilters.mapNotNull { Ingredient.fromTitle(it) }
