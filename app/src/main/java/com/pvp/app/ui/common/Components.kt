@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
@@ -126,14 +127,17 @@ fun LabelFieldWrapper(
 }
 
 @Composable
-fun ProgressIndicator() {
+fun ProgressIndicator(
+    indicatorColor: Color = MaterialTheme.colorScheme.primary,
+    modifier: Modifier = Modifier.fillMaxSize()
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center
     ) {
         CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.surface,
+            color = indicatorColor,
             modifier = Modifier.fillMaxWidth(0.5f)
         )
     }

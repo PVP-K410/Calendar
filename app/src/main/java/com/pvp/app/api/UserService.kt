@@ -10,14 +10,14 @@ interface UserService : DocumentsCollection {
         get() = "users"
 
     /**
+     * @return current application user. In case it cannot be found or resolved, null is returned.
+     */
+    val user: Flow<User?>
+
+    /**
      * Gets user by its email. In case it is not found, null is returned.
      */
     suspend fun get(email: String): Flow<User?>
-
-    /**
-     * Gets current application user. In case it cannot be found or resolved, null is returned.
-     */
-    suspend fun getCurrent(): Flow<User?>
 
     /**
      * Creates or updates the user in the database.

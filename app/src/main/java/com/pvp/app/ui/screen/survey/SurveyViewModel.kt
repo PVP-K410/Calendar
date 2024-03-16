@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.survey
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.UserService
@@ -8,16 +9,13 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SurveyViewModel @Inject constructor(
     private val userService: UserService
@@ -27,23 +25,34 @@ class SurveyViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            userService
-                .getCurrent()
-                .mapLatest {
-                    it?.let { user ->
-                        _state.update {
-                            val surveys = Survey.entries - user.surveys.toSet()
+        collectStateUpdates()
+    }
 
-                            SurveyState(
-                                current = surveys.firstOrNull(),
-                                surveys = surveys,
-                                user = user
-                            )
-                        }
+    private fun collectStateUpdates() {
+        viewModelScope.launch(Dispatchers.IO) {
+            userService.user.collect {
+                Log.i("SurveyViewModel", "Collecting update")
+
+                it?.let { user ->
+                    _state.update {
+                        val surveys = Survey.entries - user.surveys.toSet()
+
+                        SurveyState(
+                            current = surveys.firstOrNull(),
+                            surveys = surveys,
+                            user = user
+                        )
                     }
                 }
-                .launchIn(viewModelScope)
+            }
+        }
+    }
+
+    private fun continueWith(user: User) {
+        _state.value.current?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                userService.merge(user.copy(surveys = user.surveys + it))
+            }
         }
     }
 
@@ -51,7 +60,7 @@ class SurveyViewModel @Inject constructor(
         height: Int,
         mass: Int
     ) {
-        updateState(
+        continueWith(
             _state.value.user.copy(
                 height = height,
                 mass = mass
@@ -63,40 +72,19 @@ class SurveyViewModel @Inject constructor(
         filters: List<String>,
         isActivities: Boolean
     ) {
-        _state.value.user.let { user ->
-            val userNew = if (isActivities) {
-                user.copy(
-                    activities = filters.mapNotNull { SportActivity.fromTitle(it) }
-                )
-            } else {
-                user.copy(
-                    ingredients = filters.mapNotNull { Ingredient.fromTitle(it) }
-                )
-            }
-
-            updateState(userNew)
-        }
-    }
-
-    private fun updateState(user: User) {
-        viewModelScope.launch {
-            _state.update { state ->
-                val survey = state.current ?: return@update state.copy(user = user)
-                val userNew = user.copy(surveys = user.surveys + survey)
-
-                userService.merge(userNew)
-
-                val surveys = state.surveys.filter {
-                    survey != it
+        continueWith(
+            _state.value.user.let { user ->
+                if (isActivities) {
+                    user.copy(
+                        activities = filters.mapNotNull { SportActivity.fromTitle(it) }
+                    )
+                } else {
+                    user.copy(
+                        ingredients = filters.mapNotNull { Ingredient.fromTitle(it) }
+                    )
                 }
-
-                state.copy(
-                    current = surveys.firstOrNull(),
-                    surveys = surveys,
-                    user = userNew
-                )
             }
-        }
+        )
     }
 }
 

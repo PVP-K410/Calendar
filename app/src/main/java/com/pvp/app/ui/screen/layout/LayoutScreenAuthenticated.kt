@@ -25,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
@@ -53,7 +52,6 @@ import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
 import com.pvp.app.ui.screen.calendar.CreateTaskDialog
 import com.pvp.app.ui.screen.drawer.DrawerScreen
-import com.pvp.app.ui.theme.CalendarTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -150,95 +148,91 @@ fun LayoutScreenAuthenticated(
     scope: CoroutineScope,
     viewModel: LayoutViewModel = hiltViewModel()
 ) {
-    CalendarTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            val destination = controller.currentBackStackEntryAsState().value?.destination
+    val destination = controller.currentBackStackEntryAsState().value?.destination
 
-            val route = Route.routesAuthenticated
-                .find { it.path == destination?.route }
-                ?: Route.SignIn
+    val route = Route.routesAuthenticated
+        .find { it.path == destination?.route }
+        ?: Route.SignIn
 
-            val stateDrawer = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val stateDrawer = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-            ModalNavigationDrawer(
-                drawerContent = {
-                    DrawerScreen(
-                        onClick = {
-                            controller.navigateWithPopUp(path)
+    ModalNavigationDrawer(
+        drawerContent = {
+            DrawerScreen(
+                onClick = {
+                    controller.navigateWithPopUp(path)
 
-                            scope.launch {
-                                stateDrawer.close()
-                            }
-                        },
-                        route = route,
-                        routes = Route.routesDrawer
-                    )
+                    scope.launch {
+                        stateDrawer.close()
+                    }
                 },
-                drawerState = stateDrawer
-            ) {
-                var isOpen by remember { mutableStateOf(false) }
-                val stateLayout by viewModel.state.collectAsStateWithLifecycle()
-                val toggleDialog = remember { { isOpen = !isOpen } }
+                route = route,
+                routes = Route.routesDrawer
+            )
+        },
+        drawerState = stateDrawer
+    ) {
+        var isOpen by remember { mutableStateOf(false) }
+        val stateLayout by viewModel.state.collectAsStateWithLifecycle()
+        val toggleDialog = remember { { isOpen = !isOpen } }
 
-                Scaffold(
-                    floatingActionButton = {
-                        if (!supportsTaskCreation(route)) {
-                            return@Scaffold
-                        }
+        Scaffold(
+            floatingActionButton = {
+                if (!supportsTaskCreation(route)) {
+                    return@Scaffold
+                }
 
-                        FloatingActionButton(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            onClick = toggleDialog,
-                            shape = CircleShape
-                        ) {
-                            Icon(
-                                contentDescription = "Add task",
-                                imageVector = Icons.Outlined.Add
-                            )
-                        }
-                    },
-                    floatingActionButtonPosition = FabPosition.End,
-                    topBar = {
-                        Header(
-                            colorAvatarBorder = MaterialTheme.colorScheme.primaryContainer,
-                            colors = TopAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                scrolledContainerColor = MaterialTheme.colorScheme.onPrimary,
-                                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                                titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                                actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            controller = controller,
-                            modifier = Modifier
-                                .height(64.dp)
-                                .padding(8.dp)
-                                .clip(shape = MaterialTheme.shapes.extraLarge),
-                            route = route,
-                            scope = scope,
-                            state = stateDrawer,
-                            userAvatar = stateLayout.userAvatar!!
-                        )
-                    }
+                FloatingActionButton(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    onClick = toggleDialog,
+                    shape = CircleShape
                 ) {
-                    Router(
-                        controller = controller,
-                        destinationStart = Route.Calendar,
-                        modifier = Modifier.padding(it),
-                        routes = Route.routesAuthenticated,
-                        scope = scope
-                    )
-
-                    if (!supportsTaskCreation(route)) {
-                        return@Scaffold
-                    }
-
-                    CreateTaskDialog(
-                        onClose = toggleDialog,
-                        isOpen = isOpen,
-                        shouldCloseOnSubmit = true
+                    Icon(
+                        contentDescription = "Add task",
+                        imageVector = Icons.Outlined.Add
                     )
                 }
+            },
+            floatingActionButtonPosition = FabPosition.End,
+            topBar = {
+                Header(
+                    colorAvatarBorder = MaterialTheme.colorScheme.primaryContainer,
+                    colors = TopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        scrolledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    controller = controller,
+                    modifier = Modifier
+                        .height(64.dp)
+                        .padding(8.dp)
+                        .clip(shape = MaterialTheme.shapes.extraLarge),
+                    route = route,
+                    scope = scope,
+                    state = stateDrawer,
+                    userAvatar = stateLayout.userAvatar!!
+                )
             }
+        ) {
+            Router(
+                controller = controller,
+                destinationStart = Route.Calendar,
+                modifier = Modifier.padding(it),
+                routes = Route.routesAuthenticated,
+                scope = scope
+            )
+
+            if (!supportsTaskCreation(route)) {
+                return@Scaffold
+            }
+
+            CreateTaskDialog(
+                onClose = toggleDialog,
+                isOpen = isOpen,
+                shouldCloseOnSubmit = true
+            )
         }
     }
 }
