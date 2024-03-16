@@ -61,6 +61,7 @@ class SurveyViewModel @Inject constructor(
                     )
                 )
             }
+            sendSurveyStateUpdate()
         }
     }
 
@@ -84,6 +85,32 @@ class SurveyViewModel @Inject constructor(
 
                 userService.merge(updatedUser)
             }
+            sendSurveyStateUpdate()
+        }
+    }
+
+    private fun sendSurveyStateUpdate() {
+        _state.update { currentState ->
+            val completedSurvey = currentState.current ?: return@update currentState
+
+            val remainingSurveys = currentState.surveys.filter { survey ->
+                survey != completedSurvey
+            }
+            val nextSurvey = remainingSurveys.firstOrNull()
+
+            val updatedSurveys = if (completedSurvey != null) {
+                currentState.user.surveys + completedSurvey
+            } else {
+                currentState.user.surveys
+            }
+
+            val updatedUser = currentState.user.copy(surveys = updatedSurveys)
+
+            currentState.copy(
+                current = nextSurvey,
+                surveys = remainingSurveys,
+                user = updatedUser
+            )
         }
     }
 }
