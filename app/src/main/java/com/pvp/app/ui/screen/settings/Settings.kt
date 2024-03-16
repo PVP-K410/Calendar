@@ -14,10 +14,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import com.pvp.app.ui.common.Picker
+import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
 var reminderTimeMinutes by mutableIntStateOf(10)
 
@@ -43,19 +44,32 @@ fun SettingsScreen() {
             title = "General"
         )
 
-        SettingCard(title = "Placeholder")
-        SettingCard(title = "Placeholder")
-        SettingCard(title = "Placeholder")
+        //SettingCard(title = "Placeholder")
+        //SettingCard(title = "Placeholder")
+        //SettingCard(title = "Placeholder")
 
         CategoryRow(
             icon = Icons.Outlined.Notifications,
             title = "Notifications"
         )
 
-        ReminderSetting()
+        SettingCard(
+            title = "Set Reminder time",
+            value = reminderTimeMinutes,
+            editContent = { value ->
+                val pickerState = rememberPickerState(initialValue = value)
+                Picker(
+                    items = (1..60).toList(),
+                    state = pickerState,
+                    startIndex = reminderTimeMinutes - 1,
+                )
+                reminderTimeMinutes = pickerState.value ?: reminderTimeMinutes
+            },
+            description = "Choose how long before the task would you like to be reminded"
+        )
 
-        SettingCard(title = "Placeholder")
-        SettingCard(title = "Placeholder")
+        //SettingCard(title = "Placeholder")
+        //SettingCard(title = "Placeholder")
     }
 }
 
@@ -78,45 +92,19 @@ fun CategoryRow(
         )
     }
 
-    Divider(
-        color = MaterialTheme.colorScheme.tertiary,
+    HorizontalDivider(
+        modifier = Modifier.fillMaxWidth(),
         thickness = 1.dp,
-        modifier = Modifier.fillMaxWidth()
+        color = MaterialTheme.colorScheme.tertiary
     )
 }
 
 @Composable
-fun ReminderSetting() {
-    Row {
-        Text(
-            text = "Reminder time",
-            style = MaterialTheme.typography.titleLarge,
-        )
-    }
-
-    Text(
-        modifier = Modifier.padding(vertical = 8.dp),
-        text = "Selected (minutes): $reminderTimeMinutes",
-    )
-
-    Slider(
-        value = reminderTimeMinutes.toFloat(),
-        onValueChange = { reminderTimeMinutes = it.toInt() },
-        valueRange = 1f..60f,
-        steps = 59,
-        modifier = Modifier.padding(vertical = 8.dp)
-    )
-
-    Divider(
-        color = MaterialTheme.colorScheme.tertiary,
-        thickness = 1.dp,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-fun SettingCard(
-    title: String,
+fun <T> SettingCard(
+    title: String? = null,
+    value: T? = null,
+    editContent: @Composable (T?) -> Unit = { _ -> },
+    description: String? = null
 ) {
     Card(
         modifier = Modifier
@@ -131,5 +119,18 @@ fun SettingCard(
             text = " $title",
             fontSize = 18.sp
         )
+
+        if (description != null) {
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = description,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        editContent(value)
     }
 }
