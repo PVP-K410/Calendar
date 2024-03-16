@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EditNote
-import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -15,8 +14,6 @@ import com.pvp.app.ui.screen.authentication.SignInScreen
 import com.pvp.app.ui.screen.authentication.SignUpScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.calendar.MonthlyCalendarScreen
-import com.pvp.app.ui.screen.filter.ActivitiesFilter
-import com.pvp.app.ui.screen.filter.IngredientsFilter
 import com.pvp.app.ui.screen.profile.ProfileScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
