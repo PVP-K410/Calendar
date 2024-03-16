@@ -1,43 +1,49 @@
 package com.pvp.app.ui.screen.survey
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.UserService
+import com.pvp.app.model.Ingredient
+import com.pvp.app.model.SportActivity
+import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SurveyViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
 
-    private val _form = MutableStateFlow(Form.BODY_MASS_INDEX)
-    val form = _form.asStateFlow()
-
-    private val user = MutableStateFlow<User?>(null)
+    private val _state = MutableStateFlow(SurveyState())
+    val state = _state.asStateFlow()
 
     init {
         viewModelScope.launch {
             userService
                 .getCurrent()
-                .map {
-                    user.value = it
+                .mapLatest {
+                    it?.let { user ->
+                        _state.update {
+                            val surveys = Survey.entries - user.surveys.toSet()
+
+                            SurveyState(
+                                current = surveys.firstOrNull(),
+                                surveys = surveys,
+                                user = user
+                            )
+                        }
+                    }
                 }
                 .launchIn(viewModelScope)
-        }
-    }
-
-    fun next() {
-        form.value.next?.let {
-            _form.value = it
         }
     }
 
@@ -45,39 +51,57 @@ class SurveyViewModel @Inject constructor(
         height: Int,
         mass: Int
     ) {
+        updateState(
+            _state.value.user.copy(
+                height = height,
+                mass = mass
+            )
+        )
+    }
+
+    fun updateUserFilters(
+        filters: List<String>,
+        isActivities: Boolean
+    ) {
+        _state.value.user.let { user ->
+            val userNew = if (isActivities) {
+                user.copy(
+                    activities = filters.mapNotNull { SportActivity.fromTitle(it) }
+                )
+            } else {
+                user.copy(
+                    ingredients = filters.mapNotNull { Ingredient.fromTitle(it) }
+                )
+            }
+
+            updateState(userNew)
+        }
+    }
+
+    private fun updateState(user: User) {
         viewModelScope.launch {
-            user.value?.let {
-                userService.merge(
-                    it.copy(
-                        height = height,
-                        mass = mass
-                    )
+            _state.update { state ->
+                val survey = state.current ?: return@update state.copy(user = user)
+                val userNew = user.copy(surveys = user.surveys + survey)
+
+                userService.merge(userNew)
+
+                val surveys = state.surveys.filter {
+                    survey != it
+                }
+
+                state.copy(
+                    current = surveys.firstOrNull(),
+                    surveys = surveys,
+                    user = userNew
                 )
             }
         }
     }
 }
 
-enum class Form(
-    val content: @Composable (Modifier, SurveyViewModel) -> () -> Boolean,
-    val next: Form?
-) {
-
-    BODY_MASS_INDEX(
-        { m, vm ->
-            BodyMassIndexSurvey(
-                modifier = m,
-                onSubmit = { height, mass ->
-                    vm.updateBodyMassIndex(
-                        height = height,
-                        mass = mass
-                    )
-                }
-            )
-        },
-        null
-    );
-    // TODO: Append new survey forms here.
-
-    fun hasNext() = next != null
-}
+data class SurveyState(
+    val current: Survey? = null,
+    val surveys: List<Survey> = emptyList(),
+    val user: User = User()
+)

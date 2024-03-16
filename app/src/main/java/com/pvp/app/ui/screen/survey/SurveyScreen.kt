@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Icon
@@ -25,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
+import com.pvp.app.model.Survey
 import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.showToast
 
 @Composable
@@ -44,13 +48,25 @@ fun SurveyScreen(
             .padding(8.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        val form by viewModel.form.collectAsStateWithLifecycle()
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        if (state.surveys.isEmpty()) {
+            ProgressIndicator()
+
+            return
+        }
+
+        var handler by remember { mutableStateOf({}) }
         var success by remember { mutableStateOf(true) }
 
-        val callback = form.content(
-            Modifier.weight(0.9f),
-            viewModel
-        )
+        Column(modifier = Modifier.weight(0.9f)) {
+            SurveyInput(
+                handler = { onSubmit ->
+                    handler = onSubmit
+                },
+                viewModel = viewModel
+            )
+        }
 
         Row(
             modifier = Modifier.weight(0.1f)
@@ -58,11 +74,11 @@ fun SurveyScreen(
             Button(
                 modifier = Modifier.fillMaxWidth(0.8f),
                 onClick = {
-                    success = callback()
+                    try {
+                        handler()
+                    } catch (e: Exception) {
+                        success = false
 
-                    if (success) {
-                        viewModel.next()
-                    } else {
                         context.showToast(message = textError)
                     }
                 }
@@ -78,9 +94,75 @@ fun SurveyScreen(
 
                 Text(
                     style = MaterialTheme.typography.labelMedium,
-                    text = if (form.hasNext()) textContinue else textSubmit,
+                    text = if (state.surveys.size > 1) textContinue else textSubmit,
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SurveyInput(
+    handler: (onSubmit: () -> Unit) -> Unit,
+    viewModel: SurveyViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    when (state.current) {
+        Survey.BODY_MASS_INDEX -> {
+            BodyMassIndexSurvey(
+                handler = { height, mass ->
+                    handler {
+                        viewModel.updateBodyMassIndex(
+                            height = height,
+                            mass = mass
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Survey.FILTER_ACTIVITIES -> {
+            FilterSurvey(
+                filters = state.user.activities.map { it.title },
+                handler = { filters ->
+                    handler {
+                        viewModel.updateUserFilters(
+                            filters = filters,
+                            isActivities = true
+                        )
+                    }
+                },
+                isActivities = true,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                title = "activities"
+            )
+        }
+
+        Survey.FILTER_INGREDIENTS -> {
+            FilterSurvey(
+                filters = state.user.ingredients.map { it.title },
+                handler = { filters ->
+                    handler {
+                        viewModel.updateUserFilters(
+                            filters = filters,
+                            isActivities = false
+                        )
+                    }
+                },
+                isActivities = false,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                title = "ingredients"
+            )
+        }
+
+        else -> {}
     }
 }

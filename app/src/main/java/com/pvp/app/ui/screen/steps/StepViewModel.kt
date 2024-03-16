@@ -1,13 +1,11 @@
 package com.pvp.app.ui.screen.steps
 
-import androidx.health.connect.client.records.StepsRecord
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.StepsRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.HealthConnectService
