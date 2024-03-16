@@ -40,9 +40,7 @@ sealed class Route(
          * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
          */
         val routesAuthenticated = listOf(
-            ActivitiesFilter,
             Calendar,
-            IngredientsFilter,
             MonthlyCalendar,
             Profile,
             Settings,
@@ -58,9 +56,7 @@ sealed class Route(
          * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
          */
         val routesDrawer = listOf(
-            ActivitiesFilter,
             Calendar,
-            IngredientsFilter,
             MonthlyCalendar,
             Profile,
             Settings,
@@ -80,28 +76,12 @@ sealed class Route(
         )
     }
 
-    data object ActivitiesFilter : Route(
-        icon = Icons.Outlined.FilterList,
-        iconDescription = "Activities filter edit page button icon",
-        path = "filters/edit/activities",
-        resourceTitleId = R.string.route_filters_edit_activities,
-        screen = { _, _ -> ActivitiesFilter() }
-    )
-
     data object Calendar : Route(
         icon = Icons.Outlined.CalendarMonth,
         iconDescription = "Calendar page button icon",
         path = "calendar",
         resourceTitleId = R.string.route_calendar,
         screen = { _, _ -> CalendarScreen() }
-    )
-
-    data object IngredientsFilter : Route(
-        icon = Icons.Outlined.FilterList,
-        iconDescription = "Ingredients filter edit page button icon",
-        path = "filters/edit/ingredients",
-        resourceTitleId = R.string.route_filters_edit_ingredients,
-        screen = { _, _ -> IngredientsFilter() }
     )
 
     data object MonthlyCalendar : Route(
