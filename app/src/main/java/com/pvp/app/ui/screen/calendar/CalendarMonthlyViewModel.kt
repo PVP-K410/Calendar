@@ -25,7 +25,6 @@ class CalendarMonthlyViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
 
-    private val _currentYearMonth = MutableStateFlow(YearMonth.now())
     private val _state = MutableStateFlow(CalendarUiState.Init)
     val state: StateFlow<CalendarUiState> = _state.asStateFlow()
 

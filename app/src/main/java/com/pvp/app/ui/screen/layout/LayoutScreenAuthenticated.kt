@@ -245,7 +245,7 @@ fun LayoutScreenAuthenticated(
 
 private fun supportsTaskCreation(route: Route): Boolean {
     return when (route) {
-        Route.Calendar, Route.MonthlyCalendar -> true
+        Route.Calendar -> true
         else -> false
     }
 }

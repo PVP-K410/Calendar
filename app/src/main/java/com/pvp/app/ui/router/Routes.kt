@@ -37,7 +37,6 @@ sealed class Route(
          */
         val routesAuthenticated = listOf(
             Calendar,
-            MonthlyCalendar,
             Profile,
             Settings,
             Steps
@@ -53,7 +52,6 @@ sealed class Route(
          */
         val routesDrawer = listOf(
             Calendar,
-            MonthlyCalendar,
             Profile,
             Settings,
             Steps
@@ -77,15 +75,7 @@ sealed class Route(
         iconDescription = "Calendar page button icon",
         path = "calendar",
         resourceTitleId = R.string.route_calendar,
-        screen = { _, _ -> CalendarScreen(currentPage = 1) }
-    )
-
-    data object MonthlyCalendar : Route(
-        icon = Icons.Outlined.CalendarMonth,
-        iconDescription = "Calendar page button icon",
-        resourceTitleId = R.string.route_calendar_monthly,
-        path = "calendar/monthly",
-        screen = { _, _ -> CalendarScreen(currentPage = 0) }
+        screen = { _, _ -> CalendarScreen() }
     )
 
     data object Profile : Route(

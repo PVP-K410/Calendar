@@ -9,14 +9,14 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CalendarScreen(currentPage: Int) {
-    val pagerState = rememberPagerState(
+fun CalendarScreen() {
+    val state = rememberPagerState(
         pageCount = { 2 },
-        initialPage = currentPage
+        initialPage = 1
     )
 
     VerticalPager(
-        state = pagerState,
+        state = state,
         modifier = Modifier.fillMaxSize()
     ) { page ->
         when (page) {

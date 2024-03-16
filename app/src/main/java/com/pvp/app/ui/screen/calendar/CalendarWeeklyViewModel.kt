@@ -32,7 +32,7 @@ import javax.inject.Inject
 class CalendarWeeklyViewModel @Inject constructor(
     private val taskService: TaskService,
     private val userService: UserService,
-    private val healtConnectService: HealthConnectService,
+    private val healthConnectService: HealthConnectService,
     private val client: HealthConnectClient
 ) : ViewModel() {
 
@@ -85,7 +85,7 @@ class CalendarWeeklyViewModel @Inject constructor(
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
 
-        return healtConnectService.aggregateSteps(
+        return healthConnectService.aggregateSteps(
             start,
             end
         )
