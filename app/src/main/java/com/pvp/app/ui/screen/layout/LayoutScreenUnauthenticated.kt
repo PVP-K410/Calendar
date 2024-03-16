@@ -17,9 +17,9 @@ import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun LayoutScreenUnauthenticated(
+    areSurveysFilled: Boolean?,
     controller: NavHostController,
     isAuthenticated: Boolean,
-    isSurveyFilled: Boolean?,
     scope: CoroutineScope
 ) {
     CalendarTheme {
@@ -31,7 +31,7 @@ fun LayoutScreenUnauthenticated(
         ) {
             Router(
                 controller = controller,
-                destinationStart = if (isAuthenticated && isSurveyFilled == false) {
+                destinationStart = if (isAuthenticated && areSurveysFilled == false) {
                     Route.Survey
                 } else {
                     Route.SignIn

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,8 +46,8 @@ class LayoutViewModel @Inject constructor(
             ) { userApp, userFirebase ->
                 _state.update {
                     LayoutState(
+                        areSurveysFilled = userApp?.let { areSurveysFilled(it) },
                         isAuthenticated = userFirebase != null,
-                        isSurveyFilled = userApp?.let { isSurveyFilled(it) },
                         user = userApp,
                         userAvatar = userApp?.let {
                             userService.resolveAvatar(it.email)
@@ -60,15 +61,15 @@ class LayoutViewModel @Inject constructor(
         }
     }
 
-    private fun isSurveyFilled(user: User): Boolean {
-        return user.mass != 0 && user.height != 0
+    private fun areSurveysFilled(user: User): Boolean {
+        return user.surveys.containsAll(Survey.entries)
     }
 }
 
 data class LayoutState(
+    val areSurveysFilled: Boolean? = null,
     val isAuthenticated: Boolean = false,
     val isLoading: Boolean = false,
-    val isSurveyFilled: Boolean? = null,
     val user: User? = null,
     val userAvatar: ImageBitmap? = null
 )

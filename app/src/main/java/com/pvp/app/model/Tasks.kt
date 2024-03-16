@@ -4,7 +4,6 @@ import android.content.Context
 import com.pvp.app.common.DurationSerializer
 import com.pvp.app.common.LocalDateTimeSerializer
 import com.pvp.app.service.scheduleNotification
-import com.pvp.app.ui.screen.task.TaskViewModel
 import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.LocalDateTime

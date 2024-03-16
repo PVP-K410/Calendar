@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,30 +40,6 @@ class PickerState<T>(initialValue: T) {
         @Composable
         fun <T> rememberPickerState(initialValue: T) = remember { PickerState(initialValue) }
     }
-}
-
-@Composable
-fun <T : Number> NumberPicker(
-    dividersColor: Color = MaterialTheme.colorScheme.primary,
-    indexStart: Int = 0,
-    items: List<T>,
-    label: (T) -> String = {
-        it.toString()
-    },
-    modifier: Modifier = Modifier,
-    textStyle: TextStyle = LocalTextStyle.current,
-    state: PickerState<T>
-) {
-    Picker(
-        dividerColor = dividersColor,
-        items = items,
-        label = label,
-        modifier = modifier,
-        startIndex = indexStart,
-        textModifier = Modifier,
-        textStyle = textStyle,
-        state = state
-    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)

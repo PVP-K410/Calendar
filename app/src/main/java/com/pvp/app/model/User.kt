@@ -10,5 +10,6 @@ data class User(
     var ingredients: List<Ingredient> = emptyList(),
     var mass: Int = 0,
     var points: Int = 0,
+    val surveys : List<Survey> = emptyList(),
     var username: String = ""
 )
