@@ -2,7 +2,6 @@ package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,22 +23,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.pvp.app.model.Task
-import com.pvp.app.ui.common.navigateWithPopUp
-import com.pvp.app.ui.router.Route
 import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun MonthlyCalendarScreen(
-    model: MonthlyCalendarViewModel = hiltViewModel(),
+fun CalendarMonthlyScreen(
+    model: CalendarMonthlyViewModel = hiltViewModel(),
 ) {
     val state by model.state.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -120,7 +115,7 @@ fun MonthlyCalendar(
 @Composable
 fun Header(
     month: YearMonth,
-    model: MonthlyCalendarViewModel = hiltViewModel()
+    model: CalendarMonthlyViewModel = hiltViewModel()
 ) {
     Row {
         IconButton(onClick = {

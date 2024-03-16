@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
-class CalendarViewModel @Inject constructor(
+class CalendarWeeklyViewModel @Inject constructor(
     private val taskService: TaskService,
     private val userService: UserService,
     private val healtConnectService: HealthConnectService,

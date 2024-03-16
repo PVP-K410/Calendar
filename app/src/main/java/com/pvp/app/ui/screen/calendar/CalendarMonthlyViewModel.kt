@@ -20,7 +20,7 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
-class MonthlyCalendarViewModel @Inject constructor(
+class CalendarMonthlyViewModel @Inject constructor(
     private val taskService: TaskService,
     private val userService: UserService
 ) : ViewModel() {
