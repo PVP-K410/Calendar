@@ -41,7 +41,7 @@ class CalendarViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val flowUser = userService.getCurrent()
+            val flowUser = userService.user
             val flowTasks = flowUser.flatMapLatest { user ->
                 user
                     ?.let { taskService.get(user.email) }

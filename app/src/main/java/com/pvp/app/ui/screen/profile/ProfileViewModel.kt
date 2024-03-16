@@ -36,8 +36,7 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userService
-                .getCurrent()
+            userService.user
                 .map { user ->
                     _state.update {
                         ProfileState(

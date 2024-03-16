@@ -29,8 +29,7 @@ class TaskViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userService
-                .getCurrent()
+            userService.user
                 .map {
                     user.value = it
                 }
