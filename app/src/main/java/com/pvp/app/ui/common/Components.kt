@@ -240,7 +240,7 @@ fun ButtonWithDialog(
         modifier = modifier,
         contentAlignment = contentAlignment
     ) {
-        androidx.compose.material3.Button(
+        Button(
             content = mainButtonContent,
             onClick = {
                 showDialog = true
@@ -261,7 +261,7 @@ fun ButtonWithDialog(
                 Box(
                     contentAlignment = Alignment.BottomEnd
                 ) {
-                    androidx.compose.material3.Button(
+                    Button(
                         content = confirmButtonContent,
                         onClick = {
                             onConfirmClick()
@@ -275,7 +275,7 @@ fun ButtonWithDialog(
                 Box(
                     contentAlignment = Alignment.BottomEnd
                 ) {
-                    androidx.compose.material3.Button(
+                    Button(
                         content = dismissButtonContent,
                         onClick = {
                             onDismiss()
@@ -292,8 +292,9 @@ fun ButtonWithDialog(
 @Composable
 fun IconButtonWithDialog(
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Outlined.Edit,
+    icon: ImageVector,
     iconSize: Dp = 20.dp,
+    iconDescription: String? = null,
     confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
@@ -314,7 +315,7 @@ fun IconButtonWithDialog(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = null
+                contentDescription = iconDescription
             )
         }
     }
@@ -332,7 +333,7 @@ fun IconButtonWithDialog(
                 Box(
                     contentAlignment = Alignment.BottomStart
                 ) {
-                    androidx.compose.material3.Button(
+                    Button(
                         content = confirmButtonContent,
                         onClick = {
                             onConfirmClick()
@@ -347,7 +348,7 @@ fun IconButtonWithDialog(
                 Box(
                     contentAlignment = Alignment.BottomEnd
                 ) {
-                    androidx.compose.material3.Button(
+                    Button(
                         content = dismissButtonContent,
                         onClick = {
                             onDismiss()
@@ -362,7 +363,7 @@ fun IconButtonWithDialog(
 }
 
 @Composable
-fun UserInfoItem(
+fun EditableInfoItem(
     label: String,
     value: String,
     dialogTitle: @Composable () -> Unit,
@@ -405,7 +406,9 @@ fun UserInfoItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 IconButtonWithDialog(
+                    icon = Icons.Outlined.Edit,
                     iconSize = 30.dp,
+                    iconDescription = "Edit Icon Button",
                     confirmButtonContent = {
                         Text("Edit")
                     },

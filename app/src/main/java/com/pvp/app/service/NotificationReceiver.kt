@@ -13,10 +13,16 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.pvp.app.R
+import com.pvp.app.api.Configuration
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-const val channelNotificationTasksReminderId: String = "Task Reminder"
-
+@AndroidEntryPoint
 class NotificationReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var configuration : Configuration
+
     override fun onReceive(
         context: Context,
         intent: Intent
@@ -39,7 +45,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val notificationManager = NotificationManagerCompat.from(context)
 
         val channel = NotificationChannel(
-            channelNotificationTasksReminderId,
+            configuration.channelNotificationTasksReminderId,
             "Task",
             NotificationManager.IMPORTANCE_DEFAULT
         )
@@ -48,7 +54,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(
             context,
-            channelNotificationTasksReminderId
+            configuration.channelNotificationTasksReminderId
         )
             .setContentTitle("Calendar reminder")
             .setContentText(text)

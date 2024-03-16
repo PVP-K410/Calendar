@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -44,9 +45,9 @@ import com.pvp.app.R
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.ButtonWithDialog
+import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicator
-import com.pvp.app.ui.common.UserInfoItem
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.common.underline
 import com.pvp.app.ui.screen.filters.FiltersDialog
@@ -101,7 +102,7 @@ private fun ProfileBody(
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        UserInfoItem(
+        EditableInfoItem(
             label = "Your mass:",
             value = "$massDisplay kg",
             dialogTitle = { Text("Editing Mass") },
@@ -138,7 +139,7 @@ private fun ProfileBody(
             }
         )
 
-        UserInfoItem(
+        EditableInfoItem(
             label = "Your height:",
             value = "$heightDisplay cm",
             dialogTitle = { Text("Editing Height") },
@@ -334,7 +335,9 @@ private fun ProfileHeader(
                         start = 5.dp,
                         top = 4.dp
                     ),
+                icon = Icons.Outlined.Edit,
                 iconSize = 30.dp,
+                iconDescription = "Edit Icon Button",
                 confirmButtonContent = {
                     Text("Edit")
                 },
