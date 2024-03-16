@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
 import com.pvp.app.model.Survey
 import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.showToast
 
 @Composable
@@ -47,6 +48,14 @@ fun SurveyScreen(
             .padding(8.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        if (state.surveys.isEmpty()) {
+            ProgressIndicator()
+
+            return
+        }
+
         var handler by remember { mutableStateOf({}) }
         var success by remember { mutableStateOf(true) }
 
@@ -74,8 +83,6 @@ fun SurveyScreen(
                     }
                 }
             ) {
-                val state by viewModel.state.collectAsStateWithLifecycle()
-
                 if (!success) {
                     Icon(
                         imageVector = Icons.Outlined.ErrorOutline,
@@ -104,7 +111,6 @@ fun SurveyInput(
     when (state.current) {
         Survey.BODY_MASS_INDEX -> {
             BodyMassIndexSurvey(
-                modifier = Modifier.fillMaxSize(),
                 handler = { height, mass ->
                     handler {
                         viewModel.updateBodyMassIndex(
@@ -112,17 +118,14 @@ fun SurveyInput(
                             mass = mass
                         )
                     }
-                }
+                },
+                modifier = Modifier.fillMaxSize()
             )
         }
 
         Survey.FILTER_ACTIVITIES -> {
             FilterSurvey(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                isActivities = true,
+                filters = state.user.activities.map { it.title },
                 handler = { filters ->
                     handler {
                         viewModel.updateUserFilters(
@@ -131,17 +134,18 @@ fun SurveyInput(
                         )
                     }
                 },
+                isActivities = true,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
                 title = "activities"
             )
         }
 
         Survey.FILTER_INGREDIENTS -> {
             FilterSurvey(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState()),
-                isActivities = false,
+                filters = state.user.ingredients.map { it.title },
                 handler = { filters ->
                     handler {
                         viewModel.updateUserFilters(
@@ -150,6 +154,11 @@ fun SurveyInput(
                         )
                     }
                 },
+                isActivities = false,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
                 title = "ingredients"
             )
         }

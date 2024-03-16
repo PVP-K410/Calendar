@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.LabelFieldWrapper
-import com.pvp.app.ui.common.NumberPicker
+import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
@@ -47,13 +47,13 @@ fun BodyMassIndexSurvey(
     handler: (height: Int, mass: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val stateMass = rememberPickerState(massRange[0])
     val stateHeight = rememberPickerState(heightRange[0])
+    val stateMass = rememberPickerState(massRange[0])
 
     LaunchedEffect(
         handler,
-        stateMass.value,
-        stateHeight.value
+        stateHeight.value,
+        stateMass.value
     ) {
         handler(
             stateHeight.value,
@@ -86,7 +86,7 @@ fun BodyMassIndexSurvey(
                 imageVector = Icons.Outlined.Height,
                 state = stateHeight,
                 textResult = { "$it cm (${it / 100.0} m)" },
-                textSelect = "Select your height",
+                textSelect = "Select your height"
             )
         }
     }
@@ -114,7 +114,7 @@ private fun BodyMassIndexPicker(
 
                 Spacer(Modifier.padding(8.dp))
 
-                NumberPicker(
+                Picker(
                     items = heightRange,
                     modifier = Modifier.fillMaxWidth(0.5f),
                     state = state
@@ -141,37 +141,32 @@ private fun BodyMassIndexPicker(
     )
 }
 
-private val activities = SportActivity
-    .entries
-    .map { it.title }
-
-private val ingredients = Ingredient
-    .entries
-    .map { it.title }
+private val activities = SportActivity.entries.map { it.title }
+private val ingredients = Ingredient.entries.map { it.title }
 
 @Composable
 fun FilterSurvey(
+    filters: List<String>,
     handler: (filters: List<String>) -> Unit,
     isActivities: Boolean,
     modifier: Modifier = Modifier,
     title: String
 ) {
-    var selectedFilters by remember { mutableStateOf(emptyList<String>()) }
-    var unselectedFilters by remember { mutableStateOf(emptyList<String>()) }
+    var filtersSelected by remember { mutableStateOf(filters) }
+    var filtersUnselected by remember { mutableStateOf(emptyList<String>()) }
 
-    if (isActivities) {
-        unselectedFilters = activities - selectedFilters.toSet()
+    filtersUnselected = if (isActivities) {
+        activities - filtersSelected.toSet()
     } else {
-        unselectedFilters = ingredients - selectedFilters.toSet()
+        ingredients - filtersSelected.toSet()
     }
-
 
     LaunchedEffect(
         handler,
-        selectedFilters,
-        unselectedFilters
+        filtersSelected,
+        filtersUnselected
     ) {
-        handler(selectedFilters)
+        handler(filtersSelected)
     }
 
     Column(
@@ -180,21 +175,21 @@ fun FilterSurvey(
         verticalArrangement = Arrangement.Center
     ) {
         FiltersBox(
-            title = "Selected $title",
-            filters = selectedFilters,
+            filters = filtersSelected,
             onClick = { filter ->
-                selectedFilters = selectedFilters.minus(filter)
-                unselectedFilters = unselectedFilters.plus(filter)
-            }
+                filtersSelected = filtersSelected.minus(filter)
+                filtersUnselected = filtersUnselected.plus(filter)
+            },
+            title = "Selected $title"
         )
 
         FiltersBox(
-            title = "Available $title",
-            filters = unselectedFilters,
+            filters = filtersUnselected,
             onClick = { filter ->
-                unselectedFilters = unselectedFilters.minus(filter)
-                selectedFilters = selectedFilters.plus(filter)
-            }
+                filtersUnselected = filtersUnselected.minus(filter)
+                filtersSelected = filtersSelected.plus(filter)
+            },
+            title = "Available $title"
         )
     }
 }
@@ -202,9 +197,9 @@ fun FilterSurvey(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FiltersBox(
-    title: String,
     filters: List<String>,
-    onClick: (String) -> Unit
+    onClick: (String) -> Unit,
+    title: String
 ) {
     Box(
         modifier = Modifier
@@ -216,9 +211,9 @@ fun FiltersBox(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = title,
                 style = TextStyle(fontSize = 18.sp),
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+                text = title
             )
 
             FlowRow(
@@ -228,7 +223,7 @@ fun FiltersBox(
             ) {
                 filters
                     .sorted()
-                    .forEach { filter ->
+                    .forEach {
                         Card(
                             modifier = Modifier
                                 .padding(8.dp)
@@ -236,12 +231,12 @@ fun FiltersBox(
                                     MaterialTheme.colorScheme.secondary,
                                     MaterialTheme.shapes.medium
                                 ),
-                            onClick = { onClick(filter) }
+                            onClick = { onClick(it) }
                         ) {
                             Text(
-                                text = filter,
+                                modifier = Modifier.padding(16.dp),
                                 style = TextStyle(fontSize = 16.sp),
-                                modifier = Modifier.padding(16.dp)
+                                text = it
                             )
                         }
                     }

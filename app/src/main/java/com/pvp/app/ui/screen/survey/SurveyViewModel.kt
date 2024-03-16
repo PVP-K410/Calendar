@@ -51,66 +51,51 @@ class SurveyViewModel @Inject constructor(
         height: Int,
         mass: Int
     ) {
-        viewModelScope.launch {
-            _state.value.user.let {
-                userService.merge(
-                    it.copy(
-                        height = height,
-                        mass = mass,
-                        surveys = it.surveys + state.value.current!!
-                    )
-                )
-            }
-            sendSurveyStateUpdate()
-        }
+        updateState(
+            _state.value.user.copy(
+                height = height,
+                mass = mass
+            )
+        )
     }
 
     fun updateUserFilters(
         filters: List<String>,
         isActivities: Boolean
     ) {
-        viewModelScope.launch {
-            _state.value.user.let { user ->
-                val updatedUser = if (isActivities) {
-                    user.copy(
-                        activities = filters.mapNotNull { SportActivity.fromTitle(it) },
-                        surveys = user.surveys + state.value.current!!
-                    )
-                } else {
-                    user.copy(
-                        ingredients = filters.mapNotNull { Ingredient.fromTitle(it) },
-                        surveys = user.surveys + state.value.current!!
-                    )
-                }
-
-                userService.merge(updatedUser)
+        _state.value.user.let { user ->
+            val userNew = if (isActivities) {
+                user.copy(
+                    activities = filters.mapNotNull { SportActivity.fromTitle(it) }
+                )
+            } else {
+                user.copy(
+                    ingredients = filters.mapNotNull { Ingredient.fromTitle(it) }
+                )
             }
-            sendSurveyStateUpdate()
+
+            updateState(userNew)
         }
     }
 
-    private fun sendSurveyStateUpdate() {
-        _state.update { currentState ->
-            val completedSurvey = currentState.current ?: return@update currentState
+    private fun updateState(user: User) {
+        viewModelScope.launch {
+            _state.update { state ->
+                val survey = state.current ?: return@update state.copy(user = user)
+                val userNew = user.copy(surveys = user.surveys + survey)
 
-            val remainingSurveys = currentState.surveys.filter { survey ->
-                survey != completedSurvey
+                userService.merge(userNew)
+
+                val surveys = state.surveys.filter {
+                    survey != it
+                }
+
+                state.copy(
+                    current = surveys.firstOrNull(),
+                    surveys = surveys,
+                    user = userNew
+                )
             }
-            val nextSurvey = remainingSurveys.firstOrNull()
-
-            val updatedSurveys = if (completedSurvey != null) {
-                currentState.user.surveys + completedSurvey
-            } else {
-                currentState.user.surveys
-            }
-
-            val updatedUser = currentState.user.copy(surveys = updatedSurveys)
-
-            currentState.copy(
-                current = nextSurvey,
-                surveys = remainingSurveys,
-                user = updatedUser
-            )
         }
     }
 }
