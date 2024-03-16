@@ -22,6 +22,10 @@ interface ServiceModule {
 
     @Binds
     @Singleton
+    fun bindActivityService(service: HealthConnectServiceImpl): HealthConnectService
+
+    @Binds
+    @Singleton
     fun bindAuthenticationService(service: AuthenticationServiceImpl): AuthenticationService
 
     @Binds
@@ -35,8 +39,4 @@ interface ServiceModule {
     @Binds
     @Singleton
     fun bindUserService(service: UserServiceImpl): UserService
-
-    @Binds
-    @Singleton
-    fun bindActivityService(service: HealthConnectServiceImpl) : HealthConnectService
 }
