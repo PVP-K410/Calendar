@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -12,7 +11,6 @@ import androidx.navigation.NavHostController
 import com.pvp.app.R
 import com.pvp.app.ui.screen.authentication.AuthenticationScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
-import com.pvp.app.ui.screen.profile.ProfileScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
@@ -36,7 +34,6 @@ sealed class Route(
          */
         val routesAuthenticated = listOf(
             Calendar,
-            Profile,
             Settings,
             Steps
         )
@@ -51,7 +48,6 @@ sealed class Route(
          */
         val routesDrawer = listOf(
             Calendar,
-            Profile,
             Settings,
             Steps
         )
@@ -80,14 +76,6 @@ sealed class Route(
         path = "calendar",
         resourceTitleId = R.string.route_calendar,
         screen = { _, _ -> CalendarScreen() }
-    )
-
-    data object Profile : Route(
-        icon = Icons.Outlined.EditNote,
-        iconDescription = "Profile page button icon",
-        path = "profile",
-        resourceTitleId = R.string.route_profile,
-        screen = { _, _ -> ProfileScreen() }
     )
 
     data object Settings : Route(
