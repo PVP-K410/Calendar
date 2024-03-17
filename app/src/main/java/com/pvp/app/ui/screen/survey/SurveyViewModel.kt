@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.survey
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.UserService
@@ -31,8 +30,6 @@ class SurveyViewModel @Inject constructor(
     private fun collectStateUpdates() {
         viewModelScope.launch(Dispatchers.IO) {
             userService.user.collect {
-                Log.i("SurveyViewModel", "Collecting update")
-
                 it?.let { user ->
                     _state.update {
                         val surveys = Survey.entries - user.surveys.toSet()

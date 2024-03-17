@@ -3,10 +3,8 @@ package com.pvp.app.ui.screen.profile
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Ingredient
-import com.pvp.app.model.SignOutResult
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +19,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val authenticationService: AuthenticationService,
     private val userService: UserService
 ) : ViewModel() {
 
@@ -81,12 +78,6 @@ class ProfileViewModel @Inject constructor(
             }
 
             userService.merge(_state.value.user)
-        }
-    }
-
-    fun signOut(onSignOut: (SignOutResult) -> Unit) {
-        viewModelScope.launch {
-            authenticationService.signOut(onSignOut)
         }
     }
 }
