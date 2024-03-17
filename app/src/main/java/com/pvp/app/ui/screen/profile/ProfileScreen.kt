@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,9 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -34,17 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pvp.app.R
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
-import com.pvp.app.ui.common.ButtonWithDialog
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicator
@@ -63,16 +57,8 @@ private fun ProfileBody(
     onUpdateIngredients: (List<String>) -> Unit,
     onUpdateActivities: (List<String>) -> Unit,
 ) {
-    val allActivities = remember {
-        SportActivity
-            .entries
-            .map { it.title }
-    }
-    val allIngredients = remember {
-        Ingredient
-            .entries
-            .map { it.title }
-    }
+    val allActivities = remember { SportActivity.entries.map { it.title } }
+    val allIngredients = remember { Ingredient.entries.map { it.title } }
 
     var heightDisplay by remember { mutableIntStateOf(state.value.user.height) }
     var heightEditing by remember { mutableStateOf(heightDisplay.toString()) }
@@ -237,55 +223,6 @@ private fun ProfileBody(
 }
 
 @Composable
-private fun ProfileFooter(
-    onSignOut: () -> Unit
-) {
-    val textSignOut = stringResource(R.string.screen_profile_button_sign_out)
-
-    ButtonWithDialog(
-        modifier = Modifier
-            .padding(
-                top = 20.dp,
-                bottom = 10.dp,
-                end = 10.dp
-            )
-            .fillMaxSize(),
-        contentAlignment = Alignment.BottomEnd,
-        mainButtonContent = {
-            Text(textSignOut)
-        },
-        dismissButtonContent = {
-            Text("Cancel")
-        },
-        confirmButtonContent = {
-            Text("Sign Out")
-        },
-        dialogTitle = {
-            Row {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.Logout,
-                    contentDescription = "Sign Out Icon",
-                    modifier = Modifier
-                        .padding(
-                            end = 6.dp,
-                            top = 4.dp
-                        )
-                        .size(24.dp)
-                )
-                Text(text = "Sign Out?")
-            }
-        },
-        dialogContent = {
-            Text(text = "Are you sure you want to sign out?")
-        },
-        onConfirmClick = {
-            onSignOut()
-        }
-    )
-
-}
-
-@Composable
 private fun ProfileHeader(
     state: State<ProfileState>,
     context: Context = LocalContext.current,
@@ -394,8 +331,6 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
-    val textSignOut = stringResource(R.string.screen_profile_toast_success_sign_out)
-    val context = LocalContext.current
 
     if (state.value.isLoading) {
         ProgressIndicator()
@@ -438,19 +373,6 @@ fun ProfileScreen(
                 },
                 onUpdateIngredients = {
                     viewModel.updateUserInformation(newIngredientFilters = it)
-                }
-            )
-
-            ProfileFooter(
-                onSignOut = {
-                    viewModel.signOut {
-                        context.showToast(
-                            isSuccess = it.isSuccess,
-                            messageError = it.messageError
-                                ?: "Error has occurred while signing out",
-                            messageSuccess = textSignOut
-                        )
-                    }
                 }
             )
         }
