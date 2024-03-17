@@ -76,10 +76,16 @@ private fun resolveTitle(
     }
 }
 
-private fun supportsTaskCreation(route: Route): Boolean {
-    return when (route) {
-        Route.Calendar, Route.MonthlyCalendar -> true
-        else -> false
+private fun supportsTaskCreation(
+    route: Route,
+    state: PagerState
+): Boolean {
+    return when (state.currentPage) {
+        1 -> false
+        else -> when (route) {
+            Route.Calendar, Route.MonthlyCalendar -> true
+            else -> false
+        }
     }
 }
 
@@ -286,7 +292,12 @@ fun LayoutScreenAuthenticated(
 
         Scaffold(
             floatingActionButton = {
-                if (supportsTaskCreation(route)) {
+                if (
+                    supportsTaskCreation(
+                        route,
+                        statePager
+                    )
+                ) {
                     FloatingActionButton(toggleDialog)
                 }
             },
@@ -327,7 +338,12 @@ fun LayoutScreenAuthenticated(
                 state = statePager
             )
 
-            if (supportsTaskCreation(route)) {
+            if (
+                supportsTaskCreation(
+                    route,
+                    statePager
+                )
+            ) {
                 CreateTaskDialog(
                     onClose = toggleDialog,
                     isOpen = isOpen,
