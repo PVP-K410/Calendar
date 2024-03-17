@@ -156,16 +156,12 @@ private fun DrawerHeader(
 
 @Composable
 fun DrawerScreen(
-    modifier: Modifier = Modifier,
     onClick: Route.() -> Unit,
-    routes: List<Route>,
     route: Route,
+    routes: List<Route>,
     viewModel: DrawerViewModel = hiltViewModel()
 ) {
-    ModalDrawerSheet(
-        modifier = modifier,
-        drawerShape = RectangleShape
-    ) {
+    ModalDrawerSheet(drawerShape = RectangleShape) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -188,8 +184,8 @@ fun DrawerScreen(
                     .fillMaxWidth()
                     .weight(0.8f),
                 onClick = onClick,
-                routes = routes,
-                route = route
+                route = route,
+                routes = routes
             )
 
             val context = LocalContext.current
