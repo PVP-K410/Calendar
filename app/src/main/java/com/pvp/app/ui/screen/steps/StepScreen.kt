@@ -45,7 +45,7 @@ fun ActivityList(
         }
     }
 
-    val favoriteActivities = model
+    val activities = model
         .activites
         .collectAsStateWithLifecycle()
         .value
@@ -71,7 +71,7 @@ fun ActivityList(
 
         Spacer(modifier = Modifier.height((16.dp)))
 
-        favoriteActivities.forEachIndexed { index, activity ->
+        activities.forEachIndexed { index, activity ->
             Text(
                 text = "${index + 1}. ${activity.first} (${activity.second} occurences)",
                 textAlign = TextAlign.Start,
