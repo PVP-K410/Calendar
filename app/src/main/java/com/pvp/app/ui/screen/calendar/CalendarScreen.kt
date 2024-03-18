@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -486,7 +487,8 @@ fun Week(
 
     HorizontalPager(
         state = pagerState,
-        modifier = modifier.padding(horizontal = 16.dp)
+        modifier = modifier.padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(horizontal = 65.dp)
     ) { page ->
         DayPage(
             days[page],
