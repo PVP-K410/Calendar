@@ -45,10 +45,8 @@ fun ActivityList(
         }
     }
 
-    val activities = model
-        .activites
-        .collectAsStateWithLifecycle()
-        .value
+    val activities = model.activites
+        .collectAsStateWithLifecycle().value
         .groupingBy { it.title }
         .eachCount()
         .toList()
@@ -128,7 +126,6 @@ fun StepScreen() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .padding(8.dp),
-        //verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

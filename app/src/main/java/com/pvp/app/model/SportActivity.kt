@@ -14,6 +14,7 @@ enum class SportActivity(
     val supportsDistanceMetrics: Boolean,
     val title: String
 ) {
+
     Gym(0, false, "Gym"),
     Badminton(2, false, "Badminton"),
     Baseball(4, false, "Baseball"),
@@ -77,19 +78,24 @@ enum class SportActivity(
     Yoga(83, false, "Yoga");
 
     companion object {
+
         fun fromId(id: Int): SportActivity? {
-            return values().find {
+            return entries.find {
                 it.id == id
             }
         }
 
         fun fromTitle(title: String): SportActivity? {
-            return values().find {
-                it.title.equals(title, ignoreCase = true)
+            return entries.find {
+                it.title.equals(
+                    title,
+                    ignoreCase = true
+                )
             }
         }
 
         object Serializer : KSerializer<SportActivity> {
+            
             override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
                 "com.pvp.app.model.SportActivity",
                 PrimitiveKind.STRING

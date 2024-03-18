@@ -45,6 +45,7 @@ class StepViewModel @Inject constructor(
                 .plusDays(1)
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
+
             val start = LocalDate
                 .now()
                 .atStartOfDay(ZoneId.systemDefault())
@@ -60,13 +61,14 @@ class StepViewModel @Inject constructor(
     fun getExercises() {
         viewModelScope.launch {
             val end = Instant.now()
+
             val start = LocalDate
                 .now()
                 .minusDays(29)
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
 
-            val records: List<ExerciseSessionRecord> = service.readActivityData(
+            val records = service.readActivityData(
                 record = ExerciseSessionRecord::class,
                 start = start,
                 end = end
