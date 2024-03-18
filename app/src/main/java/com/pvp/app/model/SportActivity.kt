@@ -19,7 +19,7 @@ enum class SportActivity(
     Baseball(4, false, "Baseball"),
     Basketball(5, false, "Basketball"),
     Cycling(8, true, "Cycling"),
-    BikingStationary(9, false, "Biking (Stationary)"),
+    CyclingStationary(9, false, "Cycling (Stationary)"),
     BootCamp(10, false, "Boot Camp"),
     Boxing(11, false, "Boxing"),
     Calisthenics(13, false, "Calisthenics"),
