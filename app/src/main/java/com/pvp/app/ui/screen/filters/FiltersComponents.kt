@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.filters
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +12,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +33,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
@@ -34,8 +44,10 @@ import com.pvp.app.ui.common.underline
 
 @Composable
 fun FiltersItem(
+    filtersType: String,
     title: String,
     selectedFilters: List<String>,
+    isSelected: Boolean? = null,
     dialogTitle: @Composable () -> Unit,
     dialogContent: @Composable () -> Unit,
     onConfirmClick: () -> Unit,
@@ -79,7 +91,7 @@ fun FiltersItem(
                         icon = Icons.Outlined.Edit,
                         iconDescription = "Edit Icon Button",
                         confirmButtonContent = {
-                            Text("Edit")
+                            Text("Save")
                         },
                         dismissButtonContent = {
                             Text("Cancel")
@@ -93,7 +105,9 @@ fun FiltersItem(
             }
 
             FiltersBox(
-                filters = selectedFilters
+                filters = selectedFilters,
+                isSelected = isSelected,
+                title = filtersType
             )
         }
     }
@@ -102,9 +116,11 @@ fun FiltersItem(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FiltersBox(
-    title: String? = null,
+    boxTitle: String? = null,
     filters: List<String>,
-    onClick: (String) -> Unit = {}
+    isSelected: Boolean? = null,
+    onClick: (String) -> Unit = {},
+    title: String? = null
 ) {
     Box(
         modifier = Modifier
@@ -114,10 +130,18 @@ fun FiltersBox(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (title != null) {
+            if (boxTitle != null) {
                 Text(
-                    text = title,
+                    text = boxTitle,
                     style = TextStyle(fontSize = 18.sp),
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+
+            if (filters.isEmpty()) {
+                Text(
+                    text = if (isSelected == false) "No other $title" else "No $title selected",
+                    style = TextStyle(fontSize = 15.sp, fontStyle = FontStyle.Italic),
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -128,37 +152,62 @@ fun FiltersBox(
                 filters
                     .sorted()
                     .forEach { filter ->
-                        Card(
+                        Box(
                             modifier = Modifier
                                 .padding(
                                     end = 4.dp,
                                     bottom = 4.dp
-                                ),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            ),
-                            elevation = CardDefaults.cardElevation(
-                                defaultElevation = 8.dp
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.onTertiary
-                            ),
-                            onClick = {
-                                onClick(filter)
-                            }
+                                )
                         ) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(
-                                        top = 12.dp,
-                                        bottom = 12.dp,
-                                        start = 6.dp,
-                                        end = 6.dp
-                                    ),
-                                text = filter,
-                                style = TextStyle(fontSize = 15.sp),
-                            )
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                ),
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 8.dp
+                                ),
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.secondary
+                                ),
+                                onClick = {
+                                    onClick(filter)
+                                }
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(
+                                            top = 12.dp,
+                                            bottom = 12.dp,
+                                            start = 6.dp,
+                                            end = 6.dp
+                                        ),
+                                    text = filter,
+                                    style = TextStyle(fontSize = 15.sp),
+                                )
+                            }
+
+                            if (isSelected != null) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .padding(end = 0.dp, top = 0.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White)
+                                        .border(
+                                            width = 1.dp,
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            shape = CircleShape
+                                        )
+                                        .size(16.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isSelected == true) Icons.Outlined.Remove else Icons.Outlined.Add,
+                                        contentDescription = null,
+                                        tint = Color.Black
+                                    )
+                                }
+                            }
                         }
                     }
             }
@@ -168,9 +217,11 @@ fun FiltersBox(
 
 @Composable
 fun FiltersDialog(
+    boxTitle: String,
     selectedFilters: List<String>,
     unselectedFilters: List<String>,
-    onValueChange: (List<String>, List<String>) -> Unit
+    onValueChange: (List<String>, List<String>) -> Unit,
+    title: String
 ) {
     var selected by remember { mutableStateOf(selectedFilters) }
     var unselected by remember { mutableStateOf(unselectedFilters) }
@@ -179,27 +230,32 @@ fun FiltersDialog(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.6f)
+            .verticalScroll(rememberScrollState())
     ) {
         FiltersBox(
-            title = "Active filters:",
+            boxTitle = boxTitle,
             filters = selected,
+            isSelected = true,
             onClick = { filter ->
                 selected = selected.minus(filter)
                 unselected = unselected.plus(filter)
 
                 onValueChange(selected, unselected)
-            }
+            },
+            title = title
         )
 
         FiltersBox(
-            title = "Remaining filters:",
+            boxTitle = "Other $title",
             filters = unselected,
+            isSelected = false,
             onClick = { filter ->
                 unselected = unselected.minus(filter)
                 selected = selected.plus(filter)
 
                 onValueChange(selected, unselected)
-            }
+            },
+            title = title
         )
     }
 }
