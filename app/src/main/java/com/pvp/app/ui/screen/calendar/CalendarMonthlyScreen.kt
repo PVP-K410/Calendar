@@ -33,8 +33,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun MonthlyCalendarScreen(
-    model: MonthlyCalendarViewModel = hiltViewModel(),
+fun CalendarMonthlyScreen(
+    model: CalendarMonthlyViewModel = hiltViewModel(),
 ) {
     val state by model.state.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -115,7 +115,7 @@ fun MonthlyCalendar(
 @Composable
 fun Header(
     month: YearMonth,
-    model: MonthlyCalendarViewModel = hiltViewModel()
+    model: CalendarMonthlyViewModel = hiltViewModel()
 ) {
     Row {
         IconButton(onClick = {
@@ -242,4 +242,3 @@ fun ContentItem(
         )
     }
 }
-

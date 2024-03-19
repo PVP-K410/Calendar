@@ -417,7 +417,7 @@ fun EditableInfoItem(
                     iconSize = 30.dp,
                     iconDescription = "Edit Icon Button",
                     confirmButtonContent = {
-                        Text("Edit")
+                        Text("Save")
                     },
                     dismissButtonContent = {
                         Text("Cancel")
