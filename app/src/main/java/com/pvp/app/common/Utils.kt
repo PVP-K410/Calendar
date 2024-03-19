@@ -6,6 +6,8 @@ import android.graphics.Picture
 import android.graphics.drawable.PictureDrawable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import com.pvp.app.model.SportActivity
 import java.time.Duration
 
 /**
@@ -44,4 +46,17 @@ fun Picture.toImageBitmap(): ImageBitmap {
 
             return bitmap.asImageBitmap()
         }
+}
+
+fun List<ExerciseSessionRecord>.toSportActivities(): List<SportActivity> {
+    return this.mapNotNull { exercise ->
+        SportActivity.fromId(exercise.exerciseType)
+    }
+}
+
+fun List<SportActivity>.getOccurences(): List<Pair<SportActivity, Int>> {
+    return this.groupingBy { it }
+        .eachCount()
+        .toList()
+        .sortedByDescending { it.second }
 }
