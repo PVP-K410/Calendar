@@ -29,4 +29,16 @@ interface HealthConnectService {
         start: java.time.Instant,
         end: java.time.Instant
     ): Long
+
+    /**
+     * Aggregates the distance user has traversed (by sport activities)
+     * between the specified time range
+     * @param start Specifies the start of time range
+     * @param end Specifies the end of the time range
+     * @return Returns the distance in meters
+     */
+    suspend fun aggregateDistance(
+        start: java.time.Instant,
+        end: java.time.Instant
+    ): Double
 }
