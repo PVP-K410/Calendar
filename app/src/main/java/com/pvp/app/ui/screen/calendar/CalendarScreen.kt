@@ -443,7 +443,8 @@ fun DayPage(
     pageIndex: Int,
     date: LocalDate,
     tasks: List<Task>,
-    page: Int
+    page: Int,
+    alpha: Float
 ) {
     val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == date }
     val scale = animateFloatAsState(
@@ -456,7 +457,8 @@ fun DayPage(
             .fillMaxSize()
             .graphicsLayer(
                 scaleX = scale,
-                scaleY = scale
+                scaleY = scale,
+                alpha = alpha
             ),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -495,7 +497,8 @@ fun Week(
             page,
             dates[page],
             tasks,
-            currentPage
+            currentPage,
+            1f
         )
     }
 }
