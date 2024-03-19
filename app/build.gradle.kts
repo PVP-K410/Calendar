@@ -10,7 +10,7 @@ plugins {
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.android")
     id("com.google.firebase.crashlytics")
-    
+
     kotlin("kapt")
     kotlin("plugin.serialization") version "1.9.22"
 }
@@ -108,7 +108,7 @@ android {
 }
 
 dependencies {
-    // Android & Compose
+    // Development
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation(platform("androidx.compose:compose-bom:2024.02.02"))
     implementation("androidx.compose.ui:ui")
@@ -117,46 +117,35 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.datastore:datastore-preferences-core:1.0.0")
+    implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
-
-    // Kotlinx
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-
-    // Database (Firebase)
-    implementation("com.google.android.gms:play-services-auth:21.0.0")
-    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-crashlytics")
-    implementation("com.google.firebase:firebase-analytics")
-
-    // Dependency Injection (Dagger-Hilt)
-    implementation("com.google.dagger:hilt-android:2.51")
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.paging:paging-common-android:3.3.0-alpha04")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("com.caverock:androidsvg-aar:1.4")
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("com.google.dagger:hilt-android:2.51")
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     kapt("com.google.dagger:hilt-android-compiler:2.51")
 
-    // Health connect
-    implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
-
-    // Images
-    implementation("com.caverock:androidsvg-aar:1.4")
-
-    // JUnit
+    // Test
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
-
-    // Espresso
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
-    // Compose
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.02.02"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+
+    // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
