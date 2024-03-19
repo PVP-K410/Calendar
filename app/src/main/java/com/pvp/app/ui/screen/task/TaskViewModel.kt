@@ -2,39 +2,53 @@ package com.pvp.app.ui.screen.task
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pvp.app.Application.Companion.appContext
+import com.pvp.app.api.NotificationService
+import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.MealTask
+import com.pvp.app.model.Notification
+import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
+    private val notificationService: NotificationService,
+    private val settingService: SettingService,
     private val taskService: TaskService,
-    private val userService: UserService,
+    private val userService: UserService
 ) : ViewModel() {
 
-    private val user = MutableStateFlow<User?>(null)
+    private lateinit var state: StateFlow<TaskState>
 
     init {
         viewModelScope.launch {
-            userService.user
-                .map {
-                    user.value = it
-                }
-                .launchIn(viewModelScope)
+            state = collectStateChanges()
         }
+    }
+
+    private suspend fun collectStateChanges(): StateFlow<TaskState> {
+        return settingService
+            .get(Setting.Notifications.ReminderBeforeTaskMinutes)
+            .combine(userService.user) { minutes, user ->
+                TaskState(
+                    reminderMinutes = minutes,
+                    user = user!!
+                )
+            }
+            .stateIn(viewModelScope)
     }
 
     fun createTaskMeal(
@@ -43,7 +57,7 @@ class TaskViewModel @Inject constructor(
         recipe: String,
         scheduledAt: LocalDateTime,
         title: String
-    ): MealTask {
+    ) {
         val task = MealTask(
             description,
             duration,
@@ -52,16 +66,16 @@ class TaskViewModel @Inject constructor(
             recipe,
             scheduledAt,
             title,
-            user.value!!.email
+            state.value.user.email
         )
 
         viewModelScope.launch {
             taskService.merge(task)
         }
 
-        task.scheduleReminder(appContext, 10)
-
-        return task
+        task
+            .toNotification()
+            ?.also { notificationService.post(it) }
     }
 
     fun createTaskSport(
@@ -73,7 +87,7 @@ class TaskViewModel @Inject constructor(
         isCompleted: Boolean,
         scheduledAt: LocalDateTime,
         title: String
-    ): SportTask {
+    ) {
         val task = SportTask(
             activity,
             description,
@@ -83,16 +97,16 @@ class TaskViewModel @Inject constructor(
             isCompleted,
             scheduledAt,
             title,
-            user.value!!.email
+            state.value.user.email
         )
 
         viewModelScope.launch {
             taskService.merge(task)
         }
 
-        task.scheduleReminder(appContext, 10)
-
-        return task
+        task
+            .toNotification()
+            ?.also { notificationService.post(it) }
     }
 
     fun createTask(
@@ -102,7 +116,7 @@ class TaskViewModel @Inject constructor(
         isCompleted: Boolean,
         scheduledAt: LocalDateTime,
         title: String
-    ): Task {
+    ) {
         val task = Task(
             description,
             duration,
@@ -110,16 +124,34 @@ class TaskViewModel @Inject constructor(
             isCompleted,
             scheduledAt,
             title,
-            user.value!!.email
+            state.value.user.email
         )
 
         viewModelScope.launch {
             taskService.merge(task)
         }
 
-        task.scheduleReminder(appContext, 10)
+        task
+            .toNotification()
+            ?.also { notificationService.post(it) }
+    }
 
-        return task
+    private fun Task.toNotification(): Notification? {
+        val difference = ChronoUnit.SECONDS.between(
+            LocalDateTime.now(),
+            scheduledAt
+        )
+
+        val reminderSeconds = difference - (state.value.reminderMinutes * 60)
+
+        if (reminderSeconds <= 0) {
+            return null
+        }
+
+        return Notification(
+            delay = Duration.ofMinutes(state.value.reminderMinutes.toLong()),
+            text = "Task '${title}' is in 1 minute(s)..."
+        )
     }
 
     fun updateTask(
@@ -130,3 +162,8 @@ class TaskViewModel @Inject constructor(
         }
     }
 }
+
+data class TaskState(
+    val reminderMinutes: Int = Setting.Notifications.ReminderBeforeTaskMinutes.defaultValue,
+    val user: User = User()
+)
