@@ -1,14 +1,10 @@
 package com.pvp.app.model
 
-import android.content.Context
 import com.pvp.app.common.DurationSerializer
 import com.pvp.app.common.LocalDateTimeSerializer
-import com.pvp.app.service.scheduleNotification
 import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import kotlin.random.Random
 
 @Serializable
 class MealTask : Task {
@@ -89,31 +85,5 @@ open class Task(
 ) {
     override fun toString(): String {
         return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail')"
-    }
-
-    fun scheduleReminder(
-        context: Context,
-        minutesToReminder: Int)
-    {
-        val now = LocalDateTime.now()
-        val timeDifference = ChronoUnit.SECONDS.between(
-            now,
-            scheduledAt
-        )
-        val reminderTime = timeDifference - minutesToReminder * 60
-
-        if (reminderTime <= 0) {
-            return
-        }
-
-        val text = "Task: '$title' is in ${minutesToReminder} minutes!"
-        val notificationId = Random(System.currentTimeMillis()).nextInt()
-
-        scheduleNotification(
-            context,
-            text,
-            reminderTime.toInt(),
-            notificationId
-        )
     }
 }
