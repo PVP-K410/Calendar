@@ -14,9 +14,9 @@ import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
@@ -31,25 +31,24 @@ class TaskViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
 
-    private val state = MutableStateFlow(TaskState())
+    private lateinit var state: StateFlow<TaskState>
 
     init {
-        collectStateChanges()
+        viewModelScope.launch {
+            state = collectStateChanges()
+        }
     }
 
-    private fun collectStateChanges() {
-        viewModelScope.launch {
-            settingService
-                .get(Setting.Notifications.ReminderBeforeTaskMinutes)
-                .combine(userService.user) { reminderMinutes, user ->
-                    state.update {
-                        TaskState(
-                            reminderMinutes = reminderMinutes,
-                            user = user!!
-                        )
-                    }
-                }
-        }
+    private suspend fun collectStateChanges(): StateFlow<TaskState> {
+        return settingService
+            .get(Setting.Notifications.ReminderBeforeTaskMinutes)
+            .combine(userService.user) { minutes, user ->
+                TaskState(
+                    reminderMinutes = minutes,
+                    user = user!!
+                )
+            }
+            .stateIn(viewModelScope)
     }
 
     fun createTaskMeal(
@@ -143,9 +142,9 @@ class TaskViewModel @Inject constructor(
             scheduledAt
         )
 
-        val reminderTime = difference - (state.value.reminderMinutes * 60)
+        val reminderSeconds = difference - (state.value.reminderMinutes * 60)
 
-        if (reminderTime <= 0) {
+        if (reminderSeconds <= 0) {
             return null
         }
 

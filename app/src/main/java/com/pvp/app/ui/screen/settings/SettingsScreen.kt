@@ -56,10 +56,12 @@ private fun SettingNotificationReminderMinutes(
             )
         },
         onEdit = {
-            model.merge(
-                Setting.Notifications.ReminderBeforeTaskMinutes,
-                state.value
-            )
+            if (state.value != reminderMinutes) {
+                model.merge(
+                    Setting.Notifications.ReminderBeforeTaskMinutes,
+                    state.value
+                )
+            }
         },
         title = "Set Reminder Time",
         value = "$reminderMinutes minute(s)"
