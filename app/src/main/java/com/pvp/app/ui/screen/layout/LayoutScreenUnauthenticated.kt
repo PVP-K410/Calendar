@@ -17,33 +17,31 @@ import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun LayoutScreenUnauthenticated(
+    areSurveysFilled: Boolean?,
     controller: NavHostController,
     isAuthenticated: Boolean,
-    isSurveyFilled: Boolean?,
     scope: CoroutineScope
 ) {
-    CalendarTheme {
-        Surface(
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .backgroundGradientRadial()
+            .padding(8.dp)
+    ) {
+        Router(
+            controller = controller,
+            destinationStart = if (isAuthenticated && areSurveysFilled == false) {
+                Route.Survey
+            } else {
+                Route.SignIn
+            },
             modifier = Modifier
                 .fillMaxSize()
-                .backgroundGradientRadial()
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp)
-        ) {
-            Router(
-                controller = controller,
-                destinationStart = if (isAuthenticated && isSurveyFilled == false) {
-                    Route.Survey
-                } else {
-                    Route.SignIn
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(8.dp)
-                    .backgroundGradientRadial(),
-                routes = Route.routesUnauthenticated,
-                scope = scope
-            )
-        }
+                .backgroundGradientRadial(),
+            routes = Route.routesUnauthenticated,
+            scope = scope
+        )
     }
 }

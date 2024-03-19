@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,8 +29,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.underline
-import com.pvp.app.ui.screen.profile.IconButtonWithDialog
 
 @Composable
 fun FiltersItem(
@@ -74,6 +76,8 @@ fun FiltersItem(
                 ) {
                     IconButtonWithDialog(
                         iconSize = 30.dp,
+                        icon = Icons.Outlined.Edit,
+                        iconDescription = "Edit Icon Button",
                         confirmButtonContent = {
                             Text("Edit")
                         },

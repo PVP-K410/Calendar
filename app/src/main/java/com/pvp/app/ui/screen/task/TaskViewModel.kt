@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.task
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.Application.Companion.appContext
@@ -30,8 +29,7 @@ class TaskViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userService
-                .getCurrent()
+            userService.user
                 .map {
                     user.value = it
                 }

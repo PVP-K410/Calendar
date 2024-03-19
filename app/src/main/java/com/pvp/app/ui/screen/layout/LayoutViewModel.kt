@@ -5,22 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-@OptIn(ExperimentalCoroutinesApi::class)
 class LayoutViewModel @Inject constructor(
     private val authenticationService: AuthenticationService,
     private val userService: UserService
@@ -30,45 +28,41 @@ class LayoutViewModel @Inject constructor(
     val state: StateFlow<LayoutState> = _state.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+        _state.update { it.copy(isLoading = true) }
 
-            val flowUserFirebase = authenticationService.user
-
-            val flowUserApp = flowUserFirebase
-                .filterNotNull()
-                .flatMapLatest { userService.get(it.email!!) }
-
-            combine(
-                flowUserApp,
-                flowUserFirebase
-            ) { userApp, userFirebase ->
-                _state.update {
-                    LayoutState(
-                        isAuthenticated = userFirebase != null,
-                        isSurveyFilled = userApp?.let { isSurveyFilled(it) },
-                        user = userApp,
-                        userAvatar = userApp?.let {
-                            userService.resolveAvatar(it.email)
-                        }
-                    )
-                }
-            }
-                .launchIn(viewModelScope)
-
-            _state.update { it.copy(isLoading = false) }
-        }
+        collectStateUpdates()
     }
 
-    private fun isSurveyFilled(user: User): Boolean {
-        return user.mass != 0 && user.height != 0
+    private fun collectStateUpdates() {
+        combine(
+            userService.user,
+            authenticationService.user
+        ) { userApp, userFirebase ->
+            _state.update {
+                LayoutState(
+                    areSurveysFilled = userApp?.let { areSurveysFilled(it) },
+                    isAuthenticated = userFirebase != null,
+                    isLoading = false,
+                    user = userApp,
+                    userAvatar = userApp?.let {
+                        userService.resolveAvatar(it.email)
+                    }
+                )
+            }
+        }
+            .flowOn(Dispatchers.IO)
+            .launchIn(viewModelScope)
+    }
+
+    private fun areSurveysFilled(user: User): Boolean {
+        return user.surveys.containsAll(Survey.entries)
     }
 }
 
 data class LayoutState(
+    val areSurveysFilled: Boolean? = null,
     val isAuthenticated: Boolean = false,
     val isLoading: Boolean = false,
-    val isSurveyFilled: Boolean? = null,
     val user: User? = null,
     val userAvatar: ImageBitmap? = null
 )

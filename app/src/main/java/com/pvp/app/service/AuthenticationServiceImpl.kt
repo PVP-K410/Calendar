@@ -15,8 +15,8 @@ import com.pvp.app.di.AuthenticationModule
 import com.pvp.app.model.AuthenticationResult
 import com.pvp.app.model.SignOutResult
 import com.pvp.app.model.UserProperties
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
@@ -32,8 +32,17 @@ class AuthenticationServiceImpl @Inject constructor(
     private val userService: UserService
 ) : AuthenticationService {
 
-    private val _user = MutableStateFlow(auth.currentUser)
-    override val user = _user.asStateFlow()
+    override val user = callbackFlow {
+        val listener = FirebaseAuth.AuthStateListener {
+            trySend(it.currentUser)
+        }
+
+        auth.addAuthStateListener(listener)
+
+        awaitClose {
+            auth.removeAuthStateListener(listener)
+        }
+    }
 
     companion object {
 
@@ -114,11 +123,7 @@ class AuthenticationServiceImpl @Inject constructor(
                 onValidate
             ).run {
                 resolveAuthenticationResult(this)
-                    .also {
-                        onSignIn(it)
-
-                        _user.value = this
-                    }
+                    .also { onSignIn(it) }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Sign in failed: ${e.message}")
@@ -137,11 +142,7 @@ class AuthenticationServiceImpl @Inject constructor(
             auth.signOut()
 
             SignOutResult(isSuccess = true)
-                .also {
-                    onSignOut(it)
-
-                    _user.value = null
-                }
+                .also { onSignOut(it) }
         } catch (e: Exception) {
             Log.e(TAG, "Sign out failed: ${e.message}")
 
