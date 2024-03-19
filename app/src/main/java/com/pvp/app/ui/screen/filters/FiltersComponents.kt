@@ -141,7 +141,10 @@ fun FiltersBox(
             if (filters.isEmpty()) {
                 Text(
                     text = if (isSelected == false) "No other $title" else "No $title selected",
-                    style = TextStyle(fontSize = 15.sp, fontStyle = FontStyle.Italic),
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        fontStyle = FontStyle.Italic
+                    ),
                     modifier = Modifier.padding(8.dp)
                 )
             }
@@ -191,7 +194,10 @@ fun FiltersBox(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .padding(end = 0.dp, top = 0.dp)
+                                        .padding(
+                                            end = 0.dp,
+                                            top = 0.dp
+                                        )
                                         .clip(CircleShape)
                                         .background(Color.White)
                                         .border(
