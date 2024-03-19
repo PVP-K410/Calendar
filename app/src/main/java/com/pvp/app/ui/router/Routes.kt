@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -12,7 +13,7 @@ import com.pvp.app.R
 import com.pvp.app.ui.screen.authentication.SignInScreen
 import com.pvp.app.ui.screen.authentication.SignUpScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
-import com.pvp.app.ui.screen.calendar.MonthlyCalendarScreen
+import com.pvp.app.ui.screen.profile.ProfileScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
@@ -36,7 +37,7 @@ sealed class Route(
          */
         val routesAuthenticated = listOf(
             Calendar,
-            MonthlyCalendar,
+            Profile,
             Settings,
             Steps
         )
@@ -51,7 +52,7 @@ sealed class Route(
          */
         val routesDrawer = listOf(
             Calendar,
-            MonthlyCalendar,
+            Profile,
             Settings,
             Steps
         )
@@ -77,12 +78,12 @@ sealed class Route(
         screen = { _, _ -> CalendarScreen() }
     )
 
-    data object MonthlyCalendar : Route(
-        icon = Icons.Outlined.CalendarMonth,
-        iconDescription = "Calendar page button icon",
-        resourceTitleId = R.string.route_calendar_monthly,
-        path = "calendar/monthly",
-        screen = { _, _ -> MonthlyCalendarScreen() }
+    data object Profile : Route(
+        icon = Icons.Outlined.EditNote,
+        iconDescription = "Profile page button icon",
+        path = "profile",
+        resourceTitleId = R.string.route_profile,
+        screen = { _, _ -> ProfileScreen() }
     )
 
     data object Settings : Route(
