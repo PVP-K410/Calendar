@@ -15,11 +15,13 @@ import com.pvp.app.R
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.model.Notification
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.random.Random
 
 class NotificationServiceImpl @Inject constructor(
     private val configuration: Configuration,
+    @ApplicationContext
     private val context: Context
 ) : NotificationService {
 

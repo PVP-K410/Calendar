@@ -12,9 +12,11 @@ import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
+import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
@@ -24,24 +26,31 @@ import javax.inject.Inject
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     private val notificationService: NotificationService,
-    settingService: SettingService,
+    private val settingService: SettingService,
     private val taskService: TaskService,
-    userService: UserService
+    private val userService: UserService
 ) : ViewModel() {
 
-    private val reminderMinutes = settingService
-        .get(Setting.Notifications.ReminderBeforeTaskMinutes)
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            Setting.Notifications.ReminderBeforeTaskMinutes.defaultValue
-        )
+    private val state = MutableStateFlow(TaskState())
 
-    private val user = userService.user.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        null
-    )
+    init {
+        collectStateChanges()
+    }
+
+    private fun collectStateChanges() {
+        viewModelScope.launch {
+            settingService
+                .get(Setting.Notifications.ReminderBeforeTaskMinutes)
+                .combine(userService.user) { reminderMinutes, user ->
+                    state.update {
+                        TaskState(
+                            reminderMinutes = reminderMinutes,
+                            user = user!!
+                        )
+                    }
+                }
+        }
+    }
 
     fun createTaskMeal(
         description: String? = null,
@@ -50,26 +59,24 @@ class TaskViewModel @Inject constructor(
         scheduledAt: LocalDateTime,
         title: String
     ) {
-        user.value?.run {
-            val task = MealTask(
-                description,
-                duration,
-                null,
-                false,
-                recipe,
-                scheduledAt,
-                title,
-                email
-            )
+        val task = MealTask(
+            description,
+            duration,
+            null,
+            false,
+            recipe,
+            scheduledAt,
+            title,
+            state.value.user.email
+        )
 
-            viewModelScope.launch {
-                taskService.merge(task)
-            }
-
-            task
-                .toNotification()
-                ?.also { notificationService.post(it) }
+        viewModelScope.launch {
+            taskService.merge(task)
         }
+
+        task
+            .toNotification()
+            ?.also { notificationService.post(it) }
     }
 
     fun createTaskSport(
@@ -82,27 +89,25 @@ class TaskViewModel @Inject constructor(
         scheduledAt: LocalDateTime,
         title: String
     ) {
-        user.value?.run {
-            val task = SportTask(
-                activity,
-                description,
-                distance,
-                duration,
-                id,
-                isCompleted,
-                scheduledAt,
-                title,
-                email
-            )
+        val task = SportTask(
+            activity,
+            description,
+            distance,
+            duration,
+            id,
+            isCompleted,
+            scheduledAt,
+            title,
+            state.value.user.email
+        )
 
-            viewModelScope.launch {
-                taskService.merge(task)
-            }
-
-            task
-                .toNotification()
-                ?.also { notificationService.post(it) }
+        viewModelScope.launch {
+            taskService.merge(task)
         }
+
+        task
+            .toNotification()
+            ?.also { notificationService.post(it) }
     }
 
     fun createTask(
@@ -113,25 +118,23 @@ class TaskViewModel @Inject constructor(
         scheduledAt: LocalDateTime,
         title: String
     ) {
-        user.value?.run {
-            val task = Task(
-                description,
-                duration,
-                id,
-                isCompleted,
-                scheduledAt,
-                title,
-                email
-            )
+        val task = Task(
+            description,
+            duration,
+            id,
+            isCompleted,
+            scheduledAt,
+            title,
+            state.value.user.email
+        )
 
-            viewModelScope.launch {
-                taskService.merge(task)
-            }
-
-            task
-                .toNotification()
-                ?.also { notificationService.post(it) }
+        viewModelScope.launch {
+            taskService.merge(task)
         }
+
+        task
+            .toNotification()
+            ?.also { notificationService.post(it) }
     }
 
     private fun Task.toNotification(): Notification? {
@@ -140,15 +143,15 @@ class TaskViewModel @Inject constructor(
             scheduledAt
         )
 
-        val reminderTime = difference - (reminderMinutes.value * 60)
+        val reminderTime = difference - (state.value.reminderMinutes * 60)
 
         if (reminderTime <= 0) {
             return null
         }
 
         return Notification(
-            delay = Duration.ofMinutes(reminderMinutes.value.toLong()),
-            text = "Task '${title}' is in $reminderTime minutes!"
+            delay = Duration.ofMinutes(state.value.reminderMinutes.toLong()),
+            text = "Task '${title}' is in 1 minute(s)..."
         )
     }
 
@@ -160,3 +163,8 @@ class TaskViewModel @Inject constructor(
         }
     }
 }
+
+data class TaskState(
+    val reminderMinutes: Int = Setting.Notifications.ReminderBeforeTaskMinutes.defaultValue,
+    val user: User = User()
+)
