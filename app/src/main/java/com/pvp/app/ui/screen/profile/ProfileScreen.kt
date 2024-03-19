@@ -163,6 +163,7 @@ private fun ProfileBody(
         )
 
         FiltersItem(
+            filtersType = "activities",
             title = "Sport activities filter:",
             selectedFilters = activitiesDisplay,
             dialogTitle = {
@@ -170,12 +171,14 @@ private fun ProfileBody(
             },
             dialogContent = {
                 FiltersDialog(
+                    boxTitle = "Activities that I like",
                     selectedFilters = activitiesEditingSelected,
                     unselectedFilters = activitiesEditingUnselected,
                     onValueChange = { newSelected, newUnselected ->
                         activitiesEditingSelected = newSelected
                         activitiesEditingUnselected = newUnselected
-                    }
+                    },
+                    title = "activities"
                 )
             },
             onConfirmClick = {
@@ -192,6 +195,7 @@ private fun ProfileBody(
         )
 
         FiltersItem(
+            filtersType = "ingredients",
             title = "Meal ingredients filter:",
             selectedFilters = ingredientsDisplay,
             dialogTitle = {
@@ -199,12 +203,14 @@ private fun ProfileBody(
             },
             dialogContent = {
                 FiltersDialog(
+                    boxTitle = "Ingredients that I don't like",
                     selectedFilters = ingredientsEditingSelected,
                     unselectedFilters = ingredientsEditingUnselected,
                     onValueChange = { newSelected, newUnselected ->
                         ingredientsEditingSelected = newSelected
                         ingredientsEditingUnselected = newUnselected
-                    }
+                    },
+                    title = "ingredients"
                 )
             },
             onConfirmClick = {
@@ -212,7 +218,7 @@ private fun ProfileBody(
 
                 onUpdateIngredients(ingredientsEditingSelected)
 
-                context.showToast(message = "Your sport activities have been updated!")
+                context.showToast(message = "Your meal ingredients have been updated!")
             },
             onDismiss = {
                 ingredientsEditingSelected = ingredientsDisplay
@@ -276,7 +282,7 @@ private fun ProfileHeader(
                 iconSize = 30.dp,
                 iconDescription = "Edit Icon Button",
                 confirmButtonContent = {
-                    Text("Edit")
+                    Text("Save")
                 },
                 dismissButtonContent = {
                     Text("Cancel")
