@@ -40,23 +40,23 @@ import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 private fun SettingNotificationReminderMinutes(
     model: SettingsViewModel = hiltViewModel()
 ) {
-    val reminderMinutes by model
+    val minutes by model
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
         .collectAsStateWithLifecycle()
 
-    val state = rememberPickerState(initialValue = reminderMinutes)
+    val state = rememberPickerState(initialValue = minutes)
 
     SettingCard(
         description = "Choose minutes before tasks reminder executes. Default is 10 minutes",
         editContent = {
             Picker(
-                items = (1..60).toList(),
+                items = (1..120).toList(),
                 state = state,
-                startIndex = 0,
+                startIndex = minutes - 1,
             )
         },
         onEdit = {
-            if (state.value != reminderMinutes) {
+            if (state.value != minutes) {
                 model.merge(
                     Setting.Notifications.ReminderBeforeTaskMinutes,
                     state.value
@@ -64,7 +64,7 @@ private fun SettingNotificationReminderMinutes(
             }
         },
         title = "Set Reminder Time",
-        value = "$reminderMinutes minute(s)"
+        value = "$minutes minute(s)"
     )
 }
 
