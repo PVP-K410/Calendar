@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class ExerciseServiceImpl @Inject constructor(
     private val service: HealthConnectService
-): ExerciseService {
+) : ExerciseService {
 
     override suspend fun getExerciseInfo(record: ExerciseSessionRecord): ExerciseSessionInfo {
         return ExerciseSessionInfo(
