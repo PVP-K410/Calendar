@@ -1,17 +1,18 @@
-package com.pvp.app.common
+package com.pvp.app.service
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.model.ExerciseSessionInfo
 import com.pvp.app.model.SportActivity
 import java.time.Duration
+import javax.inject.Inject
 
-object ExerciseInfoUtils {
-    suspend fun getExerciseInfo(
-        service: HealthConnectService,
-        record: ExerciseSessionRecord
-    ):
-            ExerciseSessionInfo {
+class ExerciseServiceImpl @Inject constructor(
+    private val service: HealthConnectService
+): ExerciseService {
+
+    override suspend fun getExerciseInfo(record: ExerciseSessionRecord): ExerciseSessionInfo {
         return ExerciseSessionInfo(
             record = record,
             distance = when (SportActivity.fromId(record.exerciseType)?.supportsDistanceMetrics) {
@@ -20,12 +21,5 @@ object ExerciseInfoUtils {
             },
             duration = Duration.between(record.startTime, record.endTime)
         )
-    }
-
-    suspend fun getExerciseInfo(
-        service: HealthConnectService,
-        records: List<ExerciseSessionRecord>
-    ): List<ExerciseSessionInfo> {
-        return records.map { getExerciseInfo(service, it) }
     }
 }
