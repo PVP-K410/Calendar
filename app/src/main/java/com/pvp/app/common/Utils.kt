@@ -55,7 +55,8 @@ fun List<ExerciseSessionRecord>.toSportActivities(): List<SportActivity> {
 }
 
 fun List<SportActivity>.getOccurences(): List<Pair<SportActivity, Int>> {
-    return this.groupingBy { it }
+    return this
+        .groupingBy { it }
         .eachCount()
         .toList()
         .sortedByDescending { it.second }

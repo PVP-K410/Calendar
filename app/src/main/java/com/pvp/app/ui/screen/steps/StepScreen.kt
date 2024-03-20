@@ -47,7 +47,8 @@ fun ActivityList(
     }
 
     val activities = model.activities
-        .collectAsStateWithLifecycle().value.getOccurences()
+        .collectAsStateWithLifecycle().value
+        .getOccurences()
 
     Column(
         modifier = Modifier

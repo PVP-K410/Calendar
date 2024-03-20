@@ -16,10 +16,16 @@ class ExerciseServiceImpl @Inject constructor(
         return ExerciseSessionInfo(
             record = record,
             distance = when (SportActivity.fromId(record.exerciseType)?.supportsDistanceMetrics) {
-                true -> service.aggregateDistance(record.startTime, record.endTime)
+                true -> service.aggregateDistance(
+                    record.startTime,
+                    record.endTime
+                )
                 else -> null
             },
-            duration = Duration.between(record.startTime, record.endTime)
+            duration = Duration.between(
+                record.startTime,
+                record.endTime
+            )
         )
     }
 }

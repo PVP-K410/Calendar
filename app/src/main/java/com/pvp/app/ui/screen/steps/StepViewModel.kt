@@ -82,5 +82,5 @@ class StepViewModel @Inject constructor(
 
 val PERMISSIONS = setOf(
     HealthPermission.getReadPermission(StepsRecord::class),
-    HealthPermission.getReadPermission(ExerciseSessionRecord::class),
+    HealthPermission.getReadPermission(ExerciseSessionRecord::class)
 )

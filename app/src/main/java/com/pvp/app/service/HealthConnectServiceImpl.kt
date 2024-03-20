@@ -56,12 +56,16 @@ class HealthConnectServiceImpl @Inject constructor(
             val response = client.aggregate(
                 AggregateRequest(
                     metrics = setOf(DistanceRecord.DISTANCE_TOTAL),
-                    timeRangeFilter = TimeRangeFilter.between(start, end)
+                    timeRangeFilter = TimeRangeFilter.between(
+                        start,
+                        end
+                    )
                 )
             )
+
             response[DistanceRecord.DISTANCE_TOTAL]?.inMeters ?: 0.0
         } catch (e: Exception) {
-            Log.e("DISTANCE", "EXCEPTION ${e.toString()}")
+            Log.e("DISTANCE", "EXCEPTION ${e.message}")
             0.0
         }
     }

@@ -36,6 +36,10 @@ interface ServiceModule {
 
     @Binds
     @Singleton
+    fun bindExerciseService(service: ExerciseServiceImpl): ExerciseService
+
+    @Binds
+    @Singleton
     fun bindConfiguration(service: ConfigurationImpl): Configuration
 
     @Binds
@@ -53,8 +57,4 @@ interface ServiceModule {
     @Binds
     @Singleton
     fun bindUserService(service: UserServiceImpl): UserService
-
-    @Binds
-    @Singleton
-    fun bindExerciseService(service: ExerciseServiceImpl): ExerciseService
 }

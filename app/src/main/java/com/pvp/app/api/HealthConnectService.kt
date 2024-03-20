@@ -1,6 +1,7 @@
 package com.pvp.app.api
 
 import androidx.health.connect.client.records.Record
+import java.time.Instant
 import kotlin.reflect.KClass
 
 interface HealthConnectService {
@@ -15,8 +16,8 @@ interface HealthConnectService {
      */
     suspend fun <T : Record> readActivityData(
         record: KClass<T>,
-        start: java.time.Instant,
-        end: java.time.Instant
+        start: Instant,
+        end: Instant
     ): List<T>
 
     /**
@@ -26,8 +27,8 @@ interface HealthConnectService {
      * @return Returns the step count (0 if the data could not be read)
      */
     suspend fun aggregateSteps(
-        start: java.time.Instant,
-        end: java.time.Instant
+        start: Instant,
+        end: Instant
     ): Long
 
     /**
@@ -38,7 +39,7 @@ interface HealthConnectService {
      * @return Returns the distance in meters
      */
     suspend fun aggregateDistance(
-        start: java.time.Instant,
-        end: java.time.Instant
+        start: Instant,
+        end: Instant
     ): Double
 }
