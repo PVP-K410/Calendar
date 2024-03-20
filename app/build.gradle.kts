@@ -138,6 +138,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     kapt("com.google.dagger:hilt-android-compiler:2.51")
 
+    // new
+    implementation("io.coil-kt:coil-compose:2.3.0")
+
     // Test
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

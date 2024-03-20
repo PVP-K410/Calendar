@@ -67,7 +67,7 @@ enum class SportActivity(
     Stretching(71, false, "Stretching"),
     Surfing(72, true, "Surfing"),
     SwimmingOpenWater(73, true, "Swimming (Open Water)"),
-    SwimmingPool(74, true, "Swimming (Pool)"),
+    Swimming(74, true, "Swimming (Pool)"),
     TableTennis(75, false, "Table Tennis"),
     Tennis(76, false, "Tennis"),
     Volleyball(78, false, "Volleyball"),
