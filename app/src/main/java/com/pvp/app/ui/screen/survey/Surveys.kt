@@ -1,7 +1,9 @@
 package com.pvp.app.ui.screen.survey
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +13,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Height
+import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Scale
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,8 +33,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -154,11 +164,17 @@ fun FilterSurvey(
 ) {
     var filtersSelected by remember { mutableStateOf(filters) }
     var filtersUnselected by remember { mutableStateOf(emptyList<String>()) }
+    val informativeText: String
+    val boxTitle: String
 
-    filtersUnselected = if (isActivities) {
-        activities - filtersSelected.toSet()
+    if (isActivities) {
+        filtersUnselected = activities - filtersSelected.toSet()
+        informativeText = "Select sport activities that you like doing"
+        boxTitle = "${title.capitalize()} that I like"
     } else {
-        ingredients - filtersSelected.toSet()
+        filtersUnselected = ingredients - filtersSelected.toSet()
+        informativeText = "Select meal ingredients that you don't like"
+        boxTitle = "${title.capitalize()} that I don't like"
     }
 
     LaunchedEffect(
@@ -169,35 +185,53 @@ fun FilterSurvey(
         handler(filtersSelected)
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(8.dp)
     ) {
-        FiltersBox(
-            filters = filtersSelected,
-            onClick = { filter ->
-                filtersSelected = filtersSelected.minus(filter)
-                filtersUnselected = filtersUnselected.plus(filter)
-            },
-            title = "Selected $title"
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = modifier,
+        ) {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                style = TextStyle(fontSize = 24.sp),
+                text = informativeText
+            )
 
-        FiltersBox(
-            filters = filtersUnselected,
-            onClick = { filter ->
-                filtersUnselected = filtersUnselected.minus(filter)
-                filtersSelected = filtersSelected.plus(filter)
-            },
-            title = "Available $title"
-        )
+            FiltersBox(
+                boxTitle = boxTitle,
+                filters = filtersSelected,
+                isSelected = true,
+                onClick = { filter ->
+                    filtersSelected = filtersSelected.minus(filter)
+                    filtersUnselected = filtersUnselected.plus(filter)
+                },
+                title = title
+            )
+
+            FiltersBox(
+                boxTitle = "Other $title",
+                filters = filtersUnselected,
+                isSelected = false,
+                onClick = { filter ->
+                    filtersUnselected = filtersUnselected.minus(filter)
+                    filtersSelected = filtersSelected.plus(filter)
+                },
+                title = title
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FiltersBox(
+    boxTitle: String,
     filters: List<String>,
+    isSelected: Boolean,
     onClick: (String) -> Unit,
     title: String
 ) {
@@ -211,10 +245,21 @@ fun FiltersBox(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                style = TextStyle(fontSize = 18.sp),
                 modifier = Modifier.padding(8.dp),
-                text = title
+                style = TextStyle(fontSize = 18.sp),
+                text = boxTitle
             )
+
+            if (filters.isEmpty()) {
+                Text(
+                    text = if (!isSelected) "No other $title" else "No $title selected",
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                        fontStyle = FontStyle.Italic
+                    ),
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
 
             FlowRow(
                 modifier = Modifier
@@ -224,20 +269,61 @@ fun FiltersBox(
                 filters
                     .sorted()
                     .forEach {
-                        Card(
+                        Box(
                             modifier = Modifier
-                                .padding(8.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.secondary,
-                                    MaterialTheme.shapes.medium
-                                ),
-                            onClick = { onClick(it) }
+                                .padding(
+                                    end = 4.dp,
+                                    bottom = 4.dp
+                                )
                         ) {
-                            Text(
-                                modifier = Modifier.padding(16.dp),
-                                style = TextStyle(fontSize = 16.sp),
-                                text = it
-                            )
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                ),
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 8.dp
+                                ),
+                                border = BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.secondary
+                                ),
+                                onClick = { onClick(it) }
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(
+                                            top = 12.dp,
+                                            bottom = 12.dp,
+                                            start = 6.dp,
+                                            end = 6.dp
+                                        ),
+                                    style = TextStyle(fontSize = 15.sp),
+                                    text = it
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(
+                                        end = 0.dp,
+                                        top = 0.dp
+                                    )
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        shape = CircleShape
+                                    )
+                                    .size(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (isSelected) Icons.Outlined.Remove else Icons.Outlined.Add,
+                                    contentDescription = null,
+                                    tint = Color.Black
+                                )
+                            }
                         }
                     }
             }

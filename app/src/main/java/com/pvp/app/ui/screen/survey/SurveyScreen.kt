@@ -69,7 +69,8 @@ fun SurveyScreen(
         }
 
         Row(
-            modifier = Modifier.weight(0.1f)
+            modifier = Modifier.weight(0.1f),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
                 modifier = Modifier.fillMaxWidth(0.8f),
