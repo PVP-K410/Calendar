@@ -15,6 +15,7 @@ import com.pvp.app.model.Task
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -42,7 +43,7 @@ class TaskViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = TaskState()
         )
 
@@ -53,23 +54,29 @@ class TaskViewModel @Inject constructor(
         scheduledAt: LocalDateTime,
         title: String
     ) {
-        val task = MealTask(
-            description,
-            duration,
-            null,
-            false,
-            recipe,
-            scheduledAt,
-            title,
-            state.value.user.email
-        )
-
         viewModelScope.launch {
-            taskService.merge(task)
+            state.collectLatest { state ->
+                if (state.user.email.isBlank()) {
+                    return@collectLatest
+                }
 
-            task
-                .toNotification()
-                ?.also { notificationService.post(it) }
+                val task = MealTask(
+                    description,
+                    duration,
+                    null,
+                    false,
+                    recipe,
+                    scheduledAt,
+                    title,
+                    state.user.email
+                )
+
+                taskService.merge(task)
+
+                task
+                    .toNotification()
+                    ?.also { notificationService.post(it) }
+            }
         }
     }
 
@@ -83,24 +90,30 @@ class TaskViewModel @Inject constructor(
         scheduledAt: LocalDateTime,
         title: String
     ) {
-        val task = SportTask(
-            activity,
-            description,
-            distance,
-            duration,
-            id,
-            isCompleted,
-            scheduledAt,
-            title,
-            state.value.user.email
-        )
-
         viewModelScope.launch {
-            taskService.merge(task)
+            state.collectLatest { state ->
+                if (state.user.email.isBlank()) {
+                    return@collectLatest
+                }
 
-            task
-                .toNotification()
-                ?.also { notificationService.post(it) }
+                val task = SportTask(
+                    activity,
+                    description,
+                    distance,
+                    duration,
+                    id,
+                    isCompleted,
+                    scheduledAt,
+                    title,
+                    state.user.email
+                )
+
+                taskService.merge(task)
+
+                task
+                    .toNotification()
+                    ?.also { notificationService.post(it) }
+            }
         }
     }
 
@@ -112,22 +125,28 @@ class TaskViewModel @Inject constructor(
         scheduledAt: LocalDateTime,
         title: String
     ) {
-        val task = Task(
-            description,
-            duration,
-            id,
-            isCompleted,
-            scheduledAt,
-            title,
-            state.value.user.email
-        )
-
         viewModelScope.launch {
-            taskService.merge(task)
+            state.collectLatest { state ->
+                if (state.user.email.isBlank()) {
+                    return@collectLatest
+                }
 
-            task
-                .toNotification()
-                ?.also { notificationService.post(it) }
+                val task = Task(
+                    description,
+                    duration,
+                    id,
+                    isCompleted,
+                    scheduledAt,
+                    title,
+                    state.user.email
+                )
+
+                taskService.merge(task)
+
+                task
+                    .toNotification()
+                    ?.also { notificationService.post(it) }
+            }
         }
     }
 
@@ -138,14 +157,14 @@ class TaskViewModel @Inject constructor(
         )
 
         val reminderMinutes = state.first().reminderMinutes
-        val secondsUntilRemind = difference - (state.value.reminderMinutes * 60)
+        val secondsUntilRemind = difference - (reminderMinutes * 60)
 
         if (secondsUntilRemind <= 0) {
             return null
         }
 
         return Notification(
-            delay = Duration.ofMinutes(state.value.reminderMinutes.toLong()),
+            delay = Duration.ofMinutes(reminderMinutes.toLong()),
             text = "Task '${title}' is in $reminderMinutes minute(s)..."
         )
     }
