@@ -301,20 +301,23 @@ private fun ProfileHeader(
                     )
                 },
                 onConfirmClick = {
-                    if (userNameEditing.isNotEmpty()) {
+                    userNameEditing = userNameEditing.trim()
+
+                    if (userNameEditing.isNotEmpty() && userNameEditing.length <= 30) {
                         userNameDisplay = userNameEditing
 
                         onUpdateUsername(userNameEditing)
 
                         context.showToast(message = "Your username has been updated!")
-                    } else if (userNameEditing.length > 30) {
-                        userNameEditing = userNameDisplay
-
-                        context.showToast(message = "Username cannot be longer than 30 characters")
                     } else {
-                        userNameEditing = userNameDisplay
+                        if (userNameEditing.isEmpty()) {
+                            context.showToast(message = "Username cannot be empty!")
+                        }
+                        if (userNameEditing.length > 30) {
+                            context.showToast(message = "Username cannot be longer than 30 characters")
+                        }
 
-                        context.showToast(message = "Username cannot be empty!")
+                        userNameEditing = userNameDisplay
                     }
                 },
                 onDismiss = {
