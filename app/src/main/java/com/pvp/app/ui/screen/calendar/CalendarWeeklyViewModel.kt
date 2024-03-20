@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.calendar
 
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.lifecycle.ViewModel
@@ -100,5 +101,6 @@ data class CalendarState(
 
 val PERMISSIONS = setOf(
     HealthPermission.getReadPermission(StepsRecord::class),
-    HealthPermission.getReadPermission(ExerciseSessionRecord::class)
+    HealthPermission.getReadPermission(ExerciseSessionRecord::class),
+    HealthPermission.getReadPermission(DistanceRecord::class)
 )
