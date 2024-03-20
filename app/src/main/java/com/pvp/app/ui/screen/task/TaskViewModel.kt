@@ -164,8 +164,8 @@ class TaskViewModel @Inject constructor(
         }
 
         return Notification(
-            delay = Duration.ofMinutes(reminderMinutes.toLong()),
-            text = "Task '${title}' is in $reminderMinutes minute(s)..."
+            delay = Duration.ofSeconds(secondsUntilRemind),
+            text = "'${title}' is in $reminderMinutes minute(s)..."
         )
     }
 
