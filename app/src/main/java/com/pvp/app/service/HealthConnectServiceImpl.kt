@@ -66,6 +66,7 @@ class HealthConnectServiceImpl @Inject constructor(
             response[DistanceRecord.DISTANCE_TOTAL]?.inMeters ?: 0.0
         } catch (e: Exception) {
             Log.e("DISTANCE", "EXCEPTION ${e.message}")
+
             0.0
         }
     }
