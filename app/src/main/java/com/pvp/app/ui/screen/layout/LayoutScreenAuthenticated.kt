@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
@@ -179,6 +180,12 @@ fun LayoutScreenAuthenticated(
                 var isOpen by remember { mutableStateOf(false) }
                 val stateLayout by viewModel.state.collectAsStateWithLifecycle()
                 val toggleDialog = remember { { isOpen = !isOpen } }
+
+                if (stateLayout.userAvatar == null) {
+                    ProgressIndicator()
+
+                    return@ModalNavigationDrawer
+                }
 
                 Scaffold(
                     floatingActionButton = {
