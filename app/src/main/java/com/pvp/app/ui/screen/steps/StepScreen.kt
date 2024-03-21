@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.common.getOccurences
 
 @Composable
 fun ActivityList(
@@ -45,13 +46,9 @@ fun ActivityList(
         }
     }
 
-    val activities = model.activites
+    val activities = model.activities
         .collectAsStateWithLifecycle().value
-        .groupingBy { it.title }
-        .eachCount()
-        .toList()
-        .sortedByDescending { it.second }
-
+        .getOccurences()
 
     Column(
         modifier = Modifier
@@ -71,7 +68,7 @@ fun ActivityList(
 
         activities.forEachIndexed { index, activity ->
             Text(
-                text = "${index + 1}. ${activity.first} (${activity.second} occurences)",
+                text = "${index + 1}. ${activity.first.title} (${activity.second} occurences)",
                 textAlign = TextAlign.Start,
                 fontSize = 18.sp,
                 modifier = Modifier
