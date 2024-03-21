@@ -190,6 +190,8 @@ fun Day(
     date: LocalDate = LocalDate.MIN,
     tasks: List<Task> = emptyList(),
     expandedUponCreation: Boolean = false,
+    page: Int = 0,
+    pageIndex: Int = 0
 ) {
     var expand by remember { mutableStateOf(expandedUponCreation) }
     var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
@@ -253,29 +255,29 @@ fun Day(
                 }
             }
         }
-    //}
 
-    if (expand) {
-        Spacer(modifier = Modifier.padding(20.dp))
+        if (expand && page == pageIndex) {
+            Spacer(modifier = Modifier.padding(20.dp))
 
-        TaskFilterBar(selectedFilter) { filter ->
-            selectedFilter = filter
-        }
+            TaskFilterBar(selectedFilter) { filter ->
+                selectedFilter = filter
+            }
 
-        // Fixed to take up the whole screen for now as it bugs out in Weekly view,
-        // replace Modifier.width with Modifier.fillMaxWidth() later
-        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+            // Fixed to take up the whole screen for now as it bugs out in Weekly view,
+            // replace Modifier.width with Modifier.fillMaxWidth() later
+            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
-        LazyColumn(
-            modifier = Modifier.width(screenWidth)
-        ) {
-            items(filteredTasks) {
-                Spacer(modifier = Modifier.padding(8.dp))
+            LazyColumn(
+                modifier = Modifier.width(screenWidth)
+            ) {
+                items(filteredTasks) {
+                    Spacer(modifier = Modifier.padding(8.dp))
 
-                TaskBox(task = it)
+                    TaskBox(task = it)
+                }
             }
         }
-    }}
+    }
 }
 
 private fun filterTasks(
@@ -457,7 +459,9 @@ fun DayPage(
         Day(
             name = day,
             tasks = tasksForDay,
-            date = date
+            date = date,
+            page = page,
+            pageIndex = pageIndex
         )
     }
 }
