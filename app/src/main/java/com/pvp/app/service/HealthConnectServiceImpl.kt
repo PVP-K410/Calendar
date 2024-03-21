@@ -1,10 +1,14 @@
 package com.pvp.app.service
 
-import android.util.Log
+import android.health.connect.datatypes.units.Energy
+import android.health.connect.datatypes.units.Length
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.aggregate.AggregateMetric
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
@@ -17,6 +21,70 @@ class HealthConnectServiceImpl @Inject constructor(
     private val client: HealthConnectClient
 ) : HealthConnectService {
 
+    override suspend fun aggregateActiveCalories(
+        start: Instant,
+        end: Instant
+    ): Double {
+        return (aggregationResult(
+            metric = ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL,
+            start = start,
+            end = end
+        ) as? Energy)?.inCalories ?: 0.0
+    }
+
+    override suspend fun aggregateDistance(
+        start: Instant,
+        end: Instant
+    ): Double {
+        return (aggregationResult(
+            metric = DistanceRecord.DISTANCE_TOTAL,
+            start = start,
+            end = end
+        ) as? Length)?.inMeters ?: 0.0
+    }
+
+    override suspend fun aggregateSteps(
+        start: Instant,
+        end: Instant
+    ): Long {
+        return aggregationResult(
+            metric = StepsRecord.COUNT_TOTAL,
+            start = start,
+            end = end
+        ) as? Long ?: 0L
+    }
+
+    override suspend fun aggregateTotalCalories(
+        start: Instant,
+        end: Instant
+    ): Double {
+        return (aggregationResult(
+            metric = TotalCaloriesBurnedRecord.ENERGY_TOTAL,
+            start = start,
+            end = end
+        ) as? Energy)?.inCalories ?: 0.0
+    }
+
+    private suspend fun aggregationResult(
+        metric: AggregateMetric<*>,
+        start: Instant,
+        end: Instant
+    ): Any? {
+        return try {
+            client.aggregate(
+                AggregateRequest(
+                    metrics = setOf(metric),
+                    timeRangeFilter = TimeRangeFilter.between(
+                        start,
+                        end
+                    )
+                )
+            )[metric]
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     override suspend fun <T : Record> readActivityData(
         record: KClass<T>,
         start: java.time.Instant,
@@ -28,46 +96,5 @@ class HealthConnectServiceImpl @Inject constructor(
         )
 
         return client.readRecords(request).records
-    }
-
-    override suspend fun aggregateSteps(
-        start: Instant,
-        end: Instant
-    ): Long {
-        return try {
-            val response = client.aggregate(
-                AggregateRequest(
-                    metrics = setOf(StepsRecord.COUNT_TOTAL),
-                    timeRangeFilter = TimeRangeFilter.between(start, end)
-                )
-            )
-
-            response[StepsRecord.COUNT_TOTAL] ?: 0L
-        } catch (e: Exception) {
-            0L
-        }
-    }
-
-    override suspend fun aggregateDistance(
-        start: Instant,
-        end: Instant
-    ): Double {
-        return try {
-            val response = client.aggregate(
-                AggregateRequest(
-                    metrics = setOf(DistanceRecord.DISTANCE_TOTAL),
-                    timeRangeFilter = TimeRangeFilter.between(
-                        start,
-                        end
-                    )
-                )
-            )
-
-            response[DistanceRecord.DISTANCE_TOTAL]?.inMeters ?: 0.0
-        } catch (e: Exception) {
-            Log.e("DISTANCE", "EXCEPTION ${e.message}")
-
-            0.0
-        }
     }
 }

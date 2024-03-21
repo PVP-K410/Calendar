@@ -71,7 +71,8 @@ class TaskViewModel @Inject constructor(
                     recipe,
                     scheduledAt,
                     title,
-                    state.user.email
+                    state.user.email,
+                    false
                 )
 
                 taskService.merge(task)
@@ -108,7 +109,8 @@ class TaskViewModel @Inject constructor(
                     isCompleted,
                     scheduledAt,
                     title,
-                    state.user.email
+                    state.user.email,
+                    false
                 )
 
                 taskService.merge(task)
@@ -141,7 +143,8 @@ class TaskViewModel @Inject constructor(
                     isCompleted,
                     scheduledAt,
                     title,
-                    state.user.email
+                    state.user.email,
+                    false
                 )
 
                 taskService.merge(task)

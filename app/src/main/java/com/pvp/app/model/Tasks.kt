@@ -19,7 +19,8 @@ class MealTask : Task {
         recipe: String,
         scheduledAt: LocalDateTime,
         title: String,
-        userEmail: String
+        userEmail: String,
+        isDaily: Boolean
     ) : super(
         description,
         duration,
@@ -27,7 +28,8 @@ class MealTask : Task {
         isCompleted,
         scheduledAt,
         title,
-        userEmail
+        userEmail,
+        isDaily
     ) {
         this.recipe = recipe
     }
@@ -52,7 +54,8 @@ class SportTask : Task {
         isCompleted: Boolean,
         scheduledAt: LocalDateTime,
         title: String,
-        userEmail: String
+        userEmail: String,
+        isDaily: Boolean
     ) : super(
         description,
         duration,
@@ -60,7 +63,8 @@ class SportTask : Task {
         isCompleted,
         scheduledAt,
         title,
-        userEmail
+        userEmail,
+        isDaily
     ) {
         this.activity = activity
         this.distance = distance
@@ -81,9 +85,10 @@ open class Task(
     @Serializable(LocalDateTimeSerializer::class)
     var scheduledAt: LocalDateTime,
     var title: String,
-    val userEmail: String
+    val userEmail: String,
+    var isDaily: Boolean
 ) {
     override fun toString(): String {
-        return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail')"
+        return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail', isDaily=$isDaily)"
     }
 }
