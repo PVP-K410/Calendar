@@ -263,7 +263,10 @@ fun Day(
         if (expand) {
             if (!tasks.any()) {
                 CreateTaskDialog(
-                    date = LocalDateTime.of(date, LocalTime.now()),
+                    date = LocalDateTime.of(
+                        date,
+                        LocalTime.now()
+                    ),
                     onClose = { expand = false },
                     isOpen = expand,
                     shouldCloseOnSubmit = true
@@ -288,7 +291,7 @@ fun Day(
                                 fontStyle = FontStyle.Italic,
                                 modifier = Modifier.padding(8.dp),
                                 style = MaterialTheme.typography.bodyMedium,
-                                text = "No ${selectedFilter.toString().toLowerCase()} tasks for this day"
+                                text = "No ${selectedFilter.toString().toLowerCase()} tasks have been setup for this day"
                             )
                         }
                     } else {

@@ -57,7 +57,10 @@ fun CalendarMonthlyScreen(
     if (showDialog) {
         if (dateTasks.isEmpty()) {
             CreateTaskDialog(
-                date = LocalDateTime.of(selectedDate, LocalTime.now()),
+                date = LocalDateTime.of(
+                    selectedDate,
+                    LocalTime.now()
+                ),
                 onClose = { showDialog = false },
                 isOpen = showDialog,
                 shouldCloseOnSubmit = true
