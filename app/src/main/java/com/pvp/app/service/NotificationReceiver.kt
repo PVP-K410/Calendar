@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.pvp.app.api.NotificationService
 import com.pvp.app.model.Notification
+import com.pvp.app.model.NotificationChannel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -18,13 +19,19 @@ class NotificationReceiver : BroadcastReceiver() {
         context: Context,
         intent: Intent
     ) {
+        val channelId = intent.getStringExtra("notificationChannelId") ?: ""
+        val channel = NotificationChannel.fromChannelId(channelId)
+        if (channel == NotificationChannel.UNKNOWN) {
+            throw Exception("Unknown notification channel id")
+        }
+
         notificationService.show(
             notification = Notification(
                 id = intent.getIntExtra(
                     "notificationId",
                     0
                 ),
-                channelId = intent.getStringExtra("notificationChannelId") ?: "",
+                channel = channel,
                 title = intent.getStringExtra("notificationTitle") ?: "",
                 text = intent.getStringExtra("notificationText") ?: ""
             )

@@ -45,7 +45,7 @@ class NotificationServiceImpl @Inject constructor(
 
                 putExtra(
                     "notificationChannelId",
-                    notification.channelId
+                    notification.channel.channelId
                 )
 
                 putExtra(
@@ -88,7 +88,7 @@ class NotificationServiceImpl @Inject constructor(
         }
 
         val channel = NotificationChannel(
-            notification.channelId,
+            notification.channel.channelId,
             notification.title,
             NotificationManager.IMPORTANCE_DEFAULT
         )
@@ -99,7 +99,7 @@ class NotificationServiceImpl @Inject constructor(
 
         val notificationAndroid = NotificationCompat.Builder(
             context,
-            notification.channelId
+            notification.channel.channelId
         )
             .setContentTitle(notification.title)
             .setContentText(notification.text)

@@ -9,6 +9,7 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.Notification
+import com.pvp.app.model.NotificationChannel
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -167,7 +168,7 @@ class TaskViewModel @Inject constructor(
 
         return Notification(
             delay = Duration.ofSeconds(secondsUntilRemind),
-            channelId = configuration.channelNotificationTasksReminderId,
+            channel = NotificationChannel.TaskReminder,
             title = "Task Reminder",
             text = "'${title}' is in $reminderMinutes minute${if (reminderMinutes > 1) "s" else ""}..."
         )
