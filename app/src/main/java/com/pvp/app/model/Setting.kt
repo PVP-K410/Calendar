@@ -20,5 +20,10 @@ sealed class Setting<T>(
             intPreferencesKey("reminderBeforeTaskMinutes"),
             10
         )
+
+        data object CupVolumeMl : Setting<Int>(
+            intPreferencesKey("cupVolumeMl"),
+            250
+        )
     }
 }

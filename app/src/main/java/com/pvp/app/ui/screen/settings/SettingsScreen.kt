@@ -69,6 +69,38 @@ private fun SettingNotificationReminderMinutes(
 }
 
 @Composable
+private fun SettingCupVolumeMl(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    val ml by model
+        .get(Setting.Notifications.CupVolumeMl)
+        .collectAsStateWithLifecycle()
+
+    val state = rememberPickerState(initialValue = ml)
+
+    SettingCard(
+        description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
+        editContent = {
+            Picker(
+                items = (100..500).toList(),
+                state = state,
+                startIndex = ml - 100,
+            )
+        },
+        onEdit = {
+            if (state.value != ml) {
+                model.merge(
+                    Setting.Notifications.CupVolumeMl,
+                    state.value
+                )
+            }
+        },
+        title = "Set Cup Volume",
+        value = "$ml ml"
+    )
+}
+
+@Composable
 fun SettingsScreen(
     model: SettingsViewModel = hiltViewModel()
 ) {
@@ -84,6 +116,8 @@ fun SettingsScreen(
         )
 
         SettingNotificationReminderMinutes(model)
+
+        SettingCupVolumeMl(model)
     }
 }
 
