@@ -20,7 +20,6 @@ interface NotificationService {
      * The notification will be shown with the provided title.
      */
     fun show(
-        notification: Notification,
-        title: String
+        notification: Notification
     )
 }

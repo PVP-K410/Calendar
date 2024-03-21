@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.task
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
@@ -30,7 +31,8 @@ class TaskViewModel @Inject constructor(
     private val notificationService: NotificationService,
     settingService: SettingService,
     private val taskService: TaskService,
-    userService: UserService
+    userService: UserService,
+    private val configuration: Configuration
 ) : ViewModel() {
 
     private val state = settingService
@@ -165,7 +167,9 @@ class TaskViewModel @Inject constructor(
 
         return Notification(
             delay = Duration.ofSeconds(secondsUntilRemind),
-            text = "'${title}' is in $reminderMinutes minute(s)..."
+            channelId = configuration.channelNotificationTasksReminderId,
+            title = "Task Reminder",
+            text = "'${title}' is in $reminderMinutes minute${if (reminderMinutes > 1) "s" else ""}..."
         )
     }
 

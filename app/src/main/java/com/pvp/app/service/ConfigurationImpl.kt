@@ -8,4 +8,5 @@ class ConfigurationImpl @Inject constructor() : Configuration {
 
     override val googleOAuthClientId: String = BuildConfig.GOOGLE_OAUTH_CLIENT_ID
     override val channelNotificationTasksReminderId: String = "Task Reminder"
+    override val channelNotificationWaterDrinkingReminderId: String = "Water Drinking Reminder"
 }

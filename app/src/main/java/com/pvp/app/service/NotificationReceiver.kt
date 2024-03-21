@@ -24,9 +24,10 @@ class NotificationReceiver : BroadcastReceiver() {
                     "notificationId",
                     0
                 ),
+                channelId = intent.getStringExtra("notificationChannelId") ?: "",
+                title = intent.getStringExtra("notificationTitle") ?: "",
                 text = intent.getStringExtra("notificationText") ?: ""
-            ),
-            title = "Task Reminder"
+            )
         )
     }
 }

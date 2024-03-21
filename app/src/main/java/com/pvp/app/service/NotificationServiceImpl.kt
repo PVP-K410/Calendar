@@ -12,7 +12,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.pvp.app.R
-import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.model.Notification
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,7 +19,6 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 class NotificationServiceImpl @Inject constructor(
-    private val configuration: Configuration,
     @ApplicationContext
     private val context: Context
 ) : NotificationService {
@@ -41,13 +39,23 @@ class NotificationServiceImpl @Inject constructor(
         )
             .apply {
                 putExtra(
-                    "notificationText",
-                    notification.text
+                    "notificationId",
+                    id
                 )
 
                 putExtra(
-                    "notificationId",
-                    id
+                    "notificationChannelId",
+                    notification.channelId
+                )
+
+                putExtra(
+                    "notificationTitle",
+                    notification.title
+                )
+
+                putExtra(
+                    "notificationText",
+                    notification.text
                 )
             }
 
@@ -68,8 +76,7 @@ class NotificationServiceImpl @Inject constructor(
     }
 
     override fun show(
-        notification: Notification,
-        title: String
+        notification: Notification
     ) {
         if (
             ActivityCompat.checkSelfPermission(
@@ -81,8 +88,8 @@ class NotificationServiceImpl @Inject constructor(
         }
 
         val channel = NotificationChannel(
-            configuration.channelNotificationTasksReminderId,
-            "Task",
+            notification.channelId,
+            notification.title,
             NotificationManager.IMPORTANCE_DEFAULT
         )
 
@@ -92,9 +99,9 @@ class NotificationServiceImpl @Inject constructor(
 
         val notificationAndroid = NotificationCompat.Builder(
             context,
-            configuration.channelNotificationTasksReminderId
+            notification.channelId
         )
-            .setContentTitle(title)
+            .setContentTitle(notification.title)
             .setContentText(notification.text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
