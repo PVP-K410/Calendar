@@ -33,8 +33,7 @@ class HealthConnectServiceImpl @Inject constructor(
                 )
             )
 
-            response[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.inCalories
-            0.0
+            response[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.inCalories ?: 0.0
         } catch (e: Exception) {
             0.0
         }
@@ -94,8 +93,7 @@ class HealthConnectServiceImpl @Inject constructor(
                 )
             )
 
-            response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inCalories
-            0.0
+            response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inCalories ?: 0.0
         } catch (e: Exception) {
             0.0
         }
