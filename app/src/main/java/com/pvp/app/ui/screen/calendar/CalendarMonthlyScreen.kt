@@ -30,6 +30,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.Task
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 
 @Composable
@@ -53,11 +55,20 @@ fun CalendarMonthlyScreen(
     )
 
     if (showDialog) {
-        DayDialog(
-            date = selectedDate,
-            tasks = dateTasks,
-            onDismissRequest = { showDialog = false }
-        )
+        if (dateTasks.isEmpty()) {
+            CreateTaskDialog(
+                date = LocalDateTime.of(selectedDate, LocalTime.now()),
+                onClose = { showDialog = false },
+                isOpen = showDialog,
+                shouldCloseOnSubmit = true
+            )
+        } else {
+            DayDialog(
+                date = selectedDate,
+                tasks = dateTasks,
+                onDismissRequest = { showDialog = false }
+            )
+        }
     }
 }
 
@@ -215,7 +226,7 @@ fun ContentItem(
         clickable = false
     } else if (entry.tasks.isEmpty()) {
         color = Color.Gray
-        clickable = false
+        clickable = true
     }
 
     Box(

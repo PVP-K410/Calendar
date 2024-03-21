@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,6 +67,8 @@ import com.pvp.app.ui.screen.task.CreateTaskSportForm
 import com.pvp.app.ui.screen.task.TaskBox
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.temporal.TemporalAdjusters
 import kotlin.reflect.KClass
 
@@ -105,6 +108,7 @@ fun CalendarWeeklyScreen(
 
 @Composable
 fun CreateTaskDialog(
+    date: LocalDateTime? = null,
     onClose: () -> Unit,
     isOpen: Boolean,
     shouldCloseOnSubmit: Boolean
@@ -165,16 +169,19 @@ fun CreateTaskDialog(
 
             when (target) {
                 MealTask::class -> CreateTaskMealForm(
+                    date = date,
                     modifier = modifier,
                     onCreate = closeIfShould
                 )
 
                 SportTask::class -> CreateTaskSportForm(
+                    date = date,
                     modifier = modifier,
                     onCreate = closeIfShould
                 )
 
                 Task::class -> CreateTaskGeneralForm(
+                    date = date,
                     modifier = modifier,
                     onCreate = closeIfShould
                 )
@@ -254,23 +261,43 @@ fun Day(
         }
 
         if (expand) {
-            Spacer(modifier = Modifier.padding(8.dp))
+            if (!tasks.any()) {
+                CreateTaskDialog(
+                    date = LocalDateTime.of(date, LocalTime.now()),
+                    onClose = { expand = false },
+                    isOpen = expand,
+                    shouldCloseOnSubmit = true
+                )
+            } else {
+                Spacer(modifier = Modifier.padding(8.dp))
 
-            TaskFilterBar(selectedFilter) { filter ->
-                selectedFilter = filter
-            }
+                TaskFilterBar(selectedFilter) { filter ->
+                    selectedFilter = filter
+                }
 
-            // Fixed to take up the whole screen for now as it bugs out in Weekly view,
-            // replace Modifier.width with Modifier.fillMaxWidth() later
-            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+                // Fixed to take up the whole screen for now as it bugs out in Weekly view,
+                // replace Modifier.width with Modifier.fillMaxWidth() later
+                val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
-            LazyColumn(
-                modifier = Modifier.width(screenWidth)
-            ) {
-                items(filteredTasks) {
-                    Spacer(modifier = Modifier.padding(8.dp))
+                LazyColumn(
+                    modifier = Modifier.width(screenWidth)
+                ) {
+                    if (!filteredTasks.any()) {
+                        item {
+                            Text(
+                                fontStyle = FontStyle.Italic,
+                                modifier = Modifier.padding(8.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                text = "No ${selectedFilter.toString().toLowerCase()} tasks for this day"
+                            )
+                        }
+                    } else {
+                        items(filteredTasks) {
+                            Spacer(modifier = Modifier.padding(8.dp))
 
-                    TaskBox(task = it)
+                            TaskBox(task = it)
+                        }
+                    }
                 }
             }
         }
