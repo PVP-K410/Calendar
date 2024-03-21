@@ -62,6 +62,7 @@ import java.time.format.DateTimeFormatter
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun CreateTaskMealForm(
+    date: LocalDateTime? = null,
     model: TaskViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onCreate: () -> Unit
@@ -73,7 +74,7 @@ fun CreateTaskMealForm(
     var ingredients by remember { mutableStateOf("") }
     var preparation by remember { mutableStateOf("") }
     var duration by remember { mutableIntStateOf(0) }
-    var selectedDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+    var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
 
     val isFormValid by derivedStateOf {
         !titleError && !descriptionError && duration > 0
@@ -190,6 +191,7 @@ fun CreateTaskMealForm(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateTaskSportForm(
+    date: LocalDateTime? = null,
     model: TaskViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onCreate: () -> Unit
@@ -203,7 +205,7 @@ fun CreateTaskSportForm(
     var distanceError by remember { mutableStateOf(true) }
     var duration by remember { mutableIntStateOf(0) }
     var durationError by remember { mutableStateOf(true) }
-    var selectedDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+    var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
     var isExpanded by remember { mutableStateOf(false) }
 
     val isFormValid by derivedStateOf {
@@ -366,6 +368,7 @@ fun CreateTaskSportForm(
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun CreateTaskGeneralForm(
+    date: LocalDateTime? = null,
     model: TaskViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onCreate: () -> Unit
@@ -375,7 +378,7 @@ fun CreateTaskGeneralForm(
     var description by remember { mutableStateOf("") }
     var descriptionError by remember { mutableStateOf(true) }
     var duration by remember { mutableFloatStateOf(0.0f) }
-    var selectedDateTime by remember { mutableStateOf(LocalDateTime.now()) }
+    var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
 
     val isFormValid by derivedStateOf {
         !titleError && !descriptionError
