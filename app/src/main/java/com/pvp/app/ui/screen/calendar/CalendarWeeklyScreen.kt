@@ -287,12 +287,17 @@ fun Day(
                 ) {
                     if (!filteredTasks.any()) {
                         item {
-                            Text(
-                                fontStyle = FontStyle.Italic,
-                                modifier = Modifier.padding(8.dp),
-                                style = MaterialTheme.typography.bodyMedium,
-                                text = "No ${selectedFilter.toString().toLowerCase()} tasks have been setup for this day"
-                            )
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    fontStyle = FontStyle.Italic,
+                                    modifier = Modifier.padding(32.dp),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    text = "No ${selectedFilter.toString().toLowerCase()} tasks have been setup for this day"
+                                )
+                            }
                         }
                     } else {
                         items(filteredTasks) {
