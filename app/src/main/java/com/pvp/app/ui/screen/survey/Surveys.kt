@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package com.pvp.app.ui.screen.survey
 
 import android.annotation.SuppressLint
@@ -41,6 +43,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.LabelFieldWrapper
@@ -48,17 +51,17 @@ import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
-private val massRange = (5..500).toList()
-private val heightRange = (10..300).toList()
-
 @Composable
 @SuppressLint("ComposableNaming")
 fun BodyMassIndexSurvey(
     handler: (height: Int, mass: Int) -> Unit,
+    model: SurveyViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
-    val stateHeight = rememberPickerState(heightRange[0])
-    val stateMass = rememberPickerState(massRange[0])
+    val rangeHeight = remember { model.fromConfiguration { it.rangeHeight } }
+    val rangeMass = remember { model.fromConfiguration { it.rangeMass } }
+    val stateHeight = rememberPickerState(rangeHeight[0])
+    val stateMass = rememberPickerState(rangeMass[0])
 
     LaunchedEffect(
         handler,
@@ -86,7 +89,8 @@ fun BodyMassIndexSurvey(
                 imageVector = Icons.Outlined.Scale,
                 state = stateMass,
                 textResult = { "$it kg" },
-                textSelect = "Select your mass"
+                textSelect = "Select your mass",
+                values = rangeMass
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
@@ -96,7 +100,8 @@ fun BodyMassIndexSurvey(
                 imageVector = Icons.Outlined.Height,
                 state = stateHeight,
                 textResult = { "$it cm (${it / 100.0} m)" },
-                textSelect = "Select your height"
+                textSelect = "Select your height",
+                values = rangeHeight
             )
         }
     }
@@ -109,6 +114,7 @@ private fun BodyMassIndexPicker(
     state: PickerState<Int>,
     textResult: (Int) -> String,
     textSelect: String,
+    values: List<Int>
 ) {
     LabelFieldWrapper(
         content = {
@@ -125,7 +131,7 @@ private fun BodyMassIndexPicker(
                 Spacer(Modifier.padding(8.dp))
 
                 Picker(
-                    items = heightRange,
+                    items = values,
                     modifier = Modifier.fillMaxWidth(0.5f),
                     state = state
                 )
@@ -185,50 +191,44 @@ fun FilterSurvey(
         handler(filtersSelected)
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(8.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier,
-        ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                style = TextStyle(fontSize = 24.sp),
-                text = informativeText
-            )
+        Text(
+            color = Color.Black,
+            modifier = Modifier.padding(8.dp),
+            style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp),
+            text = informativeText
+        )
 
-            FiltersBox(
-                boxTitle = boxTitle,
-                filters = filtersSelected,
-                isSelected = true,
-                onClick = { filter ->
-                    filtersSelected = filtersSelected.minus(filter)
-                    filtersUnselected = filtersUnselected.plus(filter)
-                },
-                title = title
-            )
+        FiltersBox(
+            boxTitle = boxTitle,
+            filters = filtersSelected,
+            isSelected = true,
+            onClick = { filter ->
+                filtersSelected = filtersSelected.minus(filter)
+                filtersUnselected = filtersUnselected.plus(filter)
+            },
+            title = title
+        )
 
-            FiltersBox(
-                boxTitle = "Other $title",
-                filters = filtersUnselected,
-                isSelected = false,
-                onClick = { filter ->
-                    filtersUnselected = filtersUnselected.minus(filter)
-                    filtersSelected = filtersSelected.plus(filter)
-                },
-                title = title
-            )
-        }
+        FiltersBox(
+            boxTitle = "Other $title",
+            filters = filtersUnselected,
+            isSelected = false,
+            onClick = { filter ->
+                filtersUnselected = filtersUnselected.minus(filter)
+                filtersSelected = filtersSelected.plus(filter)
+            },
+            title = title
+        )
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun FiltersBox(
+private fun FiltersBox(
     boxTitle: String,
     filters: List<String>,
     isSelected: Boolean,
@@ -238,15 +238,18 @@ fun FiltersBox(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
             .padding(8.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = MaterialTheme.shapes.large
+            )
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 modifier = Modifier.padding(8.dp),
-                style = TextStyle(fontSize = 18.sp),
+                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 18.sp),
                 text = boxTitle
             )
 
@@ -269,64 +272,75 @@ fun FiltersBox(
                 filters
                     .sorted()
                     .forEach {
-                        Box(
-                            modifier = Modifier
-                                .padding(
-                                    end = 4.dp,
-                                    bottom = 4.dp
-                                )
-                        ) {
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                ),
-                                elevation = CardDefaults.cardElevation(
-                                    defaultElevation = 8.dp
-                                ),
-                                border = BorderStroke(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.secondary
-                                ),
-                                onClick = { onClick(it) }
-                            ) {
-                                Text(
-                                    modifier = Modifier
-                                        .padding(
-                                            top = 12.dp,
-                                            bottom = 12.dp,
-                                            start = 6.dp,
-                                            end = 6.dp
-                                        ),
-                                    style = TextStyle(fontSize = 15.sp),
-                                    text = it
-                                )
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(
-                                        end = 0.dp,
-                                        top = 0.dp
-                                    )
-                                    .clip(CircleShape)
-                                    .background(Color.White)
-                                    .border(
-                                        width = 1.dp,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        shape = CircleShape
-                                    )
-                                    .size(16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (isSelected) Icons.Outlined.Remove else Icons.Outlined.Add,
-                                    contentDescription = null,
-                                    tint = Color.Black
-                                )
-                            }
-                        }
+                        FilterBoxCard(
+                            entry = it,
+                            isSelected = isSelected,
+                            onClick = onClick
+                        )
                     }
             }
+        }
+    }
+}
+
+@Composable
+private fun FilterBoxCard(
+    entry: String,
+    isSelected: Boolean,
+    onClick: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier.padding(
+            end = 4.dp,
+            bottom = 4.dp
+        )
+    ) {
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 8.dp
+            ),
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.secondary
+            ),
+            onClick = { onClick(entry) }
+        ) {
+            Text(
+                modifier = Modifier.padding(
+                    top = 12.dp,
+                    bottom = 12.dp,
+                    start = 6.dp,
+                    end = 6.dp
+                ),
+                style = TextStyle(fontSize = 15.sp),
+                text = entry
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(
+                    end = 0.dp,
+                    top = 0.dp
+                )
+                .clip(CircleShape)
+                .background(Color.White)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.secondary,
+                    shape = CircleShape
+                )
+                .size(16.dp)
+        ) {
+            Icon(
+                imageVector = if (isSelected) Icons.Outlined.Remove else Icons.Outlined.Add,
+                contentDescription = null,
+                tint = Color.Black
+            )
         }
     }
 }
