@@ -153,21 +153,11 @@ fun CreateTaskMealForm(
 
         Button(
             onClick = {
-                val recipe = if (
-                    ingredients.isNotEmpty() &&
-                    preparation.isNotEmpty()
-                ) {
-                    "$ingredients\n$preparation"
-                } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
-                    ingredients
-                } else {
-                    preparation
-                }
-
-                model.createTaskMeal(
+                model.create(
                     description = description,
                     duration = Duration.ofMinutes(duration.toLong()),
-                    recipe = recipe,
+                    ingredients = ingredients,
+                    preparation = preparation,
                     scheduledAt = selectedDateTime,
                     title = title
                 )
@@ -343,12 +333,11 @@ fun CreateTaskSportForm(
                     0.0f.toDouble()
                 }
 
-                model.createTaskSport(
+                model.create(
                     activity = activity,
                     description = description,
                     distance = distanceValue,
                     duration = Duration.ofMinutes(duration.toLong()),
-                    isCompleted = false,
                     scheduledAt = selectedDateTime,
                     title = title
                 )
@@ -448,10 +437,9 @@ fun CreateTaskGeneralForm(
 
         Button(
             onClick = {
-                model.createTask(
+                model.create(
                     description = description,
                     duration = Duration.ofMinutes(duration.toLong()),
-                    isCompleted = false,
                     scheduledAt = selectedDateTime,
                     title = title
                 )
@@ -625,7 +613,7 @@ fun TaskBox(
                     onCheckedChange = {
                         checked = it
                         task.isCompleted = checked
-                        model.updateTask(task)
+                        model.update(task)
                     },
                     modifier = Modifier
                         .size(36.dp)

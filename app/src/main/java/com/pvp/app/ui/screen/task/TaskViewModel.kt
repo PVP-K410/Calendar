@@ -6,11 +6,9 @@ import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.model.MealTask
 import com.pvp.app.model.Notification
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
-import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,10 +45,14 @@ class TaskViewModel @Inject constructor(
             initialValue = TaskState()
         )
 
-    fun createTaskMeal(
+    /**
+     * Create a meal task for the user with the given parameters
+     */
+    fun create(
         description: String? = null,
         duration: Duration? = null,
-        recipe: String,
+        ingredients: String,
+        preparation: String,
         scheduledAt: LocalDateTime,
         title: String
     ) {
@@ -60,34 +62,40 @@ class TaskViewModel @Inject constructor(
                     return@collectLatest
                 }
 
-                val task = MealTask(
-                    description,
-                    duration,
-                    null,
-                    false,
-                    recipe,
-                    scheduledAt,
-                    title,
-                    state.user.email,
-                    false
-                )
+                val recipe = if (
+                    ingredients.isNotEmpty() &&
+                    preparation.isNotEmpty()
+                ) {
+                    "$ingredients\n$preparation"
+                } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
+                    ingredients
+                } else {
+                    preparation
+                }
 
-                taskService.merge(task)
-
-                task
+                taskService
+                    .create(
+                        description,
+                        duration,
+                        recipe,
+                        scheduledAt,
+                        title,
+                        state.user.email
+                    )
                     .toNotification()
                     ?.also { notificationService.post(it) }
             }
         }
     }
 
-    fun createTaskSport(
+    /**
+     * Create a sport task for the user with the given parameters
+     */
+    fun create(
         activity: SportActivity,
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
-        id: String? = null,
-        isCompleted: Boolean,
         scheduledAt: LocalDateTime,
         title: String
     ) {
@@ -97,33 +105,28 @@ class TaskViewModel @Inject constructor(
                     return@collectLatest
                 }
 
-                val task = SportTask(
-                    activity,
-                    description,
-                    distance,
-                    duration,
-                    id,
-                    isCompleted,
-                    scheduledAt,
-                    title,
-                    state.user.email,
-                    false
-                )
-
-                taskService.merge(task)
-
-                task
+                taskService
+                    .create(
+                        activity,
+                        description,
+                        distance,
+                        duration,
+                        scheduledAt,
+                        title,
+                        state.user.email
+                    )
                     .toNotification()
                     ?.also { notificationService.post(it) }
             }
         }
     }
 
-    fun createTask(
+    /**
+     * Create a general task for the user with the given parameters
+     */
+    fun create(
         description: String? = null,
         duration: Duration? = null,
-        id: String? = null,
-        isCompleted: Boolean,
         scheduledAt: LocalDateTime,
         title: String
     ) {
@@ -133,20 +136,14 @@ class TaskViewModel @Inject constructor(
                     return@collectLatest
                 }
 
-                val task = Task(
-                    description,
-                    duration,
-                    id,
-                    isCompleted,
-                    scheduledAt,
-                    title,
-                    state.user.email,
-                    false
-                )
-
-                taskService.merge(task)
-
-                task
+                taskService
+                    .create(
+                        description,
+                        duration,
+                        scheduledAt,
+                        title,
+                        state.user.email
+                    )
                     .toNotification()
                     ?.also { notificationService.post(it) }
             }
@@ -172,11 +169,11 @@ class TaskViewModel @Inject constructor(
         )
     }
 
-    fun updateTask(
+    fun update(
         task: Task
     ) {
         viewModelScope.launch {
-            taskService.merge(task)
+            taskService.update(task)
         }
     }
 }
