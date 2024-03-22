@@ -24,7 +24,7 @@ class Application : Application(), Configuration.Provider {
         super.onCreate()
 
         createNotificationChannels()
-        scheduleDrinkReminders()
+        createDrinkReminderWorker()
     }
 
     private fun createNotificationChannels() {
@@ -43,7 +43,7 @@ class Application : Application(), Configuration.Provider {
         }
     }
 
-    private fun scheduleDrinkReminders() {
+    private fun createDrinkReminderWorker() {
         val drinkWorkerRequest = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.DAYS
