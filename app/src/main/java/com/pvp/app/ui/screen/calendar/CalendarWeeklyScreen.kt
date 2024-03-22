@@ -255,28 +255,28 @@ fun Day(
                 }
             }
         }
-
-        if (expand && page == pageIndex) {
-            Spacer(modifier = Modifier.padding(20.dp))
-
-            TaskFilterBar(selectedFilter) { filter ->
-                selectedFilter = filter
-            }
-
-            // Fixed to take up the whole screen for now as it bugs out in Weekly view,
-            // replace Modifier.width with Modifier.fillMaxWidth() later
-            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-
-            LazyColumn(
-                modifier = Modifier.width(screenWidth)
-            ) {
-                items(filteredTasks) {
-                    Spacer(modifier = Modifier.padding(8.dp))
-
-                    TaskBox(task = it)
-                }
-            }
-        }
+//
+//        if (expand && page == pageIndex) {
+//            Spacer(modifier = Modifier.padding(20.dp))
+//
+//            TaskFilterBar(selectedFilter) { filter ->
+//                selectedFilter = filter
+//            }
+//
+//            // Fixed to take up the whole screen for now as it bugs out in Weekly view,
+//            // replace Modifier.width with Modifier.fillMaxWidth() later
+//            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+//
+//            LazyColumn(
+//                modifier = Modifier.width(screenWidth)
+//            ) {
+//                items(filteredTasks) {
+//                    Spacer(modifier = Modifier.padding(8.dp))
+//
+//                    TaskBox(task = it)
+//                }
+//            }
+//        }
     }
 }
 
@@ -441,7 +441,6 @@ fun DayPage(
     tasks: List<Task>,
     page: Int
 ) {
-    val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == date }
     val scale = animateFloatAsState(
         targetValue = if (pageIndex == page) 1f else 0.8f,
         animationSpec = spring(stiffness = 500f)
@@ -458,11 +457,12 @@ fun DayPage(
     ) {
         Day(
             name = day,
-            tasks = tasksForDay,
+            tasks = tasks,
             date = date,
             page = page,
             pageIndex = pageIndex
         )
+
     }
 }
 
@@ -473,6 +473,7 @@ fun Week(
     tasks: List<Task>
 ) {
     val days = (1..7).map { DayOfWeek.of(it).name }
+    var expand by remember { mutableStateOf(true) }
     val today = LocalDate.now()
     val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
@@ -481,18 +482,45 @@ fun Week(
         pageCount = { days.size }
     )
     val currentPage = pagerState.currentPage
+    var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
+    val filteredTasks = filterTasks(tasks, selectedFilter)
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier.padding(horizontal = 0.dp),
-        contentPadding = PaddingValues(70.dp, 0.dp),
-    ) { page ->
-        DayPage(
-            days[page],
-            page,
-            dates[page],
-            tasks,
-            currentPage
-        )
+    Column{
+        HorizontalPager(
+            state = pagerState,
+            modifier = modifier.padding(horizontal = 0.dp),
+            contentPadding = PaddingValues(70.dp, 0.dp),
+        ) { page ->
+            val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == dates[page] }
+            DayPage(
+                days[page],
+                page,
+                dates[page],
+                tasksForDay,
+                currentPage
+            )
+        }
+
+        if (true) {
+            Spacer(modifier = Modifier.padding(20.dp))
+
+            TaskFilterBar(selectedFilter) { filter ->
+                selectedFilter = filter
+            }
+
+            // Fixed to take up the whole screen for now as it bugs out in Weekly view,
+            // replace Modifier.width with Modifier.fillMaxWidth() later
+            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+            LazyColumn(
+                modifier = Modifier.width(screenWidth)
+            ) {
+                items(filteredTasks) {
+                    Spacer(modifier = Modifier.padding(8.dp))
+
+                    TaskBox(task = it)
+                }
+            }
+        }
     }
 }
