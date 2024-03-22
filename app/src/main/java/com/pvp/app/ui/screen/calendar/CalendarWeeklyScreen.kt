@@ -484,11 +484,14 @@ fun Week(
     val currentPage = pagerState.currentPage
     var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
     val filteredTasks = filterTasks(tasks, selectedFilter)
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     Column{
         HorizontalPager(
             state = pagerState,
-            modifier = modifier.padding(horizontal = 0.dp),
+            modifier = modifier
+                .padding(horizontal = 0.dp)
+                .height(screenHeight/3),
             contentPadding = PaddingValues(70.dp, 0.dp),
         ) { page ->
             val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == dates[page] }
