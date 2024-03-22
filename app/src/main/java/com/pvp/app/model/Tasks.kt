@@ -16,20 +16,22 @@ class MealTask : Task {
         duration: Duration? = null,
         id: String? = null,
         isCompleted: Boolean,
+        isDaily: Boolean,
+        points: Points,
         recipe: String,
         scheduledAt: LocalDateTime,
         title: String,
-        userEmail: String,
-        isDaily: Boolean
+        userEmail: String
     ) : super(
         description,
         duration,
         id,
         isCompleted,
+        isDaily,
+        points,
         scheduledAt,
         title,
-        userEmail,
-        isDaily
+        userEmail
     ) {
         this.recipe = recipe
     }
@@ -52,19 +54,21 @@ class SportTask : Task {
         duration: Duration? = null,
         id: String? = null,
         isCompleted: Boolean,
+        isDaily: Boolean,
+        points: Points,
         scheduledAt: LocalDateTime,
         title: String,
-        userEmail: String,
-        isDaily: Boolean
+        userEmail: String
     ) : super(
         description,
         duration,
         id,
         isCompleted,
+        isDaily,
+        points,
         scheduledAt,
         title,
-        userEmail,
-        isDaily
+        userEmail
     ) {
         this.activity = activity
         this.distance = distance
@@ -82,13 +86,14 @@ open class Task(
     var duration: Duration? = null,
     val id: String? = null,
     var isCompleted: Boolean,
+    var isDaily: Boolean,
+    var points: Points,
     @Serializable(LocalDateTimeSerializer::class)
     var scheduledAt: LocalDateTime,
     var title: String,
-    val userEmail: String,
-    var isDaily: Boolean
+    val userEmail: String
 ) {
     override fun toString(): String {
-        return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail', isDaily=$isDaily)"
+        return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, isDaily=$isDaily, points=$points, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail')"
     }
 }
