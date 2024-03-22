@@ -42,6 +42,10 @@ class DrinkReminderWorker @AssistedInject constructor(
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
+    companion object {
+        const val WORKER_NAME = "com.pvp.app.service.DrinkReminderWorker"
+    }
+
     override suspend fun doWork(): Result {
         Log.e("DrinkReminderWorker", "YOOOOOOOOOOOOO")
 

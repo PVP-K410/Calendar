@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
-class Application() : Application() {
+class Application : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -50,19 +50,18 @@ class Application() : Application() {
         )
             .build()
 
-        val workerConfig = Configuration.Builder()
-                .setWorkerFactory(workerFactory)
-                .setMinimumLoggingLevel(android.util.Log.DEBUG)
-                .build()
-
-        WorkManager.initialize(this, workerConfig)
-
         WorkManager
             .getInstance(this)
             .enqueueUniquePeriodicWork(
-                "DrinkReminderWork",
+                DrinkReminderWorker.WORKER_NAME,
                 ExistingPeriodicWorkPolicy.UPDATE,
                 drinkWorkerRequest
             )
     }
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(android.util.Log.DEBUG)
+            .build()
 }
