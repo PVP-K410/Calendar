@@ -157,7 +157,7 @@ fun LayoutScreenAuthenticated(
 
             val route = Route.routesAuthenticated
                 .find { it.path == destination?.route }
-                ?: Route.SignIn
+                ?: Route.Authentication
 
             val stateDrawer = rememberDrawerState(initialValue = DrawerValue.Closed)
 
