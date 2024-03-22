@@ -45,17 +45,23 @@ class AuthenticationViewModel @Inject constructor(
         launcherOneTap: (IntentSenderRequest) -> Unit
     ) {
         viewModelScope.launch {
-            val requestOneTap = buildSignInRequestOneTap()
+            try {
+                _state.update { it.copy(isLoading = true) }
 
-            if (requestOneTap == null) {
-                val request = buildSignInRequest()
+                val requestOneTap = buildSignInRequestOneTap()
 
-                launcher(request)
+                if (requestOneTap == null) {
+                    val request = buildSignInRequest()
 
-                return@launch
+                    launcher(request)
+
+                    return@launch
+                }
+
+                launcherOneTap(requestOneTap)
+            } finally {
+                _state.update { it.copy(isLoading = false) }
             }
-
-            launcherOneTap(requestOneTap)
         }
     }
 

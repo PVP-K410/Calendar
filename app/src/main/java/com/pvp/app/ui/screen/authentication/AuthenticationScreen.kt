@@ -8,9 +8,9 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,24 +46,15 @@ import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.backgroundGradientHorizontal
 import com.pvp.app.ui.common.backgroundGradientLinear
 import com.pvp.app.ui.common.backgroundGradientVertical
+import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.showToast
-
-private val COLORS_BACKGROUND = listOf(
-    Color.Yellow.lighten(0.5f),
-    Color.Red.lighten(0.5f),
-    Color.White
-)
-
-private val COLORS_BUTTON_TRANSPARENT = ButtonColors(
-    containerColor = Color.Transparent,
-    contentColor = Color.Transparent,
-    disabledContainerColor = Color.Transparent,
-    disabledContentColor = Color.Transparent
-)
+import com.pvp.app.ui.theme.BackgroundUnauthenticated
+import com.pvp.app.ui.theme.ButtonTransparent
 
 private val COLORS_GET_STARTED = listOf(
-    Color("#d5dd59".toColorInt()),
+    Color("#d5dd59".toColorInt())
+        .darken(.15f),
     Color("#fe5370".toColorInt())
 )
     .map { it.lighten(0.75f) }
@@ -93,7 +83,7 @@ private fun Authentication(
     ) -> Unit,
     verticalArrangement: Arrangement.Vertical = Arrangement.Center,
 ) {
-    val textBegin = stringResource(R.string.screen_authentication_begin)
+    val textBegin = stringResource(R.string.screen_authentication_button_begin)
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -118,24 +108,22 @@ private fun Authentication(
         verticalArrangement = verticalArrangement
     ) {
         Button(
-            colors = COLORS_BUTTON_TRANSPARENT,
+            colors = ButtonTransparent.copy(contentColor = Color.Black),
+            contentPadding = PaddingValues(),
             enabled = isEnabled,
             modifier = Modifier
                 .fillMaxWidth(0.75f)
-                .clip(MaterialTheme.shapes.large)
-                .border(
-                    color = Color.Black,
-                    shape = MaterialTheme.shapes.large,
-                    width = 3.dp
-                )
-                .backgroundGradientHorizontal(COLORS_GET_STARTED),
+                .backgroundGradientHorizontal(
+                    colors = COLORS_GET_STARTED,
+                    shape = MaterialTheme.shapes.large
+                ),
             onClick = {
                 onClick(
                     launcher,
                     launcherOneTap
                 )
             },
-            shape = MaterialTheme.shapes.small
+            shape = MaterialTheme.shapes.large
         ) {
             Image(
                 contentDescription = "Google authentication button logo",
@@ -146,7 +134,6 @@ private fun Authentication(
             Spacer(modifier = Modifier.size(8.dp))
 
             Text(
-                color = Color.Black,
                 style = MaterialTheme.typography.bodyLarge.plus(TextStyle(fontWeight = FontWeight.Bold)),
                 text = textBegin,
                 textDecoration = TextDecoration.Underline
@@ -163,13 +150,12 @@ fun AuthenticationScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .backgroundGradientVertical(COLORS_BACKGROUND),
+            .backgroundGradientVertical(BackgroundUnauthenticated),
         verticalArrangement = Arrangement.Center
     ) {
         val context = LocalContext.current
         val state by viewModel.state.collectAsStateWithLifecycle()
         val textError = stringResource(R.string.screen_authentication_toast_error)
-        val textSuccess = stringResource(R.string.screen_authentication_toast_success)
 
         FeatureCard.cards.forEachIndexed { index, card ->
             FeatureCardBlock(
@@ -187,13 +173,14 @@ fun AuthenticationScreen(
 
         when (state.isLoading) {
             true -> {
-                ProgressIndicator(modifier = Modifier.size(48.dp))
+                ProgressIndicator(modifier = Modifier.size(64.dp))
             }
 
             else -> {
                 Icon(
                     contentDescription = "Authenticate button",
                     imageVector = Icons.Outlined.ArrowDownward,
+                    modifier = Modifier.size(36.dp),
                     tint = Color.Black
                 )
             }
@@ -207,11 +194,9 @@ fun AuthenticationScreen(
                     request,
                     isOneTap
                 ) {
-                    context.showToast(
-                        isSuccess = it.isSuccess,
-                        messageError = it.messageError ?: textError,
-                        messageSuccess = textSuccess
-                    )
+                    if (!it.isSuccess) {
+                        context.showToast(message = textError)
+                    }
                 }
             },
             isEnabled = !state.isLoading,

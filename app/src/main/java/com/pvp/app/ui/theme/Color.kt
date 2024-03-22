@@ -1,11 +1,26 @@
 package com.pvp.app.ui.theme
 
+import androidx.compose.material3.ButtonColors
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
+import com.pvp.app.ui.common.lighten
 
 val BackgroundGradientDefault = listOf(
     Color("#FF5A6148".toColorInt()),
     Color("#FF396660".toColorInt())
+)
+
+val BackgroundUnauthenticated = listOf(
+    Color.Yellow.lighten(0.5f),
+    Color.Red.lighten(0.5f),
+    Color.White
+)
+
+val ButtonTransparent = ButtonColors(
+    containerColor = Color.Transparent,
+    contentColor = Color.Transparent,
+    disabledContainerColor = Color.Transparent,
+    disabledContentColor = Color.Transparent
 )
 
 val DarkPrimary = Color(0xFFACD458)
