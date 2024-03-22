@@ -1,9 +1,8 @@
 package com.pvp.app.service
 
-import android.app.Service
-import android.content.Intent
-import android.os.IBinder
-import android.util.Log
+import android.content.Context
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.UserService
@@ -11,7 +10,6 @@ import com.pvp.app.model.Notification
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.model.Setting
 import com.pvp.app.model.User
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,8 +19,10 @@ import java.time.Duration
 import java.time.LocalTime
 import javax.inject.Inject
 
-@AndroidEntryPoint
-class WaterDrinkReminder : Service() {
+class DrinkReminderWorker(
+    private val context: Context,
+    private val workerParams: WorkerParameters
+) : CoroutineWorker(context, workerParams) {
 
     @Inject
     lateinit var notificationService: NotificationService
@@ -35,13 +35,13 @@ class WaterDrinkReminder : Service() {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
-    override fun onCreate() {
-        Log.e("WATEEEEEER", "YOOOOOOOOOOOOO")
-        super.onCreate()
-        setup()
+    override suspend fun doWork(): Result {
+        scheduleNotifications()
+
+        return Result.success()
     }
 
-    private fun setup() {
+    private fun scheduleNotifications() {
         val state = settingService
             .get(Setting.Notifications.CupVolumeMl)
             .combine(userService.user) { volume, user ->
@@ -73,18 +73,18 @@ class WaterDrinkReminder : Service() {
 
             notificationService.post(
                 notification = Notification(
-                    delay = relativeDuration,
                     channel = NotificationChannel.DrinkReminder,
                     title = "Water Drinking Reminder",
                     text = "It's time to drink a cup of water!"
-                )
+                ),
+                delay = relativeDuration
             )
 
             notificationTime = notificationTime.plus(intervalDuration)
         }
     }
 
-    fun calculateDuration(notificationTime: LocalTime): Duration {
+    private fun calculateDuration(notificationTime: LocalTime): Duration {
         val currentDateTime = LocalTime.now()
         val notificationDateTime =
             LocalTime.of(notificationTime.hour, notificationTime.minute, notificationTime.second)
@@ -94,10 +94,6 @@ class WaterDrinkReminder : Service() {
         } else {
             Duration.between(currentDateTime, notificationDateTime)
         }
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
     }
 }
 
