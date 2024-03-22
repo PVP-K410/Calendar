@@ -44,7 +44,7 @@ class MealTask : Task {
 @Serializable
 class SportTask : Task {
 
-    var activity: SportActivity?
+    var activity: SportActivity
     var distance: Double?
 
     constructor(
