@@ -39,9 +39,13 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.WaterDrinkReminder" />
-
         <receiver android:name=".service.NotificationReceiver" />
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove">
+        </provider>
 
     </application>
 

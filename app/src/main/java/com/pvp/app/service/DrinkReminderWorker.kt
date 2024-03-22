@@ -1,6 +1,8 @@
 package com.pvp.app.service
 
 import android.content.Context
+import android.util.Log
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.pvp.app.api.NotificationService
@@ -10,6 +12,8 @@ import com.pvp.app.model.Notification
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.model.Setting
 import com.pvp.app.model.User
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,25 +21,30 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.Duration
 import java.time.LocalTime
-import javax.inject.Inject
 
-class DrinkReminderWorker(
-    private val context: Context,
-    private val workerParams: WorkerParameters
+@HiltWorker
+class DrinkReminderWorker @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted workerParams: WorkerParameters,
+    val notificationService: NotificationService,
+    val settingService: SettingService,
+    val userService: UserService
 ) : CoroutineWorker(context, workerParams) {
 
-    @Inject
-    lateinit var notificationService: NotificationService
-
-    @Inject
-    lateinit var settingService: SettingService
-
-    @Inject
-    lateinit var userService: UserService
+//    @Inject
+//    lateinit var notificationService: NotificationService
+//
+//    @Inject
+//    lateinit var settingService: SettingService
+//
+//    @Inject
+//    lateinit var userService: UserService
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     override suspend fun doWork(): Result {
+        Log.e("DrinkReminderWorker", "YOOOOOOOOOOOOO")
+
         scheduleNotifications()
 
         return Result.success()
@@ -69,30 +78,17 @@ class DrinkReminderWorker(
         var notificationTime = LocalTime.of(startHour, 0)
 
         repeat(nbOfReminders) {
-            val relativeDuration = calculateDuration(notificationTime)
-
             notificationService.post(
                 notification = Notification(
                     channel = NotificationChannel.DrinkReminder,
                     title = "Water Drinking Reminder",
                     text = "It's time to drink a cup of water!"
                 ),
-                delay = relativeDuration
+                time = notificationTime
             )
 
             notificationTime = notificationTime.plus(intervalDuration)
-        }
-    }
-
-    private fun calculateDuration(notificationTime: LocalTime): Duration {
-        val currentDateTime = LocalTime.now()
-        val notificationDateTime =
-            LocalTime.of(notificationTime.hour, notificationTime.minute, notificationTime.second)
-
-        return if (notificationDateTime.isBefore(currentDateTime)) {
-            Duration.between(currentDateTime, notificationDateTime.plusHours(24))
-        } else {
-            Duration.between(currentDateTime, notificationDateTime)
+            Log.e("DrinkReminderWorker", notificationTime.toString())
         }
     }
 }
