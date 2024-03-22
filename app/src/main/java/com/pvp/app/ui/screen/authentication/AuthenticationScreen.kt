@@ -49,6 +49,9 @@ import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.theme.ButtonTransparent
 
+private typealias LauncherIntent = ManagedActivityResultLauncher<Intent, ActivityResult>
+private typealias LauncherIntentSenderRequest = ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+
 private val COLORS_GET_STARTED = listOf(
     Color("#d5dd59".toColorInt())
         .darken(.15f),
@@ -71,12 +74,15 @@ private fun randomizedColors() = listOf(
 
 @Composable
 private fun Authentication(
-    authenticate: (isOneTap: Boolean, request: Intent) -> Unit,
+    authenticate: (
+        isOneTap: Boolean,
+        request: Intent
+    ) -> Unit,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     isEnabled: Boolean,
     onClick: (
-        launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-        launcherOneTap: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+        launcher: LauncherIntent,
+        launcherOneTap: LauncherIntentSenderRequest
     ) -> Unit,
     verticalArrangement: Arrangement.Vertical = Arrangement.Center,
 ) {
@@ -86,7 +92,10 @@ private fun Authentication(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = { result ->
             if (result.resultCode == RESULT_OK) {
-                authenticate(false, result.data ?: return@rememberLauncherForActivityResult)
+                authenticate(
+                    false,
+                    result.data ?: return@rememberLauncherForActivityResult
+                )
             }
         }
     )
@@ -95,7 +104,10 @@ private fun Authentication(
         contract = ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
             if (result.resultCode == RESULT_OK) {
-                authenticate(true, result.data ?: return@rememberLauncherForActivityResult)
+                authenticate(
+                    true,
+                    result.data ?: return@rememberLauncherForActivityResult
+                )
             }
         }
     )
