@@ -2,22 +2,6 @@ package com.pvp.app.api
 
 import com.pvp.app.model.Task
 
-/**
- * TODO :: PLAN
- * - Tasks are created only in the TaskService
- *   - Tasks are updated only in the TaskService
- *   - TaskService#merge split into TaskService#create, TaskService#update and TaskService#claim
- * - TaskService#claim is used to claim points of the task
- * - If claimed, points are added to the user's total points
- *   - Multiple claims are not allowed. Check if claimed before claiming
- * - Tasks contain an attribute as a state:
- *   - claimedAt
- *   - points
- * - Points are calculated upon task creation
- *   - Points are recalculated upon task update (manually triggered)
- *   - Points are recalculated upon user status change (manually triggered)
- */
-
 interface PointService {
 
     /**
