@@ -10,8 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import com.pvp.app.R
-import com.pvp.app.ui.screen.authentication.SignInScreen
-import com.pvp.app.ui.screen.authentication.SignUpScreen
+import com.pvp.app.ui.screen.authentication.AuthenticationScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.profile.ProfileScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
@@ -64,11 +63,16 @@ sealed class Route(
          * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenUnauthenticated] layout.
          */
         val routesUnauthenticated = listOf(
-            SignIn,
-            SignUp,
+            Authentication,
             Survey
         )
     }
+
+    data object Authentication : Route(
+        path = "authentication",
+        resourceTitleId = R.string.route_authentication,
+        screen = { _, _ -> AuthenticationScreen() }
+    )
 
     data object Calendar : Route(
         icon = Icons.Outlined.CalendarMonth,
@@ -101,18 +105,6 @@ sealed class Route(
         path = "steps",
         resourceTitleId = R.string.route_steps,
         screen = { _, _ -> StepScreen() }
-    )
-
-    data object SignIn : Route(
-        path = "authentication/sign-in",
-        resourceTitleId = R.string.route_authentication_sign_in,
-        screen = { c, s -> SignInScreen(c, s) }
-    )
-
-    data object SignUp : Route(
-        path = "authentication/sign-up",
-        resourceTitleId = R.string.route_authentication_sign_up,
-        screen = { c, s -> SignUpScreen(c, s) }
     )
 
     data object Survey : Route(
