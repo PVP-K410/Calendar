@@ -6,7 +6,6 @@ import javax.inject.Inject
 
 class ConfigurationImpl @Inject constructor() : Configuration {
 
-    override val channelNotificationTasksReminderId: String = "Task Reminder"
     override val googleOAuthClientId: String = BuildConfig.GOOGLE_OAUTH_CLIENT_ID
 
     override val rangeHeight: List<Int> = (10..300)

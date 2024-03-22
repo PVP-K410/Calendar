@@ -2,8 +2,6 @@ package com.pvp.app.service
 
 import android.Manifest
 import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -87,16 +85,6 @@ class NotificationServiceImpl @Inject constructor(
             return
         }
 
-        val channel = NotificationChannel(
-            notification.channel.channelId,
-            notification.title,
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-
-        val manager = NotificationManagerCompat.from(context)
-
-        manager.createNotificationChannel(channel)
-
         val notificationAndroid = NotificationCompat.Builder(
             context,
             notification.channel.channelId
@@ -106,6 +94,8 @@ class NotificationServiceImpl @Inject constructor(
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
+
+        val manager = NotificationManagerCompat.from(context)
 
         manager.notify(
             notification.id ?: 0,
