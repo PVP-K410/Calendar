@@ -13,7 +13,7 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
@@ -54,15 +54,17 @@ class TaskServiceImpl @Inject constructor(
 
         userService
             .get(task.userEmail)
-            .collectLatest {
-                val user = it ?: error("User not found while claiming task points")
-
+            .firstOrNull()
+            ?.let { user ->
                 userService.merge(
                     user.copy(
                         points = user.points + task.points.value
                     )
                 )
             }
+            ?: error("User not found while claiming task points")
+
+        update(task)
     }
 
     override suspend fun create(
@@ -77,7 +79,6 @@ class TaskServiceImpl @Inject constructor(
             duration = duration,
             id = null,
             isCompleted = false,
-            isDaily = false,
             points = Points(),
             scheduledAt = scheduledAt,
             title = title,
@@ -118,6 +119,7 @@ class TaskServiceImpl @Inject constructor(
         val task = SportTask(
             activity = activity,
             description = description,
+            distance = distance,
             duration = duration,
             id = null,
             isCompleted = false,
@@ -163,7 +165,6 @@ class TaskServiceImpl @Inject constructor(
             duration = duration,
             id = null,
             isCompleted = false,
-            isDaily = false,
             points = Points(),
             recipe = recipe,
             scheduledAt = scheduledAt,
@@ -191,6 +192,13 @@ class TaskServiceImpl @Inject constructor(
         return snapshot.data
             ?.let { decodeByType(it) } as? MealTask
             ?: error("Meal task creation failed")
+    }
+
+    override suspend fun generateDaily(
+        count: Int,
+        userEmail: String
+    ) {
+        TODO("Not yet implemented")
     }
 
     private fun decodeByType(

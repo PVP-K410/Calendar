@@ -90,9 +90,22 @@ interface TaskService : DocumentsCollection {
     ): MealTask
 
     /**
+     * Generates daily tasks for the given user by its email.
+     *
+     * @param count number of tasks to generate
+     * @param userEmail email of the user to generate daily tasks for
+     */
+    suspend fun generateDaily(
+        count: Int = 3,
+        userEmail: String
+    )
+
+    /**
      * Gets all tasks for the given user by its email.
      *
      * @param userEmail email of the user to get tasks for
+     *
+     * @return flow of tasks
      */
     suspend fun get(
         userEmail: String
@@ -100,8 +113,12 @@ interface TaskService : DocumentsCollection {
 
     /**
      * Removes a task from the database.
+     *
+     * @param task task to remove
      */
-    suspend fun remove(task: Task)
+    suspend fun remove(
+        task: Task
+    )
 
     /**
      * Updates the task in the database.

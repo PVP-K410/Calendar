@@ -14,6 +14,8 @@ class PointServiceImpl @Inject constructor(
     override suspend fun calculate(
         task: Task
     ): Int {
+        val isDaily = task is SportTask && task.isDaily
+
         val points = mutableSetOf<Int>()
             .apply {
                 add(if (Random.nextFloat() <= 0.1) 2 else 1)
@@ -52,7 +54,7 @@ class PointServiceImpl @Inject constructor(
         return points
             .sum()
             .apply {
-                if (task.isDaily) {
+                if (isDaily) {
                     this * 2
                 }
             }

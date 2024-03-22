@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material.icons.outlined.Timelapse
@@ -41,7 +39,6 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,10 +51,19 @@ import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.DateTimePicker
+import com.pvp.app.ui.common.LabelFieldWrapper
+import com.pvp.app.ui.common.Picker
+import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.TextField
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.round
+
+private val RANGE_KILOMETERS = listOf(null)
+    .plus(List(1001) {
+        round(it * 0.1 * 10) / 10
+    })
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -95,7 +101,7 @@ fun CreateTaskMealForm(
             label = { Text("Meal Title") },
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = description,
@@ -107,7 +113,7 @@ fun CreateTaskMealForm(
             label = { Text("Description") },
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = ingredients,
@@ -117,7 +123,7 @@ fun CreateTaskMealForm(
             label = { Text("Ingredients") },
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = preparation,
@@ -127,7 +133,7 @@ fun CreateTaskMealForm(
             label = { Text("Preparation") },
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             modifier = Modifier.padding(vertical = 8.dp),
@@ -142,7 +148,7 @@ fun CreateTaskMealForm(
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         DateTimePicker(
             dateTime = selectedDateTime,
@@ -191,15 +197,14 @@ fun CreateTaskSportForm(
     var description by remember { mutableStateOf("") }
     var descriptionError by remember { mutableStateOf(true) }
     var activity by remember { mutableStateOf(SportActivity.Walking) }
-    var distance by remember { mutableStateOf("") }
-    var distanceError by remember { mutableStateOf(true) }
     var duration by remember { mutableIntStateOf(0) }
     var durationError by remember { mutableStateOf(true) }
     var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
     var isExpanded by remember { mutableStateOf(false) }
+    val statePickerDistance = rememberPickerState<Double?>(null)
 
     val isFormValid by derivedStateOf {
-        !titleError && !descriptionError && (!durationError || !distanceError)
+        !titleError && !descriptionError && (!durationError)
     }
 
     Column(
@@ -217,7 +222,7 @@ fun CreateTaskSportForm(
             label = { Text("Title") },
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         ExposedDropdownMenuBox(
             expanded = isExpanded,
@@ -251,7 +256,7 @@ fun CreateTaskSportForm(
             }
         }
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = description,
@@ -268,53 +273,45 @@ fun CreateTaskSportForm(
             label = { Text("Description") },
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        if (activity.supportsDistanceMetrics) {
-            duration = 0
+        LabelFieldWrapper(
+            content = {
+                Picker(
+                    items = RANGE_KILOMETERS,
+                    label = { if (it != null) "$it (km)" else "No distance" },
+                    state = statePickerDistance
+                )
+            },
+            putBelow = true,
+            text = "${statePickerDistance.value ?: 0} (km) distance",
+            textAlign = TextAlign.End
+        )
 
-            TextField(
-                value = distance,
-                onValueChange = { newText, errors ->
-                    distance = newText
-                    distanceError = errors.isNotEmpty()
-                },
-                validationPolicies = { input ->
-                    InputValidator.validateBlank(input, "Distance") +
-                            InputValidator.validateFloat(input, "Distance")
-                },
-                label = { Text("Distance (m)") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surface)
-                    .width(200.dp)
-            )
-        } else {
-            distance = ""
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Duration: $duration minutes",
-                style = TextStyle(
-                    fontSize = 15.sp,
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            )
+        Text(
+            text = "Duration: $duration minutes",
+            style = TextStyle(
+                fontSize = 15.sp,
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+        )
 
-            Slider(
-                value = duration.toFloat(),
-                onValueChange = { newValue ->
-                    duration = newValue.toInt()
-                    durationError = false
-                },
-                valueRange = 1f..180f,
-                steps = 180,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-            )
-        }
+        Slider(
+            value = duration.toFloat(),
+            onValueChange = { newValue ->
+                duration = newValue.toInt()
+                durationError = false
+            },
+            valueRange = 1f..180f,
+            steps = 180,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp)
+        )
 
         Spacer(modifier = Modifier.height((32.dp)))
 
@@ -327,16 +324,10 @@ fun CreateTaskSportForm(
 
         Button(
             onClick = {
-                val distanceValue = if (distance != "") {
-                    distance.toDouble()
-                } else {
-                    0.0f.toDouble()
-                }
-
                 model.create(
                     activity = activity,
                     description = description,
-                    distance = distanceValue,
+                    distance = statePickerDistance.value,
                     duration = Duration.ofMinutes(duration.toLong()),
                     scheduledAt = selectedDateTime,
                     title = title
@@ -388,7 +379,7 @@ fun CreateTaskGeneralForm(
             label = { Text("Title") },
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = description,
@@ -400,7 +391,7 @@ fun CreateTaskGeneralForm(
             label = { Text("Description") },
         )
 
-        Spacer(modifier = Modifier.height((16.dp)))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Duration: ${duration.toInt()} minutes",
@@ -502,7 +493,7 @@ private fun SportTaskBoxBody(
             )
 
             Text(
-                text = "${task.distance!! / 1000} km",
+                text = "${task.distance} km",
                 textAlign = TextAlign.Left,
                 modifier = Modifier
                     .fillMaxWidth()

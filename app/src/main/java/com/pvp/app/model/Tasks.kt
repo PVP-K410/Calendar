@@ -16,7 +16,6 @@ class MealTask : Task {
         duration: Duration? = null,
         id: String? = null,
         isCompleted: Boolean,
-        isDaily: Boolean,
         points: Points,
         recipe: String,
         scheduledAt: LocalDateTime,
@@ -27,7 +26,6 @@ class MealTask : Task {
         duration,
         id,
         isCompleted,
-        isDaily,
         points,
         scheduledAt,
         title,
@@ -45,7 +43,8 @@ class MealTask : Task {
 class SportTask : Task {
 
     var activity: SportActivity
-    var distance: Double?
+    var distance: Double? = null
+    var isDaily: Boolean = false
 
     constructor(
         activity: SportActivity,
@@ -64,7 +63,6 @@ class SportTask : Task {
         duration,
         id,
         isCompleted,
-        isDaily,
         points,
         scheduledAt,
         title,
@@ -72,10 +70,11 @@ class SportTask : Task {
     ) {
         this.activity = activity
         this.distance = distance
+        this.isDaily = isDaily
     }
 
     override fun toString(): String {
-        return "SportTask(activity=$activity, distance=$distance) && " + super.toString()
+        return "SportTask(activity=$activity, distance=$distance, isDaily=$isDaily) && " + super.toString()
     }
 }
 
@@ -86,7 +85,6 @@ open class Task(
     var duration: Duration? = null,
     val id: String? = null,
     var isCompleted: Boolean,
-    var isDaily: Boolean,
     var points: Points,
     @Serializable(LocalDateTimeSerializer::class)
     var scheduledAt: LocalDateTime,
@@ -94,6 +92,6 @@ open class Task(
     val userEmail: String
 ) {
     override fun toString(): String {
-        return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, isDaily=$isDaily, points=$points, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail')"
+        return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, points=$points, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail')"
     }
 }

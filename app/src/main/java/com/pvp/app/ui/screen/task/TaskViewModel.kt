@@ -173,7 +173,11 @@ class TaskViewModel @Inject constructor(
         task: Task
     ) {
         viewModelScope.launch {
-            taskService.update(task)
+            if (task.isCompleted && task.points.claimedAt == null) {
+                taskService.claim(task)
+            } else {
+                taskService.update(task)
+            }
         }
     }
 }
