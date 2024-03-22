@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalTime
 
@@ -30,15 +31,6 @@ class DrinkReminderWorker @AssistedInject constructor(
     val settingService: SettingService,
     val userService: UserService
 ) : CoroutineWorker(context, workerParams) {
-
-//    @Inject
-//    lateinit var notificationService: NotificationService
-//
-//    @Inject
-//    lateinit var settingService: SettingService
-//
-//    @Inject
-//    lateinit var userService: UserService
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
@@ -55,7 +47,7 @@ class DrinkReminderWorker @AssistedInject constructor(
     }
 
     private fun scheduleNotifications() {
-        val state = settingService
+        val stateFlow = settingService
             .get(Setting.Notifications.CupVolumeMl)
             .combine(userService.user) { volume, user ->
                 DrinkReminderState(
@@ -69,30 +61,40 @@ class DrinkReminderWorker @AssistedInject constructor(
                 initialValue = DrinkReminderState()
             )
 
-        val mass = state.value.user.mass
-        val cupVolume = state.value.cupVolume
-        val recommendedIntake = mass * 3
-        val nbOfReminders = recommendedIntake / cupVolume
+        coroutineScope.launch {
+            stateFlow.collect { state ->
+                val mass = state.user.mass
 
-        val startHour = 8
-        val endHour = 22
-        val totalDuration = Duration.ofHours(endHour.toLong() - startHour.toLong())
-        val intervalDuration = totalDuration.dividedBy(nbOfReminders.toLong())
+                if (mass != 0) {
+                    Log.e("DrinkReminderWorker mass", mass.toString())
+                    val cupVolume = state.cupVolume
+                    Log.e("DrinkReminderWorker cupVolume", cupVolume.toString())
+                    val recommendedIntake = mass * 30
+                    val nbOfReminders = recommendedIntake / cupVolume
+                    Log.e("DrinkReminderWorker recommendedIntake", recommendedIntake.toString())
 
-        var notificationTime = LocalTime.of(startHour, 0)
+                    val startHour = 8
+                    val endHour = 22
+                    val totalDuration = Duration.ofHours(endHour.toLong() - startHour.toLong())
+                    val intervalDuration = totalDuration.dividedBy(nbOfReminders.toLong())
 
-        repeat(nbOfReminders) {
-            notificationService.post(
-                notification = Notification(
-                    channel = NotificationChannel.DrinkReminder,
-                    title = "Water Drinking Reminder",
-                    text = "It's time to drink a cup of water!"
-                ),
-                time = notificationTime
-            )
+                    var notificationTime = LocalTime.of(startHour, 0)
 
-            notificationTime = notificationTime.plus(intervalDuration)
-            Log.e("DrinkReminderWorker", notificationTime.toString())
+                    repeat(nbOfReminders) {
+                        notificationService.post(
+                            notification = Notification(
+                                channel = NotificationChannel.DrinkReminder,
+                                title = "Water Drinking Reminder",
+                                text = "It's time to drink a cup of water!"
+                            ),
+                            time = notificationTime
+                        )
+
+                        notificationTime = notificationTime.plus(intervalDuration)
+                        Log.e("DrinkReminderWorker", notificationTime.toString())
+                    }
+                }
+            }
         }
     }
 }
