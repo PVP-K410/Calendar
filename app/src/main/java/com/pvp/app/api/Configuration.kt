@@ -13,12 +13,12 @@ interface Configuration {
     val googleOAuthClientId: String
 
     /**
-     * Mass values for the user to select from.
-     */
-    val rangeMass: List<Int>
-
-    /**
      * Height values for the user to select from.
      */
     val rangeHeight: List<Int>
+
+    /**
+     * Mass values for the user to select from.
+     */
+    val rangeMass: List<Int>
 }

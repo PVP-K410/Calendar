@@ -9,9 +9,9 @@ class ConfigurationImpl @Inject constructor() : Configuration {
     override val channelNotificationTasksReminderId: String = "Task Reminder"
     override val googleOAuthClientId: String = BuildConfig.GOOGLE_OAUTH_CLIENT_ID
 
-    override val rangeMass: List<Int> = (5..500)
+    override val rangeHeight: List<Int> = (10..300)
         .toList()
 
-    override val rangeHeight: List<Int> = (10..300)
+    override val rangeMass: List<Int> = (5..500)
         .toList()
 }

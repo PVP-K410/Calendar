@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.survey
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -38,7 +36,6 @@ import com.pvp.app.ui.common.showToast
 fun SurveyScreen(
     viewModel: SurveyViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val textContinue = stringResource(R.string.action_continue)
     val textError = stringResource(R.string.form_survey_toast_error)
     val textSubmit = stringResource(R.string.action_submit)
@@ -74,6 +71,8 @@ fun SurveyScreen(
             modifier = Modifier.weight(0.1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val context = LocalContext.current
+
             Button(
                 modifier = Modifier.fillMaxWidth(0.8f),
                 onClick = {

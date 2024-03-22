@@ -9,8 +9,8 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -110,14 +109,11 @@ private fun Authentication(
                 contentColor = Color.Black,
                 disabledContentColor = Color.DarkGray
             ),
-            contentPadding = PaddingValues(),
             enabled = isEnabled,
             modifier = Modifier
-                .fillMaxWidth(0.75f)
-                .backgroundGradientHorizontal(
-                    colors = COLORS_GET_STARTED,
-                    shape = MaterialTheme.shapes.large
-                ),
+                .fillMaxWidth(0.8f)
+                .clip(MaterialTheme.shapes.large)
+                .backgroundGradientHorizontal(COLORS_GET_STARTED),
             onClick = {
                 onClick(
                     launcher,
@@ -126,19 +122,23 @@ private fun Authentication(
             },
             shape = MaterialTheme.shapes.large
         ) {
-            Image(
-                contentDescription = "Google authentication button logo",
-                modifier = Modifier.size(24.dp),
-                painter = painterResource(R.drawable.google)
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    alignment = Alignment.CenterStart,
+                    contentDescription = "Google authentication button logo",
+                    modifier = Modifier.size(26.dp),
+                    painter = painterResource(R.drawable.google)
+                )
 
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Text(
-                style = MaterialTheme.typography.bodyLarge.plus(TextStyle(fontWeight = FontWeight.Bold)),
-                text = textBegin,
-                textDecoration = TextDecoration.Underline
-            )
+                Text(
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    text = textBegin,
+                    textDecoration = TextDecoration.Underline
+                )
+            }
         }
     }
 }
