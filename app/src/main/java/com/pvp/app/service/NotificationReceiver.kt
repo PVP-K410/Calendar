@@ -27,10 +27,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
         notificationService.show(
             notification = Notification(
-                id = intent.getIntExtra(
-                    "notificationId",
-                    0
-                ),
                 channel = channel,
                 title = intent.getStringExtra("notificationTitle") ?: "",
                 text = intent.getStringExtra("notificationText") ?: ""

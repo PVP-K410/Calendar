@@ -13,34 +13,47 @@ import com.pvp.app.R
 import com.pvp.app.api.NotificationService
 import com.pvp.app.model.Notification
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Duration
 import javax.inject.Inject
 import kotlin.random.Random
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 
 class NotificationServiceImpl @Inject constructor(
     @ApplicationContext
     private val context: Context
 ) : NotificationService {
 
-    private fun generateId(): Int {
-        return (0..Int.MAX_VALUE)
-            .random(Random(System.currentTimeMillis()))
+    override fun post(
+        notification: Notification,
+        delay: Duration
+    ) {
+        postNotification(
+            notification,
+            System.currentTimeMillis() + delay.toMillis()
+        )
     }
 
     override fun post(
-        notification: Notification
+        notification: Notification,
+        dateTime: LocalDateTime
     ) {
-        val id = notification.id ?: generateId()
+        postNotification(
+            notification,
+            dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )
+    }
 
+    private fun postNotification(
+        notification: Notification,
+        triggerAtMillis: Long
+    ) {
         val intent = Intent(
             context,
             NotificationReceiver::class.java
         )
             .apply {
-                putExtra(
-                    "notificationId",
-                    id
-                )
-
                 putExtra(
                     "notificationChannelId",
                     notification.channel.channelId
@@ -57,18 +70,18 @@ class NotificationServiceImpl @Inject constructor(
                 )
             }
 
-        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            id,
+            Random.nextInt(),
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
         manager.setExact(
             AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + notification.delay.toMillis(),
+            triggerAtMillis,
             pendingIntent
         )
     }
@@ -98,7 +111,7 @@ class NotificationServiceImpl @Inject constructor(
         val manager = NotificationManagerCompat.from(context)
 
         manager.notify(
-            notification.id ?: 0,
+            Random.nextInt(),
             notificationAndroid
         )
     }
