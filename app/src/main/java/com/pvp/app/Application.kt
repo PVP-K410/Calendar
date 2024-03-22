@@ -54,7 +54,7 @@ class Application : Application(), Configuration.Provider {
             .getInstance(this)
             .enqueueUniquePeriodicWork(
                 DrinkReminderWorker.WORKER_NAME,
-                ExistingPeriodicWorkPolicy.UPDATE,
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
                 drinkWorkerRequest
             )
     }
