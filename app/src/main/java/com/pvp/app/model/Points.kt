@@ -7,6 +7,6 @@ import java.time.LocalDateTime
 @Serializable
 data class Points(
     @Serializable(LocalDateTimeSerializer::class)
-    val claimedAt: LocalDateTime? = null,
-    val value: Int = 0
+    val claimedAt: LocalDateTime,
+    val value: Int
 )
