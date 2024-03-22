@@ -24,6 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Default"
         tools:targetApi="31">
+
         <activity
             android:name=".Activity"
             android:exported="true"
@@ -37,10 +38,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".service.WaterDrinkReminder" />
+
         <receiver android:name=".service.NotificationReceiver" />
+
     </application>
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
     </queries>
+
 </manifest>

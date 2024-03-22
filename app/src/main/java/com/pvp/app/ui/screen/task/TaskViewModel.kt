@@ -2,7 +2,6 @@ package com.pvp.app.ui.screen.task
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
@@ -32,8 +31,7 @@ class TaskViewModel @Inject constructor(
     private val notificationService: NotificationService,
     settingService: SettingService,
     private val taskService: TaskService,
-    userService: UserService,
-    private val configuration: Configuration
+    userService: UserService
 ) : ViewModel() {
 
     private val state = settingService

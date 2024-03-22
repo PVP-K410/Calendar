@@ -6,7 +6,7 @@ enum class NotificationChannel(
 
     UNKNOWN("UNKNOWN"),
     TaskReminder("Task Reminder"),
-    DrinkReminder("Drink Reminder");
+    DrinkReminder("Water Drinking Reminder");
 
     companion object {
 
