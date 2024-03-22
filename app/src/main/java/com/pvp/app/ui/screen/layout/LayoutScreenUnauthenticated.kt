@@ -5,6 +5,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import com.pvp.app.ui.common.LocalBackgroundColors
+import com.pvp.app.ui.common.backgroundGradientVertical
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +28,9 @@ fun LayoutScreenUnauthenticated(
             } else {
                 Route.Authentication
             },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .backgroundGradientVertical(LocalBackgroundColors.current),
             routes = Route.routesUnauthenticated,
             scope = scope
         )

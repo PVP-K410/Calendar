@@ -45,11 +45,9 @@ import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.backgroundGradientHorizontal
 import com.pvp.app.ui.common.backgroundGradientLinear
-import com.pvp.app.ui.common.backgroundGradientVertical
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.showToast
-import com.pvp.app.ui.theme.BackgroundUnauthenticated
 import com.pvp.app.ui.theme.ButtonTransparent
 
 private val COLORS_GET_STARTED = listOf(
@@ -108,7 +106,10 @@ private fun Authentication(
         verticalArrangement = verticalArrangement
     ) {
         Button(
-            colors = ButtonTransparent.copy(contentColor = Color.Black),
+            colors = ButtonTransparent.copy(
+                contentColor = Color.Black,
+                disabledContentColor = Color.DarkGray
+            ),
             contentPadding = PaddingValues(),
             enabled = isEnabled,
             modifier = Modifier
@@ -148,9 +149,7 @@ fun AuthenticationScreen(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .backgroundGradientVertical(BackgroundUnauthenticated),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
         val context = LocalContext.current
@@ -169,24 +168,22 @@ fun AuthenticationScreen(
             }
         }
 
-        Spacer(modifier = Modifier.size(24.dp))
-
         when (state.isLoading) {
             true -> {
-                ProgressIndicator(modifier = Modifier.size(64.dp))
+                ProgressIndicator(modifier = Modifier.size(84.dp))
             }
 
             else -> {
                 Icon(
                     contentDescription = "Authenticate button",
                     imageVector = Icons.Outlined.ArrowDownward,
-                    modifier = Modifier.size(36.dp),
+                    modifier = Modifier
+                        .padding(vertical = 24.dp)
+                        .size(36.dp),
                     tint = Color.Black
                 )
             }
         }
-
-        Spacer(modifier = Modifier.size(24.dp))
 
         Authentication(
             authenticate = { isOneTap, request ->

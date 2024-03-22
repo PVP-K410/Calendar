@@ -10,7 +10,7 @@ val BackgroundGradientDefault = listOf(
     Color("#FF396660".toColorInt())
 )
 
-val BackgroundUnauthenticated = listOf(
+val BackgroundGradientSunset = listOf(
     Color.Yellow.lighten(0.5f),
     Color.Red.lighten(0.5f),
     Color.White

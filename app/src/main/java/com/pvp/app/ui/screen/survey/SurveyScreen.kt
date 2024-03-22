@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.survey
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,9 +45,7 @@ fun SurveyScreen(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
         val state by viewModel.state.collectAsStateWithLifecycle()
@@ -59,7 +59,9 @@ fun SurveyScreen(
         var handler by remember { mutableStateOf({}) }
         var success by remember { mutableStateOf(true) }
 
-        Column(modifier = Modifier.weight(0.9f)) {
+        Column(
+            modifier = Modifier.weight(0.9f)
+        ) {
             SurveyInput(
                 handler = { onSubmit ->
                     handler = onSubmit
@@ -120,7 +122,9 @@ fun SurveyInput(
                         )
                     }
                 },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
             )
         }
 

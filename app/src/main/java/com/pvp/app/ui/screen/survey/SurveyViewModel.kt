@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.survey
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
@@ -17,6 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SurveyViewModel @Inject constructor(
+    private val configuration: Configuration,
     private val userService: UserService
 ) : ViewModel() {
 
@@ -51,6 +53,10 @@ class SurveyViewModel @Inject constructor(
                 userService.merge(user.copy(surveys = user.surveys + it))
             }
         }
+    }
+
+    fun <T> fromConfiguration(function: (Configuration) -> T): T {
+        return function(configuration)
     }
 
     fun updateBodyMassIndex(
