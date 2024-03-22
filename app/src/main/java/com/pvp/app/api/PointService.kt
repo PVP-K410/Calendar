@@ -9,6 +9,7 @@ interface PointService {
      * the task. User status can also be taken into account, hence, [Task.userEmail] is required.
      *
      * @param task task to calculate points for
+     *
      * @return points of the task
      */
     suspend fun calculate(
@@ -19,6 +20,7 @@ interface PointService {
      * Calculate the total points of a list of tasks. Each task is calculated using [calculate].
      *
      * @param tasks list of tasks to calculate points for
+     *
      * @return total points of the tasks
      */
     suspend fun calculate(
