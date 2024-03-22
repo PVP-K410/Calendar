@@ -14,11 +14,12 @@ import com.pvp.app.api.NotificationService
 import com.pvp.app.model.Notification
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import javax.inject.Inject
 import kotlin.random.Random
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
 
 class NotificationServiceImpl @Inject constructor(
     @ApplicationContext
@@ -39,6 +40,18 @@ class NotificationServiceImpl @Inject constructor(
         notification: Notification,
         dateTime: LocalDateTime
     ) {
+        postNotification(
+            notification,
+            dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )
+    }
+
+    override fun post(
+        notification: Notification,
+        time: LocalTime
+    ) {
+        val dateTime = time.atDate(LocalDate.now())
+
         postNotification(
             notification,
             dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()

@@ -3,6 +3,7 @@ package com.pvp.app.api
 import com.pvp.app.model.Notification
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 interface NotificationService {
 
@@ -15,11 +16,19 @@ interface NotificationService {
     )
 
     /**
-     * Posts a notification to the android alarm manager at the specified date.
+     * Posts a notification to the android alarm manager at the specified date time.
      */
     fun post(
         notification: Notification,
         dateTime: LocalDateTime
+    )
+
+    /**
+     * Posts a notification to the android alarm manager at the specified time.
+     */
+    fun post(
+        notification: Notification,
+        time: LocalTime
     )
 
     /**
