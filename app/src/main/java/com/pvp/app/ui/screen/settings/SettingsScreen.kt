@@ -41,6 +41,7 @@ private fun SettingNotificationReminderMinutes(
     model: SettingsViewModel = hiltViewModel()
 ) {
     val rangeMinutes = remember { model.fromConfiguration { it.rangeReminderMinutes } }
+
     val minutes by model
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
         .collectAsStateWithLifecycle()

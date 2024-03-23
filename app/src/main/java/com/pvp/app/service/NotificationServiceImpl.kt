@@ -42,7 +42,10 @@ class NotificationServiceImpl @Inject constructor(
     ) {
         postNotification(
             notification,
-            dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            dateTime
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
         )
     }
 
@@ -54,7 +57,10 @@ class NotificationServiceImpl @Inject constructor(
 
         postNotification(
             notification,
-            dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            dateTime
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
         )
     }
 

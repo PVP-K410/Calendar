@@ -43,4 +43,9 @@ interface Configuration {
      * Represents a range from startHour to endHour.
      */
     val intervalDrinkReminder: Pair<Int, Int>
+
+    /**
+     * The inclusive interval of allowed username length
+     */
+    val intervalUsernameLength: Pair<Int, Int>
 }

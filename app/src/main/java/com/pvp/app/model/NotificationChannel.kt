@@ -4,7 +4,7 @@ enum class NotificationChannel(
     val channelId: String
 ) {
 
-    UNKNOWN("UNKNOWN"),
+    Unknown("Unknown"),
     TaskReminder("Task Reminder"),
     DrinkReminder("Water Drinking Reminder");
 
@@ -13,7 +13,7 @@ enum class NotificationChannel(
         fun fromChannelId(channelId: String): NotificationChannel {
             return entries.find {
                 it.channelId == channelId
-            } ?: UNKNOWN
+            } ?: Unknown
         }
     }
 }

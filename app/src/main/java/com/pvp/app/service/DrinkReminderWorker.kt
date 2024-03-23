@@ -29,9 +29,13 @@ class DrinkReminderWorker @AssistedInject constructor(
     private val settingService: SettingService,
     private val userService: UserService,
     private val configuration: Configuration
-) : CoroutineWorker(context, workerParams) {
+) : CoroutineWorker(
+    context,
+    workerParams
+) {
 
     companion object {
+
         const val WORKER_NAME = "com.pvp.app.service.DrinkReminderWorker"
     }
 
@@ -76,16 +80,14 @@ class DrinkReminderWorker @AssistedInject constructor(
         cupVolume: Int
     ) {
         val recommendedIntake = mass * 30
-        val nbOfReminders = recommendedIntake / cupVolume
-
+        val count = recommendedIntake / cupVolume
         val startHour = configuration.intervalDrinkReminder.first
         val endHour = configuration.intervalDrinkReminder.second
         val totalDuration = Duration.ofHours((endHour - startHour).toLong())
-        val intervalDuration = totalDuration.dividedBy(nbOfReminders.toLong())
-
+        val intervalDuration = totalDuration.dividedBy(count.toLong())
         var notificationTime = LocalTime.of(startHour, 0)
 
-        repeat(nbOfReminders) {
+        repeat(count) {
             val progress = (it + 1) * cupVolume
 
             val notification = Notification(

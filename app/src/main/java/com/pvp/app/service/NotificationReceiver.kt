@@ -23,9 +23,9 @@ class NotificationReceiver : BroadcastReceiver() {
         val channelId = intent.getStringExtra("notificationChannelId") ?: ""
         val title = intent.getStringExtra("notificationTitle") ?: ""
         val text = intent.getStringExtra("notificationText") ?: ""
-
         val channel = NotificationChannel.fromChannelId(channelId)
-        if (channel == NotificationChannel.UNKNOWN) {
+
+        if (channel == NotificationChannel.Unknown) {
             throw Exception("Unknown notification channel id")
         }
 

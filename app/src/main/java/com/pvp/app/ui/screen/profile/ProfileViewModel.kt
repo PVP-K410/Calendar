@@ -3,6 +3,7 @@ package com.pvp.app.ui.screen.profile
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userService: UserService
+    private val userService: UserService,
+    private val configuration: Configuration
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -79,6 +81,10 @@ class ProfileViewModel @Inject constructor(
 
             userService.merge(_state.value.user)
         }
+    }
+
+    fun <T> fromConfiguration(function: (Configuration) -> T): T {
+        return function(configuration)
     }
 }
 

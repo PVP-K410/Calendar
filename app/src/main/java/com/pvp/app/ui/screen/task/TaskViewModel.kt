@@ -147,7 +147,10 @@ class TaskViewModel @Inject constructor(
     }
 
     private suspend fun Task.postNotification() {
-        val reminderMinutes = state.first().reminderMinutes.toLong()
+        val reminderMinutes = state
+            .first().reminderMinutes
+            .toLong()
+
         val reminderDateTime = scheduledAt
             .withSecond(0)
             .withNano(0)

@@ -230,10 +230,14 @@ private fun ProfileBody(
 
 @Composable
 private fun ProfileHeader(
+    model: ProfileViewModel = hiltViewModel(),
     state: State<ProfileState>,
     context: Context = LocalContext.current,
     onUpdateUsername: (String) -> Unit
 ) {
+    val intervalUsernameLength = remember { model.fromConfiguration { it.intervalUsernameLength } }
+    val minLength = intervalUsernameLength.first
+    val maxLength = intervalUsernameLength.second
     var userNameDisplay by remember { mutableStateOf(state.value.user.username) }
     var userNameEditing by remember { mutableStateOf(userNameDisplay) }
     val emailDisplay by remember { mutableStateOf(state.value.user.email) }
@@ -260,70 +264,75 @@ private fun ProfileHeader(
             alignment = Alignment.TopCenter,
         )
 
-        Row(
+        Column(
             modifier = Modifier
-                .padding(top = 15.dp)
-                .underline()
+                .padding(top = 15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Welcome, $userNameDisplay",
-                style = MaterialTheme.typography.titleLarge,
-                fontStyle = FontStyle.Italic,
-                fontSize = 30.sp
+                text = "Welcome,",
+                fontSize = 28.sp
             )
 
-            IconButtonWithDialog(
+            Row(
                 modifier = Modifier
-                    .padding(
-                        start = 5.dp,
-                        top = 4.dp
-                    ),
-                icon = Icons.Outlined.Edit,
-                iconSize = 30.dp,
-                iconDescription = "Edit Icon Button",
-                confirmButtonContent = {
-                    Text("Save")
-                },
-                dismissButtonContent = {
-                    Text("Cancel")
-                },
-                dialogTitle = {
-                    Text("Editing Username")
-                },
-                dialogContent = {
-                    OutlinedTextField(
-                        value = userNameEditing,
-                        onValueChange = { userNameEditing = it },
-                        label = { Text("Username") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
-                },
-                onConfirmClick = {
-                    userNameEditing = userNameEditing.trim()
+                    .underline(),
+            ) {
+                Text(
+                    text = userNameDisplay,
+                    fontSize = 28.sp
+                )
 
-                    if (userNameEditing.isNotEmpty() && userNameEditing.length <= 30) {
-                        userNameDisplay = userNameEditing
 
-                        onUpdateUsername(userNameEditing)
+                IconButtonWithDialog(
+                    modifier = Modifier
+                        .padding(
+                            start = 5.dp,
+                            top = 4.dp
+                        ),
+                    icon = Icons.Outlined.Edit,
+                    iconSize = 30.dp,
+                    iconDescription = "Edit Icon Button",
+                    confirmButtonContent = {
+                        Text("Save")
+                    },
+                    dismissButtonContent = {
+                        Text("Cancel")
+                    },
+                    dialogTitle = {
+                        Text("Editing Username")
+                    },
+                    dialogContent = {
+                        OutlinedTextField(
+                            value = userNameEditing,
+                            onValueChange = { userNameEditing = it },
+                            label = { Text("Username") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
+                        )
+                    },
+                    onConfirmClick = {
+                        userNameEditing = userNameEditing.trim()
+                        val length = userNameEditing.length
 
-                        context.showToast(message = "Your username has been updated!")
-                    } else {
-                        if (userNameEditing.isEmpty()) {
-                            context.showToast(message = "Username cannot be empty!")
+                        if (length in minLength..maxLength) {
+                            userNameDisplay = userNameEditing
+
+                            onUpdateUsername(userNameEditing)
+
+                            context.showToast(message = "Your username has been updated!")
+                        } else {
+                            context.showToast(message = "Username must be between $minLength and $maxLength characters long!")
+
+                            userNameEditing = userNameDisplay
                         }
-                        if (userNameEditing.length > 30) {
-                            context.showToast(message = "Username cannot be longer than 30 characters")
-                        }
-
+                    },
+                    onDismiss = {
                         userNameEditing = userNameDisplay
                     }
-                },
-                onDismiss = {
-                    userNameEditing = userNameDisplay
-                }
-            )
+                )
+            }
         }
 
         Text(

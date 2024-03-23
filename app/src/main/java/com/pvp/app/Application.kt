@@ -64,7 +64,7 @@ class Application : Application(), Configuration.Provider {
         val manager = NotificationManagerCompat.from(this)
 
         NotificationChannel.entries.forEach { channelEnum ->
-            if (channelEnum != NotificationChannel.UNKNOWN) {
+            if (channelEnum != NotificationChannel.Unknown) {
                 val notificationChannel = android.app.NotificationChannel(
                     channelEnum.channelId,
                     channelEnum.channelId,
