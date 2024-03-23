@@ -2,6 +2,7 @@ package com.pvp.app.service
 
 import com.pvp.app.api.ExperienceService
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlin.math.ln
 import kotlin.math.pow
 
@@ -18,12 +19,16 @@ class ExperienceServiceImpl @Inject constructor(
     override fun experienceOf(
         level: Int
     ): Int {
-        return (BASE * RATIO.pow(level)).toInt()
+        return (BASE * RATIO.pow(level - 1)).toInt()
     }
 
     override fun levelOf(
         experience: Int
     ): Int {
-        return (ln(experience.toDouble() / BASE) / ln(RATIO)).toInt()
+        if (experience <= BASE) {
+            return 1
+        }
+
+        return ceil(ln(experience.toDouble() / BASE) / ln(RATIO)).toInt()
     }
 }

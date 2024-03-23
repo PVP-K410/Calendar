@@ -3,6 +3,7 @@ package com.pvp.app.service
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
@@ -31,6 +32,7 @@ import javax.inject.Inject
 class TaskServiceImpl @Inject constructor(
     private val configuration: Configuration,
     private val database: FirebaseFirestore,
+    private val experienceService: ExperienceService,
     private val pointService: PointService,
     private val userService: UserService
 ) : TaskService {
@@ -92,10 +94,13 @@ class TaskServiceImpl @Inject constructor(
             .firstOrNull()
             ?.let { user ->
                 val points = task.points.value + (if (task.points.expired) 1 else 0)
+                val experience = user.experience + points
+                val level = experienceService.levelOf(experience)
 
                 userService.merge(
                     user.copy(
-                        experience = user.experience + points,
+                        experience = experience,
+                        level = level,
                         points = user.points + points
                     )
                 )
