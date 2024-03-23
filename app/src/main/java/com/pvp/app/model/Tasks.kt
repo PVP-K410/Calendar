@@ -9,6 +9,34 @@ import java.time.LocalDateTime
 @Serializable
 class MealTask : Task {
 
+    companion object {
+
+        fun copy(
+            task: MealTask,
+            description: String? = task.description,
+            duration: Duration? = task.duration,
+            id: String? = task.id,
+            isCompleted: Boolean = task.isCompleted,
+            points: Points = task.points,
+            recipe: String = task.recipe,
+            scheduledAt: LocalDateTime = task.scheduledAt,
+            title: String = task.title,
+            userEmail: String = task.userEmail
+        ): MealTask {
+            return MealTask(
+                description = description,
+                duration = duration,
+                id = id,
+                isCompleted = isCompleted,
+                points = points,
+                recipe = recipe,
+                scheduledAt = scheduledAt,
+                title = title,
+                userEmail = userEmail
+            )
+        }
+    }
+
     var recipe: String
 
     constructor(
@@ -41,6 +69,38 @@ class MealTask : Task {
 
 @Serializable
 class SportTask : Task {
+
+    companion object {
+
+        fun copy(
+            task: SportTask,
+            activity: SportActivity = task.activity,
+            description: String? = task.description,
+            distance: Double? = task.distance,
+            duration: Duration? = task.duration,
+            id: String? = task.id,
+            isCompleted: Boolean = task.isCompleted,
+            isDaily: Boolean = task.isDaily,
+            points: Points = task.points,
+            scheduledAt: LocalDateTime = task.scheduledAt,
+            title: String = task.title,
+            userEmail: String = task.userEmail
+        ): SportTask {
+            return SportTask(
+                activity = activity,
+                description = description,
+                distance = distance,
+                duration = duration,
+                id = id,
+                isCompleted = isCompleted,
+                isDaily = isDaily,
+                points = points,
+                scheduledAt = scheduledAt,
+                title = title,
+                userEmail = userEmail
+            )
+        }
+    }
 
     var activity: SportActivity
     var distance: Double? = null
@@ -91,6 +151,33 @@ open class Task(
     var title: String,
     val userEmail: String
 ) {
+
+    companion object {
+
+        fun copy(
+            task: Task,
+            description: String? = task.description,
+            duration: Duration? = task.duration,
+            id: String? = task.id,
+            isCompleted: Boolean = task.isCompleted,
+            points: Points = task.points,
+            scheduledAt: LocalDateTime = task.scheduledAt,
+            title: String = task.title,
+            userEmail: String = task.userEmail
+        ): Task {
+            return Task(
+                description = description,
+                duration = duration,
+                id = id,
+                isCompleted = isCompleted,
+                points = points,
+                scheduledAt = scheduledAt,
+                title = title,
+                userEmail = userEmail
+            )
+        }
+    }
+
     override fun toString(): String {
         return "Task(description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, points=$points, scheduledAt=$scheduledAt, title='$title', userEmail='$userEmail')"
     }

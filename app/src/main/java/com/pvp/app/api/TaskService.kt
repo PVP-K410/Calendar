@@ -125,9 +125,11 @@ interface TaskService : DocumentsCollection {
      *
      * @param task task to update
      * @param updatePoints flag to update the points of the task by recalculating them
+     *
+     * @return updated task
      */
     suspend fun update(
         task: Task,
         updatePoints: Boolean = false
-    )
+    ): Task
 }

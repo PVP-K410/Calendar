@@ -6,15 +6,17 @@ import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.MealTask
 import com.pvp.app.model.Notification
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
+import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -44,6 +46,9 @@ class TaskViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = TaskState()
         )
+        .filter {
+            it.user.email.isNotBlank()
+        }
 
     /**
      * Create a meal task for the user with the given parameters
@@ -57,34 +62,32 @@ class TaskViewModel @Inject constructor(
         title: String
     ) {
         viewModelScope.launch {
-            state.collectLatest { state ->
-                if (state.user.email.isBlank()) {
-                    return@collectLatest
-                }
+            state
+                .first()
+                .let { state ->
+                    val recipe = if (
+                        ingredients.isNotEmpty() &&
+                        preparation.isNotEmpty()
+                    ) {
+                        "$ingredients\n$preparation"
+                    } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
+                        ingredients
+                    } else {
+                        preparation
+                    }
 
-                val recipe = if (
-                    ingredients.isNotEmpty() &&
-                    preparation.isNotEmpty()
-                ) {
-                    "$ingredients\n$preparation"
-                } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
-                    ingredients
-                } else {
-                    preparation
+                    taskService
+                        .create(
+                            description,
+                            duration,
+                            recipe,
+                            scheduledAt,
+                            title,
+                            state.user.email
+                        )
+                        .toNotification()
+                        ?.also { notificationService.post(it) }
                 }
-
-                taskService
-                    .create(
-                        description,
-                        duration,
-                        recipe,
-                        scheduledAt,
-                        title,
-                        state.user.email
-                    )
-                    .toNotification()
-                    ?.also { notificationService.post(it) }
-            }
         }
     }
 
@@ -100,24 +103,22 @@ class TaskViewModel @Inject constructor(
         title: String
     ) {
         viewModelScope.launch {
-            state.collectLatest { state ->
-                if (state.user.email.isBlank()) {
-                    return@collectLatest
+            state
+                .first()
+                .let { state ->
+                    taskService
+                        .create(
+                            activity,
+                            description,
+                            distance,
+                            duration,
+                            scheduledAt,
+                            title,
+                            state.user.email
+                        )
+                        .toNotification()
+                        ?.also { notificationService.post(it) }
                 }
-
-                taskService
-                    .create(
-                        activity,
-                        description,
-                        distance,
-                        duration,
-                        scheduledAt,
-                        title,
-                        state.user.email
-                    )
-                    .toNotification()
-                    ?.also { notificationService.post(it) }
-            }
         }
     }
 
@@ -131,22 +132,20 @@ class TaskViewModel @Inject constructor(
         title: String
     ) {
         viewModelScope.launch {
-            state.collectLatest { state ->
-                if (state.user.email.isBlank()) {
-                    return@collectLatest
+            state
+                .first()
+                .let { state ->
+                    taskService
+                        .create(
+                            description,
+                            duration,
+                            scheduledAt,
+                            title,
+                            state.user.email
+                        )
+                        .toNotification()
+                        ?.also { notificationService.post(it) }
                 }
-
-                taskService
-                    .create(
-                        description,
-                        duration,
-                        scheduledAt,
-                        title,
-                        state.user.email
-                    )
-                    .toNotification()
-                    ?.also { notificationService.post(it) }
-            }
         }
     }
 
@@ -169,14 +168,81 @@ class TaskViewModel @Inject constructor(
         )
     }
 
-    fun update(
-        task: Task
+    /**
+     * Handles the provided task with a provided function block
+     *
+     * @param handle Function block to handle the task
+     * @param task Task to handle
+     *
+     * @return Pair of the modified task and a boolean indicating if the task points should also
+     * be updated
+     */
+    private fun <T : Task> resolve(
+        handle: (T) -> Unit,
+        task: T
+    ): Pair<T, Boolean> {
+        val taskNew: T
+        val update: Boolean
+
+        when (task) {
+            is SportTask -> {
+                taskNew = SportTask.copy(task) as T
+
+                handle(taskNew)
+
+                with(taskNew as SportTask) {
+                    update = activity != task.activity ||
+                            distance != task.distance ||
+                            duration != task.duration
+                }
+            }
+
+            is MealTask -> {
+                taskNew = MealTask.copy(task) as T
+
+                handle(taskNew)
+
+                update = taskNew.duration != task.duration
+            }
+
+            else -> {
+                taskNew = Task.copy(task) as T
+
+                handle(taskNew)
+
+                update = false
+            }
+        }
+
+        return Pair(
+            taskNew,
+            update
+        )
+    }
+
+    /**
+     * Update the task with the provided handle function block
+     *
+     * @param handle Function block to handle the task
+     * @param task Task to update
+     */
+    fun <T : Task> update(
+        handle: (T) -> Unit,
+        task: T
     ) {
         viewModelScope.launch {
-            if (task.isCompleted && task.points.claimedAt == null) {
-                taskService.claim(task)
-            } else {
-                taskService.update(task)
+            val (taskModified, updatePoints) = resolve(
+                handle,
+                task
+            )
+
+            val taskUpdated = taskService.update(
+                taskModified,
+                updatePoints
+            )
+
+            if (taskUpdated.isCompleted && taskUpdated.points.claimedAt == null) {
+                taskService.claim(taskUpdated)
             }
         }
     }

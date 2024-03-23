@@ -602,9 +602,12 @@ fun TaskBox(
                 Checkbox(
                     checked = checked,
                     onCheckedChange = {
+                        model.update(
+                            { task -> task.isCompleted = it },
+                            task
+                        )
+
                         checked = it
-                        task.isCompleted = checked
-                        model.update(task)
                     },
                     modifier = Modifier
                         .size(36.dp)

@@ -5,6 +5,8 @@ import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import javax.inject.Inject
+import kotlin.math.cosh
+import kotlin.math.ln
 import kotlin.random.Random
 
 class PointServiceImpl @Inject constructor(
@@ -22,30 +24,40 @@ class PointServiceImpl @Inject constructor(
 
                 when (task) {
                     is MealTask -> {
-                        task.duration?.let {
-                            when (it.toMinutes()) {
-                                in 0..30 -> add(1)
-                                in 30..60 -> add(2)
-                                else -> add(3)
+                        task.duration
+                            ?.toMinutes()
+                            ?.let {
+                                add(
+                                    calculateDurationPoints(
+                                        duration = it,
+                                        max = 3,
+                                        ratio = 1f
+                                    )
+                                )
                             }
-                        }
                     }
 
                     is SportTask -> {
-                        task.duration?.let {
-                            when (it.toMinutes()) {
-                                in 0..120 -> add(1)
-                                in 120..240 -> add(2)
-                                else -> add(3)
+                        val pointsDuration = task.duration
+                            ?.toMinutes()
+                            ?.let {
+                                calculateDurationPoints(
+                                    duration = it,
+                                    ratio = task.activity.pointsRatioDuration
+                                )
                             }
-                        }
+                            ?: 0
 
-                        task.distance?.let {
-                            when (it.toInt()) {
-                                in 2000..5000 -> add(1)
-                                in 5000..15000 -> add(2)
-                                else -> add(3)
-                            }
+                        add(pointsDuration)
+
+                        task.distance?.let { distance ->
+                            add(
+                                calculateDistancePoints(
+                                    distance = distance,
+                                    max = if (pointsDuration > 2) 2 else 3,
+                                    ratio = task.activity.pointsRatioDistance
+                                )
+                            )
                         }
                     }
                 }
@@ -53,10 +65,48 @@ class PointServiceImpl @Inject constructor(
 
         return points
             .sum()
-            .apply {
+            .let {
                 if (isDaily) {
-                    this * 2
+                    it * 2
                 }
+
+                it
             }
+    }
+
+    private fun calculateDistancePoints(
+        distance: Double,
+        max: Int = 3,
+        ratio: Float
+    ): Int {
+        val result = when (cosh(ln(distance * ratio))) {
+            in 0.0..1.65 -> 1
+            in 1.65..2.5 -> 2
+            else -> 3
+        }
+
+        return minOf(
+            result,
+            max
+        )
+    }
+
+    private fun calculateDurationPoints(
+        duration: Long,
+        max: Int = 5,
+        ratio: Float
+    ): Int {
+        val result = when ((duration / 60.0) * ratio) {
+            in 0.0..0.75 -> 1
+            in 0.75..1.5 -> 2
+            in 1.5..2.8 -> 3
+            in 2.8..4.2 -> 4
+            else -> 5
+        }
+
+        return minOf(
+            result,
+            max
+        )
     }
 }

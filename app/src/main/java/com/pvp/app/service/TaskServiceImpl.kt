@@ -64,7 +64,10 @@ class TaskServiceImpl @Inject constructor(
             }
             ?: error("User not found while claiming task points")
 
-        update(task)
+        update(
+            task,
+            false
+        )
     }
 
     override suspend fun create(
@@ -270,7 +273,7 @@ class TaskServiceImpl @Inject constructor(
     override suspend fun update(
         task: Task,
         updatePoints: Boolean
-    ) {
+    ): Task {
         if (task.id == null) {
             error("Task id is required to update it.")
         }
@@ -286,5 +289,11 @@ class TaskServiceImpl @Inject constructor(
             .document(task.id)
             .set(encodeByType(task))
             .await()
+
+        return when (task) {
+            is MealTask -> MealTask.copy(task)
+            is SportTask -> SportTask.copy(task)
+            else -> Task.copy(task)
+        }
     }
 }
