@@ -85,13 +85,7 @@ class TaskViewModel @Inject constructor(
                             title,
                             state.user.email
                         )
-                        .toNotification()
-                        ?.also {
-                            notificationService.post(
-                                it,
-                                getDurationTillReminder(scheduledAt)!!
-                            )
-                        }
+                        .postNotification()
                 }
         }
     }
@@ -121,13 +115,7 @@ class TaskViewModel @Inject constructor(
                             title,
                             state.user.email
                         )
-                        .toNotification()
-                        ?.also {
-                            notificationService.post(
-                                it,
-                                getDurationTillReminder(scheduledAt)!!
-                            )
-                        }
+                        .postNotification()
                 }
         }
     }
@@ -153,36 +141,31 @@ class TaskViewModel @Inject constructor(
                             title,
                             state.user.email
                         )
-                        .toNotification()
-                        ?.also {
-                            notificationService.post(
-                                it,
-                                getDurationTillReminder(scheduledAt)!!
-                            )
-                        }
+                        .postNotification()
                 }
         }
     }
 
-    private suspend fun getDurationTillReminder(scheduledAt: LocalDateTime): Duration? =
-        Duration.between(
+    private suspend fun Task.postNotification() {
+        val reminderMinutes = state.first().reminderMinutes.toLong()
+        val delay = Duration.between(
             LocalDateTime.now(),
             scheduledAt
         )
-            .minusMinutes(state.first().reminderMinutes.toLong())
-            .takeIf { !it.isNegative && !it.isZero }
+            .minusMinutes(reminderMinutes)
+            .takeIf {
+                !it.isNegative && !it.isZero
+            } ?: return
 
-    private suspend fun Task.toNotification(): Notification? {
-        if (getDurationTillReminder(scheduledAt) == null) {
-            return null
-        }
-
-        val reminderMinutes = state.first().reminderMinutes
-
-        return Notification(
+        val notification = Notification(
             channel = NotificationChannel.TaskReminder,
             title = "Task Reminder",
             text = "'${title}' is in $reminderMinutes minute${if (reminderMinutes > 1) "s" else ""}..."
+        )
+
+        notificationService.post(
+            notification = notification,
+            delay = delay
         )
     }
 
