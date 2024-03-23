@@ -1,6 +1,5 @@
 package com.pvp.app.service
 
-import android.util.Log
 import com.pvp.app.api.PointService
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
@@ -79,8 +78,6 @@ class PointServiceImpl @Inject constructor(
         distance: Double,
         ratio: Float
     ): Int {
-        Log.d("PointServiceImpl", "distance: $distance, ratio: $ratio")
-
         if (distance == 0.0 || ratio == 0.0f) {
             return 0
         }
