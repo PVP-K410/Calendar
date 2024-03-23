@@ -91,11 +91,11 @@ class DrinkReminderWorker @AssistedInject constructor(
 
             val notification = Notification(
                 channel = NotificationChannel.DrinkReminder,
-                title = "Water Drinking Reminder",
-                text = "It's time to drink a cup ($cupVolume ml) of water! " +
+                title = "Hydration Reminder 💦",
+                text = "Time for a cup of water ($cupVolume ml)! 😋 " +
                         "Today's progress: " +
-                        "${"%.2f".format(progress / 1000.0)} l out of " +
-                        "${"%.2f".format(recommendedIntake / 1000.0)} l"
+                        "${"%.1f".format(progress / 1000.0)}/" +
+                        "${"%.1f".format(recommendedIntake / 1000.0)} liters"
             )
 
             scheduledNotifications.add(notification)
