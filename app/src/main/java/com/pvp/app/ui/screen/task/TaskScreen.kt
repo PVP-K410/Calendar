@@ -60,10 +60,9 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.round
 
-private val RANGE_KILOMETERS = listOf(null)
-    .plus(List(1001) {
-        round(it * 0.1 * 10) / 10
-    })
+private val RANGE_KILOMETERS = List(1001) {
+    round(it * 0.1 * 10) / 10
+}
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -193,19 +192,13 @@ fun CreateTaskSportForm(
     onCreate: () -> Unit
 ) {
     var title by remember { mutableStateOf("") }
-    var titleError by remember { mutableStateOf(true) }
+    var titleValid by remember { mutableStateOf(false) }
     var description by remember { mutableStateOf("") }
-    var descriptionError by remember { mutableStateOf(true) }
     var activity by remember { mutableStateOf(SportActivity.Walking) }
     var duration by remember { mutableIntStateOf(0) }
-    var durationError by remember { mutableStateOf(true) }
     var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
     var isExpanded by remember { mutableStateOf(false) }
-    val statePickerDistance = rememberPickerState<Double?>(null)
-
-    val isFormValid by derivedStateOf {
-        !titleError && !descriptionError && (!durationError)
-    }
+    val statePickerDistance = rememberPickerState(0.0)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -216,7 +209,7 @@ fun CreateTaskSportForm(
             value = title,
             onValueChange = { newText, errors ->
                 title = newText
-                titleError = errors.isNotEmpty()
+                titleValid = errors.isEmpty()
             },
             validationPolicies = { input -> InputValidator.validateBlank(input, "Title") },
             label = { Text("Title") },
@@ -260,58 +253,50 @@ fun CreateTaskSportForm(
 
         TextField(
             value = description,
-            onValueChange = { newText, errors ->
+            onValueChange = { newText, _ ->
                 description = newText
-                descriptionError = errors.isNotEmpty()
-            },
-            validationPolicies = { input ->
-                InputValidator.validateBlank(
-                    input,
-                    "Description"
-                )
             },
             label = { Text("Description") },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LabelFieldWrapper(
-            content = {
-                Picker(
-                    items = RANGE_KILOMETERS,
-                    label = { if (it != null) "$it (km)" else "No distance" },
-                    state = statePickerDistance
-                )
-            },
-            putBelow = true,
-            text = "${statePickerDistance.value ?: 0} (km) distance",
-            textAlign = TextAlign.End
-        )
+        if (activity.supportsDistanceMetrics) {
+            LabelFieldWrapper(
+                content = {
+                    Picker(
+                        items = RANGE_KILOMETERS,
+                        label = { "$it (km)" },
+                        state = statePickerDistance
+                    )
+                },
+                putBelow = true,
+                text = "${statePickerDistance.value} (km) distance",
+                textAlign = TextAlign.End
+            )
+        } else {
+            Text(
+                text = "Duration: $duration minutes",
+                style = TextStyle(
+                    fontSize = 15.sp,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Duration: $duration minutes",
-            style = TextStyle(
-                fontSize = 15.sp,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp)
-        )
-
-        Slider(
-            value = duration.toFloat(),
-            onValueChange = { newValue ->
-                duration = newValue.toInt()
-                durationError = false
-            },
-            valueRange = 1f..180f,
-            steps = 180,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-        )
+            Slider(
+                value = duration.toFloat(),
+                onValueChange = { newValue ->
+                    duration = newValue.toInt()
+                },
+                valueRange = 1f..180f,
+                steps = 180,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height((32.dp)))
 
@@ -335,7 +320,7 @@ fun CreateTaskSportForm(
 
                 onCreate()
             },
-            enabled = isFormValid,
+            enabled = titleValid,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 20.dp)

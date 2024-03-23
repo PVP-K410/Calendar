@@ -1,5 +1,6 @@
 package com.pvp.app.service
 
+import android.util.Log
 import com.pvp.app.api.PointService
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
@@ -18,7 +19,7 @@ class PointServiceImpl @Inject constructor(
     ): Int {
         val isDaily = task is SportTask && task.isDaily
 
-        val points = mutableSetOf<Int>()
+        val points = mutableListOf<Int>()
             .apply {
                 add(if (Random.nextFloat() <= 0.1) 2 else 1)
 
@@ -38,26 +39,26 @@ class PointServiceImpl @Inject constructor(
                     }
 
                     is SportTask -> {
-                        val pointsDuration = task.duration
-                            ?.toMinutes()
-                            ?.let {
-                                calculateDurationPoints(
-                                    duration = it,
-                                    ratio = task.activity.pointsRatioDuration
+                        if (task.activity.supportsDistanceMetrics) {
+                            task.distance?.let { distance ->
+                                add(
+                                    calculateDistancePoints(
+                                        distance = distance,
+                                        ratio = task.activity.pointsRatioDistance
+                                    )
                                 )
                             }
-                            ?: 0
-
-                        add(pointsDuration)
-
-                        task.distance?.let { distance ->
-                            add(
-                                calculateDistancePoints(
-                                    distance = distance,
-                                    max = if (pointsDuration > 2) 2 else 3,
-                                    ratio = task.activity.pointsRatioDistance
-                                )
-                            )
+                        } else {
+                            task.duration
+                                ?.toMinutes()
+                                ?.let {
+                                    add(
+                                        calculateDurationPoints(
+                                            duration = it,
+                                            ratio = task.activity.pointsRatioDuration
+                                        )
+                                    )
+                                }
                         }
                     }
                 }
@@ -76,23 +77,19 @@ class PointServiceImpl @Inject constructor(
 
     private fun calculateDistancePoints(
         distance: Double,
-        max: Int = 3,
         ratio: Float
     ): Int {
+        Log.d("PointServiceImpl", "distance: $distance, ratio: $ratio")
+
         if (distance == 0.0 || ratio == 0.0f) {
             return 0
         }
 
-        val result = when (cosh(ln(distance * ratio))) {
+        return when (cosh(ln(distance * ratio))) {
             in 0.0..1.65 -> 1
             in 1.65..2.5 -> 2
             else -> 3
         }
-
-        return minOf(
-            result,
-            max
-        )
     }
 
     private fun calculateDurationPoints(
