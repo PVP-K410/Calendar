@@ -8,6 +8,7 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.Notification
+import com.pvp.app.model.NotificationChannel
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -86,7 +86,12 @@ class TaskViewModel @Inject constructor(
                             state.user.email
                         )
                         .toNotification()
-                        ?.also { notificationService.post(it) }
+                        ?.also {
+                            notificationService.post(
+                                it,
+                                getDurationTillReminder(scheduledAt)!!
+                            )
+                        }
                 }
         }
     }
@@ -117,7 +122,12 @@ class TaskViewModel @Inject constructor(
                             state.user.email
                         )
                         .toNotification()
-                        ?.also { notificationService.post(it) }
+                        ?.also {
+                            notificationService.post(
+                                it,
+                                getDurationTillReminder(scheduledAt)!!
+                            )
+                        }
                 }
         }
     }
@@ -144,27 +154,35 @@ class TaskViewModel @Inject constructor(
                             state.user.email
                         )
                         .toNotification()
-                        ?.also { notificationService.post(it) }
+                        ?.also {
+                            notificationService.post(
+                                it,
+                                getDurationTillReminder(scheduledAt)!!
+                            )
+                        }
                 }
         }
     }
 
-    private suspend fun Task.toNotification(): Notification? {
-        val difference = ChronoUnit.SECONDS.between(
+    private suspend fun getDurationTillReminder(scheduledAt: LocalDateTime): Duration? =
+        Duration.between(
             LocalDateTime.now(),
             scheduledAt
         )
+            .minusMinutes(state.first().reminderMinutes.toLong())
+            .takeIf { !it.isNegative && !it.isZero }
 
-        val reminderMinutes = state.first().reminderMinutes
-        val secondsUntilRemind = difference - (reminderMinutes * 60)
-
-        if (secondsUntilRemind <= 0) {
+    private suspend fun Task.toNotification(): Notification? {
+        if (getDurationTillReminder(scheduledAt) == null) {
             return null
         }
 
+        val reminderMinutes = state.first().reminderMinutes
+
         return Notification(
-            delay = Duration.ofSeconds(secondsUntilRemind),
-            text = "'${title}' is in $reminderMinutes minute(s)..."
+            channel = NotificationChannel.TaskReminder,
+            title = "Task Reminder",
+            text = "'${title}' is in $reminderMinutes minute${if (reminderMinutes > 1) "s" else ""}..."
         )
     }
 
