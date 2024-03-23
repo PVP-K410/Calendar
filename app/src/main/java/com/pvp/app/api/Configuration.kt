@@ -8,6 +8,11 @@ interface Configuration {
     val googleOAuthClientId: String
 
     /**
+     * Limit of points that can be deducted from the user in a single day.
+     */
+    val limitPointsDeduction: Int
+
+    /**
      * Height values for the user to select from.
      */
     val rangeHeight: List<Int>

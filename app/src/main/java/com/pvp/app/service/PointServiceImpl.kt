@@ -1,16 +1,29 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.pvp.app.service
 
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.PointService
+import com.pvp.app.api.TaskService
+import com.pvp.app.api.UserService
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.mapLatest
+import java.time.LocalDate
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.math.cosh
 import kotlin.math.ln
 import kotlin.random.Random
 
 class PointServiceImpl @Inject constructor(
-
+    private val configuration: Configuration,
+    private val taskServiceProvider: Provider<TaskService>,
+    private val userService: UserService
 ) : PointService {
 
     override suspend fun calculate(
@@ -110,5 +123,69 @@ class PointServiceImpl @Inject constructor(
             result,
             max
         )
+    }
+
+    override suspend fun deduct(
+        date: LocalDate
+    ) {
+        val taskService = taskServiceProvider.get()
+        val user = userService.user.firstOrNull() ?: error("User not found while deducting points")
+
+        val tasks = taskService
+            .get(user.email)
+            .mapLatest {
+                it
+                    .filter { task -> !task.isCompleted }
+                    .filter { task -> !task.points.expired }
+                    .filter { task ->
+                        task.scheduledAt.year == date.year &&
+                                task.scheduledAt.monthValue == date.monthValue &&
+                                task.scheduledAt.dayOfMonth == date.dayOfMonth
+                    }
+            }
+            .first()
+            .map { it.markExpired() }
+
+        tasks.forEach {
+            taskService.update(it)
+        }
+
+        user.points -= minOf(
+            tasks.size,
+            configuration.limitPointsDeduction
+        )
+
+        userService.merge(user)
+    }
+
+    private fun Task.markExpired(): Task {
+        return when (this) {
+            is MealTask -> {
+                MealTask.copy(
+                    points = this.points.copy(
+                        expired = true
+                    ),
+                    task = this
+                )
+            }
+
+            is SportTask -> {
+                SportTask.copy(
+                    points = this.points.copy(
+                        expired = true
+                    ),
+                    task = this
+                )
+            }
+
+            else -> {
+                Task.copy(
+                    points = this.points.copy(
+                        expired = true
+                    ),
+                    task = this
+                )
+            }
+        }
     }
 }

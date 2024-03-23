@@ -48,8 +48,28 @@ class TaskServiceImpl @Inject constructor(
             error("Task points are already claimed")
         }
 
+        val now = LocalDateTime.now()
+
+        if (
+            task.points.expired && (
+                    task.scheduledAt.year != now.year ||
+                            task.scheduledAt.dayOfYear < now.dayOfYear - 2 ||
+                            task.scheduledAt.dayOfYear > now.dayOfYear
+                    )
+        ) {
+            return
+        }
+
+        /**
+         * TODO: Check if there are any other deducted re-claimed tasks in the same day.
+         * No more than [Configuration.limitPointsDeduction] points can be reclaimed.
+         * If this is over the limit, return.
+         */
+
+        val pointsReclaimed = (if (task.points.expired) 1 else 0)
+
         task.points = task.points.copy(
-            claimedAt = LocalDateTime.now()
+            claimedAt = now
         )
 
         userService
@@ -58,7 +78,7 @@ class TaskServiceImpl @Inject constructor(
             ?.let { user ->
                 userService.merge(
                     user.copy(
-                        points = user.points + task.points.value
+                        points = user.points + task.points.value + pointsReclaimed
                     )
                 )
             }

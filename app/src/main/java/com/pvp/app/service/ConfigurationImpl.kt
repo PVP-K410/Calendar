@@ -7,6 +7,7 @@ import javax.inject.Inject
 class ConfigurationImpl @Inject constructor() : Configuration {
 
     override val googleOAuthClientId: String = BuildConfig.GOOGLE_OAUTH_CLIENT_ID
+    override val limitPointsDeduction: Int = 5
 
     override val rangeHeight: List<Int> = (10..300)
         .toList()
