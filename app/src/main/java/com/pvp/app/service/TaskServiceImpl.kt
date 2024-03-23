@@ -26,6 +26,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -56,7 +57,7 @@ class TaskServiceImpl @Inject constructor(
         val now = LocalDateTime.now()
 
         if (
-            task.points.expired && (
+            task.points.isExpired && (
                     task.scheduledAt.year != now.year ||
                             task.scheduledAt.dayOfYear < (now.dayOfYear -
                             configuration.limitPointsReclaimDays) ||
@@ -77,7 +78,7 @@ class TaskServiceImpl @Inject constructor(
                             .isEqual(date)
                     }
                     .filter { t -> t.points.claimedAt != null }
-                    .filter { t -> t.points.expired }
+                    .filter { t -> t.points.isExpired }
             }
             .first().size
 
@@ -93,7 +94,7 @@ class TaskServiceImpl @Inject constructor(
             .get(task.userEmail)
             .firstOrNull()
             ?.let { user ->
-                val points = task.points.value + (if (task.points.expired) 1 else 0)
+                val points = task.points.value + (if (task.points.isExpired) 1 else 0)
                 val experience = user.experience + points
                 val level = experienceService.levelOf(experience)
 
@@ -132,6 +133,9 @@ class TaskServiceImpl @Inject constructor(
         )
 
         task.points = task.points.copy(
+            isExpired = task.scheduledAt
+                .toLocalDate()
+                .isBefore(LocalDate.now()),
             value = pointService.calculate(task)
         )
 
@@ -177,6 +181,9 @@ class TaskServiceImpl @Inject constructor(
         )
 
         task.points = task.points.copy(
+            isExpired = task.scheduledAt
+                .toLocalDate()
+                .isBefore(LocalDate.now()),
             value = pointService.calculate(task)
         )
 
@@ -219,6 +226,9 @@ class TaskServiceImpl @Inject constructor(
         )
 
         task.points = task.points.copy(
+            isExpired = task.scheduledAt
+                .toLocalDate()
+                .isBefore(LocalDate.now()),
             value = pointService.calculate(task)
         )
 

@@ -8,6 +8,6 @@ import java.time.LocalDateTime
 data class Points(
     @Serializable(LocalDateTimeSerializer::class)
     val claimedAt: LocalDateTime? = null,
-    val expired: Boolean = false,
+    val isExpired: Boolean = false,
     val value: Int = 0
 )

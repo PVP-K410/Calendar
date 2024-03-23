@@ -136,7 +136,7 @@ class PointServiceImpl @Inject constructor(
             .mapLatest {
                 it
                     .filter { task -> !task.isCompleted }
-                    .filter { task -> !task.points.expired }
+                    .filter { task -> !task.points.isExpired }
                     .filter { task ->
                         task.scheduledAt.year == date.year &&
                                 task.scheduledAt.monthValue == date.monthValue &&
@@ -163,7 +163,7 @@ class PointServiceImpl @Inject constructor(
             is MealTask -> {
                 MealTask.copy(
                     points = this.points.copy(
-                        expired = true
+                        isExpired = true
                     ),
                     task = this
                 )
@@ -172,7 +172,7 @@ class PointServiceImpl @Inject constructor(
             is SportTask -> {
                 SportTask.copy(
                     points = this.points.copy(
-                        expired = true
+                        isExpired = true
                     ),
                     task = this
                 )
@@ -181,7 +181,7 @@ class PointServiceImpl @Inject constructor(
             else -> {
                 Task.copy(
                     points = this.points.copy(
-                        expired = true
+                        isExpired = true
                     ),
                     task = this
                 )
