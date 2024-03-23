@@ -32,6 +32,13 @@ interface NotificationService {
     )
 
     /**
+     * Cancels a scheduled notification.
+     */
+    fun cancel(
+        notification: Notification
+    )
+
+    /**
      * Shows a notification to the user using the android notification manager.
      * The notification will be shown with the provided title.
      */

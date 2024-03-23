@@ -6,9 +6,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.pvp.app.Activity
 import com.pvp.app.R
 import com.pvp.app.api.NotificationService
 import com.pvp.app.model.Notification
@@ -19,7 +21,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
-import kotlin.random.Random
 
 class NotificationServiceImpl @Inject constructor(
     @ApplicationContext
@@ -62,11 +63,21 @@ class NotificationServiceImpl @Inject constructor(
         notification: Notification,
         triggerAtMillis: Long
     ) {
+        if (triggerAtMillis <= System.currentTimeMillis()) {
+            Log.d("postNotification", "Notification trigger time is in the past, skipping.")
+            return
+        }
+
         val intent = Intent(
             context,
             NotificationReceiver::class.java
         )
             .apply {
+                putExtra(
+                    "notificationId",
+                    notification.id
+                )
+
                 putExtra(
                     "notificationChannelId",
                     notification.channel.channelId
@@ -85,7 +96,7 @@ class NotificationServiceImpl @Inject constructor(
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            Random.nextInt(),
+            notification.id,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -111,6 +122,20 @@ class NotificationServiceImpl @Inject constructor(
             return
         }
 
+        val intent = Intent(
+            context,
+            Activity::class.java
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
         val notificationAndroid = NotificationCompat.Builder(
             context,
             notification.channel.channelId
@@ -118,14 +143,38 @@ class NotificationServiceImpl @Inject constructor(
             .setContentTitle(notification.title)
             .setContentText(notification.text)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
             .build()
 
         val manager = NotificationManagerCompat.from(context)
 
         manager.notify(
-            Random.nextInt(),
+            notification.id,
             notificationAndroid
         )
+    }
+
+    override fun cancel(
+        notification: Notification
+    ) {
+        val intent = Intent(
+            context,
+            NotificationReceiver::class.java
+        )
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            notification.id,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        pendingIntent?.let {
+            val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            manager.cancel(it)
+            it.cancel()
+        }
     }
 }
