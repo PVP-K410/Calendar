@@ -79,6 +79,10 @@ class PointServiceImpl @Inject constructor(
         max: Int = 3,
         ratio: Float
     ): Int {
+        if (distance == 0.0 || ratio == 0.0f) {
+            return 0
+        }
+
         val result = when (cosh(ln(distance * ratio))) {
             in 0.0..1.65 -> 1
             in 1.65..2.5 -> 2
@@ -96,6 +100,10 @@ class PointServiceImpl @Inject constructor(
         max: Int = 5,
         ratio: Float
     ): Int {
+        if (duration == 0L || ratio == 0.0f) {
+            return 0
+        }
+
         val result = when ((duration / 60.0) * ratio) {
             in 0.0..0.75 -> 1
             in 0.75..1.5 -> 2
