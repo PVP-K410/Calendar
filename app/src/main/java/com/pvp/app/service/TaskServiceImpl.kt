@@ -83,8 +83,6 @@ class TaskServiceImpl @Inject constructor(
             return
         }
 
-        val reclaimPoints = (if (task.points.expired) 1 else 0)
-
         task.points = task.points.copy(
             claimedAt = now
         )
@@ -93,9 +91,12 @@ class TaskServiceImpl @Inject constructor(
             .get(task.userEmail)
             .firstOrNull()
             ?.let { user ->
+                val points = task.points.value + (if (task.points.expired) 1 else 0)
+
                 userService.merge(
                     user.copy(
-                        points = user.points + task.points.value + reclaimPoints
+                        experience = user.experience + points,
+                        points = user.points + points
                     )
                 )
             }
