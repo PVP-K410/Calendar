@@ -1,7 +1,6 @@
 package com.pvp.app.service
 
 import android.content.Context
-import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -35,14 +34,15 @@ class DrinkReminderWorker @AssistedInject constructor(
     }
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val scheduledNotifications = mutableListOf<Notification>()
 
     override suspend fun doWork(): Result {
-        setup()
+        initializeReminderListener()
 
         return Result.success()
     }
 
-    private suspend fun setup() {
+    private suspend fun initializeReminderListener() {
         val stateFlow = settingService
             .get(Setting.Notifications.CupVolumeMl)
             .combine(userService.user) { volume, user ->
@@ -57,28 +57,24 @@ class DrinkReminderWorker @AssistedInject constructor(
                 initialValue = DrinkReminderState()
             )
 
-            stateFlow.collect { state ->
-                if (state.userMass != 0) {
-                    scheduleNotifications(
-                        mass = state.userMass,
-                        cupVolume = state.cupVolume
-                    )
-                }
+        stateFlow.collect { state ->
+            if (state.userMass != 0) {
+                cancelScheduledNotifications()
+
+                scheduleNotifications(
+                    mass = state.userMass,
+                    cupVolume = state.cupVolume
+                )
             }
+        }
     }
 
     private fun scheduleNotifications(
         mass: Int,
         cupVolume: Int
     ) {
-        Log.e("DrinkReminderWorker mass", mass.toString())
-        Log.e("DrinkReminderWorker cupVolume", cupVolume.toString())
-
         val recommendedIntake = mass * 30
-        Log.e("DrinkReminderWorker recommendedIntake", recommendedIntake.toString())
-
         val nbOfReminders = recommendedIntake / cupVolume
-        Log.e("DrinkReminderWorker nbOfReminders", nbOfReminders.toString())
 
         val startHour = 8
         val endHour = 22
@@ -88,18 +84,30 @@ class DrinkReminderWorker @AssistedInject constructor(
         var notificationTime = LocalTime.of(startHour, 0)
 
         repeat(nbOfReminders) {
+            val notification = Notification(
+                channel = NotificationChannel.DrinkReminder,
+                title = "Water Drinking Reminder",
+                text = "It's time to drink a cup of water!"
+            )
+
             notificationService.post(
-                notification = Notification(
-                    channel = NotificationChannel.DrinkReminder,
-                    title = "Water Drinking Reminder",
-                    text = "It's time to drink a cup of water!"
-                ),
+                notification = notification,
                 time = notificationTime
             )
 
+            scheduledNotifications.add(notification)
+
             notificationTime = notificationTime.plus(intervalDuration)
-            Log.e("DrinkReminderWorker", notificationTime.toString())
+            //Log.e("DrinkReminderWorker", notificationTime.toString())
         }
+    }
+
+    private fun cancelScheduledNotifications() {
+        for (notification in scheduledNotifications) {
+            notificationService.cancel(notification)
+        }
+
+        scheduledNotifications.clear()
     }
 }
 

@@ -19,7 +19,11 @@ class NotificationReceiver : BroadcastReceiver() {
         context: Context,
         intent: Intent
     ) {
+        val id = intent.getIntExtra("notificationId", 0)
         val channelId = intent.getStringExtra("notificationChannelId") ?: ""
+        val title = intent.getStringExtra("notificationTitle") ?: ""
+        val text = intent.getStringExtra("notificationText") ?: ""
+
         val channel = NotificationChannel.fromChannelId(channelId)
         if (channel == NotificationChannel.UNKNOWN) {
             throw Exception("Unknown notification channel id")
@@ -27,9 +31,10 @@ class NotificationReceiver : BroadcastReceiver() {
 
         notificationService.show(
             notification = Notification(
+                id = id,
                 channel = channel,
-                title = intent.getStringExtra("notificationTitle") ?: "",
-                text = intent.getStringExtra("notificationText") ?: ""
+                title = title,
+                text = text
             )
         )
     }
