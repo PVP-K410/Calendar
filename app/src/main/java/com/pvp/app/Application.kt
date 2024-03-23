@@ -2,15 +2,22 @@ package com.pvp.app
 
 import android.app.Application
 import android.app.NotificationManager
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.pvp.app.common.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.service.DrinkReminderWorker
+import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import dagger.hilt.android.HiltAndroidApp
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -19,12 +26,38 @@ class Application : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
-    
+
+    @Inject
+    lateinit var workManager: WorkManager
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(Log.DEBUG)
+            .build()
+
     override fun onCreate() {
         super.onCreate()
 
-        createNotificationChannels()
         createDrinkReminderWorker()
+
+        createNotificationChannels()
+
+        createTaskPointsDeductionWorker()
+    }
+
+    private fun createDrinkReminderWorker() {
+        val drinkWorkerRequest = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
+            repeatInterval = 1,
+            repeatIntervalTimeUnit = TimeUnit.DAYS
+        )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            DrinkReminderWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            drinkWorkerRequest
+        )
     }
 
     private fun createNotificationChannels() {
@@ -43,25 +76,29 @@ class Application : Application(), Configuration.Provider {
         }
     }
 
-    private fun createDrinkReminderWorker() {
-        val drinkWorkerRequest = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
-            repeatInterval = 1,
-            repeatIntervalTimeUnit = TimeUnit.DAYS
-        )
-            .build()
+    private fun createTaskPointsDeductionWorker() {
+        val now = LocalDateTime.now()
 
-        WorkManager
-            .getInstance(this)
-            .enqueueUniquePeriodicWork(
-                DrinkReminderWorker.WORKER_NAME,
-                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-                drinkWorkerRequest
+        val target = now
+            .plusDays(1)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
+
+        val delay = target.toEpochSecondTimeZoned() - now.toEpochSecondTimeZoned()
+
+        val requestOneTime = OneTimeWorkRequestBuilder<TaskPointsDeductionWorkerSetup>()
+            .setInitialDelay(
+                Duration.of(
+                    delay,
+                    ChronoUnit.SECONDS
+                )
             )
-    }
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .setMinimumLoggingLevel(android.util.Log.DEBUG)
             .build()
+
+        workManager
+            .beginWith(requestOneTime)
+            .enqueue()
+    }
 }
