@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -70,6 +72,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.TemporalAdjusters
+import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
 @Composable
@@ -89,6 +92,51 @@ private fun ButtonTaskSelector(
         Text(
             style = MaterialTheme.typography.labelLarge,
             text = text
+        )
+    }
+}
+
+@Composable
+fun CalorieCounter(
+    model: CalendarWeeklyViewModel = hiltViewModel(),
+    date: LocalDate
+) {
+    var calories by remember { mutableDoubleStateOf(0.0) }
+    var launcherTriggered by remember { mutableStateOf<Boolean>(false) }
+
+    val permissionContract = PermissionController.createRequestPermissionResultContract()
+
+    val launcher =
+        rememberLauncherForActivityResult(permissionContract) {
+            launcherTriggered = !launcherTriggered
+        }
+
+    LaunchedEffect(date, launcherTriggered) {
+        if (model.permissionsGranted()) {
+            calories = model.getDaysCaloriesTotal(date)
+
+        } else {
+            launcher.launch(PERMISSIONS)
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .padding(6.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.LocalFireDepartment,
+            contentDescription = "Calories"
+        )
+
+        Text(
+            text = "${(calories / 1000).roundToInt()} kCal",
+            style = MaterialTheme.typography.titleSmall,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(start = 8.dp)
         )
     }
 }
@@ -209,7 +257,7 @@ fun Day(
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .size(
-                    height = 250.dp,
+                    height = 280.dp,
                     width = 300.dp
                 )
                 .border(
@@ -255,7 +303,13 @@ fun Day(
                             .padding(16.dp)
                     )
 
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     StepCounter(date = date)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    CalorieCounter(date = date)
                 }
             }
         }
@@ -295,7 +349,9 @@ fun Day(
                                     fontStyle = FontStyle.Italic,
                                     modifier = Modifier.padding(32.dp),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    text = "No ${selectedFilter.toString().toLowerCase()} tasks have been setup for this day"
+                                    text = "No ${
+                                        selectedFilter.toString().toLowerCase()
+                                    } tasks have been setup for this day"
                                 )
                             }
                         }
@@ -362,7 +418,7 @@ fun StepCounter(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
     ) {
         val backgroundArcColor = MaterialTheme.colorScheme.primaryContainer
         val progressArcColor = MaterialTheme.colorScheme.primary
