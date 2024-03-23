@@ -2,6 +2,7 @@ package com.pvp.app.service
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
@@ -13,6 +14,7 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -27,6 +29,7 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 class TaskServiceImpl @Inject constructor(
+    private val configuration: Configuration,
     private val database: FirebaseFirestore,
     private val pointService: PointService,
     private val userService: UserService
@@ -53,20 +56,34 @@ class TaskServiceImpl @Inject constructor(
         if (
             task.points.expired && (
                     task.scheduledAt.year != now.year ||
-                            task.scheduledAt.dayOfYear < now.dayOfYear - 2 ||
+                            task.scheduledAt.dayOfYear < (now.dayOfYear -
+                            configuration.limitPointsReclaimDays) ||
                             task.scheduledAt.dayOfYear > now.dayOfYear
                     )
         ) {
             return
         }
 
-        /**
-         * TODO: Check if there are any other deducted re-claimed tasks in the same day.
-         * No more than [Configuration.limitPointsDeduction] points can be reclaimed.
-         * If this is over the limit, return.
-         */
+        val tasksReclaimed = get(task.userEmail)
+            .map {
+                val date = task.scheduledAt.toLocalDate()
 
-        val pointsReclaimed = (if (task.points.expired) 1 else 0)
+                it
+                    .filter { t ->
+                        t.scheduledAt
+                            .toLocalDate()
+                            .isEqual(date)
+                    }
+                    .filter { t -> t.points.claimedAt != null }
+                    .filter { t -> t.points.expired }
+            }
+            .first().size
+
+        if (tasksReclaimed >= configuration.limitPointsDeduction) {
+            return
+        }
+
+        val reclaimPoints = (if (task.points.expired) 1 else 0)
 
         task.points = task.points.copy(
             claimedAt = now
@@ -78,7 +95,7 @@ class TaskServiceImpl @Inject constructor(
             ?.let { user ->
                 userService.merge(
                     user.copy(
-                        points = user.points + task.points.value + pointsReclaimed
+                        points = user.points + task.points.value + reclaimPoints
                     )
                 )
             }

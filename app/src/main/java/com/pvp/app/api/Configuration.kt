@@ -13,6 +13,12 @@ interface Configuration {
     val limitPointsDeduction: Int
 
     /**
+     * Limit of days within which the user can reclaim task points by marking the task as completed.
+     * If the task is not marked as completed within this limit, the points are lost and never gain.
+     */
+    val limitPointsReclaimDays: Int
+
+    /**
      * Height values for the user to select from.
      */
     val rangeHeight: List<Int>
