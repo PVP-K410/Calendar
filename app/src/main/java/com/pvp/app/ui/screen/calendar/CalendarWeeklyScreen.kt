@@ -102,8 +102,7 @@ fun CalorieCounter(
     date: LocalDate
 ) {
     var calories by remember { mutableDoubleStateOf(0.0) }
-    var launcherTriggered by remember { mutableStateOf<Boolean>(false) }
-
+    var launcherTriggered by remember { mutableStateOf(false) }
     val permissionContract = PermissionController.createRequestPermissionResultContract()
 
     val launcher =
@@ -114,7 +113,6 @@ fun CalorieCounter(
     LaunchedEffect(date, launcherTriggered) {
         if (model.permissionsGranted()) {
             calories = model.getDaysCaloriesTotal(date)
-
         } else {
             launcher.launch(PERMISSIONS)
         }

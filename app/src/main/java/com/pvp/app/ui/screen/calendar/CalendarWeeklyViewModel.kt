@@ -83,6 +83,7 @@ class CalendarWeeklyViewModel @Inject constructor(
 
     suspend fun getDaysCaloriesActive(date: LocalDate): Double {
         val end = getEndInstant(date)
+
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
@@ -95,6 +96,7 @@ class CalendarWeeklyViewModel @Inject constructor(
 
     suspend fun getDaysCaloriesTotal(date: LocalDate): Double {
         val end = getEndInstant(date)
+
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
@@ -122,7 +124,12 @@ class CalendarWeeklyViewModel @Inject constructor(
 
     private fun getEndInstant(date: LocalDate): Instant {
         return if (date.isEqual(LocalDate.now())) {
-            ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()).toInstant()
+            ZonedDateTime
+                .of(
+                    LocalDateTime.now(),
+                    ZoneId.systemDefault()
+                )
+                .toInstant()
         } else {
             date
                 .plusDays(1)
