@@ -1,9 +1,11 @@
 package com.pvp.app.service
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.UserService
@@ -26,7 +28,8 @@ class DrinkReminderWorker @AssistedInject constructor(
     @Assisted workerParams: WorkerParameters,
     private val notificationService: NotificationService,
     private val settingService: SettingService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val configuration: Configuration
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
@@ -76,29 +79,33 @@ class DrinkReminderWorker @AssistedInject constructor(
         val recommendedIntake = mass * 30
         val nbOfReminders = recommendedIntake / cupVolume
 
-        val startHour = 8
-        val endHour = 22
-        val totalDuration = Duration.ofHours(endHour.toLong() - startHour.toLong())
+        val startHour = configuration.intervalDrinkReminder.first
+        val endHour = configuration.intervalDrinkReminder.second
+        val totalDuration = Duration.ofHours((endHour - startHour).toLong())
         val intervalDuration = totalDuration.dividedBy(nbOfReminders.toLong())
 
         var notificationTime = LocalTime.of(startHour, 0)
 
         repeat(nbOfReminders) {
+            val progress = (it + 1) * cupVolume
+
             val notification = Notification(
                 channel = NotificationChannel.DrinkReminder,
                 title = "Water Drinking Reminder",
-                text = "It's time to drink a cup of water!"
+                text = "It's time to drink a cup ($cupVolume ml) of water! " +
+                        "Today's progress: " +
+                        "${"%.2f".format(progress / 1000.0)} l out of " +
+                        "${"%.2f".format(recommendedIntake / 1000.0)} l"
             )
 
+            scheduledNotifications.add(notification)
             notificationService.post(
                 notification = notification,
                 time = notificationTime
             )
 
-            scheduledNotifications.add(notification)
-
+            Log.e("DrinkReminderWorker", notificationTime.toString())
             notificationTime = notificationTime.plus(intervalDuration)
-            //Log.e("DrinkReminderWorker", notificationTime.toString())
         }
     }
 

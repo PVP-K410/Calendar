@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -64,7 +63,6 @@ class NotificationServiceImpl @Inject constructor(
         triggerAtMillis: Long
     ) {
         if (triggerAtMillis <= System.currentTimeMillis()) {
-            Log.d("postNotification", "Notification trigger time is in the past, skipping.")
             return
         }
 

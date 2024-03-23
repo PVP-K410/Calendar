@@ -148,24 +148,25 @@ class TaskViewModel @Inject constructor(
 
     private suspend fun Task.postNotification() {
         val reminderMinutes = state.first().reminderMinutes.toLong()
-        val delay = Duration.between(
-            LocalDateTime.now(),
-            scheduledAt
-        )
+        val reminderDateTime = scheduledAt
+            .withSecond(0)
+            .withNano(0)
             .minusMinutes(reminderMinutes)
-            .takeIf {
-                !it.isNegative && !it.isZero
-            } ?: return
+
+        if (reminderDateTime.isBefore(LocalDateTime.now())) {
+            return
+        }
 
         val notification = Notification(
             channel = NotificationChannel.TaskReminder,
             title = "Task Reminder",
-            text = "'${title}' is in $reminderMinutes minute${if (reminderMinutes > 1) "s" else ""}..."
+            text = "Task '${title}' is in $reminderMinutes minute" +
+                    "${if (reminderMinutes > 1) "s" else ""}..."
         )
-
+        
         notificationService.post(
             notification = notification,
-            delay = delay
+            dateTime = reminderDateTime
         )
     }
 

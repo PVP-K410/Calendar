@@ -13,4 +13,12 @@ class ConfigurationImpl @Inject constructor() : Configuration {
 
     override val rangeMass: List<Int> = (5..500)
         .toList()
+
+    override val rangeReminderMinutes: List<Int> = (1..120)
+        .toList()
+
+    override val rangeCupVolume: List<Int> = (100..500)
+        .toList()
+
+    override val intervalDrinkReminder: Pair<Int, Int> = Pair(8, 22)
 }

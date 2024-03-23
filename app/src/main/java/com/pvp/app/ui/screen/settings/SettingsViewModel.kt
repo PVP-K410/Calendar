@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.SettingService
 import com.pvp.app.model.Setting
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    private val configuration: Configuration,
     private val settingService: SettingService
 ) : ViewModel() {
 
@@ -33,5 +35,9 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingService.merge(setting, value)
         }
+    }
+
+    fun <T> fromConfiguration(function: (Configuration) -> T): T {
+        return function(configuration)
     }
 }
