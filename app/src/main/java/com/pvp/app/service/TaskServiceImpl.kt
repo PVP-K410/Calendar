@@ -2,6 +2,8 @@ package com.pvp.app.service
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
+import com.pvp.app.api.Configuration
+import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
@@ -13,6 +15,7 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -23,11 +26,14 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 
 class TaskServiceImpl @Inject constructor(
+    private val configuration: Configuration,
     private val database: FirebaseFirestore,
+    private val experienceService: ExperienceService,
     private val pointService: PointService,
     private val userService: UserService
 ) : TaskService {
@@ -48,17 +54,55 @@ class TaskServiceImpl @Inject constructor(
             error("Task points are already claimed")
         }
 
+        val now = LocalDateTime.now()
+
+        if (
+            task.points.isExpired && (
+                    task.scheduledAt.year != now.year ||
+                            task.scheduledAt.dayOfYear < (now.dayOfYear -
+                            configuration.limitPointsReclaimDays) ||
+                            task.scheduledAt.dayOfYear > now.dayOfYear
+                    )
+        ) {
+            return
+        }
+
+        val tasksReclaimed = get(task.userEmail)
+            .map {
+                val date = task.scheduledAt.toLocalDate()
+
+                it
+                    .filter { t ->
+                        t.scheduledAt
+                            .toLocalDate()
+                            .isEqual(date)
+                    }
+                    .filter { t -> t.points.claimedAt != null }
+                    .filter { t -> t.points.isExpired }
+            }
+            .first().size
+
+        if (tasksReclaimed >= configuration.limitPointsDeduction) {
+            return
+        }
+
         task.points = task.points.copy(
-            claimedAt = LocalDateTime.now()
+            claimedAt = now
         )
 
         userService
             .get(task.userEmail)
             .firstOrNull()
             ?.let { user ->
+                val points = task.points.value + (if (task.points.isExpired) 1 else 0)
+                val experience = user.experience + points
+                val level = experienceService.levelOf(experience)
+
                 userService.merge(
                     user.copy(
-                        points = user.points + task.points.value
+                        experience = experience,
+                        level = level,
+                        points = user.points + points
                     )
                 )
             }
@@ -89,6 +133,9 @@ class TaskServiceImpl @Inject constructor(
         )
 
         task.points = task.points.copy(
+            isExpired = task.scheduledAt
+                .toLocalDate()
+                .isBefore(LocalDate.now()),
             value = pointService.calculate(task)
         )
 
@@ -134,6 +181,9 @@ class TaskServiceImpl @Inject constructor(
         )
 
         task.points = task.points.copy(
+            isExpired = task.scheduledAt
+                .toLocalDate()
+                .isBefore(LocalDate.now()),
             value = pointService.calculate(task)
         )
 
@@ -176,6 +226,9 @@ class TaskServiceImpl @Inject constructor(
         )
 
         task.points = task.points.copy(
+            isExpired = task.scheduledAt
+                .toLocalDate()
+                .isBefore(LocalDate.now()),
             value = pointService.calculate(task)
         )
 

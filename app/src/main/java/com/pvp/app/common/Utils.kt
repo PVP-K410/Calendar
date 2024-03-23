@@ -9,6 +9,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.pvp.app.model.SportActivity
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * Parses Duration object to a string
@@ -60,4 +62,12 @@ fun List<SportActivity>.getOccurences(): List<Pair<SportActivity, Int>> {
         .eachCount()
         .toList()
         .sortedByDescending { it.second }
+}
+
+fun LocalDateTime.toEpochSecondTimeZoned(): Long {
+    return toEpochSecond(
+        ZoneId
+            .systemDefault().rules
+            .getOffset(this)
+    )
 }
