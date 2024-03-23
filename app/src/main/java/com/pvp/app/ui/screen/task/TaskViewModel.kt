@@ -163,7 +163,7 @@ class TaskViewModel @Inject constructor(
             text = "Task '${title}' is in $reminderMinutes minute" +
                     "${if (reminderMinutes > 1) "s" else ""}..."
         )
-        
+
         notificationService.post(
             notification = notification,
             dateTime = reminderDateTime
