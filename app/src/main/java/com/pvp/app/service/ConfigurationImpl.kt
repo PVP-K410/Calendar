@@ -23,6 +23,5 @@ class ConfigurationImpl @Inject constructor() : Configuration {
         .toList()
 
     override val intervalDrinkReminder: Pair<Int, Int> = Pair(8, 22)
-
     override val intervalUsernameLength: Pair<Int, Int> = Pair(3, 18)
 }

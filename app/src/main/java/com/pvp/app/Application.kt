@@ -12,7 +12,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.pvp.app.common.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
-import com.pvp.app.service.DrinkReminderWorker
+import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import dagger.hilt.android.HiltAndroidApp
 import java.time.Duration

@@ -283,7 +283,6 @@ private fun ProfileHeader(
                     fontSize = 28.sp
                 )
 
-
                 IconButtonWithDialog(
                     modifier = Modifier
                         .padding(
@@ -314,6 +313,7 @@ private fun ProfileHeader(
                     },
                     onConfirmClick = {
                         userNameEditing = userNameEditing.trim()
+                        
                         val length = userNameEditing.length
 
                         if (length in minLength..maxLength) {
