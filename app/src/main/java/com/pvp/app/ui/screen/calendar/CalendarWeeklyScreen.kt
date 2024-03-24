@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,8 +29,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DirectionsRun
+import androidx.compose.material.icons.outlined.LibraryBooks
 import androidx.compose.material.icons.outlined.LocalFireDepartment
+import androidx.compose.material.icons.outlined.MonitorHeart
+import androidx.compose.material.icons.outlined.Nightlight
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +79,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.TemporalAdjusters
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
@@ -118,25 +126,17 @@ fun CalorieCounter(
         }
     }
 
-    Row(
-        modifier = Modifier
-            .padding(6.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.LocalFireDepartment,
-            contentDescription = "Calories"
-        )
+    Icon(
+        imageVector = Icons.Outlined.LocalFireDepartment,
+        contentDescription = "Calories",
+        modifier = Modifier.size(26.dp)
+    )
 
-        Text(
-            text = "${(calories / 1000).roundToInt()} kCal",
-            style = MaterialTheme.typography.titleSmall,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(start = 8.dp)
-        )
-    }
+    Text(
+        text = "${(calories / 1000).roundToInt()} kCal",
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(start = 8.dp)
+    )
 }
 
 @Composable
@@ -255,8 +255,8 @@ fun Day(
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .size(
-                    height = 280.dp,
-                    width = 300.dp
+                    height = 180.dp,
+                    width = 200.dp
                 )
                 .border(
                     BorderStroke(
@@ -290,24 +290,14 @@ fun Day(
                     )
                 }
 
-                if (!date.isEqual(LocalDate.MIN) && !date.isAfter(LocalDate.now())) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = "Steps of the day",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontSize = 20.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
+                        text = date.dayOfMonth.toString(),
+                        fontSize = 50.sp
                     )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    StepCounter(date = date)
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    CalorieCounter(date = date)
                 }
             }
         }
@@ -324,7 +314,7 @@ fun Day(
                     shouldCloseOnSubmit = true
                 )
             } else {
-                Spacer(modifier = Modifier.padding(8.dp))
+                Spacer(modifier = Modifier.padding(16.dp))
 
                 TaskFilterBar(selectedFilter) { filter ->
                     selectedFilter = filter
@@ -347,9 +337,7 @@ fun Day(
                                     fontStyle = FontStyle.Italic,
                                     modifier = Modifier.padding(32.dp),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    text = "No ${
-                                        selectedFilter.toString().toLowerCase()
-                                    } tasks have been setup for this day"
+                                    text = "No ${selectedFilter.toString().toLowerCase()} tasks have been setup for this day"
                                 )
                             }
                         }
@@ -362,7 +350,198 @@ fun Day(
                     }
                 }
             }
+        } else {
+            if (!date.isEqual(LocalDate.MIN) && !date.isAfter(LocalDate.now())) {
+                ActivitiesBox(
+                    date = date,
+                    tasks = tasks
+                )
+            }
         }
+    }
+}
+
+@Composable
+fun ActivitiesBox(
+    date: LocalDate,
+    tasks: List<Task>
+) {
+    Spacer(modifier = Modifier.padding(16.dp))
+
+    Box(
+        modifier = Modifier.size(
+            height = 270.dp,
+            width = 300.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            ActivityBox(
+                modifier = Modifier.fillMaxWidth(),
+                columnModifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    fontSize = 18.sp,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    text = "Today's tasks"
+                )
+
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(
+                            top = 2.dp,
+                            bottom = 12.dp
+                        )
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    //TodaysTasks(Icons.Outlined.Event, tasks, Daily::class) // TODO uncomment when Daily tasks are implemented
+                    TodaysTasks(Icons.Outlined.LibraryBooks, tasks, Task::class)
+                    TodaysTasks(Icons.Outlined.DirectionsRun, tasks, SportTask::class)
+                    TodaysTasks(Icons.Outlined.Restaurant, tasks, MealTask::class)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                ActivityBox(
+                    modifier = Modifier.weight(1f),
+                    columnModifier = Modifier.fillMaxSize()
+                ) {
+                    Text(
+                        text = "Steps of the day",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp)
+                    )
+
+                    StepCounter(date = date)
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                ActivityBox(
+                    modifier = Modifier.weight(1f),
+                    columnModifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    ActivityRow {
+                        CalorieCounter(date = date)
+                    }
+
+                    ActivityRow {
+                        Icon(
+                            imageVector = Icons.Outlined.MonitorHeart,
+                            contentDescription = null,
+                            modifier = Modifier.size(26.dp)
+                        )
+
+                        Text(
+                            text = "0",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+
+                    ActivityRow {
+                        Icon(
+                            imageVector = Icons.Outlined.Nightlight,
+                            contentDescription = null,
+                            modifier = Modifier.size(26.dp)
+                        )
+
+                        Text(
+                            text = "0 hr 0 m",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TodaysTasks(
+    icon: ImageVector,
+    tasks: List<Task>,
+    taskCategory: KClass<out Task>
+) {
+    val tasksOfCategory = tasks.filter { it::class == taskCategory }
+    val completedTasks = tasksOfCategory.filter { it.isCompleted }
+
+    val text = if (tasksOfCategory.isEmpty()) {
+        "-"
+    } else {
+        "${completedTasks.size}/${tasksOfCategory.size}"
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null
+        )
+
+        Text(text = text)
+    }
+}
+
+@Composable
+fun ActivityBox(
+    modifier: Modifier = Modifier,
+    columnModifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(
+                MaterialTheme.colorScheme.surface,
+                MaterialTheme.shapes.small
+            )
+            .border(
+                BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.outline
+                ),
+                shape = RoundedCornerShape(10.dp)
+            )
+    ) {
+        Column(
+            modifier = columnModifier,
+            verticalArrangement = verticalArrangement,
+            content = content
+        )
+    }
+}
+
+@Composable
+fun ActivityRow(content: @Composable () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        content()
     }
 }
 
@@ -416,19 +595,26 @@ fun StepCounter(
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxSize(fraction = 1f)
+            .padding(bottom = 4.dp)
     ) {
         val backgroundArcColor = MaterialTheme.colorScheme.primaryContainer
         val progressArcColor = MaterialTheme.colorScheme.primary
 
-        Canvas(modifier = Modifier.size(100.dp)) {
+        Canvas(modifier = Modifier.fillMaxSize(fraction = 1f)) {
             val strokeWidth = 6.dp.toPx()
-            val radius = 300f
+            val radius = min(size.width, size.height) / 2 - strokeWidth
+
             val topLeft = Offset(
-                (size.width / 2) - (radius / 2),
-                (size.height / 2) - (radius / 2)
+                (size.width / 2) - radius,
+                (size.height / 2) - radius
             )
-            val size = Size(radius, radius)
+
+            val size = Size(
+                radius * 2,
+                radius * 2
+            )
 
             drawArc(
                 color = backgroundArcColor,
@@ -460,7 +646,6 @@ fun StepCounter(
         Text(
             text = steps.toString(),
             style = MaterialTheme.typography.titleSmall,
-            fontSize = 20.sp,
             textAlign = TextAlign.Center
         )
     }
