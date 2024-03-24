@@ -36,7 +36,6 @@ import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.Nightlight
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Restaurant
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -371,7 +370,7 @@ fun ActivitiesBox(
 
     Box(
         modifier = Modifier.size(
-            height = 250.dp,
+            height = 270.dp,
             width = 300.dp
         )
     ) {
@@ -382,14 +381,13 @@ fun ActivitiesBox(
                 modifier = Modifier.fillMaxWidth(),
                 columnModifier = Modifier.padding(16.dp)
             ) {
-
                 Text(
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    text = "Todays tasks"
+                    text = "Today's tasks"
                 )
 
-                Divider(
+                HorizontalDivider(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -409,10 +407,9 @@ fun ActivitiesBox(
                     TodaysTasks(Icons.Outlined.DirectionsRun, tasks, SportTask::class)
                     TodaysTasks(Icons.Outlined.Restaurant, tasks, MealTask::class)
                 }
-
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Row(
                 modifier = Modifier
@@ -434,7 +431,6 @@ fun ActivitiesBox(
                     )
 
                     StepCounter(date = date)
-
                 }
 
                 Spacer(modifier = Modifier.width(4.dp))
@@ -454,6 +450,7 @@ fun ActivitiesBox(
                             contentDescription = null,
                             modifier = Modifier.size(26.dp)
                         )
+
                         Text(
                             text = "0",
                             style = MaterialTheme.typography.titleSmall,
@@ -467,13 +464,13 @@ fun ActivitiesBox(
                             contentDescription = null,
                             modifier = Modifier.size(26.dp)
                         )
+
                         Text(
                             text = "0 hr 0 m",
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
-
                 }
             }
         }
@@ -488,8 +485,12 @@ fun TodaysTasks(
 ) {
     val tasksOfCategory = tasks.filter { it::class == taskCategory }
     val completedTasks = tasksOfCategory.filter { it.isCompleted }
-    val text =
-        if (tasksOfCategory.isEmpty()) "-" else "${completedTasks.size}/${tasksOfCategory.size}"
+
+    val text = if (tasksOfCategory.isEmpty()) {
+        "-"
+    } else {
+        "${completedTasks.size}/${tasksOfCategory.size}"
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -498,6 +499,7 @@ fun TodaysTasks(
             imageVector = icon,
             contentDescription = null
         )
+
         Text(text = text)
     }
 }
@@ -603,11 +605,16 @@ fun StepCounter(
         Canvas(modifier = Modifier.fillMaxSize(fraction = 1f)) {
             val strokeWidth = 6.dp.toPx()
             val radius = min(size.width, size.height) / 2 - strokeWidth
+
             val topLeft = Offset(
                 (size.width / 2) - radius,
                 (size.height / 2) - radius
             )
-            val size = Size(radius * 2, radius * 2)
+
+            val size = Size(
+                radius * 2,
+                radius * 2
+            )
 
             drawArc(
                 color = backgroundArcColor,
