@@ -131,6 +131,7 @@ dependencies {
     implementation("com.caverock:androidsvg-aar:1.4")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.google.dagger:hilt-android:2.51")
     implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
     implementation("com.google.firebase:firebase-analytics")

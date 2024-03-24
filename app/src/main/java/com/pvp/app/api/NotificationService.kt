@@ -33,9 +33,18 @@ interface NotificationService {
 
     /**
      * Cancels a scheduled notification.
+     * @param notification The notification to cancel.
      */
     fun cancel(
         notification: Notification
+    )
+
+    /**
+     * Cancels a scheduled notification by its ID.
+     * @param id The ID of the notification to cancel.
+     */
+    fun cancel(
+        id: Int
     )
 
     /**

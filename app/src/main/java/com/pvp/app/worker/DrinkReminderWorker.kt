@@ -1,10 +1,11 @@
 package com.pvp.app.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.google.common.reflect.TypeToken
+import com.google.gson.Gson
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
@@ -16,14 +17,14 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.Duration
 import java.time.LocalTime
-import kotlin.coroutines.cancellation.CancellationException
+
+private const val PREFS_NAME = "CalendarPrefs"
+private const val NOTIFICATION_IDS_KEY = "notification_ids"
 
 @HiltWorker
 class DrinkReminderWorker @AssistedInject constructor(
@@ -44,31 +45,18 @@ class DrinkReminderWorker @AssistedInject constructor(
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val scheduledNotifications = mutableListOf<Notification>()
+    private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private var scheduledNotificationIds = mutableListOf<Int>()
 
-    override suspend fun doWork(): Result {
-        return coroutineScope {
-            val job = async {
-                initializeReminderListener()
-            }
-
-            job.invokeOnCompletion { exception: Throwable? ->
-                when (exception) {
-                    is CancellationException -> {
-                        Log.e("DrinkReminderWorker", "Cleanup on completion", exception)
-                        cancelScheduledNotifications()
-                    }
-
-                    else -> {
-                        cancelScheduledNotifications()
-                    }
-                }
-            }
-
-            job.await()
-        }
+    init {
+        scheduledNotificationIds = getScheduledNotificationIds()
     }
 
+    override suspend fun doWork(): Result {
+        initializeReminderListener()
+
+        return Result.success()
+    }
 
     private suspend fun initializeReminderListener(): Result {
         val stateFlow = settingService
@@ -121,7 +109,7 @@ class DrinkReminderWorker @AssistedInject constructor(
                         "${"%.1f".format(recommendedIntake / 1000.0)} liters"
             )
 
-            scheduledNotifications.add(notification)
+            scheduledNotificationIds.add(notification.id)
 
             notificationService.post(
                 notification = notification,
@@ -130,14 +118,49 @@ class DrinkReminderWorker @AssistedInject constructor(
 
             notificationTime = notificationTime.plus(intervalDuration)
         }
+
+        saveScheduledNotificationIds()
     }
 
     private fun cancelScheduledNotifications() {
-        for (notification in scheduledNotifications) {
-            notificationService.cancel(notification)
+        for (notificationId in scheduledNotificationIds) {
+            notificationService.cancel(notificationId)
         }
 
-        scheduledNotifications.clear()
+        scheduledNotificationIds.clear()
+        saveScheduledNotificationIds()
+    }
+
+    private fun saveScheduledNotificationIds() {
+        val notificationIdsJson = Gson().toJson(scheduledNotificationIds)
+
+        sharedPreferences
+            .edit()
+            .putString(
+                NOTIFICATION_IDS_KEY,
+                notificationIdsJson
+            ).apply()
+    }
+
+    private fun getScheduledNotificationIds(): MutableList<Int> {
+        val ids = mutableListOf<Int>()
+
+        val notificationIdsJson = sharedPreferences
+            .getString(
+                NOTIFICATION_IDS_KEY,
+                null
+            )
+
+        notificationIdsJson?.let {
+            ids.addAll(
+                Gson().fromJson(
+                    it,
+                    object : TypeToken<List<Int>>() {}.type
+                )
+            )
+        }
+
+        return ids
     }
 }
 

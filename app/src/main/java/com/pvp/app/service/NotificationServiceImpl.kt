@@ -102,7 +102,7 @@ class NotificationServiceImpl @Inject constructor(
             context,
             notification.id,
             intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
 
         val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -163,6 +163,18 @@ class NotificationServiceImpl @Inject constructor(
     override fun cancel(
         notification: Notification
     ) {
+        cancelNotification(id = notification.id)
+    }
+
+    override fun cancel(
+        id: Int
+    ) {
+        cancelNotification(id = id)
+    }
+
+    private fun cancelNotification(
+        id: Int
+    ) {
         val intent = Intent(
             context,
             NotificationReceiver::class.java
@@ -170,9 +182,9 @@ class NotificationServiceImpl @Inject constructor(
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            notification.id,
+            id,
             intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
 
         pendingIntent?.let {
