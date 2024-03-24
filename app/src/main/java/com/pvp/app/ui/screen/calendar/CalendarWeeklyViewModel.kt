@@ -2,8 +2,11 @@ package com.pvp.app.ui.screen.calendar
 
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.HealthConnectService
@@ -21,9 +24,11 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.temporal.IsoFields
 import javax.inject.Inject
 
@@ -76,6 +81,32 @@ class CalendarWeeklyViewModel @Inject constructor(
         return granted.containsAll(PERMISSIONS)
     }
 
+    suspend fun getDaysCaloriesActive(date: LocalDate): Double {
+        val end = getEndInstant(date)
+
+        val start = date
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return healthConnectService.aggregateActiveCalories(
+            start,
+            end
+        )
+    }
+
+    suspend fun getDaysCaloriesTotal(date: LocalDate): Double {
+        val end = getEndInstant(date)
+
+        val start = date
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return healthConnectService.aggregateTotalCalories(
+            start,
+            end
+        )
+    }
+
     suspend fun getDaysSteps(date: LocalDate): Long {
         val end = date
             .plusDays(1)
@@ -90,6 +121,22 @@ class CalendarWeeklyViewModel @Inject constructor(
             end
         )
     }
+
+    private fun getEndInstant(date: LocalDate): Instant {
+        return if (date.isEqual(LocalDate.now())) {
+            ZonedDateTime
+                .of(
+                    LocalDateTime.now(),
+                    ZoneId.systemDefault()
+                )
+                .toInstant()
+        } else {
+            date
+                .plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+        }
+    }
 }
 
 data class CalendarState(
@@ -99,6 +146,9 @@ data class CalendarState(
 )
 
 val PERMISSIONS = setOf(
+    HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
+    HealthPermission.getReadPermission(DistanceRecord::class),
+    HealthPermission.getReadPermission(ExerciseSessionRecord::class),
     HealthPermission.getReadPermission(StepsRecord::class),
-    HealthPermission.getReadPermission(ExerciseSessionRecord::class)
+    HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class)
 )

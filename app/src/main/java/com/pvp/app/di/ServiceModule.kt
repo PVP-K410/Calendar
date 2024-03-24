@@ -2,15 +2,19 @@ package com.pvp.app.di
 
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.NotificationService
+import com.pvp.app.api.PointService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.service.AuthenticationServiceImpl
 import com.pvp.app.service.ConfigurationImpl
+import com.pvp.app.service.ExerciseServiceImpl
 import com.pvp.app.service.HealthConnectServiceImpl
 import com.pvp.app.service.NotificationServiceImpl
+import com.pvp.app.service.PointServiceImpl
 import com.pvp.app.service.SettingServiceImpl
 import com.pvp.app.service.TaskServiceImpl
 import com.pvp.app.service.UserServiceImpl
@@ -38,7 +42,15 @@ interface ServiceModule {
 
     @Binds
     @Singleton
+    fun bindExerciseService(service: ExerciseServiceImpl): ExerciseService
+
+    @Binds
+    @Singleton
     fun bindNotificationService(service: NotificationServiceImpl): NotificationService
+
+    @Binds
+    @Singleton
+    fun bindPointService(service: PointServiceImpl): PointService
 
     @Binds
     @Singleton

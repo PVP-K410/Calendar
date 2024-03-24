@@ -11,6 +11,8 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
@@ -31,86 +33,88 @@ private fun colorsToPairs(
 fun Modifier.backgroundGradientRadial(
     colors: List<Color> = BackgroundGradientDefault,
     radius: Float = 1500.0f,
+    shape: Shape = RectangleShape,
     tileMode: TileMode = TileMode.Repeated
-): Modifier {
-    return background(
-        Brush.radialGradient(
-            colorStops = colorsToPairs(colors, radius),
-            radius = radius,
-            tileMode = tileMode
-        )
-    )
-}
+): Modifier = this.background(
+    brush = Brush.radialGradient(
+        colorStops = colorsToPairs(colors, radius),
+        radius = radius,
+        tileMode = tileMode
+    ),
+    shape = shape
+)
 
 fun Modifier.backgroundGradientLinear(
     colors: List<Color> = BackgroundGradientDefault,
     end: Offset = Offset.Infinite,
+    shape: Shape = RectangleShape,
     start: Offset = Offset.Zero
-): Modifier {
-    return background(
-        Brush.linearGradient(
-            colorStops = colorsToPairs(colors),
-            start = start,
-            end = end
-        )
-    )
-}
+): Modifier = this.background(
+    brush = Brush.linearGradient(
+        colorStops = colorsToPairs(colors),
+        end = end,
+        start = start
+    ),
+    shape = shape
+)
 
 fun Modifier.backgroundGradientHorizontal(
     colors: List<Color> = BackgroundGradientDefault,
     end: Float = 1000.0f,
+    shape: Shape = RectangleShape,
     start: Float = 0.0f
-): Modifier {
-    return background(
-        Brush.horizontalGradient(
-            colorStops = colorsToPairs(colors),
-            startX = start,
-            endX = end
-        )
-    )
-}
+): Modifier = this.background(
+    brush = Brush.horizontalGradient(
+        colorStops = colorsToPairs(colors),
+        endX = end,
+        startX = start
+    ),
+    shape = shape
+)
 
 fun Modifier.backgroundGradientVertical(
     colors: List<Color> = BackgroundGradientDefault,
     end: Float = 1500.0f,
+    shape: Shape = RectangleShape,
     start: Float = 0.0f
-): Modifier {
-    return background(
-        Brush.verticalGradient(
-            colorStops = colorsToPairs(colors),
-            startY = start,
-            endY = end
-        )
-    )
-}
+): Modifier = this.background(
+    brush = Brush.verticalGradient(
+        colorStops = colorsToPairs(colors),
+        endY = end,
+        startY = start
+    ),
+    shape = shape
+)
 
-fun Modifier.fadingEdge(brush: Brush) = this
+fun Modifier.fadingEdge(
+    brush: Brush
+) = this
     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
     .drawWithContent {
         drawContent()
+
         drawRect(
-            brush = brush,
-            blendMode = BlendMode.DstIn
+            blendMode = BlendMode.DstIn,
+            brush = brush
         )
     }
 
 @Composable
 fun Modifier.underline(
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer
-): Modifier = this
-    .drawBehind {
-        val verticalOffset = size.height - 2.sp.toPx()
+): Modifier = this.drawBehind {
+    val verticalOffset = size.height - 2.sp.toPx()
 
-        drawLine(
-            color = color,
-            strokeWidth = 1.dp.toPx(),
-            start = Offset(
-                0f,
-                verticalOffset
-            ),
-            end = Offset(
-                size.width,
-                verticalOffset
-            )
-        )
-    }
+    drawLine(
+        color = color,
+        end = Offset(
+            size.width,
+            verticalOffset
+        ),
+        start = Offset(
+            0f,
+            verticalOffset
+        ),
+        strokeWidth = 1.dp.toPx()
+    )
+}

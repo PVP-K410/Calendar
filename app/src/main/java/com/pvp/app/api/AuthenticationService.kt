@@ -47,18 +47,10 @@ interface AuthenticationService {
      * of the sign-in flows.
      * @param isOneTap A flag that indicates whether the sign-in process is completed using the
      * One Tap or standard sign-in flow.
-     * @param onSignIn A callback that is called when the sign-in process is completed, but before
-     * the user flow is triggered.
-     * @param onValidate A callback that is called before the sign-in process is completed but
-     * google data is resolved to validate the user's data. Method caller should delegate this callback
-     * to the [validateSignIn] or [validateSignUp] methods. However, if there is need to perform
-     * additional validation, the method caller can provide a custom implementation.
      */
     suspend fun signIn(
         intent: Intent,
-        isOneTap: Boolean,
-        onSignIn: suspend (AuthenticationResult) -> Unit = {},
-        onValidate: suspend (String) -> Unit
+        isOneTap: Boolean
     ): AuthenticationResult
 
     /**
@@ -68,20 +60,4 @@ interface AuthenticationService {
      * before the user flow is triggered.
      */
     suspend fun signOut(onSignOut: suspend (SignOutResult) -> Unit = {}): SignOutResult
-
-    /**
-     * Validates the user before the sign-in process is completed. Implementation should resolve
-     * user data by using the provided [email].
-     *
-     * @throws IllegalStateException if the user or some required sign-in state is not valid
-     */
-    suspend fun validateSignIn(email: String)
-
-    /**
-     * Validates the user before the sign-up process is completed. Implementation should resolve
-     * user data by using the provided [email].
-     *
-     * @throws IllegalStateException if the user or some required sign-up state is not valid
-     */
-    suspend fun validateSignUp(email: String)
 }

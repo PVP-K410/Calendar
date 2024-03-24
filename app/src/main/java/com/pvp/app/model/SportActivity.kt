@@ -10,99 +10,103 @@ import kotlinx.serialization.encoding.Encoder
 
 @Serializable(SportActivity.Companion.Serializer::class)
 enum class SportActivity(
+
+    /**
+     * Unique identifier of the sport activity, used with the HealthConnect API
+     */
     val id: Int,
+
+    /**
+     * Whether the sport activity supports distance metrics. If it doesn't, [pointsRatioDistance]
+     * is ignored and the distance is not taken into account when calculating [SportTask] points
+     */
     val supportsDistanceMetrics: Boolean,
+
+    /**
+     * Points ratio for the distance of the sport activity. The distance is taken into account when
+     * calculating [SportTask] points. Greater ratio yield more points. Interval is [0, 1]
+     */
+    val pointsRatioDistance: Float,
+
+    /**
+     * Points ratio for the duration of the sport activity. The duration is taken into account when
+     * calculating [SportTask] points. Greater ratio yield more points. Interval is [0, 1]
+     */
+    val pointsRatioDuration: Float,
+
+    /**
+     * Title of the sport activity
+     */
     val title: String
 ) {
 
-    Gym(0, false, "Gym"),
-    Badminton(2, false, "Badminton"),
-    Baseball(4, false, "Baseball"),
-    Basketball(5, false, "Basketball"),
-    Cycling(8, true, "Cycling"),
-    CyclingStationary(9, false, "Cycling (Stationary)"),
-    BootCamp(10, false, "Boot Camp"),
-    Boxing(11, false, "Boxing"),
-    Calisthenics(13, false, "Calisthenics"),
-    Cricket(14, false, "Cricket"),
-    Dancing(16, false, "Dancing"),
-    Elliptical(25, false, "Elliptical"),
-    ExerciseClass(26, false, "Exercise Class"),
-    Fencing(27, false, "Fencing"),
-    FootballAmerican(28, false, "Football (American)"),
-    FootballAustralian(29, false, "Football (Australian)"),
-    FrisbeeDisc(31, false, "Frisbee Disc"),
-    Golf(32, false, "Golf"),
-    GuidedBreathing(33, false, "Guided Breathing"),
-    Gymnastics(34, false, "Gymnastics"),
-    Handball(35, false, "Handball"),
-    HighIntensityIntervalTraining(36, false, "High Intensity Interval Training"),
-    Hiking(37, true, "Hiking"),
-    IceHockey(38, false, "Ice Hockey"),
-    IceSkating(39, false, "Ice Skating"),
-    MartialArts(44, false, "Martial Arts"),
-    Paddling(46, true, "Paddling"),
-    Paragliding(47, false, "Paragliding"),
-    Pilates(48, false, "Pilates"),
-    Racquetball(50, false, "Racquetball"),
-    RockClimbing(51, true, "Rock Climbing"),
-    RollerHockey(52, false, "Roller Hockey"),
-    Rowing(53, true, "Rowing"),
-    RowingMachine(54, false, "Rowing Machine"),
-    Rugby(55, false, "Rugby"),
-    Running(56, true, "Running"),
-    RunningTreadmill(57, true, "Running (Treadmill)"),
-    Sailing(58, false, "Sailing"),
-    ScubaDiving(59, false, "Scuba Diving"),
-    Skating(60, false, "Skating"),
-    Skiing(61, true, "Skiing"),
-    Snowboarding(62, true, "Snowboarding"),
-    Snowshoeing(63, true, "Snowshoeing"),
-    Soccer(64, false, "Soccer"),
-    Softball(65, false, "Softball"),
-    Squash(66, false, "Squash"),
-    StairClimbing(68, true, "Stair Climbing"),
-    StairClimbingMachine(69, false, "Stair Climbing Machine"),
-    StrengthTraining(70, false, "Strength Training"),
-    Stretching(71, false, "Stretching"),
-    Surfing(72, true, "Surfing"),
-    SwimmingOpenWater(73, true, "Swimming (Open Water)"),
-    SwimmingPool(74, true, "Swimming (Pool)"),
-    TableTennis(75, false, "Table Tennis"),
-    Tennis(76, false, "Tennis"),
-    Volleyball(78, false, "Volleyball"),
-    Walking(79, true, "Walking"),
-    WaterPolo(80, false, "Water Polo"),
-    Weightlifting(81, false, "Weightlifting"),
-    Wheelchair(82, true, "Wheelchair"),
-    Yoga(83, false, "Yoga");
+    Badminton(2, false, 0.0f, 0.5f, "Badminton"),
+    Baseball(4, false, 0.0f, 0.6f, "Baseball"),
+    Basketball(5, false, 0.0f, 0.6f, "Basketball"),
+    Boxing(11, false, 0.0f, 0.85f, "Boxing"),
+    Cricket(14, false, 0.0f, 0.5f, "Cricket"),
+    Cycling(8, true, 0.25f, 0.0f, "Cycling"),
+    Football(64, false, 0.0f, 0.6f, "Football"),
+    Golf(32, false, 0.0f, 0.25f, "Golf"),
+    Gymnastics(34, false, 0.0f, 0.3f, "Gymnastics"),
+    Handball(35, false, 0.0f, 0.4f, "Handball"),
+    Hiking(37, true, 0.5f, 0.0f, "Hiking"),
+    IceHockey(38, false, 0.0f, 0.7f, "Ice Hockey"),
+    IceSkating(39, false, 0.0f, 0.2f, "Ice Skating"),
+    Other(0, false, 0.0f, 0.1f, "Other"),
+    Pilates(48, false, 0.0f, 0.3f, "Pilates"),
+    RockClimbing(51, true, 0.75f, 0.0f, "Rock Climbing"),
+    Rowing(53, true, 0.35f, 0.0f, "Rowing"),
+    Rugby(55, false, 0.0f, 1f, "Rugby"),
+    Running(56, true, 0.3f, 0.0f, "Running"),
+    Skiing(61, true, 0.8f, 0.0f, "Skiing"),
+    Snowboarding(62, true, 0.9f, 0.0f, "Snowboarding"),
+    Softball(65, false, 0.0f, 0.4f, "Softball"),
+    Squash(66, false, 0.0f, 0.6f, "Squash"),
+    Swimming(74, true, 0.5f, 0.0f, "Swimming"),
+    TableTennis(75, false, 0.0f, 0.2f, "Table Tennis"),
+    Tennis(76, false, 0.0f, 0.3f, "Tennis"),
+    Volleyball(78, false, 0.0f, 0.6f, "Volleyball"),
+    Walking(79, true, 0.25f, 0.0f, "Walking"),
+    Wheelchair(82, true, 1f, 0.0f, "Wheelchair"),
+    Yoga(83, false, 0.0f, 0.15f, "Yoga");
+
+    init {
+        require(pointsRatioDistance in 0.0..1.0) {
+            "Points ratio for distance must be in [0, 1]"
+        }
+
+        require(pointsRatioDuration in 0.0..1.0) {
+            "Points ratio for duration must be in [0, 1]"
+        }
+    }
 
     companion object {
 
-        fun fromId(id: Int): SportActivity? {
+        fun fromId(id: Int): SportActivity {
             return entries.find {
                 it.id == id
-            }
+            } ?: Other
         }
 
-        fun fromTitle(title: String): SportActivity? {
+        fun fromTitle(title: String): SportActivity {
             return entries.find {
                 it.title.equals(
                     title,
                     ignoreCase = true
                 )
-            }
+            } ?: Other
         }
 
         object Serializer : KSerializer<SportActivity> {
-            
+
             override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
                 "com.pvp.app.model.SportActivity",
                 PrimitiveKind.STRING
             )
 
             override fun deserialize(decoder: Decoder): SportActivity {
-                return fromTitle(decoder.decodeString()) ?: error("Unknown sport activity")
+                return fromTitle(decoder.decodeString())
             }
 
             override fun serialize(encoder: Encoder, value: SportActivity) {

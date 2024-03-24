@@ -36,16 +36,13 @@ import com.pvp.app.ui.common.showToast
 fun SurveyScreen(
     viewModel: SurveyViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val textContinue = stringResource(R.string.action_continue)
     val textError = stringResource(R.string.form_survey_toast_error)
     val textSubmit = stringResource(R.string.action_submit)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
         val state by viewModel.state.collectAsStateWithLifecycle()
@@ -59,7 +56,9 @@ fun SurveyScreen(
         var handler by remember { mutableStateOf({}) }
         var success by remember { mutableStateOf(true) }
 
-        Column(modifier = Modifier.weight(0.9f)) {
+        Column(
+            modifier = Modifier.weight(0.9f)
+        ) {
             SurveyInput(
                 handler = { onSubmit ->
                     handler = onSubmit
@@ -72,6 +71,8 @@ fun SurveyScreen(
             modifier = Modifier.weight(0.1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val context = LocalContext.current
+
             Button(
                 modifier = Modifier.fillMaxWidth(0.8f),
                 onClick = {
@@ -120,7 +121,9 @@ fun SurveyInput(
                         )
                     }
                 },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
             )
         }
 

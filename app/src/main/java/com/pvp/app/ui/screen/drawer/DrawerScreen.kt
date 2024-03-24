@@ -165,7 +165,7 @@ fun DrawerScreen(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            val textSignOut = stringResource(R.string.screen_profile_toast_success_sign_out)
+            val textSignOut = stringResource(R.string.screen_profile_toast_error)
 
             DrawerHeader(
                 Modifier
@@ -196,12 +196,9 @@ fun DrawerScreen(
                     .weight(0.1f),
                 onSignOut = {
                     viewModel.signOut {
-                        context.showToast(
-                            isSuccess = it.isSuccess,
-                            messageError = it.messageError
-                                ?: "Error has occurred while signing out",
-                            messageSuccess = textSignOut
-                        )
+                        if (!it.isSuccess) {
+                            context.showToast(message = textSignOut)
+                        }
                     }
                 }
             )

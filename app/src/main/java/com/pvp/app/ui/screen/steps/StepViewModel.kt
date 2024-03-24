@@ -9,6 +9,7 @@ import androidx.health.connect.client.records.StepsRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.HealthConnectService
+import com.pvp.app.common.toSportActivities
 import com.pvp.app.model.SportActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,7 @@ class StepViewModel @Inject constructor(
     val stepsCount = _stepsCount.asStateFlow()
 
     private val _activities = MutableStateFlow<List<SportActivity>>(emptyList())
-    val activites = _activities.asStateFlow()
+    val activities = _activities.asStateFlow()
 
     suspend fun permissionsGranted(): Boolean {
         val granted = client.permissionController.getGrantedPermissions()
@@ -74,9 +75,7 @@ class StepViewModel @Inject constructor(
                 end = end
             )
 
-            _activities.value = records.mapNotNull { record ->
-                SportActivity.fromId(record.exerciseType)
-            }
+            _activities.value = records.toSportActivities()
         }
     }
 }
