@@ -706,7 +706,7 @@ fun Week(
         tasks,
         selectedFilter
     )
-    
+
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
     Column {
@@ -720,7 +720,10 @@ fun Week(
                 0.dp
             ),
         ) { page ->
-            val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == dates[page] }
+
+            val tasksForDay = tasks.filter {
+                task -> task.scheduledAt.toLocalDate() == dates[page]
+            }
 
             DayPage(
                 days[page],
