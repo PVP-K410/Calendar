@@ -8,6 +8,7 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.Notification
+import com.pvp.app.model.NotificationChannel
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -85,8 +85,7 @@ class TaskViewModel @Inject constructor(
                             title,
                             state.user.email
                         )
-                        .toNotification()
-                        ?.also { notificationService.post(it) }
+                        .postNotification()
                 }
         }
     }
@@ -116,8 +115,7 @@ class TaskViewModel @Inject constructor(
                             title,
                             state.user.email
                         )
-                        .toNotification()
-                        ?.also { notificationService.post(it) }
+                        .postNotification()
                 }
         }
     }
@@ -143,28 +141,35 @@ class TaskViewModel @Inject constructor(
                             title,
                             state.user.email
                         )
-                        .toNotification()
-                        ?.also { notificationService.post(it) }
+                        .postNotification()
                 }
         }
     }
 
-    private suspend fun Task.toNotification(): Notification? {
-        val difference = ChronoUnit.SECONDS.between(
-            LocalDateTime.now(),
-            scheduledAt
-        )
+    private suspend fun Task.postNotification() {
+        val reminderMinutes = state
+            .first().reminderMinutes
+            .toLong()
 
-        val reminderMinutes = state.first().reminderMinutes
-        val secondsUntilRemind = difference - (reminderMinutes * 60)
+        val reminderDateTime = scheduledAt
+            .withSecond(0)
+            .withNano(0)
+            .minusMinutes(reminderMinutes)
 
-        if (secondsUntilRemind <= 0) {
-            return null
+        if (reminderDateTime.isBefore(LocalDateTime.now())) {
+            return
         }
 
-        return Notification(
-            delay = Duration.ofSeconds(secondsUntilRemind),
-            text = "'${title}' is in $reminderMinutes minute(s)..."
+        val notification = Notification(
+            channel = NotificationChannel.TaskReminder,
+            title = "Task Reminder",
+            text = "Task '${title}' is in $reminderMinutes minute" +
+                    "${if (reminderMinutes > 1) "s" else ""}..."
+        )
+
+        notificationService.post(
+            notification = notification,
+            dateTime = reminderDateTime
         )
     }
 

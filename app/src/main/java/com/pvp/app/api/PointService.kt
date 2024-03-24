@@ -1,6 +1,7 @@
 package com.pvp.app.api
 
 import com.pvp.app.model.Task
+import java.time.LocalDate
 
 interface PointService {
 
@@ -28,4 +29,16 @@ interface PointService {
     ): Int {
         return tasks.sumOf { calculate(it) }
     }
+
+    /**
+     * Deduct points from current user for not completing tasks.
+     *
+     * Points are deducted based on the date of tasks. In case there are no tasks for the given
+     * date or points were already deducted, no points are deducted.
+     *
+     * @param date date to deduct points for
+     */
+    suspend fun deduct(
+        date: LocalDate
+    )
 }

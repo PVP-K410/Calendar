@@ -24,6 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Default"
         tools:targetApi="31">
+
         <activity
             android:name=".Activity"
             android:exported="true"
@@ -37,10 +38,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <receiver android:name=".service.NotificationReceiver" />
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
     </application>
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
     </queries>
+
 </manifest>

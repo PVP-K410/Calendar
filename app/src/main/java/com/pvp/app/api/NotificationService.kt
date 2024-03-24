@@ -1,18 +1,50 @@
 package com.pvp.app.api
 
 import com.pvp.app.model.Notification
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 interface NotificationService {
 
     /**
-     * Posts a notification to the android alarm manager.
-     *
-     * In case the notification id is not unique, the previous notification will be replaced.
-     * If null id is provided, the notification will be posted with a random generated id.
-     * If delay is provided, the notification will be posted after the delay.
+     * Posts a notification to the android alarm manager with the specified delay.
      */
     fun post(
+        notification: Notification,
+        delay: Duration
+    )
+
+    /**
+     * Posts a notification to the android alarm manager at the specified date time.
+     */
+    fun post(
+        notification: Notification,
+        dateTime: LocalDateTime
+    )
+
+    /**
+     * Posts a notification to the android alarm manager at the specified time.
+     */
+    fun post(
+        notification: Notification,
+        time: LocalTime
+    )
+
+    /**
+     * Cancels a scheduled notification.
+     * @param notification The notification to cancel.
+     */
+    fun cancel(
         notification: Notification
+    )
+
+    /**
+     * Cancels a scheduled notification by its ID.
+     * @param id The ID of the notification to cancel.
+     */
+    fun cancel(
+        id: Int
     )
 
     /**
@@ -20,7 +52,6 @@ interface NotificationService {
      * The notification will be shown with the provided title.
      */
     fun show(
-        notification: Notification,
-        title: String
+        notification: Notification
     )
 }

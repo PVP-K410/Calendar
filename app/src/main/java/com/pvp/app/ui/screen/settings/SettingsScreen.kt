@@ -40,6 +40,8 @@ import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 private fun SettingNotificationReminderMinutes(
     model: SettingsViewModel = hiltViewModel()
 ) {
+    val rangeMinutes = remember { model.fromConfiguration { it.rangeReminderMinutes } }
+
     val minutes by model
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
         .collectAsStateWithLifecycle()
@@ -50,7 +52,7 @@ private fun SettingNotificationReminderMinutes(
         description = "Choose minutes before tasks reminder executes. Default is 10 minutes",
         editContent = {
             Picker(
-                items = (1..120).toList(),
+                items = rangeMinutes,
                 state = state,
                 startIndex = minutes - 1,
             )
@@ -64,7 +66,40 @@ private fun SettingNotificationReminderMinutes(
             }
         },
         title = "Set Reminder Time",
-        value = "$minutes minute(s)"
+        value = "$minutes minute${if (minutes != 1) "s" else ""}"
+    )
+}
+
+@Composable
+private fun SettingCupVolumeMl(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    val rangeCupVolume = remember { model.fromConfiguration { it.rangeCupVolume } }
+    val volume by model
+        .get(Setting.Notifications.CupVolumeMl)
+        .collectAsStateWithLifecycle()
+
+    val state = rememberPickerState(initialValue = volume)
+
+    SettingCard(
+        description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
+        editContent = {
+            Picker(
+                items = rangeCupVolume,
+                state = state,
+                startIndex = volume - 100,
+            )
+        },
+        onEdit = {
+            if (state.value != volume) {
+                model.merge(
+                    Setting.Notifications.CupVolumeMl,
+                    state.value
+                )
+            }
+        },
+        title = "Set Cup Volume",
+        value = "$volume ml"
     )
 }
 
@@ -84,6 +119,8 @@ fun SettingsScreen(
         )
 
         SettingNotificationReminderMinutes(model)
+
+        SettingCupVolumeMl(model)
     }
 }
 
