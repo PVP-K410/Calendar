@@ -1,6 +1,7 @@
 package com.pvp.app.service
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -15,11 +16,14 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.Duration
 import java.time.LocalTime
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltWorker
 class DrinkReminderWorker @AssistedInject constructor(
@@ -39,16 +43,34 @@ class DrinkReminderWorker @AssistedInject constructor(
         const val WORKER_NAME = "com.pvp.app.service.DrinkReminderWorker"
     }
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val scope = CoroutineScope(Dispatchers.IO)
     private val scheduledNotifications = mutableListOf<Notification>()
 
     override suspend fun doWork(): Result {
-        initializeReminderListener()
+        return coroutineScope {
+            val job = async {
+                initializeReminderListener()
+            }
 
-        return Result.success()
+            job.invokeOnCompletion { exception: Throwable? ->
+                when (exception) {
+                    is CancellationException -> {
+                        Log.e("DrinkReminderWorker", "Cleanup on completion", exception)
+                        cancelScheduledNotifications()
+                    }
+
+                    else -> {
+                        cancelScheduledNotifications()
+                    }
+                }
+            }
+
+            job.await()
+        }
     }
 
-    private suspend fun initializeReminderListener() {
+
+    private suspend fun initializeReminderListener(): Result {
         val stateFlow = settingService
             .get(Setting.Notifications.CupVolumeMl)
             .combine(userService.user) { volume, user ->
@@ -58,8 +80,8 @@ class DrinkReminderWorker @AssistedInject constructor(
                 )
             }
             .stateIn(
-                scope = coroutineScope,
-                started = SharingStarted.WhileSubscribed(5000),
+                scope = scope,
+                started = SharingStarted.Eagerly,
                 initialValue = DrinkReminderState()
             )
 
