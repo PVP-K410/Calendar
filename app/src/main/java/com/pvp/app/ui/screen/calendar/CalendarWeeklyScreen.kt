@@ -82,6 +82,7 @@ import java.time.temporal.TemporalAdjusters
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
+import androidx.compose.foundation.layout.PaddingValues
 
 @Composable
 private fun ButtonTaskSelector(
@@ -241,7 +242,9 @@ fun Day(
     name: String = "Day",
     date: LocalDate = LocalDate.MIN,
     tasks: List<Task> = emptyList(),
-    expandedUponCreation: Boolean = false
+    expandedUponCreation: Boolean = false,
+    page: Int = 0,
+    pageIndex: Int = 0
 ) {
     var expand by remember { mutableStateOf(expandedUponCreation) }
     var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
@@ -302,7 +305,7 @@ fun Day(
             }
         }
 
-        if (expand) {
+        /*if (expand) {
             if (!tasks.any()) {
                 CreateTaskDialog(
                     date = LocalDateTime.of(
@@ -357,7 +360,7 @@ fun Day(
                     tasks = tasks
                 )
             }
-        }
+        }*/
     }
 }
 
@@ -658,8 +661,8 @@ fun TaskFilterBar(
 ) {
     // Fixed to take up the whole screen for now as it bugs out in Weekly view,
     // replace Modifier.width with Modifier.weigh(1f)
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val chipWidth = screenWidth / TaskFilter.values().size
+    //val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    //val chipWidth = screenWidth / TaskFilter.values().size
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -677,7 +680,9 @@ fun TaskFilterBar(
                 isSelected = selectedFilter == filter,
                 onClick = { onClick(filter) },
                 modifier = Modifier
-                    .width(chipWidth)
+                    //.width(chipWidth)
+                    .weight(1f)
+                    .fillMaxWidth()
                     .height(40.dp)
             )
         }
@@ -716,7 +721,7 @@ fun DayPage(
     tasks: List<Task>,
     page: Int
 ) {
-    val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == date }
+    //val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == date }
     val scale = animateFloatAsState(
         targetValue = if (pageIndex == page) 1f else 0.8f,
         animationSpec = spring(stiffness = 500f)
@@ -733,8 +738,10 @@ fun DayPage(
     ) {
         Day(
             name = day,
-            tasks = tasksForDay,
-            date = date
+            tasks = tasks,
+            date = date,
+            page = page,
+            pageIndex = pageIndex
         )
     }
 }
@@ -746,6 +753,7 @@ fun Week(
     tasks: List<Task>
 ) {
     val days = (1..7).map { DayOfWeek.of(it).name }
+    var expand by remember { mutableStateOf(true) }
     val today = LocalDate.now()
     val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
@@ -754,17 +762,93 @@ fun Week(
         pageCount = { days.size }
     )
     val currentPage = pagerState.currentPage
+    var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
+    val filteredTasks = filterTasks(tasks, selectedFilter)
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier.padding(horizontal = 16.dp)
-    ) { page ->
-        DayPage(
-            days[page],
-            page,
-            dates[page],
-            tasks,
-            currentPage
-        )
+    Column {
+        HorizontalPager(
+            state = pagerState,
+            modifier = modifier
+                .padding(horizontal = 16.dp)
+                .height(screenHeight / 3),
+            contentPadding = PaddingValues(70.dp, 0.dp),
+        ) { page ->
+            val tasksForDay = tasks.filter { task -> task.scheduledAt.toLocalDate() == dates[page] }
+            DayPage(
+                days[page],
+                page,
+                dates[page],
+                tasksForDay,
+                currentPage
+            )
+        }
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            if (expand) {
+                if (!tasks.any()) {
+                    CreateTaskDialog(
+                        date = LocalDateTime.of(
+                            dates[currentPage],
+                            LocalTime.now()
+                        ),
+                        onClose = { expand = false },
+                        isOpen = expand,
+                        shouldCloseOnSubmit = true
+                    )
+                } else {
+                    Spacer(modifier = Modifier.padding(16.dp))
+
+                    TaskFilterBar(selectedFilter) { filter ->
+                        selectedFilter = filter
+                    }
+
+                    // Fixed to take up the whole screen for now as it bugs out in Weekly view,
+                    // replace Modifier.width with Modifier.fillMaxWidth() later
+                    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+                    LazyColumn(
+                        modifier = Modifier.width(screenWidth)
+                    ) {
+                        if (!filteredTasks.any()) {
+                            item {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        fontStyle = FontStyle.Italic,
+                                        modifier = Modifier.padding(32.dp),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        text = "No ${
+                                            selectedFilter.toString().toLowerCase()
+                                        } tasks have been setup for this day"
+                                    )
+                                }
+                            }
+                        } else {
+                            items(filteredTasks) {
+                                Spacer(modifier = Modifier.padding(8.dp))
+
+                                TaskBox(task = it)
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (!dates[currentPage].isEqual(LocalDate.MIN) && !dates[currentPage].isAfter(
+                        LocalDate.now()
+                    )
+                ) {
+                    ActivitiesBox(
+                        date = dates[currentPage],
+                        tasks = tasks
+                    )
+                }
+            }
+        }
     }
 }
