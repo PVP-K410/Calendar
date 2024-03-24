@@ -33,6 +33,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
+import java.util.Locale
 
 @Composable
 fun CalendarMonthlyScreen(
@@ -68,7 +69,6 @@ fun CalendarMonthlyScreen(
         } else {
             DayDialog(
                 date = selectedDate,
-                tasks = dateTasks,
                 onDismissRequest = { showDialog = false }
             )
         }
@@ -78,7 +78,6 @@ fun CalendarMonthlyScreen(
 @Composable
 fun DayDialog(
     date: LocalDate,
-    tasks: List<Task> = listOf(),
     onDismissRequest: () -> Unit
 ) {
     Dialog(
@@ -86,10 +85,8 @@ fun DayDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Day(
-            "${date.month.toString().toLowerCase().capitalize()} ${date.dayOfMonth}",
-            tasks = tasks,
             date = date,
-            expandedUponCreation = true
+            name = "${date.month.toString().lowercase(Locale.ROOT).capitalize()} ${date.dayOfMonth}"
         )
     }
 }

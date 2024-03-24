@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,8 +30,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DirectionsRun
-import androidx.compose.material.icons.outlined.LibraryBooks
+import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.Nightlight
@@ -77,12 +78,11 @@ import com.pvp.app.ui.screen.task.TaskBox
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.temporal.TemporalAdjusters
+import java.util.Locale
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
-import androidx.compose.foundation.layout.PaddingValues
 
 @Composable
 private fun ButtonTaskSelector(
@@ -239,17 +239,11 @@ fun CreateTaskDialog(
 
 @Composable
 fun Day(
-    name: String = "Day",
+    clickEnabled: Boolean = false,
     date: LocalDate = LocalDate.MIN,
-    tasks: List<Task> = emptyList(),
-    expandedUponCreation: Boolean = false,
-    page: Int = 0,
-    pageIndex: Int = 0
+    name: String = "Day",
+    onClick: () -> Unit = {}
 ) {
-    var expand by remember { mutableStateOf(expandedUponCreation) }
-    var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
-    val filteredTasks = filterTasks(tasks, selectedFilter)
-
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
@@ -262,44 +256,46 @@ fun Day(
                     width = 200.dp
                 )
                 .border(
-                    BorderStroke(
+                    border = BorderStroke(
                         1.dp,
                         MaterialTheme.colorScheme.outline
                     ),
                     shape = RoundedCornerShape(10.dp)
                 )
-                .clickable { expand = !expand }
                 .align(Alignment.CenterHorizontally)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(10.dp))
+                    .clickable(
+                        enabled = clickEnabled,
+                        onClick = onClick
+                    )
             ) {
                 Box(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.secondaryContainer)
                         .height(60.dp)
                         .fillMaxWidth()
-                        .clickable { expand = !expand }
                 ) {
                     Text(
-                        text = name,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        style = MaterialTheme.typography.titleLarge,
+                        text = name,
+                        textAlign = TextAlign.Center
                     )
                 }
 
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     Text(
-                        text = date.dayOfMonth.toString(),
-                        fontSize = 50.sp
+                        fontSize = 50.sp,
+                        text = date.dayOfMonth.toString()
                     )
                 }
             }
@@ -349,8 +345,8 @@ fun ActivitiesBox(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     //TodaysTasks(Icons.Outlined.Event, tasks, Daily::class) // TODO uncomment when Daily tasks are implemented
-                    TodaysTasks(Icons.Outlined.LibraryBooks, tasks, Task::class)
-                    TodaysTasks(Icons.Outlined.DirectionsRun, tasks, SportTask::class)
+                    TodaysTasks(Icons.AutoMirrored.Outlined.LibraryBooks, tasks, Task::class)
+                    TodaysTasks(Icons.AutoMirrored.Outlined.DirectionsRun, tasks, SportTask::class)
                     TodaysTasks(Icons.Outlined.Restaurant, tasks, MealTask::class)
                 }
             }
@@ -651,17 +647,19 @@ fun FilterBox(
 }
 
 @Composable
-fun DayPage(
-    day: String,
-    pageIndex: Int,
+fun DayCard(
+    clickEnabled: Boolean,
     date: LocalDate,
-    tasks: List<Task>,
-    page: Int
+    day: String,
+    onClick: () -> Unit,
+    page: Int,
+    pageIndex: Int
 ) {
-    val scale = animateFloatAsState(
+    val scale by animateFloatAsState(
         targetValue = if (pageIndex == page) 1f else 0.8f,
-        animationSpec = spring(stiffness = 500f)
-    ).value
+        animationSpec = spring(stiffness = 500f),
+        label = "DayCardAnimation"
+    )
 
     Box(
         modifier = Modifier
@@ -673,11 +671,10 @@ fun DayPage(
         contentAlignment = Alignment.TopCenter
     ) {
         Day(
-            name = day,
-            tasks = tasks,
+            clickEnabled = clickEnabled,
             date = date,
-            page = page,
-            pageIndex = pageIndex
+            name = day,
+            onClick = onClick
         )
     }
 }
@@ -689,114 +686,119 @@ fun Week(
     tasks: List<Task>
 ) {
     val days = (1..7).map { DayOfWeek.of(it).name }
-    var expand by remember { mutableStateOf(true) }
     val today = LocalDate.now()
     val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
+    var stateDialog by remember { mutableStateOf(false) }
 
-    val pagerState = rememberPagerState(
+    val statePager = rememberPagerState(
         initialPage = dates.indexOf(today),
         pageCount = { days.size }
     )
 
-    val currentPage = pagerState.currentPage
-    var selectedFilter by remember { mutableStateOf(TaskFilter.Daily) }
+    val date = dates[statePager.currentPage]
+    var stateShowCards by remember { mutableStateOf(false) }
 
-    val filteredTasks = filterTasks(
-        tasks,
-        selectedFilter
-    )
+    val tasksFiltered = remember(tasks.size, date) {
+        tasks.filter { task ->
+            task.scheduledAt.toLocalDate() == date
+        }
+    }
 
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
-    Column {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         HorizontalPager(
-            state = pagerState,
-            modifier = modifier
-                .padding(horizontal = 16.dp)
-                .height(screenHeight / 3),
             contentPadding = PaddingValues(
-                70.dp,
+                90.dp,
                 0.dp
             ),
+            modifier = modifier.height(LocalConfiguration.current.screenHeightDp.dp / 3),
+            state = statePager
         ) { page ->
-
-            val tasksForDay = tasks.filter {
-                task -> task.scheduledAt.toLocalDate() == dates[page]
-            }
-
-            DayPage(
-                days[page],
-                page,
-                dates[page],
-                tasksForDay,
-                currentPage
+            DayCard(
+                clickEnabled = date == dates[page],
+                date = dates[page],
+                day = days[page],
+                onClick = {
+                    if (tasksFiltered.isEmpty()) {
+                        stateDialog = true
+                    } else {
+                        stateShowCards = !stateShowCards
+                    }
+                },
+                page = page,
+                pageIndex = statePager.currentPage
             )
         }
 
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
+        if (!stateShowCards || tasksFiltered.isEmpty()) {
+            if (!date.isEqual(LocalDate.MIN) && !date.isAfter(LocalDate.now())) {
+                ActivitiesBox(
+                    date = date,
+                    tasks = tasksFiltered
+                )
+            }
+        } else {
+            DayContent(tasksFiltered)
+        }
+
+        CreateTaskDialog(
+            date = date.atTime(0, 0),
+            isOpen = stateDialog,
+            onClose = { stateDialog = false },
+            shouldCloseOnSubmit = true
+        )
+    }
+}
+
+@Composable
+private fun DayContent(
+    tasks: List<Task>
+) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(0.9f)
         ) {
-            if (expand) {
-                if (!tasks.any()) {
-                    CreateTaskDialog(
-                        date = LocalDateTime.of(
-                            dates[currentPage],
-                            LocalTime.now()
-                        ),
-                        onClose = { expand = false },
-                        isOpen = expand,
-                        shouldCloseOnSubmit = true
-                    )
-                } else {
-                    Spacer(modifier = Modifier.padding(16.dp))
+            var filter by remember { mutableStateOf(TaskFilter.General) }
 
-                    TaskFilterBar(selectedFilter) { filter ->
-                        selectedFilter = filter
-                    }
+            Spacer(modifier = Modifier.padding(16.dp))
 
-                    // Fixed to take up the whole screen for now as it bugs out in Weekly view,
-                    // replace Modifier.width with Modifier.fillMaxWidth() later
-                    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+            TaskFilterBar(filter) { filter = it }
 
-                    LazyColumn(
-                        modifier = Modifier.width(screenWidth)
-                    ) {
-                        if (!filteredTasks.any()) {
-                            item {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(
-                                        fontStyle = FontStyle.Italic,
-                                        modifier = Modifier.padding(32.dp),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        text = "No ${
-                                            selectedFilter.toString().toLowerCase()
-                                        } tasks have been setup for this day"
-                                    )
-                                }
-                            }
-                        } else {
-                            items(filteredTasks) {
-                                Spacer(modifier = Modifier.padding(8.dp))
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                val filteredTasks = filterTasks(
+                    tasks,
+                    filter
+                )
 
-                                TaskBox(task = it)
-                            }
+                if (!filteredTasks.any()) {
+                    item {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                fontStyle = FontStyle.Italic,
+                                modifier = Modifier.padding(32.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                text = "No ${
+                                    filter.toString().lowercase(Locale.ROOT)
+                                } tasks have been setup for this day"
+                            )
                         }
                     }
-                }
-            } else {
-                if (!dates[currentPage].isEqual(LocalDate.MIN) && !dates[currentPage].isAfter(
-                        LocalDate.now()
-                    )
-                ) {
-                    ActivitiesBox(
-                        date = dates[currentPage],
-                        tasks = tasks
-                    )
+                } else {
+                    items(filteredTasks) {
+                        Spacer(modifier = Modifier.padding(8.dp))
+
+                        TaskBox(task = it)
+                    }
                 }
             }
         }
