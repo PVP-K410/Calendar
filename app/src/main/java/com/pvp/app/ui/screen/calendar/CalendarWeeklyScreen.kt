@@ -127,7 +127,6 @@ fun CalorieCounter(
         }
     }
 
-
     Icon(
         imageVector = Icons.Outlined.LocalFireDepartment,
         contentDescription = "Calories",
