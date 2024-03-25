@@ -14,6 +14,7 @@ import com.pvp.app.common.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
+import com.pvp.app.worker.WeeklyActivityWorkerSetup
 import dagger.hilt.android.HiltAndroidApp
 import java.time.Duration
 import java.time.LocalDateTime
@@ -44,6 +45,8 @@ class Application : Application(), Configuration.Provider {
         createNotificationChannels()
 
         createTaskPointsDeductionWorker()
+
+        createWeeklyActivitiesWorker()
     }
 
     private fun createDrinkReminderWorker() {
@@ -100,5 +103,12 @@ class Application : Application(), Configuration.Provider {
         workManager
             .beginWith(requestOneTime)
             .enqueue()
+    }
+
+    private fun createWeeklyActivitiesWorker() {
+        workManager.enqueue(
+            OneTimeWorkRequestBuilder<WeeklyActivityWorkerSetup>()
+                .build()
+        )
     }
 }
