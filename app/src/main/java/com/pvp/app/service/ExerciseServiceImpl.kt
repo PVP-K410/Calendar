@@ -35,16 +35,16 @@ class ExerciseServiceImpl @Inject constructor(
     }
 
     override suspend fun getInfrequentActivities(maxOccurrence: Int): List<SportActivity> {
-        val activityOccurrences = getActivitiesWithOccurencesMap()
+        val activityOccurrences = getActivitiesWithOccurrencesMap()
 
         return SportActivity.entries.filter { activity ->
-            activityOccurrences[activity] == null
-                    || activityOccurrences[activity]!! <= maxOccurrence
+            (activityOccurrences[activity] == null
+                    || activityOccurrences[activity]!! <= maxOccurrence)
                     && activity.id != 0
         }
     }
 
-    private suspend fun getActivitiesWithOccurencesMap(): Map<SportActivity, Int> {
+    private suspend fun getActivitiesWithOccurrencesMap(): Map<SportActivity, Int> {
         val end = Instant.now()
 
         val start = LocalDate
