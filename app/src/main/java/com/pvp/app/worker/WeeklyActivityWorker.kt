@@ -83,7 +83,7 @@ class WeeklyActivityWorker @AssistedInject constructor(
         val activities = exerciseService.getInfrequentActivities().toMutableList()
 
         return when (activities.contains(SportActivity.Wheelchair)) {
-            false -> {
+            true -> {
                 activities.remove(SportActivity.Wheelchair)
                 activities.shuffled().take(count)
             }
