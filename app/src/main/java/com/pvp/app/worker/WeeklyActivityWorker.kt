@@ -1,7 +1,6 @@
 package com.pvp.app.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -33,8 +32,7 @@ class WeeklyActivityWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result {
-        var activities = getRandomInfrequentActivities()
-        activities.forEach { Log.e("WEEKLY", it.title) }
+        val activities = getRandomInfrequentActivities()
 
         postActivityNotification(activities)
 
@@ -44,7 +42,7 @@ class WeeklyActivityWorker @AssistedInject constructor(
                 try {
                     userService.merge(
                         user.copy(
-                            increasedPointActivities = activities
+                            weeklyActivities = activities
                         )
                     )
 

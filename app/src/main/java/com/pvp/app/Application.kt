@@ -108,6 +108,12 @@ class Application : Application(), Configuration.Provider {
     private fun createWeeklyActivitiesWorker() {
         workManager.enqueue(
             OneTimeWorkRequestBuilder<WeeklyActivityWorkerSetup>()
+                .setInitialDelay(
+                    Duration.of(
+                        1,
+                        ChronoUnit.MINUTES
+                    )
+                )
                 .build()
         )
     }
