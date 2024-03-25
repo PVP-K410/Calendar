@@ -15,7 +15,9 @@ interface ExerciseService {
     /**
      * Reads user activity data from HealthConnect and finds infrequent activities
      * (activities that the user has not done in the last 30 days or has done only a few times)
+     * @param maxOccurrence Specifies maximum times user can participate in the task
+     * in the last 30 days for it to be considered "Infrequent"
      * @return a list of sport activities that the user does not participate in frequently
      */
-    suspend fun getInfrequentActivities(): List<SportActivity>
+    suspend fun getInfrequentActivities(maxOccurrence: Int = 1): List<SportActivity>
 }
