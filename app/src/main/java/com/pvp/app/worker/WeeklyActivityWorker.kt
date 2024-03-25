@@ -85,7 +85,7 @@ class WeeklyActivityWorker @AssistedInject constructor(
         return when (activities.contains(SportActivity.Wheelchair)) {
             false -> {
                 activities.remove(SportActivity.Wheelchair)
-                activities.shuffled().take(4)
+                activities.shuffled().take(count)
             }
 
             else -> listOf(SportActivity.Wheelchair)

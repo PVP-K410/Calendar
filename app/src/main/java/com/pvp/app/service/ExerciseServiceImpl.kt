@@ -16,6 +16,26 @@ class ExerciseServiceImpl @Inject constructor(
     private val service: HealthConnectService,
 ) : ExerciseService {
 
+    private suspend fun getActivitiesWithOccurrencesMap(): Map<SportActivity, Int> {
+        val end = Instant.now()
+
+        val start = LocalDate
+            .now()
+            .minusDays(29)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return service.readActivityData(
+            record = ExerciseSessionRecord::class,
+            start = start,
+            end = end
+        ).map { record ->
+            SportActivity.fromId(record.exerciseType)
+        }
+            .getOccurences()
+            .toMap()
+    }
+
     override suspend fun getExerciseInfo(record: ExerciseSessionRecord): ExerciseSessionInfo {
         return ExerciseSessionInfo(
             record = record,
@@ -42,25 +62,5 @@ class ExerciseServiceImpl @Inject constructor(
                     || activityOccurrences[activity]!! <= maxOccurrence)
                     && activity.id != 0
         }
-    }
-
-    private suspend fun getActivitiesWithOccurrencesMap(): Map<SportActivity, Int> {
-        val end = Instant.now()
-
-        val start = LocalDate
-            .now()
-            .minusDays(29)
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant()
-
-        return service.readActivityData(
-            record = ExerciseSessionRecord::class,
-            start = start,
-            end = end
-        ).map { record ->
-            SportActivity.fromId(record.exerciseType)
-        }
-            .getOccurences()
-            .toMap()
     }
 }
