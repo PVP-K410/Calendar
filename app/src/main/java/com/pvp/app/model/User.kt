@@ -8,11 +8,11 @@ data class User(
     val email: String = "",
     var experience: Int = 0,
     var height: Int = 0,
-    var increasedPointActivities: List<SportActivity> = emptyList(),
     var ingredients: List<Ingredient> = emptyList(),
     var level: Int = 1,
     var mass: Int = 0,
     var points: Int = 0,
     val surveys : List<Survey> = emptyList(),
-    var username: String = ""
+    var username: String = "",
+    var weeklyActivities: List<SportActivity> = emptyList()
 )
