@@ -12,7 +12,7 @@ data class User(
     var level: Int = 1,
     var mass: Int = 0,
     var points: Int = 0,
-    val surveys : List<Survey> = emptyList(),
+    val surveys: List<Survey> = emptyList(),
     var username: String = "",
     var weeklyActivities: List<SportActivity> = emptyList()
 )

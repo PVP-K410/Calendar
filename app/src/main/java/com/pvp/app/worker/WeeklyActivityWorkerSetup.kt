@@ -16,8 +16,7 @@ import java.util.concurrent.TimeUnit
 class WeeklyActivityWorkerSetup @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val workManager: WorkManager,
-    private val userService: UserService
+    private val workManager: WorkManager
 ) : CoroutineWorker(
     context,
     workerParams
