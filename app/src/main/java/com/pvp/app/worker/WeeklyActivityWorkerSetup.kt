@@ -25,7 +25,6 @@ class WeeklyActivityWorkerSetup @AssistedInject constructor(
     workerParams
 ) {
     override suspend fun doWork(): Result {
-
         userService.user
             .firstOrNull()
             ?.let {
