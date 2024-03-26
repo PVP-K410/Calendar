@@ -4,9 +4,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.UserService
-import com.pvp.app.model.Ingredient
-import com.pvp.app.model.SportActivity
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,8 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userService: UserService,
-    private val configuration: Configuration
+    private val configuration: Configuration,
+    private val experienceService: ExperienceService,
+    private val userService: UserService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -49,35 +49,13 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateUserInformation(
-        newUsername: String? = null,
-        newMass: Int? = null,
-        newHeight: Int? = null,
-        newActivityFilters: List<String>? = null,
-        newIngredientFilters: List<String>? = null
+    fun update(
+        function: (User) -> Unit
     ) {
         viewModelScope.launch {
-            newUsername?.let {
-                _state.value.user.username = it
-            }
+            val user = _state.value.user.copy()
 
-            newMass?.let {
-                _state.value.user.mass = it
-            }
-
-            newHeight?.let {
-                _state.value.user.height = it
-            }
-
-            newActivityFilters?.let {
-                _state.value.user.activities =
-                    newActivityFilters.mapNotNull { SportActivity.fromTitle(it) }
-            }
-
-            newIngredientFilters?.let {
-                _state.value.user.ingredients =
-                    newIngredientFilters.mapNotNull { Ingredient.fromTitle(it) }
-            }
+            function(user)
 
             userService.merge(_state.value.user)
         }
@@ -85,6 +63,24 @@ class ProfileViewModel @Inject constructor(
 
     fun <T> fromConfiguration(function: (Configuration) -> T): T {
         return function(configuration)
+    }
+
+    /**
+     * @return total experience required to level up
+     */
+    fun getExperienceRequired(): Int {
+        (1..10)
+            .plus(50)
+            .plus(70)
+            .plus(100)
+            .forEach {
+                val exp = experienceService.experienceOf(it)
+
+                println("$it -> $exp exp")
+                println("      ^ -> ${experienceService.levelOf(exp)} level")
+            }
+
+        return experienceService.experienceOf(_state.value.user.level + 1)
     }
 }
 
