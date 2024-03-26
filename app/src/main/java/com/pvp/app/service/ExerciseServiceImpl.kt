@@ -30,7 +30,8 @@ class ExerciseServiceImpl @Inject constructor(
                 record = ExerciseSessionRecord::class,
                 start = start,
                 end = end
-            ).map { record ->
+            )
+            .map { record ->
                 SportActivity
                     .fromId(record.exerciseType)
             }
