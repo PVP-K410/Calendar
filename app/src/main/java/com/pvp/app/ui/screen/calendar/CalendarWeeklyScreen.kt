@@ -699,10 +699,8 @@ fun Week(
     val date = dates[statePager.currentPage]
     var stateShowCards by remember { mutableStateOf(false) }
 
-    val tasksFiltered = remember(tasks.size, date) {
-        tasks.filter { task ->
-            task.scheduledAt.toLocalDate() == date
-        }
+    val tasksFiltered = tasks.filter { task ->
+        task.scheduledAt.toLocalDate() == date
     }
 
     Column(
