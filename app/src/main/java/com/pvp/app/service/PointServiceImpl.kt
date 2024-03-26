@@ -101,11 +101,11 @@ class PointServiceImpl @Inject constructor(
 
         val multiplier = if (increasePointYield) weeklyMultiplier else 1
 
-        return when (cosh(ln(distance * ratio))) {
+        return multiplier * when (cosh(ln(distance * ratio))) {
             in 0.0..1.65 -> 1
             in 1.65..2.5 -> 2
             else -> 3
-        } * multiplier
+        }
     }
 
     private fun calculateDurationPoints(
@@ -120,13 +120,13 @@ class PointServiceImpl @Inject constructor(
 
         val multiplier = if (increasePointYield) weeklyMultiplier else 1
 
-        val result = when ((duration / 60.0) * ratio) {
+        val result = multiplier * when ((duration / 60.0) * ratio) {
             in 0.0..0.75 -> 1
             in 0.75..1.5 -> 2
             in 1.5..2.8 -> 3
             in 2.8..4.2 -> 4
             else -> 5
-        } * multiplier
+        }
 
         return minOf(
             result,
