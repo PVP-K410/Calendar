@@ -665,6 +665,7 @@ fun DayCard(
         modifier = Modifier
             .fillMaxSize()
             .graphicsLayer(
+                alpha = if (pageIndex == page) 1f else 0.5f,
                 scaleX = scale,
                 scaleY = scale
             ),
