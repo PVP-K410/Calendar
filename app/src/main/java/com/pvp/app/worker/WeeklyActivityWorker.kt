@@ -59,7 +59,7 @@ class WeeklyActivityWorker @AssistedInject constructor(
                 when (activities.contains(SportActivity.Wheelchair)) {
                     true -> {
                         "Participating in Wheelchair activities " +
-                                "this week will give you more points!"
+                                "will give you more points this week!"
                     }
 
                     else -> {
@@ -72,18 +72,23 @@ class WeeklyActivityWorker @AssistedInject constructor(
             else -> {
                 activities.dropLast(1).joinToString(separator = ", ") { it.title } +
                         " and " + activities.last().title +
-                        " will give you more points this week! "
+                        " will give you more points this week!"
             }
         }
     }
 
     private suspend fun getRandomInfrequentActivities(count: Int = 4): List<SportActivity> {
-        val activities = exerciseService.getInfrequentActivities().toMutableList()
+        val activities = exerciseService
+            .getInfrequentActivities()
+            .toMutableList()
 
         return when (activities.contains(SportActivity.Wheelchair)) {
             true -> {
                 activities.remove(SportActivity.Wheelchair)
-                activities.shuffled().take(count)
+
+                activities
+                    .shuffled()
+                    .take(count)
             }
 
             else -> listOf(SportActivity.Wheelchair)

@@ -14,7 +14,7 @@ import com.pvp.app.common.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
-import com.pvp.app.worker.WeeklyActivityWorkerSetup
+import com.pvp.app.worker.WeeklyActivityWorker
 import dagger.hilt.android.HiltAndroidApp
 import java.time.Duration
 import java.time.LocalDateTime
@@ -106,15 +106,22 @@ class Application : Application(), Configuration.Provider {
     }
 
     private fun createWeeklyActivitiesWorker() {
-        workManager.enqueue(
-            OneTimeWorkRequestBuilder<WeeklyActivityWorkerSetup>()
-                .setInitialDelay(
-                    Duration.of(
-                        1,
-                        ChronoUnit.MINUTES
-                    )
+        val requestPeriodic = PeriodicWorkRequestBuilder<WeeklyActivityWorker>(
+            repeatInterval = 7,
+            repeatIntervalTimeUnit = TimeUnit.DAYS
+        )
+            .setInitialDelay(
+                Duration.of(
+                    1,
+                    ChronoUnit.MINUTES
                 )
-                .build()
+            )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            WeeklyActivityWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            requestPeriodic
         )
     }
 }

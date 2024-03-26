@@ -13,7 +13,7 @@ import java.time.ZoneId
 import javax.inject.Inject
 
 class ExerciseServiceImpl @Inject constructor(
-    private val service: HealthConnectService,
+    private val service: HealthConnectService
 ) : ExerciseService {
 
     private suspend fun getActivitiesWithOccurrencesMap(): Map<SportActivity, Int> {
@@ -25,13 +25,14 @@ class ExerciseServiceImpl @Inject constructor(
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
 
-        return service.readActivityData(
-            record = ExerciseSessionRecord::class,
-            start = start,
-            end = end
-        ).map { record ->
-            SportActivity.fromId(record.exerciseType)
-        }
+        return service
+            .readActivityData(
+                record = ExerciseSessionRecord::class,
+                start = start,
+                end = end
+            ).map { record ->
+                SportActivity.fromId(record.exerciseType)
+            }
             .getOccurences()
             .toMap()
     }
@@ -60,7 +61,7 @@ class ExerciseServiceImpl @Inject constructor(
         return SportActivity.entries.filter { activity ->
             (activityOccurrences[activity] == null
                     || activityOccurrences[activity]!! <= maxOccurrence)
-                    && activity.id != 0
+                    && activity != SportActivity.Other
         }
     }
 }
