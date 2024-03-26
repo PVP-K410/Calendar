@@ -57,6 +57,10 @@ class ProfileViewModel @Inject constructor(
 
             function(user)
 
+            _state.update {
+                it.copy(user = user)
+            }
+
             userService.merge(_state.value.user)
         }
     }
