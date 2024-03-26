@@ -225,7 +225,7 @@ fun ProfileScreen(
 
             Experience(
                 experience = state.user.experience,
-                experienceRequired = viewModel.getExperienceRequired(),
+                experienceRequired = state.experienceRequired,
                 level = state.user.level
             )
 
@@ -248,13 +248,20 @@ private fun Properties(
     onUpdateMass: (Int) -> Unit,
     state: ProfileState
 ) {
-    var activitiesSelected = remember { state.user.activities.map { it.title } }
+    var activitiesSelected = remember(state.user.activities) {
+        state.user.activities.map { it.title }
+    }
+
     var activitiesSelectedEdit by remember { mutableStateOf(activitiesSelected) }
     var activitiesUnselected by remember { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
     val context = LocalContext.current
     var height by remember { mutableIntStateOf(state.user.height) }
     var heightEdit by remember { mutableStateOf(height.toString()) }
-    var ingredientsSelected = remember { state.user.ingredients.map { it.title } }
+
+    var ingredientsSelected = remember(state.user.ingredients) {
+        state.user.ingredients.map { it.title }
+    }
+
     var ingredientsSelectedEdit by remember { mutableStateOf(ingredientsSelected) }
     var ingredientsUnselectedEdit by remember { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
     var mass by remember { mutableIntStateOf(state.user.mass) }

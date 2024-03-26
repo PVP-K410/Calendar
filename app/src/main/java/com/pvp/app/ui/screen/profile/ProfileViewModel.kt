@@ -8,12 +8,10 @@ import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,60 +22,45 @@ class ProfileViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        ProfileState(
-            isLoading = true,
-            user = User(),
-            userAvatar = ImageBitmap(1, 1)
-        )
-    )
-    val state: StateFlow<ProfileState> = _state.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            userService.user
-                .map { user ->
-                    _state.update {
-                        ProfileState(
-                            isLoading = false,
-                            user = user ?: User(),
-                            userAvatar = userService.resolveAvatar(user?.email ?: "")
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
+    val state = userService.user
+        .map { user ->
+            ProfileState(
+                experienceRequired = experienceService.experienceOf((user?.level ?: 0) + 1),
+                isLoading = false,
+                user = user ?: User(),
+                userAvatar = userService.resolveAvatar(user?.email ?: "")
+            )
         }
-    }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ProfileState(
+                experienceRequired = 0,
+                isLoading = true,
+                user = User(),
+                userAvatar = ImageBitmap(1, 1)
+            )
+        )
 
     fun update(
         function: (User) -> Unit
     ) {
         viewModelScope.launch {
-            val user = _state.value.user.copy()
+            val user = state.first().user.copy()
 
             function(user)
 
-            _state.update {
-                it.copy(user = user)
-            }
-
-            userService.merge(_state.value.user)
+            userService.merge(user)
         }
     }
 
     fun <T> fromConfiguration(function: (Configuration) -> T): T {
         return function(configuration)
     }
-
-    /**
-     * @return total experience required to level up
-     */
-    fun getExperienceRequired(): Int {
-        return experienceService.experienceOf(_state.value.user.level + 1)
-    }
 }
 
 data class ProfileState(
+    val experienceRequired: Int,
     val isLoading: Boolean,
     val user: User,
     val userAvatar: ImageBitmap
