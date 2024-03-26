@@ -63,7 +63,8 @@ class ExerciseServiceImpl @Inject constructor(
             (
                     activityOccurrences[activity] == null ||
                             activityOccurrences[activity]!! <= maxOccurrence
-                    ) && activity != SportActivity.Other
+                    ) &&
+                    activity != SportActivity.Other
         }
     }
 }
