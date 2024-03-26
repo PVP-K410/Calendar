@@ -554,9 +554,7 @@ fun TaskBox(
     task: Task,
     model: TaskViewModel = hiltViewModel()
 ) {
-    var checked by remember {
-        mutableStateOf(task.isCompleted)
-    }
+    var checked = task.isCompleted
 
     Box(
         modifier = Modifier
@@ -572,7 +570,6 @@ fun TaskBox(
                 shape = RoundedCornerShape(10.dp)
             )
     ) {
-
         Column(
             modifier = Modifier.padding(
                 horizontal = 8.dp,

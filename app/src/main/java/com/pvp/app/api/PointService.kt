@@ -10,11 +10,13 @@ interface PointService {
      * the task. User status can also be taken into account, hence, [Task.userEmail] is required.
      *
      * @param task task to calculate points for
+     * @param increasePointYield Indicates whether the calculation should increase points for this task
      *
      * @return points of the task
      */
     suspend fun calculate(
-        task: Task
+        task: Task,
+        increasePointYield: Boolean = false
     ): Int
 
     /**
