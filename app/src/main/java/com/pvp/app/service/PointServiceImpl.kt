@@ -26,6 +26,8 @@ class PointServiceImpl @Inject constructor(
     private val userService: UserService
 ) : PointService {
 
+    private val weeklyMultiplier = 2
+
     override suspend fun calculate(
         task: Task,
         increasePointYield: Boolean
@@ -197,6 +199,4 @@ class PointServiceImpl @Inject constructor(
             }
         }
     }
-
-    private val weeklyMultiplier = 2
 }

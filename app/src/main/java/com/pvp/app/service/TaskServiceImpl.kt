@@ -312,10 +312,11 @@ class TaskServiceImpl @Inject constructor(
             }
     }
 
-    private suspend fun isWeekly(activity: SportActivity): Boolean{
+    private suspend fun isWeekly(activity: SportActivity): Boolean {
         return userService.user
             .firstOrNull()?.weeklyActivities
-            ?.contains(activity) ?: false
+            ?.contains(activity)
+            ?: false
     }
 
     override suspend fun remove(
