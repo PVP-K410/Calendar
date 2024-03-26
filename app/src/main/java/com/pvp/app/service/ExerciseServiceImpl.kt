@@ -31,7 +31,8 @@ class ExerciseServiceImpl @Inject constructor(
                 start = start,
                 end = end
             ).map { record ->
-                SportActivity.fromId(record.exerciseType)
+                SportActivity
+                    .fromId(record.exerciseType)
             }
             .getOccurences()
             .toMap()
@@ -59,9 +60,10 @@ class ExerciseServiceImpl @Inject constructor(
         val activityOccurrences = getActivitiesWithOccurrencesMap()
 
         return SportActivity.entries.filter { activity ->
-            (activityOccurrences[activity] == null
-                    || activityOccurrences[activity]!! <= maxOccurrence)
-                    && activity != SportActivity.Other
+            (
+                    activityOccurrences[activity] == null ||
+                            activityOccurrences[activity]!! <= maxOccurrence
+                    ) && activity != SportActivity.Other
         }
     }
 }

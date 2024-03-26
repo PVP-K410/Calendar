@@ -70,7 +70,9 @@ class WeeklyActivityWorker @AssistedInject constructor(
             }
 
             else -> {
-                activities.dropLast(1).joinToString(separator = ", ") { it.title } +
+                activities
+                    .dropLast(1)
+                    .joinToString(separator = ", ") { it.title } +
                         " and " + activities.last().title +
                         " will give you more points this week!"
             }
