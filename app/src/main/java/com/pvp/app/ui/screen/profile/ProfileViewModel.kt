@@ -69,17 +69,6 @@ class ProfileViewModel @Inject constructor(
      * @return total experience required to level up
      */
     fun getExperienceRequired(): Int {
-        (1..10)
-            .plus(50)
-            .plus(70)
-            .plus(100)
-            .forEach {
-                val exp = experienceService.experienceOf(it)
-
-                println("$it -> $exp exp")
-                println("      ^ -> ${experienceService.levelOf(exp)} level")
-            }
-
         return experienceService.experienceOf(_state.value.user.level + 1)
     }
 }
