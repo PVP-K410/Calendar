@@ -184,7 +184,10 @@ class TaskServiceImpl @Inject constructor(
             isExpired = task.scheduledAt
                 .toLocalDate()
                 .isBefore(LocalDate.now()),
-            value = pointService.calculate(task)
+            value = pointService.calculate(
+                task = task,
+                increasePointYield = isWeekly(activity)
+            )
         )
 
         val reference = database
@@ -307,6 +310,12 @@ class TaskServiceImpl @Inject constructor(
                     .filter { it.exists() }
                     .mapNotNull { d -> d.data?.let { decodeByType(it) } }
             }
+    }
+
+    private suspend fun isWeekly(activity: SportActivity): Boolean{
+        return userService.user
+            .firstOrNull()?.weeklyActivities
+            ?.contains(activity) ?: false
     }
 
     override suspend fun remove(

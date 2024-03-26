@@ -27,7 +27,8 @@ class PointServiceImpl @Inject constructor(
 ) : PointService {
 
     override suspend fun calculate(
-        task: Task
+        task: Task,
+        increasePointYield: Boolean
     ): Int {
         val isDaily = task is SportTask && task.isDaily
 
@@ -56,7 +57,8 @@ class PointServiceImpl @Inject constructor(
                                 add(
                                     calculateDistancePoints(
                                         distance = distance,
-                                        ratio = task.activity.pointsRatioDistance
+                                        ratio = task.activity.pointsRatioDistance,
+                                        increasePointYield = increasePointYield
                                     )
                                 )
                             }
@@ -67,7 +69,8 @@ class PointServiceImpl @Inject constructor(
                                     add(
                                         calculateDurationPoints(
                                             duration = it,
-                                            ratio = task.activity.pointsRatioDuration
+                                            ratio = task.activity.pointsRatioDuration,
+                                            increasePointYield = increasePointYield
                                         )
                                     )
                                 }
@@ -89,27 +92,33 @@ class PointServiceImpl @Inject constructor(
 
     private fun calculateDistancePoints(
         distance: Double,
-        ratio: Float
+        ratio: Float,
+        increasePointYield: Boolean = false
     ): Int {
         if (distance == 0.0 || ratio == 0.0f) {
             return 0
         }
 
+        val multiplier = if (increasePointYield) weeklyMultiplier else 1
+
         return when (cosh(ln(distance * ratio))) {
             in 0.0..1.65 -> 1
             in 1.65..2.5 -> 2
             else -> 3
-        }
+        } * multiplier
     }
 
     private fun calculateDurationPoints(
         duration: Long,
         max: Int = 5,
-        ratio: Float
+        ratio: Float,
+        increasePointYield: Boolean = false
     ): Int {
         if (duration == 0L || ratio == 0.0f) {
             return 0
         }
+
+        val multiplier = if (increasePointYield) weeklyMultiplier else 1
 
         val result = when ((duration / 60.0) * ratio) {
             in 0.0..0.75 -> 1
@@ -117,7 +126,7 @@ class PointServiceImpl @Inject constructor(
             in 1.5..2.8 -> 3
             in 2.8..4.2 -> 4
             else -> 5
-        }
+        } * multiplier
 
         return minOf(
             result,
@@ -188,4 +197,6 @@ class PointServiceImpl @Inject constructor(
             }
         }
     }
+
+    private val weeklyMultiplier = 2
 }
