@@ -4,6 +4,7 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.aggregate.AggregateMetric
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
@@ -96,6 +97,39 @@ class HealthConnectServiceImpl @Inject constructor(
             start = start,
             end = end
         ) as? Energy)?.inCalories ?: 0.0
+    }
+
+    override suspend fun getHeartRateAvg(
+        start: Instant,
+        end: Instant
+    ): Long {
+        return aggregate(
+            metric = HeartRateRecord.BPM_AVG,
+            start = start,
+            end = end
+        ) as? Long ?: 0L
+    }
+
+    override suspend fun getHeartRateMax(
+        start: Instant,
+        end: Instant
+    ): Long {
+        return aggregate(
+            metric = HeartRateRecord.BPM_MAX,
+            start = start,
+            end = end
+        ) as? Long ?: 0L
+    }
+
+    override suspend fun getHeartRateMin(
+        start: Instant,
+        end: Instant
+    ): Long {
+        return aggregate(
+            metric = HeartRateRecord.BPM_MIN,
+            start = start,
+            end = end
+        ) as? Long ?: 0L
     }
 
     override suspend fun <T : Record> readActivityData(

@@ -66,6 +66,42 @@ interface HealthConnectService {
     ): Double
 
     /**
+     * Calculates and returns users average heart rate
+     * between the specified time range
+     * @param start Specifies the start of time range
+     * @param end Specifies the end of the time range
+     * @return Returns the average heart rate
+     */
+    suspend fun getHeartRateAvg(
+        start: Instant,
+        end: Instant
+    ): Long
+
+    /**
+     * Finds and returns users maximum heart rate
+     * between the specified time range
+     * @param start Specifies the start of time range
+     * @param end Specifies the end of the time range
+     * @return Returns the average heart rate
+     */
+    suspend fun getHeartRateMax(
+        start: Instant,
+        end: Instant
+    ): Long
+
+    /**
+     * Finds and returns users minimum heart rate
+     * between the specified time range
+     * @param start Specifies the start of time range
+     * @param end Specifies the end of the time range
+     * @return Returns the minimum heart rate
+     */
+    suspend fun getHeartRateMin(
+        start: Instant,
+        end: Instant
+    ): Long
+
+    /**
      * Reads all the data about a specified activity between the specified time range
      * @param record Specifies what kind of data needs to be read (steps, heart rate, etc.)
      * @param start Specifies the start of time range
