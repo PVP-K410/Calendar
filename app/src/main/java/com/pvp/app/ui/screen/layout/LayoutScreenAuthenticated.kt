@@ -274,7 +274,7 @@ fun LayoutScreenAuthenticated(
                         statePager
                     )
                 },
-                route,
+                if (statePager.currentPage == 1) Route.None else route,
                 Route.routesDrawer
             )
         },

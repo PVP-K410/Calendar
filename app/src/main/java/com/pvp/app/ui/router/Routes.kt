@@ -34,6 +34,7 @@ sealed class Route(
          */
         val routesAuthenticated = listOf(
             Calendar,
+            None,
             Settings,
             Steps
         )
@@ -60,13 +61,14 @@ sealed class Route(
          */
         val routesUnauthenticated = listOf(
             Authentication,
+            None,
             Survey
         )
     }
 
     data object Authentication : Route(
         path = "authentication",
-        resourceTitleId = R.string.route_authentication,
+        resourceTitleId = R.string.empty,
         screen = { _, _ -> AuthenticationScreen() }
     )
 
@@ -76,6 +78,12 @@ sealed class Route(
         path = "calendar",
         resourceTitleId = R.string.route_calendar,
         screen = { _, _ -> CalendarScreen() }
+    )
+
+    data object None : Route(
+        path = "none",
+        resourceTitleId = R.string.empty,
+        screen = { _, _ -> }
     )
 
     data object Settings : Route(
