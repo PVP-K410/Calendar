@@ -5,6 +5,7 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
@@ -109,6 +110,19 @@ class CalendarWeeklyViewModel @Inject constructor(
         )
     }
 
+    suspend fun getDaysHeartRateAverage(date: LocalDate): Long {
+        val end = getEndInstant(date)
+
+        val start = date
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return healthConnectService.getHeartRateAvg(
+            start,
+            end
+        )
+    }
+
     suspend fun getDaysSleepDuration(date: LocalDate): Duration {
         val end = date
             .plusDays(1)
@@ -166,6 +180,7 @@ val PERMISSIONS = setOf(
     HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
     HealthPermission.getReadPermission(DistanceRecord::class),
     HealthPermission.getReadPermission(ExerciseSessionRecord::class),
+    HealthPermission.getReadPermission(HeartRateRecord::class),
     HealthPermission.getReadPermission(SleepSessionRecord::class),
     HealthPermission.getReadPermission(StepsRecord::class),
     HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class)

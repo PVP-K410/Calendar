@@ -126,22 +126,7 @@ fun CalorieCounter(
             TotalCaloriesBurnedRecord::class
         )
     )
-//    var launcherTriggered by remember { mutableStateOf(false) }
-//    val permissionContract = PermissionController.createRequestPermissionResultContract()
-//
-//    val launcher =
-//        rememberLauncherForActivityResult(permissionContract) {
-//            launcherTriggered = !launcherTriggered
-//        }
-//
-//    LaunchedEffect(date, launcherTriggered) {
-//        if (model.permissionsGranted()) {
-//            calories = model.getDaysCaloriesTotal(date)
-//        } else {
-//            launcher.launch(PERMISSIONS)
-//        }
-//    }
-////
+
     LaunchedEffect(date, permissionState.status) {
         calories = model.getDaysCaloriesTotal(date)
     }
@@ -322,6 +307,37 @@ fun Day(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun HeartRateCounterAverage(
+    model: CalendarWeeklyViewModel = hiltViewModel(),
+    date: LocalDate
+) {
+    var heartRate by remember { mutableLongStateOf(0L) }
+    val permissionState = rememberPermissionState(
+        permission = HealthPermission.getReadPermission(
+            TotalCaloriesBurnedRecord::class
+        )
+    )
+
+    LaunchedEffect(date, permissionState.status) {
+        heartRate = model.getDaysHeartRateAverage(date)
+    }
+
+    Icon(
+        imageVector = Icons.Outlined.MonitorHeart,
+        contentDescription = null,
+        modifier = Modifier.size(26.dp)
+    )
+
+    Text(
+        text = if (heartRate > 0) "$heartRate" else "-",
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(start = 8.dp)
+    )
+}
+
+
 @Composable
 fun ActivitiesBox(
     date: LocalDate,
@@ -424,17 +440,7 @@ fun ActivitiesBox(
                     }
 
                     ActivityRow {
-                        Icon(
-                            imageVector = Icons.Outlined.MonitorHeart,
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp)
-                        )
-
-                        Text(
-                            text = "0",
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                        HeartRateCounterAverage(date = date)
                     }
 
                     ActivityRow {
@@ -556,14 +562,8 @@ fun SleepDurationCounter(
         modifier = Modifier.size(26.dp)
     )
 
-    var text = "- hr - m"
-
-    if (!duration.equals(Duration.ZERO)) {
-        text = getDurationString(duration)
-    }
-
     Text(
-        text = text,
+        text = if (!duration.equals(Duration.ZERO)) getDurationString(duration) else "- hr - m",
         style = MaterialTheme.typography.titleSmall,
         modifier = Modifier.padding(start = 8.dp)
     )
