@@ -179,8 +179,8 @@ fun FilterSurvey(
         boxTitle = "${title.capitalize()} that I like"
     } else {
         filtersUnselected = ingredients - filtersSelected.toSet()
-        informativeText = "Select meal ingredients that you don't like"
-        boxTitle = "${title.capitalize()} that I don't like"
+        informativeText = "Select ingredients that you can't take"
+        boxTitle = "${title.capitalize()} that I can't take"
     }
 
     LaunchedEffect(

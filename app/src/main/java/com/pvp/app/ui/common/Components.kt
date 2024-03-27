@@ -38,7 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -305,7 +305,7 @@ fun IconButtonWithDialog(
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
-    onConfirmClick: () -> Unit = {},
+    onConfirm: () -> Unit = {},
     onDismiss: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -342,7 +342,7 @@ fun IconButtonWithDialog(
                     Button(
                         content = confirmButtonContent,
                         onClick = {
-                            onConfirmClick()
+                            onConfirm()
 
                             showDialog = false
                         }
@@ -370,12 +370,12 @@ fun IconButtonWithDialog(
 
 @Composable
 fun EditableInfoItem(
-    label: String,
-    value: String,
-    dialogTitle: @Composable () -> Unit,
     dialogContent: @Composable () -> Unit,
-    onConfirmClick: () -> Unit,
+    dialogTitle: @Composable () -> Unit,
+    label: String,
+    onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
+    value: String
 ) {
     Box(
         modifier = Modifier
@@ -387,24 +387,20 @@ fun EditableInfoItem(
             .fillMaxWidth()
     ) {
         Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = label,
-                    fontStyle = FontStyle.Italic,
-                    modifier = Modifier.underline()
+                    fontWeight = FontWeight.Bold,
+                    text = label
                 )
 
-                Text(
-                    text = value,
-                    fontStyle = FontStyle.Italic
-                )
+                Text(text = value)
             }
 
             Column(
@@ -412,18 +408,18 @@ fun EditableInfoItem(
                 verticalArrangement = Arrangement.Center
             ) {
                 IconButtonWithDialog(
-                    icon = Icons.Outlined.Edit,
-                    iconSize = 30.dp,
-                    iconDescription = "Edit Icon Button",
                     confirmButtonContent = {
                         Text("Save")
                     },
                     dismissButtonContent = {
                         Text("Cancel")
                     },
-                    dialogTitle = dialogTitle,
                     dialogContent = dialogContent,
-                    onConfirmClick = onConfirmClick,
+                    dialogTitle = dialogTitle,
+                    icon = Icons.Outlined.Edit,
+                    iconSize = 30.dp,
+                    iconDescription = "Edit Icon Button",
+                    onConfirm = { onConfirm(value) },
                     onDismiss = onDismiss
                 )
             }
