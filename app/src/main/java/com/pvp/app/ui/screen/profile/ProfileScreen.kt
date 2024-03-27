@@ -2,14 +2,15 @@
 
 package com.pvp.app.ui.screen.profile
 
-import android.content.Context
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -17,11 +18,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Stars
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -29,10 +32,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,303 +48,150 @@ import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.showToast
-import com.pvp.app.ui.common.underline
 import com.pvp.app.ui.screen.filters.FiltersDialog
 import com.pvp.app.ui.screen.filters.FiltersItem
 
+private val ACTIVITIES = SportActivity.entries.map { it.title }
+private val INGREDIENTS = Ingredient.entries.map { it.title }
+
 @Composable
-private fun ProfileBody(
-    modifier: Modifier = Modifier,
-    state: State<ProfileState>,
-    context: Context = LocalContext.current,
-    onUpdateMass: (Int) -> Unit,
-    onUpdateHeight: (Int) -> Unit,
-    onUpdateIngredients: (List<String>) -> Unit,
-    onUpdateActivities: (List<String>) -> Unit,
+private fun Experience(
+    experience: Int,
+    experienceRequired: Int,
+    level: Int
 ) {
-    val allActivities = remember { SportActivity.entries.map { it.title } }
-    val allIngredients = remember { Ingredient.entries.map { it.title } }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                end = 30.dp,
+                start = 30.dp
+            ),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            text = "Level $level",
+            style = MaterialTheme.typography.labelLarge
+        )
 
-    var heightDisplay by remember { mutableIntStateOf(state.value.user.height) }
-    var heightEditing by remember { mutableStateOf(heightDisplay.toString()) }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(top = 6.dp)
+        ) {
+            val progress by animateFloatAsState(
+                label = "ExperienceProgressAnimation",
+                targetValue = (experience / experienceRequired.toFloat()),
+            )
 
-    var massDisplay by remember { mutableIntStateOf(state.value.user.mass) }
-    var massEditing by remember { mutableStateOf(massDisplay.toString()) }
+            LinearProgressIndicator(
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp),
+                progress = { progress },
+                strokeCap = StrokeCap.Round,
+                trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
+            )
 
-    val _ingredients = remember { state.value.user.ingredients }
-    val _selectedIngredients = remember { _ingredients.map { it.title } }
-    val _unselectedIngredients = remember { allIngredients - _selectedIngredients.toSet() }
-    var ingredientsDisplay by remember { mutableStateOf(_selectedIngredients) }
-    var ingredientsEditingSelected by remember { mutableStateOf(_selectedIngredients) }
-    var ingredientsEditingUnselected by remember { mutableStateOf(_unselectedIngredients) }
+            Text(
+                style = MaterialTheme.typography.bodyLarge,
+                text = "$experience / $experienceRequired Exp",
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
 
-    val _activities = remember { state.value.user.activities }
-    val _selectedActivities = remember { _activities.map { it.title } }
-    val _unselectedActivities = remember { allActivities - _selectedActivities.toSet() }
-    var activitiesDisplay by remember { mutableStateOf(_selectedActivities) }
-    var activitiesEditingSelected by remember { mutableStateOf(_selectedActivities) }
-    var activitiesEditingUnselected by remember { mutableStateOf(_unselectedActivities) }
+@Composable
+private fun Initials(
+    onUsernameChange: (String) -> Unit,
+    model: ProfileViewModel = hiltViewModel(),
+    state: ProfileState
+) {
+    val context = LocalContext.current
+    val email by remember { mutableStateOf(state.user.email) }
+    var userName by remember { mutableStateOf(state.user.username) }
+    var userNameEdit by remember { mutableStateOf(userName) }
+    val usernameInterval = remember { model.fromConfiguration { it.intervalUsernameLength } }
+    val lengthMin = usernameInterval.first
+    val lengthMax = usernameInterval.second
 
     Column(
-        modifier = modifier
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(
-                start = 30.dp,
-                end = 30.dp
+                bottom = 15.dp,
+                end = 30.dp,
+                start = 30.dp
             ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.Center
     ) {
-        EditableInfoItem(
-            label = "Your mass:",
-            value = "$massDisplay kg",
-            dialogTitle = { Text("Editing Mass") },
-            dialogContent = {
-                OutlinedTextField(
-                    value = massEditing,
-                    onValueChange = { massEditing = it },
-                    label = { Text("Mass") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                )
-            },
-            onConfirmClick = {
-                val newMass = massEditing.toIntOrNull() ?: 0
+        Image(
+            alignment = Alignment.TopCenter,
+            contentDescription = "Profile screen icon",
+            modifier = Modifier.size(
+                height = 200.dp,
+                width = 200.dp
+            ),
+            painter = BitmapPainter(state.userAvatar)
+        )
 
-                if (newMass in 2..700) {
-                    massDisplay = newMass
+        Username(
+            onChange = { userNameEdit = it },
+            onDismiss = { userNameEdit = userName },
+            onSave = {
+                userNameEdit = userNameEdit.trim()
 
-                    onUpdateMass(newMass)
+                if (userNameEdit.length in lengthMin..lengthMax) {
+                    userName = userNameEdit
 
-                    context.showToast(message = "Your mass has been updated!")
+                    onUsernameChange(userNameEdit)
+
+                    context.showToast(message = "Your username has been updated")
                 } else {
-                    massEditing = massDisplay.toString()
+                    userNameEdit = userName
 
-                    context.showToast(message = "Please enter a valid mass!")
+                    context.showToast(message = "Username must be between $lengthMin and $lengthMax characters long")
                 }
             },
-            onDismiss = {
-                massEditing = massDisplay.toString()
-            }
+            username = userName,
+            usernameEdit = userNameEdit
         )
 
-        EditableInfoItem(
-            label = "Your height:",
-            value = "$heightDisplay cm",
-            dialogTitle = { Text("Editing Height") },
-            dialogContent = {
-                OutlinedTextField(
-                    value = heightEditing,
-                    onValueChange = { heightEditing = it },
-                    label = { Text("Height") },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                )
-            },
-            onConfirmClick = {
-                val newHeight = heightEditing.toIntOrNull() ?: 0
-
-                if (newHeight in 40..300) {
-                    heightDisplay = newHeight
-
-                    onUpdateHeight(newHeight)
-
-                    context.showToast(message = "Your height has been updated!")
-                } else {
-                    massEditing = massDisplay.toString()
-
-                    context.showToast(message = "Please enter a valid height!")
-                }
-            },
-            onDismiss = {
-                heightEditing = heightDisplay.toString()
-            }
-        )
-
-        FiltersItem(
-            filtersType = "activities",
-            title = "Sport activities filter:",
-            selectedFilters = activitiesDisplay,
-            dialogTitle = {
-                Text("Editing sport activities filter")
-            },
-            dialogContent = {
-                FiltersDialog(
-                    boxTitle = "Activities that I like",
-                    selectedFilters = activitiesEditingSelected,
-                    unselectedFilters = activitiesEditingUnselected,
-                    onValueChange = { newSelected, newUnselected ->
-                        activitiesEditingSelected = newSelected
-                        activitiesEditingUnselected = newUnselected
-                    },
-                    title = "activities"
-                )
-            },
-            onConfirmClick = {
-                activitiesDisplay = activitiesEditingSelected
-
-                onUpdateActivities(activitiesEditingSelected)
-
-                context.showToast(message = "Your sport activities have been updated!")
-            },
-            onDismiss = {
-                activitiesEditingSelected = activitiesDisplay
-                activitiesEditingUnselected = allActivities - activitiesDisplay.toSet()
-            }
-        )
-
-        FiltersItem(
-            filtersType = "ingredients",
-            title = "Meal ingredients filter:",
-            selectedFilters = ingredientsDisplay,
-            dialogTitle = {
-                Text("Editing meal ingredients filter")
-            },
-            dialogContent = {
-                FiltersDialog(
-                    boxTitle = "Ingredients that I don't like",
-                    selectedFilters = ingredientsEditingSelected,
-                    unselectedFilters = ingredientsEditingUnselected,
-                    onValueChange = { newSelected, newUnselected ->
-                        ingredientsEditingSelected = newSelected
-                        ingredientsEditingUnselected = newUnselected
-                    },
-                    title = "ingredients"
-                )
-            },
-            onConfirmClick = {
-                ingredientsDisplay = ingredientsEditingSelected
-
-                onUpdateIngredients(ingredientsEditingSelected)
-
-                context.showToast(message = "Your meal ingredients have been updated!")
-            },
-            onDismiss = {
-                ingredientsEditingSelected = ingredientsDisplay
-                ingredientsEditingUnselected = allIngredients - ingredientsDisplay.toSet()
-            }
+        Text(
+            style = MaterialTheme.typography.bodyMedium,
+            text = email
         )
     }
 }
 
 @Composable
-private fun ProfileHeader(
-    model: ProfileViewModel = hiltViewModel(),
-    state: State<ProfileState>,
-    context: Context = LocalContext.current,
-    onUpdateUsername: (String) -> Unit
+private fun BoxScope.Points(
+    points: Int
 ) {
-    val intervalUsernameLength = remember { model.fromConfiguration { it.intervalUsernameLength } }
-    val minLength = intervalUsernameLength.first
-    val maxLength = intervalUsernameLength.second
-    var userNameDisplay by remember { mutableStateOf(state.value.user.username) }
-    var userNameEditing by remember { mutableStateOf(userNameDisplay) }
-    val emailDisplay by remember { mutableStateOf(state.value.user.email) }
-
-    Column(
+    Row(
+        horizontalArrangement = Arrangement.Center,
         modifier = Modifier
-            .fillMaxWidth()
+            .align(Alignment.TopEnd)
             .padding(
-                start = 30.dp,
                 end = 30.dp,
-                bottom = 15.dp
+                top = 8.dp
             ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            contentDescription = "Profile screen icon",
-            modifier = Modifier
-                .size(
-                    width = 200.dp,
-                    height = 200.dp
-                ),
-            painter = BitmapPainter(state.value.userAvatar),
-            alignment = Alignment.TopCenter,
+        Text(
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(end = 4.dp),
+            text = "$points"
         )
 
-        Column(
-            modifier = Modifier
-                .padding(top = 15.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Welcome,",
-                fontSize = 28.sp
-            )
-
-            Row(
-                modifier = Modifier
-                    .underline(),
-            ) {
-                Text(
-                    text = userNameDisplay,
-                    fontSize = 28.sp
-                )
-
-                IconButtonWithDialog(
-                    modifier = Modifier
-                        .padding(
-                            start = 5.dp,
-                            top = 4.dp
-                        ),
-                    icon = Icons.Outlined.Edit,
-                    iconSize = 30.dp,
-                    iconDescription = "Edit Icon Button",
-                    confirmButtonContent = {
-                        Text("Save")
-                    },
-                    dismissButtonContent = {
-                        Text("Cancel")
-                    },
-                    dialogTitle = {
-                        Text("Editing Username")
-                    },
-                    dialogContent = {
-                        OutlinedTextField(
-                            value = userNameEditing,
-                            onValueChange = { userNameEditing = it },
-                            label = { Text("Username") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp)
-                        )
-                    },
-                    onConfirmClick = {
-                        userNameEditing = userNameEditing.trim()
-                        
-                        val length = userNameEditing.length
-
-                        if (length in minLength..maxLength) {
-                            userNameDisplay = userNameEditing
-
-                            onUpdateUsername(userNameEditing)
-
-                            context.showToast(message = "Your username has been updated!")
-                        } else {
-                            context.showToast(message = "Username must be between $minLength and $maxLength characters long!")
-
-                            userNameEditing = userNameDisplay
-                        }
-                    },
-                    onDismiss = {
-                        userNameEditing = userNameDisplay
-                    }
-                )
-            }
-        }
-
-        Text(
-            modifier = Modifier.padding(bottom = 20.dp),
-            text = emailDisplay,
-            style = MaterialTheme.typography.bodyMedium,
-            fontStyle = FontStyle.Italic
+        Icon(
+            contentDescription = "Points indicator icon",
+            imageVector = Icons.Outlined.Stars
         )
     }
 }
@@ -348,9 +200,9 @@ private fun ProfileHeader(
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val state = viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
-    if (state.value.isLoading) {
+    if (state.isLoading) {
         ProgressIndicator()
 
         return
@@ -359,40 +211,251 @@ fun ProfileScreen(
     Box(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                ProfileHeader(
-                    state = state,
-                    onUpdateUsername = {
-                        viewModel.updateUserInformation(newUsername = it)
-                    }
-                )
-            }
+        Points(points = state.user.points)
 
-            ProfileBody(
-                modifier = Modifier.fillMaxWidth(),
-                state = state,
-                onUpdateMass = {
-                    viewModel.updateUserInformation(newMass = it)
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Initials(
+                onUsernameChange = {
+                    viewModel.update { u -> u.username = it }
                 },
-                onUpdateHeight = {
-                    viewModel.updateUserInformation(newHeight = it)
-                },
-                onUpdateActivities = {
-                    viewModel.updateUserInformation(newActivityFilters = it)
-                },
-                onUpdateIngredients = {
-                    viewModel.updateUserInformation(newIngredientFilters = it)
-                }
+                state = state
+            )
+
+            Experience(
+                experience = state.user.experience,
+                experienceRequired = state.experienceRequired,
+                level = state.user.level
+            )
+
+            Properties(
+                onUpdateActivities = { viewModel.update { u -> u.activities = it } },
+                onUpdateIngredients = { viewModel.update { u -> u.ingredients = it } },
+                onUpdateHeight = { viewModel.update { u -> u.height = it } },
+                onUpdateMass = { viewModel.update { u -> u.mass = it } },
+                state = state
             )
         }
+    }
+}
+
+@Composable
+private fun Properties(
+    onUpdateActivities: (List<SportActivity>) -> Unit,
+    onUpdateHeight: (Int) -> Unit,
+    onUpdateIngredients: (List<Ingredient>) -> Unit,
+    onUpdateMass: (Int) -> Unit,
+    state: ProfileState
+) {
+    var activitiesSelected = remember(state.user.activities) {
+        state.user.activities.map { it.title }
+    }
+
+    var activitiesSelectedEdit by remember { mutableStateOf(activitiesSelected) }
+    var activitiesUnselected by remember { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
+    val context = LocalContext.current
+    var height by remember { mutableIntStateOf(state.user.height) }
+    var heightEdit by remember { mutableStateOf(height.toString()) }
+
+    var ingredientsSelected = remember(state.user.ingredients) {
+        state.user.ingredients.map { it.title }
+    }
+
+    var ingredientsSelectedEdit by remember { mutableStateOf(ingredientsSelected) }
+    var ingredientsUnselectedEdit by remember { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
+    var mass by remember { mutableIntStateOf(state.user.mass) }
+    var massEdit by remember { mutableStateOf(mass.toString()) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                end = 30.dp,
+                start = 30.dp,
+                top = 30.dp
+            ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        EditableInfoItem(
+            dialogContent = {
+                OutlinedTextField(
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    label = { Text("Mass") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    onValueChange = { massEdit = it.replace(" ", "") },
+                    value = massEdit
+                )
+            },
+            dialogTitle = { Text("Editing mass") },
+            label = "Your mass",
+            onConfirm = {
+                val massNew = massEdit.toIntOrNull() ?: 0
+
+                if (massNew in 2..700) {
+                    mass = massNew
+
+                    onUpdateMass(massNew)
+
+                    context.showToast(message = "Your mass has been updated")
+                } else {
+                    massEdit = mass.toString()
+
+                    context.showToast(message = "Please enter a mass between 2 and 700 kg")
+                }
+            },
+            onDismiss = { massEdit = mass.toString() },
+            value = "$mass kg"
+        )
+
+        EditableInfoItem(
+            dialogContent = {
+                OutlinedTextField(
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    label = { Text("Height") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    onValueChange = { heightEdit = it },
+                    value = heightEdit
+                )
+            },
+            dialogTitle = { Text("Editing height") },
+            label = "Your height",
+            onConfirm = {
+                val newHeight = heightEdit.toIntOrNull() ?: 0
+
+                if (newHeight in 40..300) {
+                    height = newHeight
+
+                    onUpdateHeight(newHeight)
+
+                    context.showToast(message = "Your height has been updated")
+                } else {
+                    massEdit = mass.toString()
+
+                    context.showToast(message = "Please enter a height between 40 and 300 cm")
+                }
+            },
+            onDismiss = {
+                heightEdit = height.toString()
+            },
+            value = "$height cm"
+        )
+
+        FiltersItem(
+            dialogContent = {
+                FiltersDialog(
+                    boxTitle = "Activities that I like",
+                    onValueChange = { selected, unselected ->
+                        activitiesSelectedEdit = selected
+                        activitiesUnselected = unselected
+                    },
+                    selectedFilters = activitiesSelectedEdit,
+                    title = "activities",
+                    unselectedFilters = activitiesUnselected
+                )
+            },
+            dialogTitle = {
+                Text("Editing preferable sport activities")
+            },
+            filtersType = "activities",
+            onConfirmClick = {
+                activitiesSelected = activitiesSelectedEdit
+
+                onUpdateActivities(activitiesSelectedEdit.map { SportActivity.fromTitle(it) })
+
+                context.showToast(message = "Your sport activities have been updated")
+            },
+            onDismiss = {
+                activitiesSelectedEdit = activitiesSelected
+                activitiesUnselected = ACTIVITIES - activitiesSelected.toSet()
+            },
+            selectedFilters = activitiesSelected,
+            title = "Sport activities that you like"
+        )
+
+        FiltersItem(
+            dialogContent = {
+                FiltersDialog(
+                    boxTitle = "Ingredients that I can't take",
+                    onValueChange = { selected, unselected ->
+                        ingredientsSelectedEdit = selected
+                        ingredientsUnselectedEdit = unselected
+                    },
+                    selectedFilters = ingredientsSelectedEdit,
+                    title = "ingredients",
+                    unselectedFilters = ingredientsUnselectedEdit
+                )
+            },
+            dialogTitle = {
+                Text("Editing ingredients that you can't take")
+            },
+            filtersType = "ingredients",
+            onConfirmClick = {
+                ingredientsSelected = ingredientsSelectedEdit
+
+                onUpdateIngredients(ingredientsSelectedEdit.mapNotNull { Ingredient.fromTitle(it) })
+
+                context.showToast(message = "Your ingredients have been updated")
+            },
+            onDismiss = {
+                ingredientsSelectedEdit = ingredientsSelected
+                ingredientsUnselectedEdit = INGREDIENTS - ingredientsSelected.toSet()
+            },
+            selectedFilters = ingredientsSelected,
+            title = "Ingredients that you can't take"
+        )
+    }
+}
+
+@Composable
+private fun Username(
+    onChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit,
+    username: String,
+    usernameEdit: String
+) {
+    Row(
+        modifier = Modifier.padding(top = 15.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineMedium,
+            text = username,
+        )
+
+        IconButtonWithDialog(
+            confirmButtonContent = { Text("Save") },
+            dismissButtonContent = { Text("Cancel") },
+            dialogContent = {
+                OutlinedTextField(
+                    label = { Text("Username") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    onValueChange = onChange,
+                    value = usernameEdit
+                )
+            },
+            dialogTitle = { Text("Editing username") },
+            icon = Icons.Outlined.Edit,
+            iconSize = 30.dp,
+            iconDescription = "Edit Icon Button",
+            modifier = Modifier.padding(
+                start = 5.dp,
+                top = 4.dp
+            ),
+            onConfirm = onSave,
+            onDismiss = onDismiss
+        )
     }
 }

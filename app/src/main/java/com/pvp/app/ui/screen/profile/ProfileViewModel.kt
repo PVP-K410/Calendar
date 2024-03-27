@@ -4,82 +4,53 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.UserService
-import com.pvp.app.model.Ingredient
-import com.pvp.app.model.SportActivity
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userService: UserService,
-    private val configuration: Configuration
+    private val configuration: Configuration,
+    private val experienceService: ExperienceService,
+    private val userService: UserService
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        ProfileState(
-            isLoading = true,
-            user = User(),
-            userAvatar = ImageBitmap(1, 1)
-        )
-    )
-    val state: StateFlow<ProfileState> = _state.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            userService.user
-                .map { user ->
-                    _state.update {
-                        ProfileState(
-                            isLoading = false,
-                            user = user ?: User(),
-                            userAvatar = userService.resolveAvatar(user?.email ?: "")
-                        )
-                    }
-                }
-                .launchIn(viewModelScope)
+    val state = userService.user
+        .map { user ->
+            ProfileState(
+                experienceRequired = experienceService.experienceOf((user?.level ?: 0) + 1),
+                isLoading = false,
+                user = user ?: User(),
+                userAvatar = userService.resolveAvatar(user?.email ?: "")
+            )
         }
-    }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ProfileState(
+                experienceRequired = 0,
+                isLoading = true,
+                user = User(),
+                userAvatar = ImageBitmap(1, 1)
+            )
+        )
 
-    fun updateUserInformation(
-        newUsername: String? = null,
-        newMass: Int? = null,
-        newHeight: Int? = null,
-        newActivityFilters: List<String>? = null,
-        newIngredientFilters: List<String>? = null
+    fun update(
+        function: (User) -> Unit
     ) {
         viewModelScope.launch {
-            newUsername?.let {
-                _state.value.user.username = it
-            }
+            val user = state.first().user.copy()
 
-            newMass?.let {
-                _state.value.user.mass = it
-            }
+            function(user)
 
-            newHeight?.let {
-                _state.value.user.height = it
-            }
-
-            newActivityFilters?.let {
-                _state.value.user.activities =
-                    newActivityFilters.mapNotNull { SportActivity.fromTitle(it) }
-            }
-
-            newIngredientFilters?.let {
-                _state.value.user.ingredients =
-                    newIngredientFilters.mapNotNull { Ingredient.fromTitle(it) }
-            }
-
-            userService.merge(_state.value.user)
+            userService.merge(user)
         }
     }
 
@@ -89,6 +60,7 @@ class ProfileViewModel @Inject constructor(
 }
 
 data class ProfileState(
+    val experienceRequired: Int,
     val isLoading: Boolean,
     val user: User,
     val userAvatar: ImageBitmap
