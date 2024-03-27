@@ -84,7 +84,7 @@ class CalendarWeeklyViewModel @Inject constructor(
         return granted.containsAll(PERMISSIONS)
     }
 
-    suspend fun getDaysCaloriesActive(date: LocalDate): Double {
+    suspend fun getDayCaloriesActive(date: LocalDate): Double {
         val end = getEndInstant(date)
 
         val start = date
@@ -97,7 +97,7 @@ class CalendarWeeklyViewModel @Inject constructor(
         )
     }
 
-    suspend fun getDaysCaloriesTotal(date: LocalDate): Double {
+    suspend fun getDayCaloriesTotal(date: LocalDate): Double {
         val end = getEndInstant(date)
 
         val start = date
@@ -110,7 +110,7 @@ class CalendarWeeklyViewModel @Inject constructor(
         )
     }
 
-    suspend fun getDaysHeartRateAverage(date: LocalDate): Long {
+    suspend fun getDayHeartRateAverage(date: LocalDate): Long {
         val end = getEndInstant(date)
 
         val start = date
@@ -123,11 +123,12 @@ class CalendarWeeklyViewModel @Inject constructor(
         )
     }
 
-    suspend fun getDaysSleepDuration(date: LocalDate): Duration {
+    suspend fun getDaySleepDuration(date: LocalDate): Duration {
         val end = date
             .plusDays(1)
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
+
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
@@ -143,6 +144,7 @@ class CalendarWeeklyViewModel @Inject constructor(
             .plusDays(1)
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
+
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()

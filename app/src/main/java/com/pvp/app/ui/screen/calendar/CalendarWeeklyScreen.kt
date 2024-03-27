@@ -121,14 +121,18 @@ fun CalorieCounter(
     date: LocalDate
 ) {
     var calories by remember { mutableDoubleStateOf(0.0) }
+
     val permissionState = rememberPermissionState(
         permission = HealthPermission.getReadPermission(
             TotalCaloriesBurnedRecord::class
         )
     )
 
-    LaunchedEffect(date, permissionState.status) {
-        calories = model.getDaysCaloriesTotal(date)
+    LaunchedEffect(
+        date,
+        permissionState.status
+    ) {
+        calories = model.getDayCaloriesTotal(date)
     }
 
     Icon(
@@ -314,14 +318,18 @@ fun HeartRateCounterAverage(
     date: LocalDate
 ) {
     var heartRate by remember { mutableLongStateOf(0L) }
+
     val permissionState = rememberPermissionState(
         permission = HealthPermission.getReadPermission(
             TotalCaloriesBurnedRecord::class
         )
     )
 
-    LaunchedEffect(date, permissionState.status) {
-        heartRate = model.getDaysHeartRateAverage(date)
+    LaunchedEffect(
+        date,
+        permissionState.status
+    ) {
+        heartRate = model.getDayHeartRateAverage(date)
     }
 
     Icon(
@@ -355,7 +363,10 @@ fun ActivitiesBox(
             launcherTriggered = !launcherTriggered
         }
 
-    LaunchedEffect(date, launcherTriggered) {
+    LaunchedEffect(
+        date,
+        launcherTriggered
+    ) {
         if (!model.permissionsGranted()) {
             launcher.launch(PERMISSIONS)
         }
@@ -546,14 +557,18 @@ fun SleepDurationCounter(
     date: LocalDate
 ) {
     var duration by remember { mutableStateOf(Duration.ZERO) }
+
     val permissionState = rememberPermissionState(
         permission = HealthPermission.getReadPermission(
             SleepSessionRecord::class
         )
     )
 
-    LaunchedEffect(date, permissionState.status) {
-        duration = model.getDaysSleepDuration(date)
+    LaunchedEffect(
+        date,
+        permissionState.status
+    ) {
+        duration = model.getDaySleepDuration(date)
     }
 
     Icon(
@@ -576,13 +591,17 @@ fun StepCounter(
     date: LocalDate
 ) {
     var steps by remember { mutableLongStateOf(0L) }
+
     val permissionState = rememberPermissionState(
         permission = HealthPermission.getReadPermission(
             StepsRecord::class
         )
     )
 
-    LaunchedEffect(date, permissionState.status) {
+    LaunchedEffect(
+        date,
+        permissionState.status
+    ) {
         steps = model.getDaysSteps(date)
     }
 

@@ -82,7 +82,7 @@ interface HealthConnectService {
      * between the specified time range
      * @param start Specifies the start of time range
      * @param end Specifies the end of the time range
-     * @return Returns the average heart rate
+     * @return Returns the maximum heart rate
      */
     suspend fun getHeartRateMax(
         start: Instant,
