@@ -3,6 +3,7 @@
 package com.pvp.app.ui.screen.profile
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,10 +84,17 @@ private fun Experience(
             contentAlignment = Alignment.Center,
             modifier = Modifier.padding(top = 6.dp)
         ) {
+            var target by remember { mutableFloatStateOf(0f) }
+
             val progress by animateFloatAsState(
+                animationSpec = tween(durationMillis = 1000),
                 label = "ExperienceProgressAnimation",
-                targetValue = (experience / experienceRequired.toFloat()),
+                targetValue = target,
             )
+
+            LaunchedEffect(Unit) {
+                target = experience / experienceRequired.toFloat()
+            }
 
             LinearProgressIndicator(
                 color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),

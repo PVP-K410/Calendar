@@ -59,12 +59,9 @@ class Activity : ComponentActivity() {
             return false
         }
 
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val channels = notificationManager.notificationChannels
-
-        for (channel in channels) {
+        for (channel in manager.notificationChannels) {
             if (channel.importance == NotificationManager.IMPORTANCE_NONE) {
                 return false
             }
@@ -74,11 +71,14 @@ class Activity : ComponentActivity() {
     }
 
     private fun openNotificationSettingsForApp(context: Context) {
-        val intent = Intent().apply {
-            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            addCategory(Intent.CATEGORY_DEFAULT)
-            data = Uri.parse("package:" + context.packageName)
-        }
+        val intent = Intent()
+            .apply {
+                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+
+                addCategory(Intent.CATEGORY_DEFAULT)
+
+                data = Uri.parse("package:" + context.packageName)
+            }
 
         context.startActivity(intent)
     }
