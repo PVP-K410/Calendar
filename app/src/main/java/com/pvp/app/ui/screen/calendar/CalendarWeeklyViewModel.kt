@@ -5,6 +5,8 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.lifecycle.ViewModel
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -81,7 +84,7 @@ class CalendarWeeklyViewModel @Inject constructor(
         return granted.containsAll(PERMISSIONS)
     }
 
-    suspend fun getDaysCaloriesActive(date: LocalDate): Double {
+    suspend fun getDayCaloriesActive(date: LocalDate): Double {
         val end = getEndInstant(date)
 
         val start = date
@@ -94,7 +97,7 @@ class CalendarWeeklyViewModel @Inject constructor(
         )
     }
 
-    suspend fun getDaysCaloriesTotal(date: LocalDate): Double {
+    suspend fun getDayCaloriesTotal(date: LocalDate): Double {
         val end = getEndInstant(date)
 
         val start = date
@@ -107,11 +110,41 @@ class CalendarWeeklyViewModel @Inject constructor(
         )
     }
 
+    suspend fun getDayHeartRateAverage(date: LocalDate): Long {
+        val end = getEndInstant(date)
+
+        val start = date
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return healthConnectService.getHeartRateAvg(
+            start,
+            end
+        )
+    }
+
+    suspend fun getDaySleepDuration(date: LocalDate): Duration {
+        val end = date
+            .plusDays(1)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        val start = date
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return healthConnectService.aggregateSleepDuration(
+            start,
+            end
+        )
+    }
+
     suspend fun getDaysSteps(date: LocalDate): Long {
         val end = date
             .plusDays(1)
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
+
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
@@ -149,6 +182,8 @@ val PERMISSIONS = setOf(
     HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
     HealthPermission.getReadPermission(DistanceRecord::class),
     HealthPermission.getReadPermission(ExerciseSessionRecord::class),
+    HealthPermission.getReadPermission(HeartRateRecord::class),
+    HealthPermission.getReadPermission(SleepSessionRecord::class),
     HealthPermission.getReadPermission(StepsRecord::class),
     HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class)
 )
