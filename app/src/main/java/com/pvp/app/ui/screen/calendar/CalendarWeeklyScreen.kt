@@ -45,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -65,8 +66,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
+import com.pvp.app.common.getDurationString
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -76,6 +84,7 @@ import com.pvp.app.ui.screen.task.CreateTaskMealForm
 import com.pvp.app.ui.screen.task.CreateTaskSportForm
 import com.pvp.app.ui.screen.task.TaskBox
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters
@@ -105,26 +114,36 @@ private fun ButtonTaskSelector(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CalorieCounter(
     model: CalendarWeeklyViewModel = hiltViewModel(),
     date: LocalDate
 ) {
     var calories by remember { mutableDoubleStateOf(0.0) }
-    var launcherTriggered by remember { mutableStateOf(false) }
-    val permissionContract = PermissionController.createRequestPermissionResultContract()
-
-    val launcher =
-        rememberLauncherForActivityResult(permissionContract) {
-            launcherTriggered = !launcherTriggered
-        }
-
-    LaunchedEffect(date, launcherTriggered) {
-        if (model.permissionsGranted()) {
-            calories = model.getDaysCaloriesTotal(date)
-        } else {
-            launcher.launch(PERMISSIONS)
-        }
+    val permissionState = rememberPermissionState(
+        permission = HealthPermission.getReadPermission(
+            TotalCaloriesBurnedRecord::class
+        )
+    )
+//    var launcherTriggered by remember { mutableStateOf(false) }
+//    val permissionContract = PermissionController.createRequestPermissionResultContract()
+//
+//    val launcher =
+//        rememberLauncherForActivityResult(permissionContract) {
+//            launcherTriggered = !launcherTriggered
+//        }
+//
+//    LaunchedEffect(date, launcherTriggered) {
+//        if (model.permissionsGranted()) {
+//            calories = model.getDaysCaloriesTotal(date)
+//        } else {
+//            launcher.launch(PERMISSIONS)
+//        }
+//    }
+////
+    LaunchedEffect(date, permissionState.status) {
+        calories = model.getDaysCaloriesTotal(date)
     }
 
     Icon(
@@ -306,8 +325,26 @@ fun Day(
 @Composable
 fun ActivitiesBox(
     date: LocalDate,
+    model: CalendarWeeklyViewModel = hiltViewModel(),
     tasks: List<Task>
 ) {
+    var launcherTriggered by remember { mutableStateOf(false) }
+
+    // Required for checking whether user has permissions before entering the window,
+    // as users can revoke permissions at any time
+    val permissionContract = PermissionController.createRequestPermissionResultContract()
+
+    val launcher =
+        rememberLauncherForActivityResult(permissionContract) {
+            launcherTriggered = !launcherTriggered
+        }
+
+    LaunchedEffect(date, launcherTriggered) {
+        if (!model.permissionsGranted()) {
+            launcher.launch(PERMISSIONS)
+        }
+    }
+
     Spacer(modifier = Modifier.padding(16.dp))
 
     Box(
@@ -401,17 +438,7 @@ fun ActivitiesBox(
                     }
 
                     ActivityRow {
-                        Icon(
-                            imageVector = Icons.Outlined.Nightlight,
-                            contentDescription = null,
-                            modifier = Modifier.size(26.dp)
-                        )
-
-                        Text(
-                            text = "0 hr 0 m",
-                            style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                        SleepDurationCounter(date = date)
                     }
                 }
             }
@@ -506,30 +533,57 @@ enum class TaskFilter(val displayName: String) {
     Meal("Meal")
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun SleepDurationCounter(
+    model: CalendarWeeklyViewModel = hiltViewModel(),
+    date: LocalDate
+) {
+    var duration by remember { mutableStateOf(Duration.ZERO) }
+    val permissionState = rememberPermissionState(
+        permission = HealthPermission.getReadPermission(
+            SleepSessionRecord::class
+        )
+    )
+
+    LaunchedEffect(date, permissionState.status) {
+        duration = model.getDaysSleepDuration(date)
+    }
+
+    Icon(
+        imageVector = Icons.Outlined.Nightlight,
+        contentDescription = null,
+        modifier = Modifier.size(26.dp)
+    )
+
+    var text = "- hr - m"
+
+    if (!duration.equals(Duration.ZERO)) {
+        text = getDurationString(duration)
+    }
+
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(start = 8.dp)
+    )
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun StepCounter(
     model: CalendarWeeklyViewModel = hiltViewModel(),
     date: LocalDate
 ) {
-    var steps by remember { mutableStateOf<Long>(0L) }
-    var launcherTriggered by remember { mutableStateOf<Boolean>(false) }
+    var steps by remember { mutableLongStateOf(0L) }
+    val permissionState = rememberPermissionState(
+        permission = HealthPermission.getReadPermission(
+            StepsRecord::class
+        )
+    )
 
-    // Required for checking whether user has permissions before entering the window,
-    // as users can revoke permissions at any time
-    val permissionContract = PermissionController.createRequestPermissionResultContract()
-
-    val launcher =
-        rememberLauncherForActivityResult(permissionContract) {
-            launcherTriggered = !launcherTriggered
-        }
-
-    LaunchedEffect(date, launcherTriggered) {
-        if (model.permissionsGranted()) {
-            steps = model.getDaysSteps(date)
-
-        } else {
-            launcher.launch(PERMISSIONS)
-        }
+    LaunchedEffect(date, permissionState.status) {
+        steps = model.getDaysSteps(date)
     }
 
     val goal = 10000f // TODO create way for user to set a step goal?

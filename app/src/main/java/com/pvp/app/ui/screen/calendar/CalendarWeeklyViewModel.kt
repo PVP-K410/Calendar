@@ -5,6 +5,7 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.lifecycle.ViewModel
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -107,6 +109,21 @@ class CalendarWeeklyViewModel @Inject constructor(
         )
     }
 
+    suspend fun getDaysSleepDuration(date: LocalDate): Duration {
+        val end = date
+            .plusDays(1)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+        val start = date
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return healthConnectService.aggregateSleepDuration(
+            start,
+            end
+        )
+    }
+
     suspend fun getDaysSteps(date: LocalDate): Long {
         val end = date
             .plusDays(1)
@@ -149,6 +166,7 @@ val PERMISSIONS = setOf(
     HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
     HealthPermission.getReadPermission(DistanceRecord::class),
     HealthPermission.getReadPermission(ExerciseSessionRecord::class),
+    HealthPermission.getReadPermission(SleepSessionRecord::class),
     HealthPermission.getReadPermission(StepsRecord::class),
     HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class)
 )
