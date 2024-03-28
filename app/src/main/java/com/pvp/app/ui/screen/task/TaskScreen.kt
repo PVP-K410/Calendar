@@ -1105,28 +1105,52 @@ fun SportTaskPreviewDialog(
                         )
                     }
 
-                    val selectedHour = rememberPickerState(scheduledAt.hour)
-                    val selectedMinute = rememberPickerState(scheduledAt.minute)
-                    EditableInfoItem(
-                        dialogContent = {
-                            TimePicker(
-                                selectedHour = selectedHour,
-                                selectedMinute = selectedMinute,
-                                onChange = { hour, minute ->
-                                    scheduledAt = scheduledAt.withHour(hour).withMinute(minute)
-                                }
-                            )
-                        },
-                        dialogTitle = { Text("Editing scheduled at") },
-                        label = "Scheduled at",
-                        onConfirm = {
-                            scheduledAt = scheduledAt.withHour(selectedHour.value)
-                                .withMinute(selectedMinute.value)
-                        },
-                        onDismiss = { scheduledAt = task.scheduledAt },
-                        value = "${scheduledAt.format(DateTimeFormatter.ofPattern("hh:mm a"))} - " +
-                                "${(scheduledAt.plus(duration)).format(DateTimeFormatter.ofPattern("hh:mm a"))}"
-                    )
+                    if (activity!!.supportsDistanceMetrics) {
+                        val selectedHour = rememberPickerState(scheduledAt.hour)
+                        val selectedMinute = rememberPickerState(scheduledAt.minute)
+                        EditableInfoItem(
+                            dialogContent = {
+                                TimePicker(
+                                    selectedHour = selectedHour,
+                                    selectedMinute = selectedMinute,
+                                    onChange = { hour, minute ->
+                                        scheduledAt = scheduledAt.withHour(hour).withMinute(minute)
+                                    }
+                                )
+                            },
+                            dialogTitle = { Text("Editing scheduled at") },
+                            label = "Scheduled at",
+                            onConfirm = {
+                                scheduledAt = scheduledAt.withHour(selectedHour.value)
+                                    .withMinute(selectedMinute.value)
+                            },
+                            onDismiss = { scheduledAt = task.scheduledAt },
+                            value = "${scheduledAt.format(DateTimeFormatter.ofPattern("hh:mm a"))}"
+                        )
+                    } else {
+                        val selectedHour = rememberPickerState(scheduledAt.hour)
+                        val selectedMinute = rememberPickerState(scheduledAt.minute)
+                        EditableInfoItem(
+                            dialogContent = {
+                                TimePicker(
+                                    selectedHour = selectedHour,
+                                    selectedMinute = selectedMinute,
+                                    onChange = { hour, minute ->
+                                        scheduledAt = scheduledAt.withHour(hour).withMinute(minute)
+                                    }
+                                )
+                            },
+                            dialogTitle = { Text("Editing scheduled at") },
+                            label = "Scheduled at",
+                            onConfirm = {
+                                scheduledAt = scheduledAt.withHour(selectedHour.value)
+                                    .withMinute(selectedMinute.value)
+                            },
+                            onDismiss = { scheduledAt = task.scheduledAt },
+                            value = "${scheduledAt.format(DateTimeFormatter.ofPattern("hh:mm a"))} - " +
+                                    "${(scheduledAt.plus(duration)).format(DateTimeFormatter.ofPattern("hh:mm a"))}"
+                        )
+                    }
 
                     CustomEditableInfoItem(
                         dialogContent = { showDialog, onDismiss, onDateSelected ->
