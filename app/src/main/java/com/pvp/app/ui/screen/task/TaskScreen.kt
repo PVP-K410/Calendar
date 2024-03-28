@@ -740,29 +740,37 @@ fun GeneralTaskPreviewDialog(
                         value = description ?: ""
                     )
 
-
-
                     EditableInfoItem(
                         dialogContent = {
-                            Slider(
-                                value = duration?.toMinutes()?.toFloat() ?: 0f,
-                                onValueChange = { newValue ->
-                                    duration = Duration.ofMinutes(newValue.toLong())
-                                },
-                                valueRange = 1f..180f,
-                                steps = 180,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        start = 8.dp,
-                                        end = 8.dp,
-                                        bottom = 8.dp
-                                    )
-                            )
+                            Column {
+                                Text(
+                                    text = "Duration: ${duration?.toMinutes()} minutes",
+                                    style = TextStyle(fontSize = 16.sp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 4.dp)
+                                )
+
+                                Slider(
+                                    value = duration?.toMinutes()?.toFloat() ?: 0f,
+                                    onValueChange = { newValue ->
+                                        duration = Duration.ofMinutes(newValue.toLong())
+                                    },
+                                    valueRange = 1f..180f,
+                                    steps = 180,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            start = 8.dp,
+                                            end = 8.dp,
+                                            bottom = 8.dp
+                                        )
+                                )
+                            }
                         },
                         dialogTitle = { Text("Editing duration") },
                         label = "Duration",
-                        onConfirm = { duration = Duration.ofMinutes(it.toLong()) },
+                        onConfirm = { duration = duration },
                         onDismiss = { duration = task.duration },
                         value = "${duration?.toMinutes()} minutes"
                     )
@@ -1026,29 +1034,37 @@ fun SportTaskPreviewDialog(
                         value = description ?: ""
                     )
 
-
-
                     EditableInfoItem(
                         dialogContent = {
-                            Slider(
-                                value = duration?.toMinutes()?.toFloat() ?: 0f,
-                                onValueChange = { newValue ->
-                                    duration = Duration.ofMinutes(newValue.toLong())
-                                },
-                                valueRange = 1f..180f,
-                                steps = 180,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        start = 8.dp,
-                                        end = 8.dp,
-                                        bottom = 8.dp
-                                    )
-                            )
+                            Column {
+                                Text(
+                                    text = "Duration: ${duration?.toMinutes()} minutes",
+                                    style = TextStyle(fontSize = 16.sp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 4.dp)
+                                )
+
+                                Slider(
+                                    value = duration?.toMinutes()?.toFloat() ?: 0f,
+                                    onValueChange = { newValue ->
+                                        duration = Duration.ofMinutes(newValue.toLong())
+                                    },
+                                    valueRange = 1f..180f,
+                                    steps = 180,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            start = 8.dp,
+                                            end = 8.dp,
+                                            bottom = 8.dp
+                                        )
+                                )
+                            }
                         },
                         dialogTitle = { Text("Editing duration") },
                         label = "Duration",
-                        onConfirm = { duration = Duration.ofMinutes(it.toLong()) },
+                        onConfirm = { duration = duration },
                         onDismiss = { duration = task.duration },
                         value = "${duration?.toMinutes()} minutes"
                     )
@@ -1243,25 +1259,35 @@ fun MealTaskPreviewDialog(
 
                     EditableInfoItem(
                         dialogContent = {
-                            Slider(
-                                value = duration?.toMinutes()?.toFloat() ?: 0f,
-                                onValueChange = { newValue ->
-                                    duration = Duration.ofMinutes(newValue.toLong())
-                                },
-                                valueRange = 1f..180f,
-                                steps = 180,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        start = 8.dp,
-                                        end = 8.dp,
-                                        bottom = 8.dp
-                                    )
-                            )
+                            Column {
+                                Text(
+                                    text = "Duration: ${duration?.toMinutes()} minutes",
+                                    style = TextStyle(fontSize = 16.sp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 4.dp)
+                                )
+
+                                Slider(
+                                    value = duration?.toMinutes()?.toFloat() ?: 0f,
+                                    onValueChange = { newValue ->
+                                        duration = Duration.ofMinutes(newValue.toLong())
+                                    },
+                                    valueRange = 1f..180f,
+                                    steps = 180,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            start = 8.dp,
+                                            end = 8.dp,
+                                            bottom = 8.dp
+                                        )
+                                )
+                            }
                         },
                         dialogTitle = { Text("Editing duration") },
                         label = "Duration",
-                        onConfirm = { duration = Duration.ofMinutes(it.toLong()) },
+                        onConfirm = { duration = duration },
                         onDismiss = { duration = task.duration },
                         value = "${duration?.toMinutes()} minutes"
                     )
