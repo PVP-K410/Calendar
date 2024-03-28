@@ -22,7 +22,7 @@ class DailyTaskWorkerSetup @AssistedInject constructor(
 ) {
 
     override suspend fun doWork(): Result {
-        val requestPeriodic = PeriodicWorkRequestBuilder<DailyTaskWorker>(
+        val request = PeriodicWorkRequestBuilder<DailyTaskWorker>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.DAYS
         )
@@ -31,7 +31,7 @@ class DailyTaskWorkerSetup @AssistedInject constructor(
         workManager.enqueueUniquePeriodicWork(
             DailyTaskWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
-            requestPeriodic
+            request
         )
 
         return Result.success()
