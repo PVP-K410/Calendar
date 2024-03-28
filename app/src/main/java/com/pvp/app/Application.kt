@@ -12,6 +12,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.pvp.app.common.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
+import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
@@ -47,6 +48,8 @@ class Application : Application(), Configuration.Provider {
         createTaskPointsDeductionWorker()
 
         createWeeklyActivitiesWorker()
+
+        createDailyTaskWorker()
     }
 
     private fun createDrinkReminderWorker() {
@@ -122,6 +125,19 @@ class Application : Application(), Configuration.Provider {
             WeeklyActivityWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             requestPeriodic
+        )
+    }
+
+    private fun createDailyTaskWorker() {
+        val dailyTaskWorkerRequest = PeriodicWorkRequestBuilder<DailyTaskWorker>(
+            1, TimeUnit.DAYS
+        )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            DailyTaskWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            dailyTaskWorkerRequest
         )
     }
 }

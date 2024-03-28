@@ -3,6 +3,11 @@ package com.pvp.app.api
 interface Configuration {
 
     /**
+     * The number of daily tasks for the user
+     */
+    val dailyTaskCount: Int
+
+    /**
      * The Google OAuth client ID used for authentication.
      */
     val googleOAuthClientId: String

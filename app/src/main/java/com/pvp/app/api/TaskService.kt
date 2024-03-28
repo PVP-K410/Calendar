@@ -98,7 +98,7 @@ interface TaskService : DocumentsCollection {
     suspend fun generateDaily(
         count: Int = 3,
         userEmail: String
-    )
+    ): List<SportTask> // changed
 
     /**
      * Gets all tasks for the given user by its email.
