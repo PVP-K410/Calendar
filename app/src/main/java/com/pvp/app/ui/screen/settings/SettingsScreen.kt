@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,7 +42,7 @@ import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 private fun SettingNotificationReminderMinutes(
     model: SettingsViewModel = hiltViewModel()
 ) {
-    val rangeMinutes = remember { model.fromConfiguration { it.rangeReminderMinutes } }
+    val range = remember { model.fromConfiguration { it.rangeReminderMinutes } }
 
     val minutes by model
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
@@ -51,11 +53,29 @@ private fun SettingNotificationReminderMinutes(
     SettingCard(
         description = "Choose minutes before tasks reminder executes. Default is 10 minutes",
         editContent = {
-            Picker(
-                items = rangeMinutes,
-                state = state,
-                startIndex = minutes - 1,
-            )
+            Column(
+                modifier = Modifier
+                    .clip(shape = MaterialTheme.shapes.small)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .wrapContentSize()
+                    .padding(32.dp)
+            ) {
+                Text(
+                    style = MaterialTheme.typography.titleLarge,
+                    text = "Select Reminder Minutes"
+                )
+
+                Picker(
+                    items = range,
+                    label = { "$it minutes" },
+                    modifier = Modifier.padding(top = 16.dp),
+                    startIndex = minutes - 1,
+                    state = state
+                )
+            }
         },
         onEdit = {
             if (state.value != minutes) {
@@ -74,7 +94,8 @@ private fun SettingNotificationReminderMinutes(
 private fun SettingCupVolumeMl(
     model: SettingsViewModel = hiltViewModel()
 ) {
-    val rangeCupVolume = remember { model.fromConfiguration { it.rangeCupVolume } }
+    val range = remember { model.fromConfiguration { it.rangeCupVolume } }
+
     val volume by model
         .get(Setting.Notifications.CupVolumeMl)
         .collectAsStateWithLifecycle()
@@ -84,11 +105,29 @@ private fun SettingCupVolumeMl(
     SettingCard(
         description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
         editContent = {
-            Picker(
-                items = rangeCupVolume,
-                state = state,
-                startIndex = volume - 100,
-            )
+            Column(
+                modifier = Modifier
+                    .clip(shape = MaterialTheme.shapes.small)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .wrapContentSize()
+                    .padding(32.dp)
+            ) {
+                Text(
+                    style = MaterialTheme.typography.titleLarge,
+                    text = "Select Cup Volume"
+                )
+
+                Picker(
+                    items = range,
+                    label = { "$it ml" },
+                    modifier = Modifier.padding(top = 16.dp),
+                    startIndex = range.indexOf(volume),
+                    state = state
+                )
+            }
         },
         onEdit = {
             if (state.value != volume) {

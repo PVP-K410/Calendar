@@ -33,7 +33,8 @@ class Application : Application(), Configuration.Provider {
     lateinit var workManager: WorkManager
 
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
+        get() = Configuration
+            .Builder()
             .setWorkerFactory(workerFactory)
             .setMinimumLoggingLevel(Log.DEBUG)
             .build()
@@ -130,7 +131,8 @@ class Application : Application(), Configuration.Provider {
 
     private fun createDailyTaskWorker() {
         val dailyTaskWorkerRequest = PeriodicWorkRequestBuilder<DailyTaskWorker>(
-            1, TimeUnit.DAYS
+            1,
+            TimeUnit.DAYS
         )
             .build()
 

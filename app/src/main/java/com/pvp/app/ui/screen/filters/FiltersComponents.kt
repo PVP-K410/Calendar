@@ -37,10 +37,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pvp.app.ui.common.IconButtonWithDialog
-import com.pvp.app.ui.common.underline
 
 @Composable
 fun FiltersItem(
@@ -76,9 +76,8 @@ fun FiltersItem(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = title,
-                        fontStyle = FontStyle.Italic,
-                        modifier = Modifier.underline()
+                        fontWeight = FontWeight.Bold,
+                        text = title
                     )
                 }
 
@@ -98,7 +97,7 @@ fun FiltersItem(
                         },
                         dialogTitle = dialogTitle,
                         dialogContent = dialogContent,
-                        onConfirmClick = onConfirmClick,
+                        onConfirm = onConfirmClick,
                         onDismiss = onDismiss
                     )
                 }

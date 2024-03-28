@@ -19,7 +19,7 @@ class ConfigurationImpl @Inject constructor() : Configuration {
     override val rangeReminderMinutes: List<Int> = (1..120)
         .toList()
 
-    override val rangeCupVolume: List<Int> = (100..500)
+    override val rangeCupVolume: List<Int> = (100..1000 step 50)
         .toList()
 
     override val intervalDrinkReminder: Pair<Int, Int> = Pair(8, 22)
