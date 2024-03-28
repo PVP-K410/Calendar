@@ -951,6 +951,7 @@ fun SportTaskPreviewDialog(
     var duration by remember { mutableStateOf(task.duration) }
     var scheduledAt by remember { mutableStateOf(task.scheduledAt) }
     var activity by remember { mutableStateOf((task as? SportTask)?.activity) }
+    var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
 
 
     if (showDialog) {
@@ -1079,6 +1080,29 @@ fun SportTaskPreviewDialog(
                         value = "${duration?.toMinutes()} minutes"
                     )
 
+                    val statePickerDistance = rememberPickerState(0.0)
+                    EditableInfoItem(
+                        dialogContent = {
+                            LabelFieldWrapper(
+                                content = {
+                                    Picker(
+                                        items = RANGE_KILOMETERS,
+                                        label = { "$it (km)" },
+                                        state = statePickerDistance
+                                    )
+                                },
+                                putBelow = true,
+                                text = "${statePickerDistance.value} (km) distance",
+                                textAlign = TextAlign.End
+                            )
+                        },
+                        dialogTitle = { Text("Editing distance") },
+                        label = "Distance",
+                        onConfirm = { distance = statePickerDistance.value },
+                        onDismiss = { distance = (task as? SportTask)?.distance },
+                        value = "$distance (km)"
+                    )
+
                     val selectedHour = rememberPickerState(scheduledAt.hour)
                     val selectedMinute = rememberPickerState(scheduledAt.minute)
                     EditableInfoItem(
@@ -1175,6 +1199,11 @@ fun SportTaskPreviewDialog(
                                     activity?.let {
                                         if (task is SportTask) {
                                             task.activity = it
+                                        }
+                                    }
+                                    distance?.let {
+                                        if (task is SportTask) {
+                                            task.distance = it
                                         }
                                     }
                                     task.duration = duration
