@@ -24,13 +24,13 @@ class ExerciseServiceImpl @Inject constructor(
         // Base level is calculated as activity level for people who walk ~1km every day for 30 days
         // this will equal multiplier of 1.
         val baseLevel = 7250.00
-        // Basically the sensitivity of the multiplier. If we want it to be adjusted later.
-        val stepSize = 7250.00
 
+        val multiplier = 1 + (activityLevel / baseLevel - 1)
 
-        val multiplier = 1 + (activityLevel / baseLevel - 1) / (stepSize / baseLevel)
-
-        return max(1.0, multiplier)
+        return max(
+            1.0,
+            multiplier
+        )
     }
 
     private suspend fun calculateActivityPoints(): Double {
