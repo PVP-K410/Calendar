@@ -931,28 +931,14 @@ fun CustomEditableInfoItem(
             Text(text = value)
         }
 
-        //var showDialog by remember { mutableStateOf(false) }
-
         dialogContent(showDialog, { showDialog = false }, { selectedDate ->
             onConfirm(selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
             showDialog = false
         })
-
-        /*
-        IconButton(
-            onClick = { showDialog = true },
-            modifier = Modifier.align(Alignment.TopEnd)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Edit,
-                contentDescription = "Edit Icon Button",
-                modifier = Modifier.size(30.dp)
-            )
-        }
-        */
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SportTaskPreviewDialog(
     task: Task,
@@ -1000,19 +986,43 @@ fun SportTaskPreviewDialog(
 
                     EditableInfoItem(
                         dialogContent = {
-                            OutlinedTextField(
-                                label = { Text("Activity") },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 16.dp),
-                                onValueChange = { },
-                                value = activity?.title ?: ""
-                            )
+                            var isExpanded by remember { mutableStateOf(false) }
+                            ExposedDropdownMenuBox(
+                                expanded = isExpanded,
+                                onExpandedChange = { isExpanded = it },
+                            ) {
+                                androidx.compose.material3.TextField(
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth(),
+                                    value = activity?.title ?: "",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                                    }
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = isExpanded,
+                                    onDismissRequest = { isExpanded = false }
+                                ) {
+                                    SportActivity.entries.forEach {
+                                        DropdownMenuItem(
+                                            text = { Text(text = it.title) },
+                                            onClick = {
+                                                activity = it
+                                                isExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         },
                         dialogTitle = { Text("Editing activity") },
                         label = "Activity",
-                        onConfirm = { activity = activity },
-                        onDismiss = { activity = activity },
+                        onConfirm = { },
+                        onDismiss = { activity = (task as? SportTask)?.activity },
                         value = activity?.title ?: ""
                     )
 
@@ -1162,6 +1172,11 @@ fun SportTaskPreviewDialog(
                                 model.update({ task ->
                                     task.title = title
                                     task.description = description
+                                    activity?.let {
+                                        if (task is SportTask) {
+                                            task.activity = it
+                                        }
+                                    }
                                     task.duration = duration
                                     task.scheduledAt = scheduledAt
                                 }, task)
