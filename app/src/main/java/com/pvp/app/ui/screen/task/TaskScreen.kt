@@ -1045,63 +1045,65 @@ fun SportTaskPreviewDialog(
                         value = description ?: ""
                     )
 
-                    EditableInfoItem(
-                        dialogContent = {
-                            Column {
-                                Text(
-                                    text = "Duration: ${duration?.toMinutes()} minutes",
-                                    style = TextStyle(fontSize = 16.sp),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 4.dp)
-                                )
-
-                                Slider(
-                                    value = duration?.toMinutes()?.toFloat() ?: 0f,
-                                    onValueChange = { newValue ->
-                                        duration = Duration.ofMinutes(newValue.toLong())
-                                    },
-                                    valueRange = 1f..180f,
-                                    steps = 180,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            start = 8.dp,
-                                            end = 8.dp,
-                                            bottom = 8.dp
+                    if (activity!!.supportsDistanceMetrics) {
+                        val statePickerDistance = rememberPickerState(0.0)
+                        EditableInfoItem(
+                            dialogContent = {
+                                LabelFieldWrapper(
+                                    content = {
+                                        Picker(
+                                            items = RANGE_KILOMETERS,
+                                            label = { "$it (km)" },
+                                            state = statePickerDistance
                                         )
+                                    },
+                                    putBelow = true,
+                                    text = "${statePickerDistance.value} (km) distance",
+                                    textAlign = TextAlign.End
                                 )
-                            }
-                        },
-                        dialogTitle = { Text("Editing duration") },
-                        label = "Duration",
-                        onConfirm = { duration = duration },
-                        onDismiss = { duration = task.duration },
-                        value = "${duration?.toMinutes()} minutes"
-                    )
-
-                    val statePickerDistance = rememberPickerState(0.0)
-                    EditableInfoItem(
-                        dialogContent = {
-                            LabelFieldWrapper(
-                                content = {
-                                    Picker(
-                                        items = RANGE_KILOMETERS,
-                                        label = { "$it (km)" },
-                                        state = statePickerDistance
+                            },
+                            dialogTitle = { Text("Editing distance") },
+                            label = "Distance",
+                            onConfirm = { distance = statePickerDistance.value },
+                            onDismiss = { distance = (task as? SportTask)?.distance },
+                            value = "$distance (km)"
+                        )
+                    } else {
+                        EditableInfoItem(
+                            dialogContent = {
+                                Column {
+                                    Text(
+                                        text = "Duration: ${duration?.toMinutes()} minutes",
+                                        style = TextStyle(fontSize = 16.sp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 4.dp)
                                     )
-                                },
-                                putBelow = true,
-                                text = "${statePickerDistance.value} (km) distance",
-                                textAlign = TextAlign.End
-                            )
-                        },
-                        dialogTitle = { Text("Editing distance") },
-                        label = "Distance",
-                        onConfirm = { distance = statePickerDistance.value },
-                        onDismiss = { distance = (task as? SportTask)?.distance },
-                        value = "$distance (km)"
-                    )
+
+                                    Slider(
+                                        value = duration?.toMinutes()?.toFloat() ?: 0f,
+                                        onValueChange = { newValue ->
+                                            duration = Duration.ofMinutes(newValue.toLong())
+                                        },
+                                        valueRange = 1f..180f,
+                                        steps = 180,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+                                                start = 8.dp,
+                                                end = 8.dp,
+                                                bottom = 8.dp
+                                            )
+                                    )
+                                }
+                            },
+                            dialogTitle = { Text("Editing duration") },
+                            label = "Duration",
+                            onConfirm = { duration = duration },
+                            onDismiss = { duration = task.duration },
+                            value = "${duration?.toMinutes()} minutes"
+                        )
+                    }
 
                     val selectedHour = rememberPickerState(scheduledAt.hour)
                     val selectedMinute = rememberPickerState(scheduledAt.minute)
