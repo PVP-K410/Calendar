@@ -256,8 +256,6 @@ class TaskServiceImpl @Inject constructor(
         count: Int,
         userEmail: String
     ): List<SportTask> {
-        // TODO: Remove these lines with empty line below upon PR create
-        println("generateDaily called")
 
         return SportActivity.entries
             .minus(SportActivity.Wheelchair)
