@@ -886,6 +886,8 @@ fun CustomEditableInfoItem(
     onDismiss: () -> Unit,
     value: String,
 ) {
+    var showDialog by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .background(
@@ -900,21 +902,35 @@ fun CustomEditableInfoItem(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                fontWeight = FontWeight.Bold,
-                text = label
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(end = 3.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    fontWeight = FontWeight.Bold,
+                    text = label
+                )
+
+                Icon(
+                    imageVector = Icons.Outlined.Edit,
+                    contentDescription = "Edit Icon Button",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { showDialog = true }
+                )
+            }
 
             Text(text = value)
         }
 
-        var showDialog by remember { mutableStateOf(false) }
+        //var showDialog by remember { mutableStateOf(false) }
 
         dialogContent(showDialog, { showDialog = false }, { selectedDate ->
             onConfirm(selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
             showDialog = false
         })
 
+        /*
         IconButton(
             onClick = { showDialog = true },
             modifier = Modifier.align(Alignment.TopEnd)
@@ -925,6 +941,7 @@ fun CustomEditableInfoItem(
                 modifier = Modifier.size(30.dp)
             )
         }
+        */
     }
 }
 
