@@ -825,7 +825,7 @@ fun Week(
 }
 
 @Composable
-private fun DayContent(
+fun DayContent(
     tasks: List<Task>
 ) {
     Box(
