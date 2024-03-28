@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,18 +14,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material.icons.outlined.Timelapse
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -38,10 +49,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.common.InputValidator
 import com.pvp.app.common.getDurationString
@@ -50,11 +66,14 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.DatePickerDialog
 import com.pvp.app.ui.common.DateTimePicker
+import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.LabelFieldWrapper
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.TextField
+import com.pvp.app.ui.common.TimePicker
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -555,6 +574,29 @@ fun TaskBox(
     model: TaskViewModel = hiltViewModel()
 ) {
     var checked = task.isCompleted
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        when (task) {
+            is SportTask -> SportTaskPreviewDialog(
+                task,
+                onDismissRequest = { showDialog = false },
+                showDialog
+            )
+
+            is MealTask -> MealTaskPreviewDialog(
+                task,
+                onDismissRequest = { showDialog = false },
+                showDialog
+            )
+
+            else -> GeneralTaskPreviewDialog(
+                task,
+                onDismissRequest = { showDialog = false },
+                showDialog
+            )
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -569,6 +611,7 @@ fun TaskBox(
                 ),
                 shape = RoundedCornerShape(10.dp)
             )
+            .clickable { showDialog = true }
     ) {
         Column(
             modifier = Modifier.padding(
@@ -630,6 +673,687 @@ fun TaskBox(
                     modifier = Modifier.weight(0.3f),
                     fontSize = 22.sp
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun GeneralTaskPreviewDialog(
+    task: Task,
+    onDismissRequest: () -> Unit,
+    showDialog: Boolean,
+    model: TaskViewModel = hiltViewModel()
+) {
+    var title by remember { mutableStateOf(task.title) }
+    var description by remember { mutableStateOf(task.description) }
+    var duration by remember { mutableStateOf(task.duration) }
+    var scheduledAt by remember { mutableStateOf(task.scheduledAt) }
+
+
+    if (showDialog) {
+        Dialog(onDismissRequest = onDismissRequest) {
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding( end = 15.dp, start = 15.dp, top = 15.dp )
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    EditableInfoItem(
+                        dialogContent = {
+                            OutlinedTextField(
+                                label = { Text("Title") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                onValueChange = { newText -> title = newText },
+                                value = title
+                            )
+                        },
+                        dialogTitle = { Text("Editing title") },
+                        label = "Title",
+                        onConfirm = { title = it },
+                        onDismiss = { title = task.title },
+                        value = title
+                    )
+
+                    EditableInfoItem(
+                        dialogContent = {
+                            OutlinedTextField(
+                                label = { Text("Description") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                onValueChange = { newText -> description = newText },
+                                value = description ?: ""
+                            )
+                        },
+                        dialogTitle = { Text("Editing description") },
+                        label = "Description",
+                        onConfirm = { description = it },
+                        onDismiss = { description = task.description },
+                        value = description ?: ""
+                    )
+
+
+
+                    EditableInfoItem(
+                        dialogContent = {
+                            Slider(
+                                value = duration?.toMinutes()?.toFloat() ?: 0f,
+                                onValueChange = { newValue ->
+                                    duration = Duration.ofMinutes(newValue.toLong())
+                                },
+                                valueRange = 1f..180f,
+                                steps = 180,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 8.dp
+                                    )
+                            )
+                        },
+                        dialogTitle = { Text("Editing duration") },
+                        label = "Duration",
+                        onConfirm = { duration = Duration.ofMinutes(it.toLong()) },
+                        onDismiss = { duration = task.duration },
+                        value = "${duration?.toMinutes()} minutes"
+                    )
+
+                    val selectedHour = rememberPickerState(scheduledAt.hour)
+                    val selectedMinute = rememberPickerState(scheduledAt.minute)
+                    EditableInfoItem(
+                        dialogContent = {
+                            TimePicker(
+                                selectedHour = selectedHour,
+                                selectedMinute = selectedMinute,
+                                onChange = { hour, minute ->
+                                    scheduledAt = scheduledAt.withHour(hour).withMinute(minute)
+                                }
+                            )
+                        },
+                        dialogTitle = { Text("Editing scheduled at") },
+                        label = "Scheduled at",
+                        onConfirm = {
+                            scheduledAt = scheduledAt.withHour(selectedHour.value)
+                                .withMinute(selectedMinute.value)
+                        },
+                        onDismiss = { scheduledAt = task.scheduledAt },
+                        value = "${scheduledAt.format(DateTimeFormatter.ofPattern("hh:mm a"))} - " +
+                                "${(scheduledAt.plus(duration)).format(DateTimeFormatter.ofPattern("hh:mm a"))}"
+                    )
+
+
+
+                    CustomEditableInfoItem(
+                        dialogContent = { showDialog, onDismiss, onDateSelected ->
+                            DatePickerDialog(
+                                showPicker = showDialog,
+                                onDismiss = onDismiss,
+                                onDateSelected = { selectedDate ->
+                                    scheduledAt = scheduledAt
+                                        .withYear(selectedDate.year)
+                                        .withMonth(selectedDate.monthValue)
+                                        .withDayOfMonth(selectedDate.dayOfMonth)
+                                }
+                            )
+                        },
+                        dialogTitle = { },
+                        label = "Date",
+                        onConfirm = { },
+                        onDismiss = { scheduledAt = task.scheduledAt },
+                        value = "${scheduledAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))}"
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 15.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        var showConfirmationDialog by remember { mutableStateOf(false) }
+
+                        OutlinedButton(
+                            onClick = { showConfirmationDialog = true },
+                            shape = MaterialTheme.shapes.extraLarge,
+                            border = BorderStroke(1.dp, Color.Red),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Remove task")
+                                Text("Delete", style = MaterialTheme.typography.titleSmall)
+                            }
+                        }
+
+                        if (showConfirmationDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showConfirmationDialog = false },
+                                confirmButton = {
+                                    Button(
+                                        onClick = {
+                                            model.remove(task)
+                                            showConfirmationDialog = false
+                                        }
+                                    ) {
+                                        Text("Yes")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(
+                                        onClick = { showConfirmationDialog = false }
+                                    ) {
+                                        Text("No")
+                                    }
+                                },
+                                title = { Text("Confirmation") },
+                                text = { Text("Are you sure you want to delete?") }
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                model.update({ task ->
+                                    task.title = title
+                                    task.description = description
+                                    task.duration = duration
+                                    task.scheduledAt = scheduledAt
+                                }, task)
+                                onDismissRequest()
+                            }
+                        ) {
+                            Text("Save")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomEditableInfoItem(
+    dialogContent: @Composable (Boolean, () -> Unit, (LocalDateTime) -> Unit) -> Unit,
+    dialogTitle: @Composable () -> Unit,
+    label: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+    value: String,
+) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                fontWeight = FontWeight.Bold,
+                text = label
+            )
+
+            Text(text = value)
+        }
+
+        var showDialog by remember { mutableStateOf(false) }
+
+        dialogContent(showDialog, { showDialog = false }, { selectedDate ->
+            onConfirm(selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+            showDialog = false
+        })
+
+        IconButton(
+            onClick = { showDialog = true },
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Edit,
+                contentDescription = "Edit Icon Button",
+                modifier = Modifier.size(30.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun SportTaskPreviewDialog(
+    task: Task,
+    onDismissRequest: () -> Unit,
+    showDialog: Boolean,
+    model: TaskViewModel = hiltViewModel()
+) {
+    var title by remember { mutableStateOf(task.title) }
+    var description by remember { mutableStateOf(task.description) }
+    var duration by remember { mutableStateOf(task.duration) }
+    var scheduledAt by remember { mutableStateOf(task.scheduledAt) }
+    var activity by remember { mutableStateOf((task as? SportTask)?.activity) }
+
+
+    if (showDialog) {
+        Dialog(onDismissRequest = onDismissRequest) {
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 15.dp, start = 15.dp, top = 15.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    EditableInfoItem(
+                        dialogContent = {
+                            OutlinedTextField(
+                                label = { Text("Title") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                onValueChange = { newText -> title = newText },
+                                value = title
+                            )
+                        },
+                        dialogTitle = { Text("Editing title") },
+                        label = "Title",
+                        onConfirm = { title = it },
+                        onDismiss = { title = task.title },
+                        value = title
+                    )
+
+                    EditableInfoItem(
+                        dialogContent = {
+                            OutlinedTextField(
+                                label = { Text("Activity") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                onValueChange = { },
+                                value = activity?.title ?: ""
+                            )
+                        },
+                        dialogTitle = { Text("Editing activity") },
+                        label = "Activity",
+                        onConfirm = { activity = activity },
+                        onDismiss = { activity = activity },
+                        value = activity?.title ?: ""
+                    )
+
+                    EditableInfoItem(
+                        dialogContent = {
+                            OutlinedTextField(
+                                label = { Text("Description") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                onValueChange = { newText -> description = newText },
+                                value = description ?: ""
+                            )
+                        },
+                        dialogTitle = { Text("Editing description") },
+                        label = "Description",
+                        onConfirm = { description = it },
+                        onDismiss = { description = task.description },
+                        value = description ?: ""
+                    )
+
+
+
+                    EditableInfoItem(
+                        dialogContent = {
+                            Slider(
+                                value = duration?.toMinutes()?.toFloat() ?: 0f,
+                                onValueChange = { newValue ->
+                                    duration = Duration.ofMinutes(newValue.toLong())
+                                },
+                                valueRange = 1f..180f,
+                                steps = 180,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 8.dp
+                                    )
+                            )
+                        },
+                        dialogTitle = { Text("Editing duration") },
+                        label = "Duration",
+                        onConfirm = { duration = Duration.ofMinutes(it.toLong()) },
+                        onDismiss = { duration = task.duration },
+                        value = "${duration?.toMinutes()} minutes"
+                    )
+
+                    val selectedHour = rememberPickerState(scheduledAt.hour)
+                    val selectedMinute = rememberPickerState(scheduledAt.minute)
+                    EditableInfoItem(
+                        dialogContent = {
+                            TimePicker(
+                                selectedHour = selectedHour,
+                                selectedMinute = selectedMinute,
+                                onChange = { hour, minute ->
+                                    scheduledAt = scheduledAt.withHour(hour).withMinute(minute)
+                                }
+                            )
+                        },
+                        dialogTitle = { Text("Editing scheduled at") },
+                        label = "Scheduled at",
+                        onConfirm = {
+                            scheduledAt = scheduledAt.withHour(selectedHour.value)
+                                .withMinute(selectedMinute.value)
+                        },
+                        onDismiss = { scheduledAt = task.scheduledAt },
+                        value = "${scheduledAt.format(DateTimeFormatter.ofPattern("hh:mm a"))} - " +
+                                "${(scheduledAt.plus(duration)).format(DateTimeFormatter.ofPattern("hh:mm a"))}"
+                    )
+
+                    CustomEditableInfoItem(
+                        dialogContent = { showDialog, onDismiss, onDateSelected ->
+                            DatePickerDialog(
+                                showPicker = showDialog,
+                                onDismiss = onDismiss,
+                                onDateSelected = { selectedDate ->
+                                    scheduledAt = scheduledAt
+                                        .withYear(selectedDate.year)
+                                        .withMonth(selectedDate.monthValue)
+                                        .withDayOfMonth(selectedDate.dayOfMonth)
+                                }
+                            )
+                        },
+                        dialogTitle = { },
+                        label = "Date",
+                        onConfirm = { },
+                        onDismiss = { scheduledAt = task.scheduledAt },
+                        value = "${scheduledAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))}"
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 15.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        var showConfirmationDialog by remember { mutableStateOf(false) }
+
+                        OutlinedButton(
+                            onClick = { showConfirmationDialog = true },
+                            shape = MaterialTheme.shapes.extraLarge,
+                            border = BorderStroke(1.dp, Color.Red),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Remove task")
+                                Text("Delete", style = MaterialTheme.typography.titleSmall)
+                            }
+                        }
+
+                        if (showConfirmationDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showConfirmationDialog = false },
+                                confirmButton = {
+                                    Button(
+                                        onClick = {
+                                            model.remove(task)
+                                            showConfirmationDialog = false
+                                        }
+                                    ) {
+                                        Text("Yes")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(
+                                        onClick = { showConfirmationDialog = false }
+                                    ) {
+                                        Text("No")
+                                    }
+                                },
+                                title = { Text("Confirmation") },
+                                text = { Text("Are you sure you want to delete?") }
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                model.update({ task ->
+                                    task.title = title
+                                    task.description = description
+                                    task.duration = duration
+                                    task.scheduledAt = scheduledAt
+                                }, task)
+                                onDismissRequest()
+                            }
+                        ) {
+                            Text("Save")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MealTaskPreviewDialog(
+    task: MealTask,
+    onDismissRequest: () -> Unit,
+    showDialog: Boolean,
+    model: TaskViewModel = hiltViewModel()
+) {
+    var title by remember { mutableStateOf(task.title) }
+    var description by remember { mutableStateOf(task.description) }
+    var recipe by remember { mutableStateOf(task.recipe) }
+    var duration by remember { mutableStateOf(task.duration) }
+    var scheduledAt by remember { mutableStateOf(task.scheduledAt) }
+
+    if (showDialog) {
+        Dialog(onDismissRequest = onDismissRequest) {
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 15.dp, start = 15.dp, top = 15.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    EditableInfoItem(
+                        dialogContent = {
+                            OutlinedTextField(
+                                label = { Text("Title") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                onValueChange = { newText -> title = newText },
+                                value = title
+                            )
+                        },
+                        dialogTitle = { Text("Editing title") },
+                        label = "Title",
+                        onConfirm = { title = it },
+                        onDismiss = { title = task.title },
+                        value = title
+                    )
+
+                    EditableInfoItem(
+                        dialogContent = {
+                            OutlinedTextField(
+                                label = { Text("Description") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                onValueChange = { newText -> description = newText },
+                                value = description ?: ""
+                            )
+                        },
+                        dialogTitle = { Text("Editing description") },
+                        label = "Description",
+                        onConfirm = { description = it },
+                        onDismiss = { description = task.description },
+                        value = description ?: ""
+                    )
+
+                    EditableInfoItem(
+                        dialogContent = {
+                            OutlinedTextField(
+                                label = { Text("Recipe") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                onValueChange = { newText -> recipe = newText },
+                                value = recipe ?: ""
+                            )
+                        },
+                        dialogTitle = { Text("Editing recipe") },
+                        label = "Recipe",
+                        onConfirm = { recipe = it },
+                        onDismiss = { recipe = task.recipe },
+                        value = recipe ?: ""
+                    )
+
+                    EditableInfoItem(
+                        dialogContent = {
+                            Slider(
+                                value = duration?.toMinutes()?.toFloat() ?: 0f,
+                                onValueChange = { newValue ->
+                                    duration = Duration.ofMinutes(newValue.toLong())
+                                },
+                                valueRange = 1f..180f,
+                                steps = 180,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 8.dp
+                                    )
+                            )
+                        },
+                        dialogTitle = { Text("Editing duration") },
+                        label = "Duration",
+                        onConfirm = { duration = Duration.ofMinutes(it.toLong()) },
+                        onDismiss = { duration = task.duration },
+                        value = "${duration?.toMinutes()} minutes"
+                    )
+
+                    val selectedHour = rememberPickerState(scheduledAt.hour)
+                    val selectedMinute = rememberPickerState(scheduledAt.minute)
+                    EditableInfoItem(
+                        dialogContent = {
+                            TimePicker(
+                                selectedHour = selectedHour,
+                                selectedMinute = selectedMinute,
+                                onChange = { hour, minute ->
+                                    scheduledAt = scheduledAt.withHour(hour).withMinute(minute)
+                                }
+                            )
+                        },
+                        dialogTitle = { Text("Editing scheduled at") },
+                        label = "Scheduled at",
+                        onConfirm = {
+                            scheduledAt = scheduledAt.withHour(selectedHour.value)
+                                .withMinute(selectedMinute.value)
+                        },
+                        onDismiss = { scheduledAt = task.scheduledAt },
+                        value = "${scheduledAt.format(DateTimeFormatter.ofPattern("hh:mm a"))} - " +
+                                "${(scheduledAt.plus(duration)).format(DateTimeFormatter.ofPattern("hh:mm a"))}"
+                    )
+
+
+                    CustomEditableInfoItem(
+                        dialogContent = { showDialog, onDismiss, onDateSelected ->
+                            DatePickerDialog(
+                                showPicker = showDialog,
+                                onDismiss = onDismiss,
+                                onDateSelected = { selectedDate ->
+                                    scheduledAt = scheduledAt
+                                        .withYear(selectedDate.year)
+                                        .withMonth(selectedDate.monthValue)
+                                        .withDayOfMonth(selectedDate.dayOfMonth)
+                                }
+                            )
+                        },
+                        dialogTitle = { },
+                        label = "Date",
+                        onConfirm = { },
+                        onDismiss = { scheduledAt = task.scheduledAt },
+                        value = "${scheduledAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))}"
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 15.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        var showConfirmationDialog by remember { mutableStateOf(false) }
+
+                        OutlinedButton(
+                            onClick = { showConfirmationDialog = true },
+                            shape = MaterialTheme.shapes.extraLarge,
+                            border = BorderStroke(1.dp, Color.Red),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Remove task")
+                                Text("Delete", style = MaterialTheme.typography.titleSmall)
+                            }
+                        }
+
+                        if (showConfirmationDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showConfirmationDialog = false },
+                                confirmButton = {
+                                    Button(
+                                        onClick = {
+                                            model.remove(task)
+                                            showConfirmationDialog = false
+                                        }
+                                    ) {
+                                        Text("Yes")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(
+                                        onClick = { showConfirmationDialog = false }
+                                    ) {
+                                        Text("No")
+                                    }
+                                },
+                                title = { Text("Confirmation") },
+                                text = { Text("Are you sure you want to delete?") }
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                model.update({ task ->
+                                    task.title = title
+                                    task.description = description
+                                    task.recipe = recipe
+                                    task.duration = duration
+                                    task.scheduledAt = scheduledAt
+                                }, task)
+                                onDismissRequest()
+                            }
+                        ) {
+                            Text("Save")
+                        }
+                    }
+                }
             }
         }
     }

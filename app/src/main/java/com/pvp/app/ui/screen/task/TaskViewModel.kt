@@ -251,6 +251,12 @@ class TaskViewModel @Inject constructor(
             }
         }
     }
+
+    fun remove(task: Task) {
+        viewModelScope.launch {
+            taskService.remove(task)
+        }
+    }
 }
 
 data class TaskState(
