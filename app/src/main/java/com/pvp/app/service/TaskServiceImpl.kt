@@ -29,6 +29,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.random.Random
 
 class TaskServiceImpl @Inject constructor(
     private val configuration: Configuration,
@@ -256,8 +257,43 @@ class TaskServiceImpl @Inject constructor(
     override suspend fun generateDaily(
         count: Int,
         userEmail: String
-    ) {
-        TODO("Not yet implemented")
+    ): List<SportTask> {
+        println("generateDaily called")
+        val tasks = mutableListOf<SportTask>()
+
+        repeat(count) {
+            val activity = SportActivity.entries.toTypedArray().random()
+            val description = "One of your daily tasks for today"
+            var distance: Double? = null
+
+            if (activity.supportsDistanceMetrics) {
+                distance = Random.nextDouble(
+                    750.0,
+                    1000.0
+                )
+            }
+
+            val title = "Task ${it + 1}: $activity"
+            val points = Points(null)
+            val scheduledAt = LocalDateTime.now()
+
+            val task = SportTask(
+                activity = activity,
+                description = description,
+                distance = distance,
+                duration = null,
+                isCompleted = false,
+                isDaily = true,
+                points = points,
+                scheduledAt = scheduledAt,
+                title = title,
+                userEmail = userEmail
+            )
+
+            tasks.add(task)
+        }
+
+        return tasks
     }
 
     private fun decodeByType(
