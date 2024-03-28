@@ -12,6 +12,8 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.pvp.app.common.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
+import com.pvp.app.worker.DailyTaskWorker
+import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
@@ -32,7 +34,8 @@ class Application : Application(), Configuration.Provider {
     lateinit var workManager: WorkManager
 
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
+        get() = Configuration
+            .Builder()
             .setWorkerFactory(workerFactory)
             .setMinimumLoggingLevel(Log.DEBUG)
             .build()
@@ -47,6 +50,8 @@ class Application : Application(), Configuration.Provider {
         createTaskPointsDeductionWorker()
 
         createWeeklyActivitiesWorker()
+
+        createDailyTaskWorker()
     }
 
     private fun createDrinkReminderWorker() {
@@ -123,5 +128,38 @@ class Application : Application(), Configuration.Provider {
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             requestPeriodic
         )
+    }
+
+    private fun createDailyTaskWorker() {
+        val requestFirstTime = OneTimeWorkRequestBuilder<DailyTaskWorker>()
+            .build()
+
+        workManager
+            .beginWith(requestFirstTime)
+            .enqueue()
+
+        val now = LocalDateTime.now()
+
+        val target = now
+            .plusDays(1)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
+
+        val delay = target.toEpochSecondTimeZoned() - now.toEpochSecondTimeZoned()
+
+        val requestOneTime = OneTimeWorkRequestBuilder<DailyTaskWorkerSetup>()
+            .setInitialDelay(
+                Duration.of(
+                    delay,
+                    ChronoUnit.SECONDS
+                )
+            )
+            .build()
+
+        workManager
+            .beginWith(requestOneTime)
+            .enqueue()
     }
 }

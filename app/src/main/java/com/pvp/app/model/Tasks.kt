@@ -107,7 +107,7 @@ class SportTask : Task {
     var isDaily: Boolean = false
 
     constructor(
-        activity: SportActivity,
+        activity: SportActivity = SportActivity.Other,
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
