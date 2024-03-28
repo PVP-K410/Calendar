@@ -813,10 +813,8 @@ fun GeneralTaskPreviewDialog(
                                 }
                             )
                         },
-                        dialogTitle = { },
                         label = "Date",
                         onConfirm = { },
-                        onDismiss = { scheduledAt = task.scheduledAt },
                         value = "${scheduledAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))}"
                     )
 
@@ -848,6 +846,7 @@ fun GeneralTaskPreviewDialog(
                                         onClick = {
                                             model.remove(task)
                                             showConfirmationDialog = false
+                                            onDismissRequest()
                                         }
                                     ) {
                                         Text("Yes")
@@ -888,10 +887,8 @@ fun GeneralTaskPreviewDialog(
 @Composable
 fun CustomEditableInfoItem(
     dialogContent: @Composable (Boolean, () -> Unit, (LocalDateTime) -> Unit) -> Unit,
-    dialogTitle: @Composable () -> Unit,
     label: String,
     onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit,
     value: String,
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -952,7 +949,6 @@ fun SportTaskPreviewDialog(
     var scheduledAt by remember { mutableStateOf(task.scheduledAt) }
     var activity by remember { mutableStateOf((task as? SportTask)?.activity) }
     var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
-
 
     if (showDialog) {
         Dialog(onDismissRequest = onDismissRequest) {
@@ -1165,10 +1161,8 @@ fun SportTaskPreviewDialog(
                                 }
                             )
                         },
-                        dialogTitle = { },
                         label = "Date",
                         onConfirm = { },
-                        onDismiss = { scheduledAt = task.scheduledAt },
                         value = "${scheduledAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))}"
                     )
 
@@ -1399,10 +1393,8 @@ fun MealTaskPreviewDialog(
                                 }
                             )
                         },
-                        dialogTitle = { },
                         label = "Date",
                         onConfirm = { },
-                        onDismiss = { scheduledAt = task.scheduledAt },
                         value = "${scheduledAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))}"
                     )
 
