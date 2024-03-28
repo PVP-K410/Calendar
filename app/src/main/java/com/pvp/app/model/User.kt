@@ -15,5 +15,5 @@ data class User(
     val surveys: List<Survey> = emptyList(),
     var username: String = "",
     var weeklyActivities: List<SportActivity> = emptyList(),
-    // var dailyTasks: List<SportTask> = emptyList()
+    var dailyTasks: List<SportTask> = emptyList()
 )

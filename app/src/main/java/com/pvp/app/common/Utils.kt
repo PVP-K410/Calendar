@@ -64,6 +64,13 @@ fun List<SportActivity>.getOccurences(): List<Pair<SportActivity, Int>> {
         .sortedByDescending { it.second }
 }
 
+fun LocalDateTime.resetTime(): LocalDateTime {
+    return withHour(0)
+        .withMinute(0)
+        .withSecond(0)
+        .withNano(0)
+}
+
 fun LocalDateTime.toEpochSecondTimeZoned(): Long {
     return toEpochSecond(
         ZoneId
