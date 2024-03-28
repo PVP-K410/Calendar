@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.calendar
 
+import androidx.compose.runtime.toMutableStateList
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
@@ -59,19 +60,21 @@ class CalendarWeeklyViewModel @Inject constructor(
             combine(flowUser, flowTasks) { user, tasks ->
                 val now = LocalDateTime.now()
 
-                _state.update {
-                    CalendarState(
-                        tasksMonth = tasks.filter {
-                            it.scheduledAt.year == now.year &&
-                                    it.scheduledAt.monthValue == now.monthValue
-                        },
-                        tasksWeek = tasks.filter {
-                            it.scheduledAt.year == now.year &&
-                                    it.scheduledAt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) ==
-                                    now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
-                        },
-                        user = user
-                    )
+                if (user != null) {
+                    _state.update {
+                        CalendarState(
+                            tasksMonth = tasks.filter {
+                                it.scheduledAt.year == now.year &&
+                                        it.scheduledAt.monthValue == now.monthValue
+                            } + user.dailyTasks,
+                            tasksWeek = tasks.filter {
+                                it.scheduledAt.year == now.year &&
+                                        it.scheduledAt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) ==
+                                        now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+                            } + user.dailyTasks,
+                            user = user
+                        )
+                    }
                 }
             }
                 .launchIn(viewModelScope)

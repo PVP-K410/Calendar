@@ -32,6 +32,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.Nightlight
@@ -408,10 +409,27 @@ fun ActivitiesBox(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    //TodaysTasks(Icons.Outlined.Event, tasks, Daily::class) // TODO uncomment when Daily tasks are implemented
-                    TodaysTasks(Icons.AutoMirrored.Outlined.LibraryBooks, tasks, Task::class)
-                    TodaysTasks(Icons.AutoMirrored.Outlined.DirectionsRun, tasks, SportTask::class)
-                    TodaysTasks(Icons.Outlined.Restaurant, tasks, MealTask::class)
+                    DayTasks(
+                        Icons.Outlined.Event,
+                        tasks,
+                        SportTask::class,
+                        true
+                    )
+                    DayTasks(
+                        Icons.AutoMirrored.Outlined.LibraryBooks,
+                        tasks,
+                        Task::class
+                    )
+                    DayTasks(
+                        Icons.AutoMirrored.Outlined.DirectionsRun,
+                        tasks,
+                        SportTask::class
+                    )
+                    DayTasks(
+                        Icons.Outlined.Restaurant,
+                        tasks,
+                        MealTask::class
+                    )
                 }
             }
 
@@ -464,12 +482,22 @@ fun ActivitiesBox(
 }
 
 @Composable
-fun TodaysTasks(
+fun DayTasks(
     icon: ImageVector,
     tasks: List<Task>,
-    taskCategory: KClass<out Task>
+    taskCategory: KClass<out Task>,
+    daily: Boolean = false
 ) {
-    val tasksOfCategory = tasks.filter { it::class == taskCategory }
+    val tasksOfCategory = when (taskCategory) {
+        SportTask::class -> {
+            tasks.filter { (it as SportTask).isDaily == daily }
+        }
+
+        else -> {
+            tasks.filter { it::class == taskCategory }
+        }
+    }
+
     val completedTasks = tasksOfCategory.filter { it.isCompleted }
 
     val text = if (tasksOfCategory.isEmpty()) {
@@ -536,8 +564,8 @@ private fun filterTasks(
     filter: TaskFilter
 ): List<Task> {
     return when (filter) {
-        TaskFilter.Daily -> emptyList()
-        TaskFilter.Sports -> tasks.filterIsInstance<SportTask>()
+        TaskFilter.Daily -> tasks.filter { it is SportTask && it.isDaily }
+        TaskFilter.Sports -> tasks.filter { it is SportTask && !it.isDaily }
         TaskFilter.Meal -> tasks.filterIsInstance<MealTask>()
         TaskFilter.General -> tasks.filter { task -> task !is SportTask && task !is MealTask }
     }
@@ -619,7 +647,10 @@ fun StepCounter(
 
         Canvas(modifier = Modifier.fillMaxSize(fraction = 1f)) {
             val strokeWidth = 6.dp.toPx()
-            val radius = min(size.width, size.height) / 2 - strokeWidth
+            val radius = min(
+                size.width,
+                size.height
+            ) / 2 - strokeWidth
 
             val topLeft = Offset(
                 (size.width / 2) - radius,
@@ -816,7 +847,10 @@ fun Week(
         }
 
         CreateTaskDialog(
-            date = date.atTime(0, 0),
+            date = date.atTime(
+                0,
+                0
+            ),
             isOpen = stateDialog,
             onClose = { stateDialog = false },
             shouldCloseOnSubmit = true
@@ -860,7 +894,8 @@ fun DayContent(
                                 modifier = Modifier.padding(32.dp),
                                 style = MaterialTheme.typography.bodyMedium,
                                 text = "No ${
-                                    filter.toString().lowercase(Locale.ROOT)
+                                    filter.toString()
+                                        .lowercase(Locale.ROOT)
                                 } tasks have been setup for this day"
                             )
                         }
