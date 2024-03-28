@@ -1,5 +1,6 @@
 package com.pvp.app.service
 
+import android.util.Log
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.HealthConnectService
@@ -11,10 +12,46 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlin.math.max
 
 class ExerciseServiceImpl @Inject constructor(
     private val service: HealthConnectService
 ) : ExerciseService {
+
+    override suspend fun calculateActivityLevel(): Double {
+        val activityLevel = calculateActivityPoints()
+
+        // Base level is calculated as activity level for people who walk ~1km every day for 30 days
+        // this will equal multiplier of 1.
+        val baseLevel = 7250.00
+        // Basically the sensitivity of the multiplier. If we want it to be adjusted later.
+        val stepSize = 7250.00
+
+
+        val multiplier = 1 + (activityLevel / baseLevel - 1) / (stepSize / baseLevel)
+
+        return max(1.0, multiplier)
+    }
+
+    private suspend fun calculateActivityPoints(): Double {
+        val exercises = getAllExerciseInfo()
+
+        val points = exercises
+            .mapNotNull { exercise ->
+                val activity = SportActivity.fromId(exercise.record.exerciseType)
+
+                if (activity.supportsDistanceMetrics) {
+                    exercise.distance?.times(activity.pointsRatioDistance)
+                } else {
+                    exercise.duration?.seconds
+                        ?.times(activity.pointsRatioDuration)
+                        ?.toDouble()
+                }
+            }
+            .sum()
+
+        return points
+    }
 
     private suspend fun getActivitiesWithOccurrencesMap(): Map<SportActivity, Int> {
         val end = Instant.now()
@@ -37,6 +74,26 @@ class ExerciseServiceImpl @Inject constructor(
             }
             .getOccurences()
             .toMap()
+    }
+
+    private suspend fun getAllExerciseInfo(): List<ExerciseSessionInfo> {
+        val end = Instant.now()
+
+        val start = LocalDate
+            .now()
+            .minusDays(29)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return service
+            .readActivityData(
+                record = ExerciseSessionRecord::class,
+                start = start,
+                end = end
+            )
+            .map { record ->
+                getExerciseInfo(record)
+            }
     }
 
     override suspend fun getExerciseInfo(record: ExerciseSessionRecord): ExerciseSessionInfo {

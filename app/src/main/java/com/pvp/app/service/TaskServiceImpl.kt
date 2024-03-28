@@ -1,8 +1,10 @@
 package com.pvp.app.service
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
@@ -28,10 +30,13 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class TaskServiceImpl @Inject constructor(
     private val configuration: Configuration,
     private val database: FirebaseFirestore,
+    private val exerciseService: ExerciseService,
     private val experienceService: ExperienceService,
     private val pointService: PointService,
     private val userService: UserService
@@ -256,9 +261,9 @@ class TaskServiceImpl @Inject constructor(
         count: Int,
         userEmail: String
     ): List<SportTask> {
-
         return SportActivity.entries
             .minus(SportActivity.Wheelchair)
+            .minus(SportActivity.Other)
             .shuffled()
             .take(count)
             .mapIndexed { index, activity ->
@@ -278,17 +283,9 @@ class TaskServiceImpl @Inject constructor(
                 )
 
                 if (activity.supportsDistanceMetrics) {
-                    task.distance = (1000..5000 step 50)
-                        .toList()
-                        .random()
-                        .toDouble()
+                    task.distance = getDistance(activity)
                 } else {
-                    task.duration = Duration.ofMinutes(
-                        (10..90 step 5)
-                            .toList()
-                            .random()
-                            .toLong()
-                    )
+                    task.duration = getDuration(activity)
                 }
 
                 task.points = task.points.copy(
@@ -297,6 +294,79 @@ class TaskServiceImpl @Inject constructor(
 
                 task
             }
+    }
+
+    /**
+     * @param baseDistance Represents a value that a user that walks 1km everyday (activity level 1)
+     * would have as a maximum value assigned for a walking task
+     */
+    private suspend fun getDistance(
+        activity: SportActivity,
+        baseDistance: Double = 750.0
+    ): Double {
+        val unit = baseDistance / (1 / SportActivity.Walking.pointsRatioDistance)
+
+        val multiplier = String
+            .format(
+                "%.2f",
+                exerciseService.calculateActivityLevel()
+            )
+            .toDouble()
+
+        val upperBound =
+            (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10).roundToInt() * 10
+
+        val lowerBound = if (multiplier < 2.0) {
+            // For ensuring users don't get task to walk 50 meters
+            upperBound / 2
+        } else {
+            (unit * (1 / activity.pointsRatioDistance) * (multiplier - 1) / 10).roundToInt() * 10
+        }
+
+        return (lowerBound..upperBound step 50)
+            .toList()
+            .random()
+            .toDouble()
+    }
+
+
+    /**
+     * @param baseDuration Represents a value that a user that walks 1km everyday (activity level 1)
+     * would have as a maximum value assigned for playing basketball
+     */
+    private suspend fun getDuration(
+        activity: SportActivity,
+        baseDuration: Duration = Duration.ofMinutes(30)
+    ): Duration {
+        val unit = baseDuration.seconds / (1 / SportActivity.Basketball.pointsRatioDuration)
+
+        val multiplier = String
+            .format(
+                "%.2f",
+                exerciseService.calculateActivityLevel()
+            )
+            .toDouble()
+
+        // Division and multiplication by 300 are there to ensure upper and lower bounds
+        // are multiples of 5 minutes
+        val upperBound =
+            ((unit * (1 / activity.pointsRatioDuration) * multiplier) / 300).roundToInt() * 300
+
+        val lowerBound = if (multiplier < 2.0) {
+            max(
+                upperBound / 2,
+                300
+            ) / 300 * 300
+        } else {
+            ((unit * (1 / activity.pointsRatioDuration) * (multiplier - 1)) / 300).roundToInt() * 300
+        }
+
+        return Duration.ofSeconds(
+            (lowerBound..upperBound step 300)
+                .toList()
+                .random()
+                .toLong()
+        )
     }
 
     private fun decodeByType(
