@@ -38,14 +38,16 @@ class CalendarMonthlyViewModel @Inject constructor(
             }
 
             combine(flowUser, flowTasks) { user, tasks ->
-                _state.update { currentState ->
-                    currentState.copy(
-                        dates = getDates(
-                            currentState.yearMonth,
-                            tasks
-                        ),
-                        tasks = tasks
-                    )
+                if (user != null) {
+                    _state.update { currentState ->
+                        currentState.copy(
+                            dates = getDates(
+                                currentState.yearMonth,
+                                tasks + user.dailyTasks
+                            ),
+                            tasks = tasks + user.dailyTasks
+                        )
+                    }
                 }
             }
                 .launchIn(viewModelScope)
