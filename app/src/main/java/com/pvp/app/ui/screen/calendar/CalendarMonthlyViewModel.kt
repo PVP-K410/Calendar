@@ -37,15 +37,20 @@ class CalendarMonthlyViewModel @Inject constructor(
                     ?: flowOf(listOf())
             }
 
-            combine(flowUser, flowTasks) { user, tasks ->
-                _state.update { currentState ->
-                    currentState.copy(
-                        dates = getDates(
-                            currentState.yearMonth,
-                            tasks
-                        ),
-                        tasks = tasks
-                    )
+            combine(
+                flowUser,
+                flowTasks
+            ) { user, tasks ->
+                if (user != null) {
+                    _state.update { currentState ->
+                        currentState.copy(
+                            dates = getDates(
+                                currentState.yearMonth,
+                                tasks + user.dailyTasks
+                            ),
+                            tasks = tasks + user.dailyTasks
+                        )
+                    }
                 }
             }
                 .launchIn(viewModelScope)
@@ -75,7 +80,10 @@ class CalendarMonthlyViewModel @Inject constructor(
                     CalendarUiState.DateEntry(
                         date = date,
                         isHighlighted = date.isEqual(LocalDate.now()),
-                        tasks = getTasksOfDate(date, tasks)
+                        tasks = getTasksOfDate(
+                            date,
+                            tasks
+                        )
                     )
                 } else {
                     // List at front is padded with empty data, that helps to ensure that
@@ -117,7 +125,11 @@ data class CalendarUiState(
         var tasks: List<Task>
     ) {
         companion object {
-            val Empty = DateEntry(LocalDate.MIN, false, emptyList())
+            val Empty = DateEntry(
+                LocalDate.MIN,
+                false,
+                emptyList()
+            )
         }
     }
 }

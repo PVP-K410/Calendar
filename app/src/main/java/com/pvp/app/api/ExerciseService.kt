@@ -7,6 +7,12 @@ import com.pvp.app.model.SportActivity
 interface ExerciseService {
 
     /**
+     * Calculates activity level for the user using all data retrievable from Health Connect.
+     * @return Level, where level 1 correlates to a person walking 1 km a day everyday
+     */
+    suspend fun calculateActivityLevel(): Double
+
+    /**
      * @param record ExerciseSessionRecord object
      * @return record object processed into an ExerciseSessionInfo object
      */
