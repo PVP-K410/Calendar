@@ -302,7 +302,7 @@ class TaskServiceImpl @Inject constructor(
      */
     private suspend fun getDistance(
         activity: SportActivity,
-        baseDistance: Double = 0.750
+        baseDistance: Double = 0.75
     ): Double {
         val unit = baseDistance * 1000 / (1 / SportActivity.Walking.pointsRatioDistance)
 
