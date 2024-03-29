@@ -1,15 +1,18 @@
 package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,70 +28,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.Locale
 
 @Composable
 fun CalendarMonthlyScreen(
     model: CalendarMonthlyViewModel = hiltViewModel(),
 ) {
     val state by model.state.collectAsState()
+    var expand by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var dateTasks by remember { mutableStateOf<List<Task>>(emptyList()) }
+    var showActivitiesBox by remember { mutableStateOf(false) }
 
     MonthlyCalendar(
         days = DateUtil.daysOfWeek,
         month = state.yearMonth,
         dates = state.dates,
+        expand = expand,
+        onExpandChange = { expand = it },
+        showDialog = showDialog,
+        onShowDialogChange = { showDialog = it },
+        selectedDate = selectedDate,
+        dateTasks = dateTasks,
+        showActivitiesBox = showActivitiesBox,
+        onShowActivitiesBoxChange = { showActivitiesBox = it },
         onClickListener = { date ->
+            expand = true
             showDialog = true
             selectedDate = date.date
             dateTasks = date.tasks
+            showActivitiesBox = false
         }
     )
-
-    if (showDialog) {
-        if (dateTasks.isEmpty()) {
-            CreateTaskDialog(
-                date = LocalDateTime.of(
-                    selectedDate,
-                    LocalTime.now()
-                ),
-                onClose = { showDialog = false },
-                isOpen = showDialog,
-                shouldCloseOnSubmit = true
-            )
-        } else {
-            DayDialog(
-                date = selectedDate,
-                onDismissRequest = { showDialog = false }
-            )
-        }
-    }
-}
-
-@Composable
-fun DayDialog(
-    date: LocalDate,
-    onDismissRequest: () -> Unit
-) {
-    Dialog(
-        onDismissRequest = { onDismissRequest() },
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        Day(
-            date = date,
-            name = "${date.month.toString().lowercase(Locale.ROOT).capitalize()} ${date.dayOfMonth}"
-        )
-    }
 }
 
 @Composable
@@ -96,6 +74,14 @@ fun MonthlyCalendar(
     days: Array<String>,
     month: YearMonth,
     dates: List<CalendarUiState.DateEntry>,
+    expand: Boolean,
+    onExpandChange: (Boolean) -> Unit,
+    showDialog: Boolean,
+    onShowDialogChange: (Boolean) -> Unit,
+    selectedDate: LocalDate,
+    dateTasks: List<Task>,
+    showActivitiesBox: Boolean,
+    onShowActivitiesBoxChange: (Boolean) -> Unit,
     onClickListener: (CalendarUiState.DateEntry) -> Unit
 ) {
     Column(
@@ -118,8 +104,125 @@ fun MonthlyCalendar(
 
         Content(
             dates = dates,
+            selectedDate = selectedDate,
             onClickListener = onClickListener
         )
+
+        if (expand) {
+            when {
+                dateTasks.isEmpty() && selectedDate == LocalDate.now() -> {
+                    showActivitiesBox(
+                        dateTasks,
+                        selectedDate
+                    )
+                    
+                    if (showDialog) {
+                        createTaskDialog(
+                            selectedDate,
+                            showDialog,
+                            onShowDialogChange
+                        )
+                    }
+                }
+
+                dateTasks.isEmpty() && !selectedDate.isBefore(LocalDate.now()) -> {
+                    createTaskDialog(
+                        selectedDate,
+                        expand,
+                        onExpandChange
+                    )
+                }
+
+                dateTasks.isEmpty() && !selectedDate.isAfter(LocalDate.now()) -> {
+                    showActivitiesBox(
+                        dateTasks,
+                        selectedDate
+                    )
+                }
+
+                else -> {
+                    showDayContentOrActivitiesBox(
+                        dateTasks,
+                        selectedDate,
+                        showActivitiesBox,
+                        onShowActivitiesBoxChange
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun showActivitiesBox(
+    dateTasks: List<Task>,
+    selectedDate: LocalDate
+) {
+    Box {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 32.dp)
+        ) {
+            ActivitiesBox(
+                date = selectedDate,
+                tasks = dateTasks
+            )
+        }
+    }
+}
+
+@Composable
+fun createTaskDialog(
+    selectedDate: LocalDate,
+    isOpen: Boolean,
+    onClose: (Boolean) -> Unit
+) {
+    CreateTaskDialog(
+        date = LocalDateTime.of(
+            selectedDate,
+            LocalTime.now()
+        ),
+        onClose = { onClose(false) },
+        isOpen = isOpen,
+        shouldCloseOnSubmit = true
+    )
+}
+
+@Composable
+fun showDayContentOrActivitiesBox(
+    dateTasks: List<Task>,
+    selectedDate: LocalDate,
+    showActivitiesBox: Boolean,
+    onShowActivitiesBoxChange: (Boolean) -> Unit
+) {
+    Box {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            if (showActivitiesBox) {
+                showActivitiesBox(
+                    dateTasks,
+                    selectedDate
+                )
+            } else {
+                DayContent(tasks = dateTasks)
+            }
+        }
+
+        if (!selectedDate.isAfter(LocalDate.now()) && dateTasks.isNotEmpty()) {
+            Icon(
+                imageVector = Icons.Outlined.SwapHoriz,
+                contentDescription = "Swap",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .size(30.dp)
+                    .zIndex(1f)
+                    .clickable { onShowActivitiesBoxChange(!showActivitiesBox) },
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
 
@@ -178,6 +281,7 @@ fun DayItem(
 @Composable
 fun Content(
     dates: List<CalendarUiState.DateEntry>,
+    selectedDate: LocalDate,
     onClickListener: (CalendarUiState.DateEntry) -> Unit,
 ) {
     Column {
@@ -198,6 +302,7 @@ fun Content(
 
                     ContentItem(
                         entry = item,
+                        selectedDate = selectedDate,
                         onClickListener = onClickListener,
                         modifier = Modifier.weight(1f)
                     )
@@ -212,6 +317,7 @@ fun Content(
 @Composable
 fun ContentItem(
     entry: CalendarUiState.DateEntry,
+    selectedDate: LocalDate,
     onClickListener: (CalendarUiState.DateEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -232,12 +338,21 @@ fun ContentItem(
     Box(
         modifier = modifier
             .background(
-                color = if (entry.isHighlighted) {
+                color = if (entry.date.isEqual(LocalDate.now())) {
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
                 },
                 MaterialTheme.shapes.medium
+            )
+            .border(
+                width = 2.dp,
+                color = if (entry.date.isEqual(selectedDate)) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    Color.Transparent
+                },
+                shape = MaterialTheme.shapes.medium
             )
             .clickable(enabled = clickable) {
                 onClickListener(entry)
