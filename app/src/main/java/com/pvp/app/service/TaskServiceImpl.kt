@@ -297,14 +297,14 @@ class TaskServiceImpl @Inject constructor(
     }
 
     /**
-     * @param baseDistance Represents a value that a user that walks 1km everyday (activity level 1)
-     * would have as a maximum value assigned for a walking task
+     * @param baseDistance Represents a value (in km) that a user that walks 1km everyday
+     * (activity level 1) would have as a maximum value assigned for a walking task
      */
     private suspend fun getDistance(
         activity: SportActivity,
-        baseDistance: Double = 750.0
+        baseDistance: Double = 0.750
     ): Double {
-        val unit = baseDistance / (1 / SportActivity.Walking.pointsRatioDistance)
+        val unit = baseDistance * 1000 / (1 / SportActivity.Walking.pointsRatioDistance)
 
         val multiplier = String
             .format(
@@ -326,7 +326,7 @@ class TaskServiceImpl @Inject constructor(
         return (lowerBound..upperBound step 50)
             .toList()
             .random()
-            .toDouble()
+            .toDouble() / 1000
     }
 
 
