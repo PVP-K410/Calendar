@@ -34,9 +34,7 @@ class ExerciseServiceImpl @Inject constructor(
     }
 
     private suspend fun calculateActivityPoints(): Double {
-        val exercises = getAllExerciseInfo()
-
-        val points = exercises
+        return getAllExerciseInfo()
             .mapNotNull { exercise ->
                 val activity = SportActivity.fromId(exercise.record.exerciseType)
 
@@ -49,8 +47,6 @@ class ExerciseServiceImpl @Inject constructor(
                 }
             }
             .sum()
-
-        return points
     }
 
     private suspend fun getActivitiesWithOccurrencesMap(): Map<SportActivity, Int> {

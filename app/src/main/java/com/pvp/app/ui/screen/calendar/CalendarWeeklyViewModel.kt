@@ -57,7 +57,10 @@ class CalendarWeeklyViewModel @Inject constructor(
                     ?: flowOf(listOf())
             }
 
-            combine(flowUser, flowTasks) { user, tasks ->
+            combine(
+                flowUser,
+                flowTasks
+            ) { user, tasks ->
                 val now = LocalDateTime.now()
 
                 if (user != null) {
