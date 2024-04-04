@@ -386,43 +386,34 @@ fun EditableInfoItem(
             .padding(8.dp)
             .fillMaxWidth()
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    fontWeight = FontWeight.Bold,
-                    text = label
-                )
+            Text(
+                fontWeight = FontWeight.Bold,
+                text = label
+            )
 
-                Text(text = value)
-            }
-
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButtonWithDialog(
-                    confirmButtonContent = {
-                        Text("Save")
-                    },
-                    dismissButtonContent = {
-                        Text("Cancel")
-                    },
-                    dialogContent = dialogContent,
-                    dialogTitle = dialogTitle,
-                    icon = Icons.Outlined.Edit,
-                    iconSize = 30.dp,
-                    iconDescription = "Edit Icon Button",
-                    onConfirm = { onConfirm(value) },
-                    onDismiss = onDismiss
-                )
-            }
+            Text(text = value)
         }
+
+        IconButtonWithDialog(
+            confirmButtonContent = {
+                Text("Save")
+            },
+            dismissButtonContent = {
+                Text("Cancel")
+            },
+            dialogContent = dialogContent,
+            dialogTitle = dialogTitle,
+            icon = Icons.Outlined.Edit,
+            iconSize = 30.dp,
+            iconDescription = "Edit Icon Button",
+            onConfirm = { onConfirm(value) },
+            onDismiss = onDismiss,
+            modifier = Modifier.align(Alignment.TopEnd)
+        )
     }
 }

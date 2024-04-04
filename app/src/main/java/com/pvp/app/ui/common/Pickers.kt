@@ -3,6 +3,7 @@ package com.pvp.app.ui.common
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -54,6 +55,7 @@ fun <T> Picker(
     textModifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     visibleItemsCount: Int = 3,
+    onChange: (T) -> Unit = {}
 ) {
     val itemsInMiddle = visibleItemsCount / 2
     val scrollCount = Integer.MAX_VALUE
@@ -78,7 +80,11 @@ fun <T> Picker(
         snapshotFlow { stateList.firstVisibleItemIndex }
             .map { index -> getItem(index + itemsInMiddle) }
             .distinctUntilChanged()
-            .collect { item -> state.value = item }
+            .collect { item ->
+                state.value = item
+
+                onChange(item)
+            }
     }
 
     Box(modifier = modifier) {
@@ -118,3 +124,55 @@ fun <T> Picker(
 
 @Composable
 private fun pixelsToDp(pixels: Int) = with(LocalDensity.current) { pixels.toDp() }
+
+@Composable
+fun TimePicker(
+    modifier: Modifier = Modifier,
+    selectedHour: PickerState<Int>,
+    selectedMinute: PickerState<Int>,
+    onChange: (hour: Int, minute: Int) -> Unit = { _, _ -> }
+) {
+    Row(modifier = modifier) {
+        Picker(
+            items = (0..23).toList(),
+            label = { "$it" },
+            state = selectedHour,
+            visibleItemsCount = 3,
+            modifier = Modifier.weight(1f),
+            startIndex = selectedHour.value,
+            onChange = {
+                onChange(
+                    it,
+                    selectedMinute.value
+                )
+            }
+        )
+
+        Text(
+            text = ":",
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+
+        Picker(
+            items = (0..59).toList(),
+            label = {
+                it
+                    .toString()
+                    .padStart(
+                        2,
+                        '0'
+                    )
+            },
+            state = selectedMinute,
+            visibleItemsCount = 3,
+            modifier = Modifier.weight(1f),
+            startIndex = selectedMinute.value,
+            onChange = {
+                onChange(
+                    selectedHour.value,
+                    it
+                )
+            }
+        )
+    }
+}

@@ -198,8 +198,7 @@ fun showDayContentOrActivitiesBox(
 ) {
     Box {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             if (showActivitiesBox) {
                 showActivitiesBox(
