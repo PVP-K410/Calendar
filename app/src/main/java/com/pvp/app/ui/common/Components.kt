@@ -375,7 +375,7 @@ fun EditableInfoItem(
     label: String,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
-    value: String,
+    value: String
 ) {
     Box(
         modifier = Modifier
