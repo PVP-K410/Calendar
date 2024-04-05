@@ -111,6 +111,7 @@ class TaskViewModel @Inject constructor(
                             description,
                             distance,
                             duration,
+                            false,
                             scheduledAt,
                             title,
                             state.user.email

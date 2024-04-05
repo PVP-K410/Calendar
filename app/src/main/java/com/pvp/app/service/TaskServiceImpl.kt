@@ -3,10 +3,13 @@ package com.pvp.app.service
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.JSON
+import com.pvp.app.common.resetTime
 import com.pvp.app.common.toJsonElement
 import com.pvp.app.common.toPrimitivesMap
 import com.pvp.app.model.MealTask
@@ -19,33 +22,24 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class TaskServiceImpl @Inject constructor(
     private val configuration: Configuration,
     private val database: FirebaseFirestore,
+    private val exerciseService: ExerciseService,
     private val experienceService: ExperienceService,
     private val pointService: PointService,
     private val userService: UserService
 ) : TaskService {
-
-    private val json = Json {
-        serializersModule = SerializersModule {
-            polymorphic(Task::class, Task.serializer()) {
-                subclass(MealTask::class, MealTask.serializer())
-                subclass(SportTask::class, SportTask.serializer())
-            }
-        }
-    }
 
     override suspend fun claim(
         task: Task
@@ -145,7 +139,10 @@ class TaskServiceImpl @Inject constructor(
             .await()
 
         reference
-            .update(Task::id.name, reference.id)
+            .update(
+                Task::id.name,
+                reference.id
+            )
             .await()
 
         val snapshot = reference
@@ -162,6 +159,7 @@ class TaskServiceImpl @Inject constructor(
         description: String?,
         distance: Double?,
         duration: Duration?,
+        isDaily: Boolean,
         scheduledAt: LocalDateTime,
         title: String,
         userEmail: String
@@ -173,7 +171,7 @@ class TaskServiceImpl @Inject constructor(
             duration = duration,
             id = null,
             isCompleted = false,
-            isDaily = false,
+            isDaily = isDaily,
             points = Points(),
             scheduledAt = scheduledAt,
             title = title,
@@ -196,7 +194,10 @@ class TaskServiceImpl @Inject constructor(
             .await()
 
         reference
-            .update(Task::id.name, reference.id)
+            .update(
+                Task::id.name,
+                reference.id
+            )
             .await()
 
         val snapshot = reference
@@ -241,7 +242,10 @@ class TaskServiceImpl @Inject constructor(
             .await()
 
         reference
-            .update(Task::id.name, reference.id)
+            .update(
+                Task::id.name,
+                reference.id
+            )
             .await()
 
         val snapshot = reference
@@ -256,8 +260,100 @@ class TaskServiceImpl @Inject constructor(
     override suspend fun generateDaily(
         count: Int,
         userEmail: String
-    ) {
-        TODO("Not yet implemented")
+    ): List<SportTask> {
+        return SportActivity.entries
+            .minus(SportActivity.Wheelchair)
+            .minus(SportActivity.Other)
+            .shuffled()
+            .take(count)
+            .mapIndexed { index, activity ->
+                val task = create(
+                    activity = activity,
+                    description = "One of your daily tasks for today",
+                    distance = if (activity.supportsDistanceMetrics) getDistance(activity) else null,
+                    duration = if (!activity.supportsDistanceMetrics) getDuration(activity) else null,
+                    isDaily = true,
+                    scheduledAt = LocalDateTime
+                        .now()
+                        .resetTime(),
+                    title = "Task #${index + 1}: ${activity.title}",
+                    userEmail = userEmail
+                )
+
+                task
+            }
+    }
+
+    /**
+     * @param baseDistance Represents a value (in km) that a user that walks 1km everyday
+     * (activity level 1) would have as a maximum value assigned for a walking task
+     */
+    private suspend fun getDistance(
+        activity: SportActivity,
+        baseDistance: Double = 0.75
+    ): Double {
+        val unit = baseDistance * 1000 / (1 / SportActivity.Walking.pointsRatioDistance)
+
+        val multiplier = String
+            .format(
+                "%.2f",
+                exerciseService.calculateActivityLevel()
+            )
+            .toDouble()
+
+        val upperBound =
+            (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10).roundToInt() * 10
+
+        val lowerBound = if (multiplier < 2.0) {
+            // For ensuring users don't get task to walk 50 meters
+            upperBound / 2
+        } else {
+            (unit * (1 / activity.pointsRatioDistance) * (multiplier - 1) / 10).roundToInt() * 10
+        }
+
+        return (lowerBound..upperBound step 50)
+            .toList()
+            .random()
+            .toDouble() / 1000
+    }
+
+    /**
+     * @param baseDuration Represents a value that a user that walks 1km everyday (activity level 1)
+     * would have as a maximum value assigned for playing basketball
+     */
+    private suspend fun getDuration(
+        activity: SportActivity,
+        baseDuration: Duration = Duration.ofMinutes(30)
+    ): Duration {
+        val unit = baseDuration.seconds / (1 / SportActivity.Basketball.pointsRatioDuration)
+
+        val multiplier = String
+            .format(
+                "%.2f",
+                exerciseService.calculateActivityLevel()
+            )
+            .toDouble()
+
+        // Division and multiplication by 300 are there to ensure upper and lower bounds
+        // are multiples of 5 minutes
+        val upperBound =
+            ((unit * (1 / activity.pointsRatioDuration) * multiplier) / 300).roundToInt() * 300
+
+        val lowerBound = if (multiplier < 2.0) {
+            max(
+                upperBound / 2,
+                300
+            ) / 300 * 300
+        } else {
+            ((unit * (1 / activity.pointsRatioDuration) * (multiplier - 1)) / 300).roundToInt() * 300
+        }
+
+        return Duration.ofSeconds(
+            (lowerBound..upperBound step 300)
+                .toList()
+                .random()
+                .toLong()
+        )
     }
 
     private fun decodeByType(
@@ -269,30 +365,30 @@ class TaskServiceImpl @Inject constructor(
             error("Task data is not a JSON object")
         }
 
-        if (element.containsKey("recipe")) {
-            return json.decodeFromJsonElement<MealTask>(element)
+        if (element.containsKey(MealTask::recipe.name)) {
+            return JSON.decodeFromJsonElement<MealTask>(element)
         }
 
-        if (element.containsKey("activity")) {
-            return json.decodeFromJsonElement<SportTask>(element)
+        if (element.containsKey(SportTask::activity.name)) {
+            return JSON.decodeFromJsonElement<SportTask>(element)
         }
 
-        return json.decodeFromJsonElement<Task>(element)
+        return JSON.decodeFromJsonElement<Task>(element)
     }
 
     private fun encodeByType(
         task: Task
     ): Map<String, Any?> {
         return when (task) {
-            is MealTask -> json
+            is MealTask -> JSON
                 .encodeToJsonElement<MealTask>(task)
                 .toPrimitivesMap()
 
-            is SportTask -> json
+            is SportTask -> JSON
                 .encodeToJsonElement<SportTask>(task)
                 .toPrimitivesMap()
 
-            else -> json
+            else -> JSON
                 .encodeToJsonElement<Task>(task)
                 .toPrimitivesMap()
         }
@@ -303,7 +399,10 @@ class TaskServiceImpl @Inject constructor(
     ): Flow<List<Task>> {
         return database
             .collection(identifier)
-            .whereEqualTo(Task::userEmail.name, userEmail)
+            .whereEqualTo(
+                Task::userEmail.name,
+                userEmail
+            )
             .snapshots()
             .map { qs ->
                 qs.documents

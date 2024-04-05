@@ -51,6 +51,7 @@ interface TaskService : DocumentsCollection {
      * @param description description of the task
      * @param distance distance of the task
      * @param duration duration of the task
+     * @param isDaily flag to create a daily task
      * @param scheduledAt scheduled date and time of the task
      * @param title title of the task
      * @param userEmail user email to create the task for
@@ -62,6 +63,7 @@ interface TaskService : DocumentsCollection {
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
+        isDaily: Boolean = false,
         scheduledAt: LocalDateTime,
         title: String,
         userEmail: String
@@ -94,11 +96,13 @@ interface TaskService : DocumentsCollection {
      *
      * @param count number of tasks to generate
      * @param userEmail email of the user to generate daily tasks for
+     *
+     * @return list of generated tasks
      */
     suspend fun generateDaily(
         count: Int = 3,
         userEmail: String
-    )
+    ): List<SportTask>
 
     /**
      * Gets all tasks for the given user by its email.

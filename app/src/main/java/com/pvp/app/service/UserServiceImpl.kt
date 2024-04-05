@@ -67,7 +67,10 @@ class UserServiceImpl @Inject constructor(
         // For now, we will just return a default avatar.
         return try {
             SVG
-                .getFromResource(context.resources, R.raw.avatar)
+                .getFromResource(
+                    context.resources,
+                    R.raw.avatar
+                )
                 .renderToPicture()
                 .toImageBitmap()
         } catch (e: SVGParseException) {

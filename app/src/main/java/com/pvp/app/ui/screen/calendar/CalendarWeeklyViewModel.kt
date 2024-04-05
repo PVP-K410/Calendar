@@ -56,22 +56,27 @@ class CalendarWeeklyViewModel @Inject constructor(
                     ?: flowOf(listOf())
             }
 
-            combine(flowUser, flowTasks) { user, tasks ->
+            combine(
+                flowUser,
+                flowTasks
+            ) { user, tasks ->
                 val now = LocalDateTime.now()
 
-                _state.update {
-                    CalendarState(
-                        tasksMonth = tasks.filter {
-                            it.scheduledAt.year == now.year &&
-                                    it.scheduledAt.monthValue == now.monthValue
-                        },
-                        tasksWeek = tasks.filter {
-                            it.scheduledAt.year == now.year &&
-                                    it.scheduledAt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) ==
-                                    now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
-                        },
-                        user = user
-                    )
+                if (user != null) {
+                    _state.update {
+                        CalendarState(
+                            tasksMonth = tasks.filter {
+                                it.scheduledAt.year == now.year &&
+                                        it.scheduledAt.monthValue == now.monthValue
+                            },
+                            tasksWeek = tasks.filter {
+                                it.scheduledAt.year == now.year &&
+                                        it.scheduledAt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) ==
+                                        now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+                            },
+                            user = user
+                        )
+                    }
                 }
             }
                 .launchIn(viewModelScope)
