@@ -46,9 +46,9 @@ class CalendarMonthlyViewModel @Inject constructor(
                         currentState.copy(
                             dates = getDates(
                                 currentState.yearMonth,
-                                tasks + user.dailyTasks
+                                tasks
                             ),
-                            tasks = tasks + user.dailyTasks
+                            tasks = tasks
                         )
                     }
                 }
@@ -111,7 +111,9 @@ data class CalendarUiState(
     val dates: List<DateEntry>,
     val tasks: List<Task>
 ) {
+
     companion object {
+
         val Init = CalendarUiState(
             yearMonth = YearMonth.now(),
             dates = emptyList(),
@@ -124,7 +126,9 @@ data class CalendarUiState(
         val isHighlighted: Boolean,
         var tasks: List<Task>
     ) {
+
         companion object {
+
             val Empty = DateEntry(
                 LocalDate.MIN,
                 false,

@@ -82,7 +82,6 @@ fun <T> Picker(
             .distinctUntilChanged()
             .collect { item ->
                 state.value = item
-
                 onChange(item)
             }
     }
@@ -140,39 +139,19 @@ fun TimePicker(
             visibleItemsCount = 3,
             modifier = Modifier.weight(1f),
             startIndex = selectedHour.value,
-            onChange = {
-                onChange(
-                    it,
-                    selectedMinute.value
-                )
-            }
+            onChange = { onChange(it, selectedMinute.value) }
         )
 
-        Text(
-            text = ":",
-            modifier = Modifier.align(Alignment.CenterVertically)
-        )
+        Text(text = ":", modifier = Modifier.align(Alignment.CenterVertically))
 
         Picker(
             items = (0..59).toList(),
-            label = {
-                it
-                    .toString()
-                    .padStart(
-                        2,
-                        '0'
-                    )
-            },
+            label = { it.toString().padStart(2, '0') },
             state = selectedMinute,
             visibleItemsCount = 3,
             modifier = Modifier.weight(1f),
             startIndex = selectedMinute.value,
-            onChange = {
-                onChange(
-                    selectedHour.value,
-                    it
-                )
-            }
+            onChange = { onChange(selectedHour.value, it) }
         )
     }
 }

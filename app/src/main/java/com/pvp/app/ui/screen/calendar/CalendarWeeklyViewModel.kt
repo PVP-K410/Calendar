@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.calendar
 
-import androidx.compose.runtime.toMutableStateList
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
@@ -69,12 +68,12 @@ class CalendarWeeklyViewModel @Inject constructor(
                             tasksMonth = tasks.filter {
                                 it.scheduledAt.year == now.year &&
                                         it.scheduledAt.monthValue == now.monthValue
-                            } + user.dailyTasks,
+                            },
                             tasksWeek = tasks.filter {
                                 it.scheduledAt.year == now.year &&
                                         it.scheduledAt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) ==
                                         now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
-                            } + user.dailyTasks,
+                            },
                             user = user
                         )
                     }

@@ -1,6 +1,5 @@
 package com.pvp.app.service
 
-import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.Configuration
@@ -160,6 +159,7 @@ class TaskServiceImpl @Inject constructor(
         description: String?,
         distance: Double?,
         duration: Duration?,
+        isDaily: Boolean,
         scheduledAt: LocalDateTime,
         title: String,
         userEmail: String
@@ -171,7 +171,7 @@ class TaskServiceImpl @Inject constructor(
             duration = duration,
             id = null,
             isCompleted = false,
-            isDaily = false,
+            isDaily = isDaily,
             points = Points(),
             scheduledAt = scheduledAt,
             title = title,
@@ -267,29 +267,17 @@ class TaskServiceImpl @Inject constructor(
             .shuffled()
             .take(count)
             .mapIndexed { index, activity ->
-                val task = SportTask(
+                val task = create(
                     activity = activity,
                     description = "One of your daily tasks for today",
-                    distance = null,
-                    duration = null,
-                    isCompleted = false,
+                    distance = if (activity.supportsDistanceMetrics) getDistance(activity) else null,
+                    duration = if (!activity.supportsDistanceMetrics) getDuration(activity) else null,
                     isDaily = true,
-                    points = Points(),
                     scheduledAt = LocalDateTime
                         .now()
                         .resetTime(),
                     title = "Task #${index + 1}: ${activity.title}",
                     userEmail = userEmail
-                )
-
-                if (activity.supportsDistanceMetrics) {
-                    task.distance = getDistance(activity)
-                } else {
-                    task.duration = getDuration(activity)
-                }
-
-                task.points = task.points.copy(
-                    value = pointService.calculate(task)
                 )
 
                 task
@@ -328,7 +316,6 @@ class TaskServiceImpl @Inject constructor(
             .random()
             .toDouble() / 1000
     }
-
 
     /**
      * @param baseDuration Represents a value that a user that walks 1km everyday (activity level 1)
