@@ -341,7 +341,7 @@ fun TaskEdit(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskEditFieldsSport(
+private fun TaskEditFieldsSport(
     task: SportTask,
     model: TaskViewModel = hiltViewModel(),
     onActivityChange: (SportActivity?) -> Unit,
@@ -486,7 +486,7 @@ fun TaskEditFieldsSport(
 }
 
 @Composable
-fun TaskEditFieldsMeal(
+private fun TaskEditFieldsMeal(
     task: MealTask,
     onRecipeChange: (String?) -> Unit
 ) {
