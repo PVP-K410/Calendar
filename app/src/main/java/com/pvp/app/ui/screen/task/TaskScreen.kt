@@ -520,9 +520,16 @@ private fun SportTaskBoxBody(
         }
     }
 
-    task.activity?.let { activity ->
+    Row(
+        modifier = Modifier.padding(6.dp)
+    ) {
+        Icon(
+            imageVector = task.activity.icon,
+            contentDescription = "Activity"
+        )
+
         Text(
-            text = activity.title,
+            text = task.activity.title,
             textAlign = TextAlign.Left,
             modifier = Modifier
                 .fillMaxWidth()
@@ -573,12 +580,14 @@ fun TaskBox(
     var checked = task.isCompleted
     var showDialog by remember { mutableStateOf(false) }
 
-    if (showDialog) {
-        TaskPreviewDialog(
-            task,
-            onDismissRequest = { showDialog = false },
-            showDialog
-        )
+    if (task !is SportTask || !task.isDaily) {
+        if (showDialog) {
+            TaskPreviewDialog(
+                task,
+                onDismissRequest = { showDialog = false },
+                showDialog
+            )
+        }
     }
 
     Box(
