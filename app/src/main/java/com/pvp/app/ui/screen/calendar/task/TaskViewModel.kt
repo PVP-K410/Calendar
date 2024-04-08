@@ -1,7 +1,8 @@
-package com.pvp.app.ui.screen.task
+package com.pvp.app.ui.screen.calendar.task
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
@@ -27,11 +28,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
+    configuration: Configuration,
     private val notificationService: NotificationService,
     settingService: SettingService,
     private val taskService: TaskService,
     userService: UserService
 ) : ViewModel() {
+
+    val rangeKilometers = configuration.rangeKilometers
 
     private val state = settingService
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
@@ -183,6 +187,7 @@ class TaskViewModel @Inject constructor(
      * @return Pair of the modified task and a boolean indicating if the task points should also
      * be updated
      */
+    @Suppress("UNCHECKED_CAST")
     private fun <T : Task> resolve(
         handle: (T) -> Unit,
         task: T
@@ -241,6 +246,8 @@ class TaskViewModel @Inject constructor(
                 handle,
                 task
             )
+
+            taskModified.id ?: error("Task ID is required. Cannot update task.")
 
             val taskUpdated = taskService.update(
                 taskModified,

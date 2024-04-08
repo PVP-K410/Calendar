@@ -80,10 +80,10 @@ import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
-import com.pvp.app.ui.screen.task.CreateTaskGeneralForm
-import com.pvp.app.ui.screen.task.CreateTaskMealForm
-import com.pvp.app.ui.screen.task.CreateTaskSportForm
-import com.pvp.app.ui.screen.task.TaskBox
+import com.pvp.app.ui.screen.calendar.task.TaskCard
+import com.pvp.app.ui.screen.calendar.task.TaskCreate
+import com.pvp.app.ui.screen.calendar.task.TaskCreateMeal
+import com.pvp.app.ui.screen.calendar.task.TaskCreateSport
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -224,19 +224,19 @@ fun CreateTaskDialog(
             }
 
             when (target) {
-                MealTask::class -> CreateTaskMealForm(
+                MealTask::class -> TaskCreateMeal(
                     date = date,
                     modifier = modifier,
                     onCreate = closeIfShould
                 )
 
-                SportTask::class -> CreateTaskSportForm(
+                SportTask::class -> TaskCreateSport(
                     date = date,
                     modifier = modifier,
                     onCreate = closeIfShould
                 )
 
-                Task::class -> CreateTaskGeneralForm(
+                Task::class -> TaskCreate(
                     date = date,
                     modifier = modifier,
                     onCreate = closeIfShould
@@ -414,16 +414,19 @@ fun ActivitiesBox(
                         SportTask::class,
                         true
                     )
+
                     DayTasks(
                         Icons.AutoMirrored.Outlined.LibraryBooks,
                         tasks,
                         Task::class
                     )
+
                     DayTasks(
                         Icons.AutoMirrored.Outlined.DirectionsRun,
                         tasks,
                         SportTask::class
                     )
+
                     DayTasks(
                         Icons.Outlined.Restaurant,
                         tasks,
@@ -490,24 +493,22 @@ fun DayTasks(
     val (completed, uncompleted) = tasks
         .filter { it::class == taskCategory }
         .let { tasksFiltered ->
-            if (taskCategory == SportTask::class && daily) {
-                tasksFiltered.filter { (it as SportTask).isDaily }
+            if (taskCategory == SportTask::class) {
+                tasksFiltered.filter { (it as SportTask).isDaily == daily }
             } else {
                 tasksFiltered
             }
         }
         .partition { it.isCompleted }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(
             contentDescription = "Task ${taskCategory.simpleName} group icon",
             imageVector = icon
         )
 
         Text(
-            if (tasks.isEmpty()) {
+            if (completed.isEmpty() && uncompleted.isEmpty()) {
                 "-"
             } else {
                 "${completed.size}/${completed.size + uncompleted.size}"
@@ -903,7 +904,7 @@ fun DayContent(
                     items(filteredTasks) {
                         Spacer(modifier = Modifier.padding(8.dp))
 
-                        TaskBox(task = it)
+                        TaskCard(task = it)
                     }
                 }
             }

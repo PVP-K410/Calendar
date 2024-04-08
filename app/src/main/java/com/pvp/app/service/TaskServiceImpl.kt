@@ -90,12 +90,11 @@ class TaskServiceImpl @Inject constructor(
             ?.let { user ->
                 val points = task.points.value + (if (task.points.isExpired) 1 else 0)
                 val experience = user.experience + points
-                val level = experienceService.levelOf(experience)
 
                 userService.merge(
                     user.copy(
                         experience = experience,
-                        level = level,
+                        level = experienceService.levelOf(experience),
                         points = user.points + points
                     )
                 )
@@ -301,8 +300,8 @@ class TaskServiceImpl @Inject constructor(
             )
             .toDouble()
 
-        val upperBound =
-            (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10).roundToInt() * 10
+        val upperBound = (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10)
+            .roundToInt() * 10
 
         val lowerBound = if (multiplier < 2.0) {
             // For ensuring users don't get task to walk 50 meters
@@ -336,8 +335,8 @@ class TaskServiceImpl @Inject constructor(
 
         // Division and multiplication by 300 are there to ensure upper and lower bounds
         // are multiples of 5 minutes
-        val upperBound =
-            ((unit * (1 / activity.pointsRatioDuration) * multiplier) / 300).roundToInt() * 300
+        val upperBound = ((unit * (1 / activity.pointsRatioDuration) * multiplier) / 300)
+            .roundToInt() * 300
 
         val lowerBound = if (multiplier < 2.0) {
             max(
