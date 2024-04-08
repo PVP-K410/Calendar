@@ -580,12 +580,14 @@ fun TaskBox(
     var checked = task.isCompleted
     var showDialog by remember { mutableStateOf(false) }
 
-    if (showDialog) {
-        TaskPreviewDialog(
-            task,
-            onDismissRequest = { showDialog = false },
-            showDialog
-        )
+    if (task !is SportTask || !task.isDaily) {
+        if (showDialog) {
+            TaskPreviewDialog(
+                task,
+                onDismissRequest = { showDialog = false },
+                showDialog
+            )
+        }
     }
 
     Box(
