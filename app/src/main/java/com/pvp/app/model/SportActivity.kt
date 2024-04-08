@@ -87,7 +87,7 @@ enum class SportActivity(
     IceSkating(39, false, 0.0f, 0.3f, "Ice Skating", Icons.Outlined.IceSkating),
     Other(0, false, 0.0f, 0.1f, "Other", Icons.Outlined.FitnessCenter),
     Pilates(48, false, 0.0f, 0.1f, "Pilates", Icons.Outlined.SelfImprovement),
-    RockClimbing(51, true, 0.85f, 0.0f, "Rock Climbing", Icons.Outlined.Landscape),
+    RockClimbing(51, false, 0.85f, 0.0f, "Rock Climbing", Icons.Outlined.Landscape),
     Rowing(53, true, 0.7f, 0.0f, "Rowing", Icons.Outlined.Rowing),
     Rugby(55, false, 0.0f, 1f, "Rugby", Icons.Outlined.SportsRugby),
     Running(56, true, 0.4f, 0.0f, "Running", Icons.AutoMirrored.Outlined.DirectionsRun),
