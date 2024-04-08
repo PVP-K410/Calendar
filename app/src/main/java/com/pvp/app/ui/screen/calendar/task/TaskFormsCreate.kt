@@ -33,7 +33,7 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.DateTimePicker
 import com.pvp.app.ui.common.LabelFieldWrapper
-import com.pvp.app.ui.common.Picker
+import com.pvp.app.ui.common.PickerPair
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.TextField
 import java.time.Duration
@@ -183,7 +183,14 @@ fun TaskCreateSport(
     var duration by remember { mutableIntStateOf(0) }
     var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
     var isExpanded by remember { mutableStateOf(false) }
-    val statePickerDistance = rememberPickerState(model.rangeKilometers.first())
+    val stateKilometers = rememberPickerState(model.rangeKilometers.first())
+    val stateMeters = rememberPickerState(0)
+
+    val distance by remember {
+        derivedStateOf {
+            stateKilometers.value + (stateMeters.value / 1000.0)
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -254,14 +261,21 @@ fun TaskCreateSport(
         if (activity.supportsDistanceMetrics) {
             LabelFieldWrapper(
                 content = {
-                    Picker(
-                        items = model.rangeKilometers,
-                        label = { "$it (km)" },
-                        state = statePickerDistance
+                    PickerPair(
+                        itemsFirst = model.rangeKilometers,
+                        itemsSecond = (0..900 step 100).toList(),
+                        labelFirst = { "$it (km)" },
+                        labelSecond = { "$it (m)" },
+                        onChange = { stateFirst, stateSecond ->
+                            stateKilometers.value = stateFirst
+                            stateMeters.value = stateSecond
+                        },
+                        stateFirst = stateKilometers,
+                        stateSecond = stateMeters
                     )
                 },
                 putBelow = true,
-                text = "${statePickerDistance.value} (km) distance",
+                text = "$distance (km) distance",
                 textAlign = TextAlign.End
             )
         } else {
@@ -302,7 +316,7 @@ fun TaskCreateSport(
                 model.create(
                     activity = activity,
                     description = description,
-                    distance = statePickerDistance.value.toDouble(),
+                    distance = distance,
                     duration = Duration.ofMinutes(duration.toLong()),
                     scheduledAt = selectedDateTime,
                     title = title

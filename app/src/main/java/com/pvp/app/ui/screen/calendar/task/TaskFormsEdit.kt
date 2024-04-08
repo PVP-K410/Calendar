@@ -52,9 +52,9 @@ import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.DatePickerDialog
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.LabelFieldWrapper
-import com.pvp.app.ui.common.Picker
+import com.pvp.app.ui.common.PickerPair
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
-import com.pvp.app.ui.common.TimePicker
+import com.pvp.app.ui.common.PickerTime
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -201,7 +201,7 @@ fun TaskEdit(
 
                 EditableInfoItem(
                     dialogContent = {
-                        TimePicker(
+                        PickerTime(
                             selectedHour = tempHour,
                             selectedMinute = tempMinute,
                             onChange = { hour, minute ->
@@ -367,7 +367,7 @@ fun TaskEditFieldsSport(
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
-                    value = tempActivity?.title ?: "",
+                    value = tempActivity.title,
                     onValueChange = {},
                     readOnly = true,
                     trailingIcon = {
@@ -399,30 +399,43 @@ fun TaskEditFieldsSport(
     )
 
     if (activity.supportsDistanceMetrics) {
-        val statePickerDistance = rememberPickerState(
+        val stateKilometers = rememberPickerState(
             task.distance
                 ?.toInt()
                 ?: model.rangeKilometers.first()
+        )
+
+        val stateMeters = rememberPickerState(
+            task.distance
+                ?.let { ((it - stateKilometers.value) * 900).toInt() }
+                ?: 0
         )
 
         EditableInfoItem(
             dialogContent = {
                 LabelFieldWrapper(
                     content = {
-                        Picker(
-                            items = model.rangeKilometers,
-                            label = { "$it (km)" },
-                            state = statePickerDistance
+                        PickerPair(
+                            itemsFirst = model.rangeKilometers,
+                            itemsSecond = (0..1000 step 100).toList(),
+                            labelFirst = { "$it (km)" },
+                            labelSecond = { "$it (m)" },
+                            onChange = { stateFirst, stateSecond ->
+                                stateKilometers.value = stateFirst
+                                stateMeters.value = stateSecond
+                            },
+                            stateFirst = stateKilometers,
+                            stateSecond = stateMeters
                         )
                     },
                     putBelow = true,
-                    text = "${statePickerDistance.value} (km) distance",
+                    text = "${stateKilometers.value + (stateMeters.value / 1000.0)} (km) distance",
                     textAlign = TextAlign.End
                 )
             },
             dialogTitle = { Text("Editing distance") },
             label = "Distance",
-            onConfirm = { distance = statePickerDistance.value.toDouble() },
+            onConfirm = { distance = stateKilometers.value.toDouble() },
             onDismiss = { distance = (task as? SportTask)?.distance },
             value = "$distance (km)"
         )

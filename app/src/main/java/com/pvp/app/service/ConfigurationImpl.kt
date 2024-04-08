@@ -17,7 +17,7 @@ class ConfigurationImpl @Inject constructor() : Configuration {
     override val rangeHeight: List<Int> = (10..300)
         .toList()
 
-    override val rangeKilometers: List<Int> = (0..100)
+    override val rangeKilometers: List<Int> = (0..99)
         .toList()
 
     override val rangeMass: List<Int> = (5..500)
