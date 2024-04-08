@@ -1,5 +1,32 @@
 package com.pvp.app.model
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Accessible
+import androidx.compose.material.icons.automirrored.outlined.DirectionsBike
+import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
+import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
+import androidx.compose.material.icons.outlined.DownhillSkiing
+import androidx.compose.material.icons.outlined.FitnessCenter
+import androidx.compose.material.icons.outlined.Hiking
+import androidx.compose.material.icons.outlined.IceSkating
+import androidx.compose.material.icons.outlined.Landscape
+import androidx.compose.material.icons.outlined.Pool
+import androidx.compose.material.icons.outlined.Rowing
+import androidx.compose.material.icons.outlined.SelfImprovement
+import androidx.compose.material.icons.outlined.Snowboarding
+import androidx.compose.material.icons.outlined.SportsBaseball
+import androidx.compose.material.icons.outlined.SportsBasketball
+import androidx.compose.material.icons.outlined.SportsCricket
+import androidx.compose.material.icons.outlined.SportsGolf
+import androidx.compose.material.icons.outlined.SportsGymnastics
+import androidx.compose.material.icons.outlined.SportsHandball
+import androidx.compose.material.icons.outlined.SportsHockey
+import androidx.compose.material.icons.outlined.SportsMma
+import androidx.compose.material.icons.outlined.SportsRugby
+import androidx.compose.material.icons.outlined.SportsSoccer
+import androidx.compose.material.icons.outlined.SportsTennis
+import androidx.compose.material.icons.outlined.SportsVolleyball
+import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -37,39 +64,44 @@ enum class SportActivity(
     /**
      * Title of the sport activity
      */
-    val title: String
+    val title: String,
+
+    /**
+     * Icon representing the sport activity
+     */
+    val icon: ImageVector
 ) {
 
-    Badminton(2, false, 0.0f, 0.6f, "Badminton"),
-    Baseball(4, false, 0.0f, 0.6f, "Baseball"),
-    Basketball(5, false, 0.0f, 0.6f, "Basketball"),
-    Boxing(11, false, 0.0f, 0.85f, "Boxing"),
-    Cricket(14, false, 0.0f, 0.5f, "Cricket"),
-    Cycling(8, true, 0.15f, 0.0f, "Cycling"),
-    Football(64, false, 0.0f, 0.6f, "Football"),
-    Golf(32, false, 0.0f, 0.1f, "Golf"),
-    Gymnastics(34, false, 0.0f, 0.3f, "Gymnastics"),
-    Handball(35, false, 0.0f, 0.7f, "Handball"),
-    Hiking(37, true, 0.5f, 0.0f, "Hiking"),
-    IceHockey(38, false, 0.0f, 0.7f, "Ice Hockey"),
-    IceSkating(39, false, 0.0f, 0.3f, "Ice Skating"),
-    Other(0, false, 0.0f, 0.1f, "Other"),
-    Pilates(48, false, 0.0f, 0.1f, "Pilates"),
-    RockClimbing(51, true, 0.85f, 0.0f, "Rock Climbing"),
-    Rowing(53, true, 0.7f, 0.0f, "Rowing"),
-    Rugby(55, false, 0.0f, 1f, "Rugby"),
-    Running(56, true, 0.4f, 0.0f, "Running"),
-    Skiing(61, true, 0.6f, 0.0f, "Skiing"),
-    Snowboarding(62, true, 0.9f, 0.0f, "Snowboarding"),
-    Softball(65, false, 0.0f, 0.5f, "Softball"),
-    Squash(66, false, 0.0f, 0.6f, "Squash"),
-    Swimming(74, true, 0.5f, 0.0f, "Swimming"),
-    TableTennis(75, false, 0.0f, 0.5f, "Table Tennis"),
-    Tennis(76, false, 0.0f, 0.7f, "Tennis"),
-    Volleyball(78, false, 0.0f, 0.6f, "Volleyball"),
-    Walking(79, true, 0.25f, 0.0f, "Walking"),
-    Wheelchair(82, true, 1f, 0.0f, "Wheelchair"),
-    Yoga(83, false, 0.0f, 0.1f, "Yoga");
+    Badminton(2, false, 0.0f, 0.6f, "Badminton", Icons.Outlined.SportsTennis),
+    Baseball(4, false, 0.0f, 0.6f, "Baseball", Icons.Outlined.SportsBaseball),
+    Basketball(5, false, 0.0f, 0.6f, "Basketball", Icons.Outlined.SportsBasketball),
+    Boxing(11, false, 0.0f, 0.85f, "Boxing", Icons.Outlined.SportsMma),
+    Cricket(14, false, 0.0f, 0.5f, "Cricket", Icons.Outlined.SportsCricket),
+    Cycling(8, true, 0.15f, 0.0f, "Cycling", Icons.AutoMirrored.Outlined.DirectionsBike),
+    Football(64, false, 0.0f, 0.6f, "Football", Icons.Outlined.SportsSoccer),
+    Golf(32, false, 0.0f, 0.1f, "Golf", Icons.Outlined.SportsGolf),
+    Gymnastics(34, false, 0.0f, 0.3f, "Gymnastics", Icons.Outlined.SportsGymnastics),
+    Handball(35, false, 0.0f, 0.7f, "Handball", Icons.Outlined.SportsHandball),
+    Hiking(37, true, 0.5f, 0.0f, "Hiking", Icons.Outlined.Hiking),
+    IceHockey(38, false, 0.0f, 0.7f, "Ice Hockey", Icons.Outlined.SportsHockey),
+    IceSkating(39, false, 0.0f, 0.3f, "Ice Skating", Icons.Outlined.IceSkating),
+    Other(0, false, 0.0f, 0.1f, "Other", Icons.Outlined.FitnessCenter),
+    Pilates(48, false, 0.0f, 0.1f, "Pilates", Icons.Outlined.SelfImprovement),
+    RockClimbing(51, true, 0.85f, 0.0f, "Rock Climbing", Icons.Outlined.Landscape),
+    Rowing(53, true, 0.7f, 0.0f, "Rowing", Icons.Outlined.Rowing),
+    Rugby(55, false, 0.0f, 1f, "Rugby", Icons.Outlined.SportsRugby),
+    Running(56, true, 0.4f, 0.0f, "Running", Icons.AutoMirrored.Outlined.DirectionsRun),
+    Skiing(61, true, 0.6f, 0.0f, "Skiing", Icons.Outlined.DownhillSkiing),
+    Snowboarding(62, true, 0.9f, 0.0f, "Snowboarding", Icons.Outlined.Snowboarding),
+    Softball(65, false, 0.0f, 0.5f, "Softball", Icons.Outlined.SportsBaseball),
+    Squash(66, false, 0.0f, 0.6f, "Squash", Icons.Outlined.SportsTennis),
+    Swimming(74, true, 0.5f, 0.0f, "Swimming", Icons.Outlined.Pool),
+    TableTennis(75, false, 0.0f, 0.5f, "Table Tennis", Icons.Outlined.SportsTennis),
+    Tennis(76, false, 0.0f, 0.7f, "Tennis", Icons.Outlined.SportsTennis),
+    Volleyball(78, false, 0.0f, 0.6f, "Volleyball", Icons.Outlined.SportsVolleyball),
+    Walking(79, true, 0.25f, 0.0f, "Walking", Icons.AutoMirrored.Outlined.DirectionsWalk),
+    Wheelchair(82, true, 1f, 0.0f, "Wheelchair", Icons.AutoMirrored.Outlined.Accessible),
+    Yoga(83, false, 0.0f, 0.1f, "Yoga", Icons.Outlined.SelfImprovement);
 
     init {
         require(pointsRatioDistance in 0.0..1.0) {
