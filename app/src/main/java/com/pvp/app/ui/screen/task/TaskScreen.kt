@@ -522,7 +522,7 @@ private fun SportTaskBoxBody(
 
     Row(
         modifier = Modifier.padding(6.dp)
-    ){
+    ) {
         Icon(
             imageVector = task.activity.icon,
             contentDescription = "Activity"
