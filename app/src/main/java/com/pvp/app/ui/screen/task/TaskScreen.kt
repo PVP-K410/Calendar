@@ -112,7 +112,12 @@ fun CreateTaskMealForm(
                 title = newText
                 titleError = errors.isNotEmpty()
             },
-            validationPolicies = { input -> InputValidator.validateBlank(input, "Title") },
+            validationPolicies = { input ->
+                InputValidator.validateBlank(
+                    input,
+                    "Title"
+                )
+            },
             label = { Text("Meal Title") },
         )
 
@@ -124,7 +129,12 @@ fun CreateTaskMealForm(
                 description = newText
                 descriptionError = errors.isNotEmpty()
             },
-            validationPolicies = { input -> InputValidator.validateBlank(input, "Description") },
+            validationPolicies = { input ->
+                InputValidator.validateBlank(
+                    input,
+                    "Description"
+                )
+            },
             label = { Text("Description") },
         )
 
@@ -227,7 +237,12 @@ fun CreateTaskSportForm(
                 title = newText
                 titleValid = errors.isEmpty()
             },
-            validationPolicies = { input -> InputValidator.validateBlank(input, "Title") },
+            validationPolicies = { input ->
+                InputValidator.validateBlank(
+                    input,
+                    "Title"
+                )
+            },
             label = { Text("Title") },
         )
 
@@ -376,7 +391,12 @@ fun CreateTaskGeneralForm(
                 title = newText
                 titleError = errors.isNotEmpty()
             },
-            validationPolicies = { input -> InputValidator.validateBlank(input, "Title") },
+            validationPolicies = { input ->
+                InputValidator.validateBlank(
+                    input,
+                    "Title"
+                )
+            },
             label = { Text("Title") },
         )
 
@@ -388,7 +408,12 @@ fun CreateTaskGeneralForm(
                 description = newText
                 descriptionError = errors.isNotEmpty()
             },
-            validationPolicies = { input -> InputValidator.validateBlank(input, "Description") },
+            validationPolicies = { input ->
+                InputValidator.validateBlank(
+                    input,
+                    "Description"
+                )
+            },
             label = { Text("Description") },
         )
 
@@ -782,7 +807,9 @@ fun TaskPreviewDialog(
                                     )
 
                                     Slider(
-                                        value = tempDuration?.toMinutes()?.toFloat() ?: 0f,
+                                        value = tempDuration
+                                            ?.toMinutes()
+                                            ?.toFloat() ?: 0f,
                                         onValueChange = { newValue ->
                                             tempDuration = Duration.ofMinutes(newValue.toLong())
                                         },
@@ -1042,7 +1069,9 @@ fun SportTaskFields(
                     )
 
                     Slider(
-                        value = tempDuration?.toMinutes()?.toFloat() ?: 0f,
+                        value = tempDuration
+                            ?.toMinutes()
+                            ?.toFloat() ?: 0f,
                         onValueChange = { newValue ->
                             tempDuration = Duration.ofMinutes(newValue.toLong())
                         },
@@ -1067,12 +1096,17 @@ fun SportTaskFields(
     }
 
     onActivityChange(activity)
-    onDistanceChange(distance!!)
-    onDurationChange(duration!!)
+
+    distance?.let { onDistanceChange(it) }
+
+    duration?.let { onDurationChange(it) }
 }
 
 @Composable
-fun MealTaskFields(task: MealTask, onRecipeChange: (String?) -> Unit) {
+fun MealTaskFields(
+    task: MealTask,
+    onRecipeChange: (String?) -> Unit
+) {
     var recipe by remember { mutableStateOf(task.recipe) }
     var tempRecipe by remember { mutableStateOf(recipe) }
 
