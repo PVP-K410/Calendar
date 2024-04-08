@@ -9,7 +9,7 @@ import com.google.firebase.firestore.snapshots
 import com.pvp.app.R
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.UserService
-import com.pvp.app.common.toImageBitmap
+import com.pvp.app.common.util.ImageUtil.toImageBitmap
 import com.pvp.app.model.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi

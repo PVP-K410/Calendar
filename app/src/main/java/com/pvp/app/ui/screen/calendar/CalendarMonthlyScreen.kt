@@ -30,6 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.common.util.DateUtil
+import com.pvp.app.common.util.DateUtil.getDisplayName
 import com.pvp.app.model.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -115,7 +117,7 @@ fun MonthlyCalendar(
                         dateTasks,
                         selectedDate
                     )
-                    
+
                     if (showDialog) {
                         createTaskDialog(
                             selectedDate,

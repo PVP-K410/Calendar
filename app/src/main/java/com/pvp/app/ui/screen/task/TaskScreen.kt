@@ -487,7 +487,7 @@ private fun MealTaskBoxBody(
             )
 
             Text(
-                text = getDurationString(duration),
+                text = duration.asString(),
                 textAlign = TextAlign.Left,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -506,13 +506,9 @@ private fun MealTaskBoxBody(
 }
 
 @Composable
-private fun SportTaskBoxBody(
-    task: SportTask
-) {
+private fun SportTaskBoxBody(task: SportTask) {
     if (task.distance != null && task.distance!! > 0) {
-        Row(
-            modifier = Modifier.padding(6.dp)
-        ) {
+        Row(modifier = Modifier.padding(6.dp)) {
             Icon(
                 imageVector = Icons.Outlined.Straighten,
                 contentDescription = "Distance"
@@ -527,16 +523,14 @@ private fun SportTaskBoxBody(
             )
         }
     } else if (task.duration != null) {
-        Row(
-            modifier = Modifier.padding(6.dp)
-        ) {
+        Row(modifier = Modifier.padding(6.dp)) {
             Icon(
                 imageVector = Icons.Outlined.Timelapse,
                 contentDescription = "Duration"
             )
 
             Text(
-                text = getDurationString(task.duration!!),
+                text = task.duration!!.asString(),
                 textAlign = TextAlign.Left,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -545,9 +539,7 @@ private fun SportTaskBoxBody(
         }
     }
 
-    Row(
-        modifier = Modifier.padding(6.dp)
-    ) {
+    Row(modifier = Modifier.padding(6.dp)) {
         Icon(
             imageVector = task.activity.icon,
             contentDescription = "Activity"
@@ -577,7 +569,7 @@ private fun TaskBoxBody(
             )
 
             Text(
-                text = getDurationString(duration),
+                text = duration.asString(),
                 textAlign = TextAlign.Left,
                 modifier = Modifier
                     .fillMaxWidth()

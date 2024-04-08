@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pvp.app.common.getOccurences
+import com.pvp.app.common.util.ActivityUtil.getOccurrences
 
 @Composable
 fun ActivityList(
@@ -48,7 +48,7 @@ fun ActivityList(
 
     val activities = model.activities
         .collectAsStateWithLifecycle().value
-        .getOccurences()
+        .getOccurrences()
 
     Column(
         modifier = Modifier

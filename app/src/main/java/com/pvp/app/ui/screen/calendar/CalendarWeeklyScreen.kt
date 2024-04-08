@@ -75,7 +75,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
-import com.pvp.app.common.getDurationString
+import com.pvp.app.common.util.DurationUtil.asString
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -346,7 +346,6 @@ fun HeartRateCounterAverage(
     )
 }
 
-
 @Composable
 fun ActivitiesBox(
     date: LocalDate,
@@ -488,33 +487,32 @@ fun DayTasks(
     taskCategory: KClass<out Task>,
     daily: Boolean = false
 ) {
-    val tasksOfCategory = when (taskCategory) {
-        SportTask::class -> {
-            tasks.filter { (it as SportTask).isDaily == daily }
+    val (completed, uncompleted) = tasks
+        .filter { it::class == taskCategory }
+        .let { tasksFiltered ->
+            if (taskCategory == SportTask::class && daily) {
+                tasksFiltered.filter { (it as SportTask).isDaily }
+            } else {
+                tasksFiltered
+            }
         }
-
-        else -> {
-            tasks.filter { it::class == taskCategory }
-        }
-    }
-
-    val completedTasks = tasksOfCategory.filter { it.isCompleted }
-
-    val text = if (tasksOfCategory.isEmpty()) {
-        "-"
-    } else {
-        "${completedTasks.size}/${tasksOfCategory.size}"
-    }
+        .partition { it.isCompleted }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            imageVector = icon,
-            contentDescription = null
+            contentDescription = "Task ${taskCategory.simpleName} group icon",
+            imageVector = icon
         )
 
-        Text(text = text)
+        Text(
+            if (tasks.isEmpty()) {
+                "-"
+            } else {
+                "${completed.size}/${completed.size + uncompleted.size}"
+            }
+        )
     }
 }
 
@@ -606,7 +604,7 @@ fun SleepDurationCounter(
     )
 
     Text(
-        text = if (!duration.equals(Duration.ZERO)) getDurationString(duration) else "- hr - m",
+        text = if (!duration.equals(Duration.ZERO)) duration.asString() else "- hr - m",
         style = MaterialTheme.typography.titleSmall,
         modifier = Modifier.padding(start = 8.dp)
     )
@@ -894,7 +892,8 @@ fun DayContent(
                                 modifier = Modifier.padding(32.dp),
                                 style = MaterialTheme.typography.bodyMedium,
                                 text = "No ${
-                                    filter.toString()
+                                    filter
+                                        .toString()
                                         .lowercase(Locale.ROOT)
                                 } tasks have been setup for this day"
                             )

@@ -9,7 +9,7 @@ import androidx.health.connect.client.records.StepsRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.HealthConnectService
-import com.pvp.app.common.toSportActivities
+import com.pvp.app.common.util.ActivityUtil.toSportActivities
 import com.pvp.app.model.SportActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
