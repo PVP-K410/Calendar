@@ -520,9 +520,16 @@ private fun SportTaskBoxBody(
         }
     }
 
-    task.activity?.let { activity ->
+    Row(
+        modifier = Modifier.padding(6.dp)
+    ){
+        Icon(
+            imageVector = task.activity.icon,
+            contentDescription = "Activity"
+        )
+
         Text(
-            text = activity.title,
+            text = task.activity.title,
             textAlign = TextAlign.Left,
             modifier = Modifier
                 .fillMaxWidth()
