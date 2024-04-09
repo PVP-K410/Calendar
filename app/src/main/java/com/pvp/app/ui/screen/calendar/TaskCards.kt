@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.common.util.DurationUtil.asString
+import com.pvp.app.common.DurationUtil.asString
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -124,9 +124,7 @@ fun TaskCard(
                 }
 
                 Text(
-                    text = task.scheduledAt
-                        .toLocalTime()
-                        .format(DateTimeFormatter.ofPattern("HH:mm")),
+                    text = task.time?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "--:--",
                     modifier = Modifier.weight(0.3f),
                     fontSize = 22.sp
                 )

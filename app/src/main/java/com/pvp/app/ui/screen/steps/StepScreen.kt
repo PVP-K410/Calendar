@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pvp.app.common.util.ActivityUtil.getOccurrences
+import com.pvp.app.common.ActivityUtil.getOccurrences
 
 @Composable
 fun ActivityList(

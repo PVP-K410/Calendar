@@ -1,4 +1,4 @@
-package com.pvp.app.common.util
+package com.pvp.app.common
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

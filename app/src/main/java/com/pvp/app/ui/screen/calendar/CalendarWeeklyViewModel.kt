@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.common.util.TaskUtil.sort
+import com.pvp.app.common.TaskUtil.sort
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -66,8 +66,8 @@ class CalendarWeeklyViewModel @Inject constructor(
                     CalendarState(
                         tasks = tasks
                             .filter {
-                                it.scheduledAt.year == now.year &&
-                                        it.scheduledAt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) ==
+                                it.date.year == now.year &&
+                                        it.date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) ==
                                         now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
                             }
                             .sort(),

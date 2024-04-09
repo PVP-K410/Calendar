@@ -1,4 +1,4 @@
-package com.pvp.app.common.util
+package com.pvp.app.common
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.pvp.app.model.SportActivity

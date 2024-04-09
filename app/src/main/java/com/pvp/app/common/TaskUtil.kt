@@ -1,4 +1,4 @@
-package com.pvp.app.common.util
+package com.pvp.app.common
 
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -16,7 +16,7 @@ object TaskUtil {
     fun List<Task>.sort(): List<Task> {
         return sortedWith(
             compareBy<Task> { it.isCompleted }
-                .thenBy { it.scheduledAt }
+                .thenBy { it.date }
                 .thenBy { it.duration }
                 .thenBy { (it as? SportTask)?.distance }
                 .thenBy { (it as? SportTask)?.activity }

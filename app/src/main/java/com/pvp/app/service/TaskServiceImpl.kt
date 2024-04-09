@@ -8,10 +8,9 @@ import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.common.util.DateUtil.resetTime
-import com.pvp.app.common.util.JsonUtil.JSON
-import com.pvp.app.common.util.JsonUtil.toJsonElement
-import com.pvp.app.common.util.JsonUtil.toPrimitivesMap
+import com.pvp.app.common.JsonUtil.JSON
+import com.pvp.app.common.JsonUtil.toJsonElement
+import com.pvp.app.common.JsonUtil.toPrimitivesMap
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.Points
 import com.pvp.app.model.SportActivity
@@ -28,6 +27,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -41,9 +41,7 @@ class TaskServiceImpl @Inject constructor(
     private val userService: UserService
 ) : TaskService {
 
-    override suspend fun claim(
-        task: Task
-    ) {
+    override suspend fun claim(task: Task) {
         if (task.points.claimedAt != null) {
             error("Task points are already claimed")
         }
@@ -52,10 +50,10 @@ class TaskServiceImpl @Inject constructor(
 
         if (
             task.points.isExpired && (
-                    task.scheduledAt.year != now.year ||
-                            task.scheduledAt.dayOfYear < (now.dayOfYear -
+                    task.date.year != now.year ||
+                            task.date.dayOfYear < (now.dayOfYear -
                             configuration.limitPointsReclaimDays) ||
-                            task.scheduledAt.dayOfYear > now.dayOfYear
+                            task.date.dayOfYear > now.dayOfYear
                     )
         ) {
             return
@@ -63,14 +61,10 @@ class TaskServiceImpl @Inject constructor(
 
         val tasksReclaimed = get(task.userEmail)
             .map {
-                val date = task.scheduledAt.toLocalDate()
+                val date = task.date
 
                 it
-                    .filter { t ->
-                        t.scheduledAt
-                            .toLocalDate()
-                            .isEqual(date)
-                    }
+                    .filter { t -> t.date.isEqual(date) }
                     .filter { t -> t.points.claimedAt != null }
                     .filter { t -> t.points.isExpired }
             }
@@ -80,9 +74,7 @@ class TaskServiceImpl @Inject constructor(
             return
         }
 
-        task.points = task.points.copy(
-            claimedAt = now
-        )
+        task.points = task.points.copy(claimedAt = now)
 
         userService
             .get(task.userEmail)
@@ -108,27 +100,27 @@ class TaskServiceImpl @Inject constructor(
     }
 
     override suspend fun create(
+        date: LocalDate,
         description: String?,
         duration: Duration?,
-        scheduledAt: LocalDateTime,
+        time: LocalTime?,
         title: String,
         userEmail: String
     ): Task {
         val task = Task(
+            date = date,
             description = description,
             duration = duration,
             id = null,
             isCompleted = false,
             points = Points(),
-            scheduledAt = scheduledAt,
+            time = time?.cleanEnd(),
             title = title,
             userEmail = userEmail
         )
 
         task.points = task.points.copy(
-            isExpired = task.scheduledAt
-                .toLocalDate()
-                .isBefore(LocalDate.now()),
+            isExpired = task.date.isBefore(LocalDate.now()),
             value = pointService.calculate(task)
         )
 
@@ -155,16 +147,18 @@ class TaskServiceImpl @Inject constructor(
 
     override suspend fun create(
         activity: SportActivity,
+        date: LocalDate,
         description: String?,
         distance: Double?,
         duration: Duration?,
         isDaily: Boolean,
-        scheduledAt: LocalDateTime,
+        time: LocalTime?,
         title: String,
         userEmail: String
     ): SportTask {
         val task = SportTask(
             activity = activity,
+            date = date,
             description = description,
             distance = distance,
             duration = duration,
@@ -172,18 +166,19 @@ class TaskServiceImpl @Inject constructor(
             isCompleted = false,
             isDaily = isDaily,
             points = Points(),
-            scheduledAt = scheduledAt,
+            time = time?.cleanEnd(),
             title = title,
             userEmail = userEmail
         )
 
         task.points = task.points.copy(
-            isExpired = task.scheduledAt
-                .toLocalDate()
-                .isBefore(LocalDate.now()),
+            isExpired = task.date.isBefore(LocalDate.now()),
             value = pointService.calculate(
                 task = task,
-                increasePointYield = isWeekly(activity)
+                increasePointYield = isWeekly(
+                    activity,
+                    userService
+                )
             )
         )
 
@@ -209,29 +204,29 @@ class TaskServiceImpl @Inject constructor(
     }
 
     override suspend fun create(
+        date: LocalDate,
         description: String?,
         duration: Duration?,
         recipe: String,
-        scheduledAt: LocalDateTime,
+        time: LocalTime?,
         title: String,
         userEmail: String
     ): MealTask {
         val task = MealTask(
+            date = date,
             description = description,
             duration = duration,
             id = null,
             isCompleted = false,
             points = Points(),
             recipe = recipe,
-            scheduledAt = scheduledAt,
+            time = time?.cleanEnd(),
             title = title,
             userEmail = userEmail
         )
 
         task.points = task.points.copy(
-            isExpired = task.scheduledAt
-                .toLocalDate()
-                .isBefore(LocalDate.now()),
+            isExpired = task.date.isBefore(LocalDate.now()),
             value = pointService.calculate(task)
         )
 
@@ -268,13 +263,25 @@ class TaskServiceImpl @Inject constructor(
             .mapIndexed { index, activity ->
                 val task = create(
                     activity = activity,
+                    date = LocalDate.now(),
                     description = "One of your daily tasks for today",
-                    distance = if (activity.supportsDistanceMetrics) getDistance(activity) else null,
-                    duration = if (!activity.supportsDistanceMetrics) getDuration(activity) else null,
+                    distance = if (activity.supportsDistanceMetrics) {
+                        getDistance(
+                            activity = activity,
+                            exerciseService = exerciseService
+                        )
+                    } else {
+                        null
+                    },
+                    duration = if (!activity.supportsDistanceMetrics) {
+                        getDuration(
+                            activity = activity,
+                            exerciseService = exerciseService
+                        )
+                    } else {
+                        null
+                    },
                     isDaily = true,
-                    scheduledAt = LocalDateTime
-                        .now()
-                        .resetTime(),
                     title = "Task #${index + 1}: ${activity.title}",
                     userEmail = userEmail
                 )
@@ -283,119 +290,7 @@ class TaskServiceImpl @Inject constructor(
             }
     }
 
-    /**
-     * @param baseDistance Represents a value (in km) that a user that walks 1km everyday
-     * (activity level 1) would have as a maximum value assigned for a walking task
-     */
-    private suspend fun getDistance(
-        activity: SportActivity,
-        baseDistance: Double = 0.75
-    ): Double {
-        val unit = baseDistance * 1000 / (1 / SportActivity.Walking.pointsRatioDistance)
-
-        val multiplier = String
-            .format(
-                "%.2f",
-                exerciseService.calculateActivityLevel()
-            )
-            .toDouble()
-
-        val upperBound = (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10)
-            .roundToInt() * 10
-
-        val lowerBound = if (multiplier < 2.0) {
-            // For ensuring users don't get task to walk 50 meters
-            upperBound / 2
-        } else {
-            (unit * (1 / activity.pointsRatioDistance) * (multiplier - 1) / 10).roundToInt() * 10
-        }
-
-        return (lowerBound..upperBound step 50)
-            .toList()
-            .random()
-            .toDouble() / 1000
-    }
-
-    /**
-     * @param baseDuration Represents a value that a user that walks 1km everyday (activity level 1)
-     * would have as a maximum value assigned for playing basketball
-     */
-    private suspend fun getDuration(
-        activity: SportActivity,
-        baseDuration: Duration = Duration.ofMinutes(30)
-    ): Duration {
-        val unit = baseDuration.seconds / (1 / SportActivity.Basketball.pointsRatioDuration)
-
-        val multiplier = String
-            .format(
-                "%.2f",
-                exerciseService.calculateActivityLevel()
-            )
-            .toDouble()
-
-        // Division and multiplication by 300 are there to ensure upper and lower bounds
-        // are multiples of 5 minutes
-        val upperBound = ((unit * (1 / activity.pointsRatioDuration) * multiplier) / 300)
-            .roundToInt() * 300
-
-        val lowerBound = if (multiplier < 2.0) {
-            max(
-                upperBound / 2,
-                300
-            ) / 300 * 300
-        } else {
-            ((unit * (1 / activity.pointsRatioDuration) * (multiplier - 1)) / 300).roundToInt() * 300
-        }
-
-        return Duration.ofSeconds(
-            (lowerBound..upperBound step 300)
-                .toList()
-                .random()
-                .toLong()
-        )
-    }
-
-    private fun decodeByType(
-        task: Map<String, Any>
-    ): Task {
-        val element = task.toJsonElement()
-
-        if (element !is JsonObject) {
-            error("Task data is not a JSON object")
-        }
-
-        if (element.containsKey(MealTask::recipe.name)) {
-            return JSON.decodeFromJsonElement<MealTask>(element)
-        }
-
-        if (element.containsKey(SportTask::activity.name)) {
-            return JSON.decodeFromJsonElement<SportTask>(element)
-        }
-
-        return JSON.decodeFromJsonElement<Task>(element)
-    }
-
-    private fun encodeByType(
-        task: Task
-    ): Map<String, Any?> {
-        return when (task) {
-            is MealTask -> JSON
-                .encodeToJsonElement<MealTask>(task)
-                .toPrimitivesMap()
-
-            is SportTask -> JSON
-                .encodeToJsonElement<SportTask>(task)
-                .toPrimitivesMap()
-
-            else -> JSON
-                .encodeToJsonElement<Task>(task)
-                .toPrimitivesMap()
-        }
-    }
-
-    override suspend fun get(
-        userEmail: String
-    ): Flow<List<Task>> {
+    override suspend fun get(userEmail: String): Flow<List<Task>> {
         return database
             .collection(identifier)
             .whereEqualTo(
@@ -410,16 +305,7 @@ class TaskServiceImpl @Inject constructor(
             }
     }
 
-    private suspend fun isWeekly(activity: SportActivity): Boolean {
-        return userService.user
-            .firstOrNull()?.weeklyActivities
-            ?.contains(activity)
-            ?: false
-    }
-
-    override suspend fun remove(
-        task: Task
-    ) {
+    override suspend fun remove(task: Task) {
         if (task.id == null) {
             error("Task id is required to remove it")
         }
@@ -455,6 +341,132 @@ class TaskServiceImpl @Inject constructor(
             is MealTask -> MealTask.copy(task)
             is SportTask -> SportTask.copy(task)
             else -> Task.copy(task)
+        }
+    }
+
+    companion object {
+
+        private fun LocalTime.cleanEnd(): LocalTime {
+            return withSecond(0)
+                .withNano(0)
+        }
+
+        private fun decodeByType(task: Map<String, Any>): Task {
+            val element = task.toJsonElement()
+
+            if (element !is JsonObject) {
+                error("Task data is not a JSON object")
+            }
+
+            if (element.containsKey(MealTask::recipe.name)) {
+                return JSON.decodeFromJsonElement<MealTask>(element)
+            }
+
+            if (element.containsKey(SportTask::activity.name)) {
+                return JSON.decodeFromJsonElement<SportTask>(element)
+            }
+
+            return JSON.decodeFromJsonElement<Task>(element)
+        }
+
+        private fun encodeByType(task: Task): Map<String, Any?> {
+            return when (task) {
+                is MealTask -> JSON
+                    .encodeToJsonElement<MealTask>(task)
+                    .toPrimitivesMap()
+
+                is SportTask -> JSON
+                    .encodeToJsonElement<SportTask>(task)
+                    .toPrimitivesMap()
+
+                else -> JSON
+                    .encodeToJsonElement<Task>(task)
+                    .toPrimitivesMap()
+            }
+        }
+
+        /**
+         * @param baseDistance Represents a value (in km) that a user that walks 1km everyday
+         * (activity level 1) would have as a maximum value assigned for a walking task
+         */
+        private suspend fun getDistance(
+            activity: SportActivity,
+            baseDistance: Double = 0.75,
+            exerciseService: ExerciseService
+        ): Double {
+            val unit = baseDistance * 1000 / (1 / SportActivity.Walking.pointsRatioDistance)
+
+            val multiplier = String
+                .format(
+                    "%.2f",
+                    exerciseService.calculateActivityLevel()
+                )
+                .toDouble()
+
+            val upperBound = (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10)
+                .roundToInt() * 10
+
+            val lowerBound = if (multiplier < 2.0) {
+                // For ensuring users don't get task to walk 50 meters
+                upperBound / 2
+            } else {
+                (unit * (1 / activity.pointsRatioDistance) * (multiplier - 1) / 10).roundToInt() * 10
+            }
+
+            return (lowerBound..upperBound step 50)
+                .toList()
+                .random()
+                .toDouble() / 1000
+        }
+
+        /**
+         * @param baseDuration Represents a value that a user that walks 1km everyday (activity level 1)
+         * would have as a maximum value assigned for playing basketball
+         */
+        private suspend fun getDuration(
+            activity: SportActivity,
+            baseDuration: Duration = Duration.ofMinutes(30),
+            exerciseService: ExerciseService
+        ): Duration {
+            val unit = baseDuration.seconds / (1 / SportActivity.Basketball.pointsRatioDuration)
+
+            val multiplier = String
+                .format(
+                    "%.2f",
+                    exerciseService.calculateActivityLevel()
+                )
+                .toDouble()
+
+            // Division and multiplication by 300 are there to ensure upper and lower bounds
+            // are multiples of 5 minutes
+            val upperBound = ((unit * (1 / activity.pointsRatioDuration) * multiplier) / 300)
+                .roundToInt() * 300
+
+            val lowerBound = if (multiplier < 2.0) {
+                max(
+                    upperBound / 2,
+                    300
+                ) / 300 * 300
+            } else {
+                ((unit * (1 / activity.pointsRatioDuration) * (multiplier - 1)) / 300).roundToInt() * 300
+            }
+
+            return Duration.ofSeconds(
+                (lowerBound..upperBound step 300)
+                    .toList()
+                    .random()
+                    .toLong()
+            )
+        }
+
+        private suspend fun isWeekly(
+            activity: SportActivity,
+            userService: UserService
+        ): Boolean {
+            return userService.user
+                .firstOrNull()?.weeklyActivities
+                ?.contains(activity)
+                ?: false
         }
     }
 }

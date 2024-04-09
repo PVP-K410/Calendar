@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.common.util.InputValidator
+import com.pvp.app.common.InputValidator
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -51,6 +51,7 @@ import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.TextField
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.LocalTime
 import kotlin.reflect.KClass
 
 @Composable
@@ -168,9 +169,10 @@ fun TaskCreate(
         Button(
             onClick = {
                 model.create(
+                    date = selectedDateTime.toLocalDate(),
                     description = description,
                     duration = Duration.ofMinutes(duration.toLong()),
-                    scheduledAt = selectedDateTime,
+                    time = selectedDateTime.toLocalTime(),
                     title = title
                 )
 
@@ -369,11 +371,14 @@ fun TaskCreateMeal(
         Button(
             onClick = {
                 model.create(
+                    date = selectedDateTime.toLocalDate(),
                     description = description,
                     duration = Duration.ofMinutes(duration.toLong()),
                     ingredients = ingredients,
                     preparation = preparation,
-                    scheduledAt = selectedDateTime,
+                    time = selectedDateTime
+                        .toLocalTime()
+                        .let { if (it == LocalTime.MIN) null else it },
                     title = title
                 )
 
@@ -533,11 +538,14 @@ fun TaskCreateSport(
         Button(
             onClick = {
                 model.create(
+                    date = selectedDateTime.toLocalDate(),
                     activity = activity,
                     description = description,
                     distance = distance,
                     duration = Duration.ofMinutes(duration.toLong()),
-                    scheduledAt = selectedDateTime,
+                    time = selectedDateTime
+                        .toLocalTime()
+                        .let { if (it == LocalTime.MIN) null else it },
                     title = title
                 )
 

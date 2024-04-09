@@ -1,4 +1,4 @@
-package com.pvp.app.common.util
+package com.pvp.app.common
 
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
@@ -17,9 +17,12 @@ import kotlinx.serialization.modules.polymorphic
 object JsonUtil {
 
     /**
-     * JSON serializer with polymorphic support for [Task] subclasses
+     * JSON serializer with polymorphic support for [Task] subclasses [MealTask] and [SportTask]
+     * and support for unknown keys by ignoring them
      */
     val JSON = Json {
+        ignoreUnknownKeys = true
+
         serializersModule = SerializersModule {
             polymorphic(
                 Task::class,
@@ -121,7 +124,7 @@ object JsonUtil {
     /**
      * Converts [JsonElement] to a list of primitives. Only supports [JsonArray]
      */
-    fun JsonElement.toPrimitivesList(): List<Any?> {
+    private fun JsonElement.toPrimitivesList(): List<Any?> {
         return when (this) {
             is JsonArray -> mapNotNull {
                 when (it) {

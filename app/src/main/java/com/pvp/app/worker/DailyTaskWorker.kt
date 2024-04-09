@@ -51,22 +51,14 @@ class DailyTaskWorker @AssistedInject constructor(
                             tasks.filter { task ->
                                 task is SportTask &&
                                         task.isDaily &&
-                                        task.scheduledAt
-                                            .toLocalDate()
-                                            .isBefore(tomorrow)
+                                        task.date.isBefore(tomorrow)
                             }
                         }
                         .first()
 
                     val today = LocalDate.now()
 
-                    if (
-                        tasks.filter {
-                            it.scheduledAt
-                                .toLocalDate()
-                                .equals(today)
-                        }.size >= configuration.dailyTaskCount
-                    ) {
+                    if (tasks.filter { it.date == today }.size >= configuration.dailyTaskCount) {
                         return Result.success()
                     }
 

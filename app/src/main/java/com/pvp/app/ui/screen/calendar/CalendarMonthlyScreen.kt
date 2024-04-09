@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -30,8 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.common.util.DateUtil
-import com.pvp.app.common.util.DateUtil.getDisplayName
+import com.pvp.app.common.DateUtil
+import com.pvp.app.common.DateUtil.getDisplayName
 import com.pvp.app.model.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -43,17 +44,16 @@ private fun AnalysisOfDayBox(
     dateTasks: List<Task>,
     selectedDate: LocalDate
 ) {
-    Box {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 32.dp)
-        ) {
-            AnalysisOfDay(
-                date = selectedDate,
-                tasks = dateTasks
-            )
-        }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 36.dp)
+    ) {
+        AnalysisOfDay(
+            date = selectedDate,
+            tasks = dateTasks
+        )
     }
 }
 
@@ -121,9 +121,7 @@ private fun ContentSwitch(
     tasks: List<Task>
 ) {
     Box {
-        Row(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Row(modifier = Modifier.fillMaxSize()) {
             if (showAnalyses) {
                 AnalysisOfDayBox(
                     tasks,

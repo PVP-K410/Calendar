@@ -104,8 +104,8 @@ fun AnalysisOfDay(
 
     Box(
         modifier = Modifier.size(
-            height = 270.dp,
-            width = 300.dp
+            height = 300.dp,
+            width = 340.dp
         )
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -207,15 +207,15 @@ private fun TasksOfDayCounterContainer(tasks: List<Task>) {
         )
 
         TasksOfDayCounter(
-            Icons.AutoMirrored.Outlined.DirectionsRun,
-            tasks,
-            SportTask::class
-        )
-
-        TasksOfDayCounter(
             Icons.Outlined.Restaurant,
             tasks,
             MealTask::class
+        )
+
+        TasksOfDayCounter(
+            Icons.AutoMirrored.Outlined.DirectionsRun,
+            tasks,
+            SportTask::class
         )
     }
 }

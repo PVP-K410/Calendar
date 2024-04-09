@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.common.util.DateUtil.getDays
-import com.pvp.app.common.util.TaskUtil.sort
+import com.pvp.app.common.DateUtil.getDays
+import com.pvp.app.common.TaskUtil.sort
 import com.pvp.app.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -107,9 +107,9 @@ class CalendarMonthlyViewModel @Inject constructor(
         tasks: List<Task>
     ): List<Task> {
         return tasks.filter { task ->
-            task.scheduledAt.year == date.year &&
-                    task.scheduledAt.month == date.month &&
-                    task.scheduledAt.dayOfMonth == date.dayOfMonth
+            task.date.year == date.year &&
+                    task.date.month == date.month &&
+                    task.date.dayOfMonth == date.dayOfMonth
         }
     }
 }

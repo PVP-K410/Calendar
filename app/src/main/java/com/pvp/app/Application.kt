@@ -10,7 +10,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.pvp.app.common.util.DateUtil.toEpochSecondTimeZoned
+import com.pvp.app.common.DateUtil.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup

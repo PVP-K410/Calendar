@@ -23,7 +23,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -58,11 +60,12 @@ class TaskViewModel @Inject constructor(
      * Create a meal task for the user with the given parameters
      */
     fun create(
+        date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
         ingredients: String,
         preparation: String,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String
     ) {
         viewModelScope.launch {
@@ -82,10 +85,11 @@ class TaskViewModel @Inject constructor(
 
                     taskService
                         .create(
+                            date,
                             description,
                             duration,
                             recipe,
-                            scheduledAt,
+                            time,
                             title,
                             state.user.email
                         )
@@ -98,11 +102,12 @@ class TaskViewModel @Inject constructor(
      * Create a sport task for the user with the given parameters
      */
     fun create(
+        date: LocalDate,
         activity: SportActivity,
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String
     ) {
         viewModelScope.launch {
@@ -112,11 +117,12 @@ class TaskViewModel @Inject constructor(
                     taskService
                         .create(
                             activity,
+                            date,
                             description,
                             distance,
                             duration,
                             false,
-                            scheduledAt,
+                            time,
                             title,
                             state.user.email
                         )
@@ -129,9 +135,10 @@ class TaskViewModel @Inject constructor(
      * Create a general task for the user with the given parameters
      */
     fun create(
+        date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String
     ) {
         viewModelScope.launch {
@@ -140,9 +147,10 @@ class TaskViewModel @Inject constructor(
                 .let { state ->
                     taskService
                         .create(
+                            date,
                             description,
                             duration,
-                            scheduledAt,
+                            time,
                             title,
                             state.user.email
                         )
@@ -152,13 +160,14 @@ class TaskViewModel @Inject constructor(
     }
 
     private suspend fun Task.postNotification() {
+        time ?: return
+
         val reminderMinutes = state
             .first().reminderMinutes
             .toLong()
 
-        val reminderDateTime = scheduledAt
-            .withSecond(0)
-            .withNano(0)
+        val reminderDateTime = date
+            .atTime(time!!)
             .minusMinutes(reminderMinutes)
 
         if (reminderDateTime.isBefore(LocalDateTime.now())) {

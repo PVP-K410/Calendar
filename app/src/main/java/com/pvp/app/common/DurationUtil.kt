@@ -1,4 +1,4 @@
-package com.pvp.app.common.util
+package com.pvp.app.common
 
 import java.time.Duration
 

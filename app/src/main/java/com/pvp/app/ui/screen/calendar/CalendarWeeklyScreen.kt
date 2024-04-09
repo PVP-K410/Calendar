@@ -49,10 +49,7 @@ fun Week(
 
     val date = dates[statePager.currentPage]
     var stateShowCards by remember { mutableStateOf(false) }
-
-    val tasksFiltered = tasks.filter { task ->
-        task.scheduledAt.toLocalDate() == date
-    }
+    val tasksFiltered = tasks.filter { it.date == date }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -62,7 +59,7 @@ fun Week(
                 90.dp,
                 0.dp
             ),
-            modifier = modifier.height(LocalConfiguration.current.screenHeightDp.dp / 3),
+            modifier = modifier.height(LocalConfiguration.current.screenHeightDp.dp / 4),
             state = statePager
         ) { page ->
             DayCard(

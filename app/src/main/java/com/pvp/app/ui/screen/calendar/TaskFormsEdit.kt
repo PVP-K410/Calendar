@@ -57,6 +57,7 @@ import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.PickerTime
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -73,15 +74,16 @@ fun TaskEdit(
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description) }
     var duration by remember { mutableStateOf(task.duration) }
-    var scheduledAt by remember { mutableStateOf(task.scheduledAt) }
+    var date by remember { mutableStateOf(task.date) }
     var activity by remember { mutableStateOf((task as? SportTask)?.activity) }
     var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
     var recipe by remember { mutableStateOf((task as? MealTask)?.recipe) }
     var tempTitle by remember { mutableStateOf(title) }
     var tempDescription by remember { mutableStateOf(description) }
     var tempDuration by remember { mutableStateOf(duration) }
-    val tempHour = rememberPickerState(scheduledAt.hour)
-    val tempMinute = rememberPickerState(scheduledAt.minute)
+    var time = task.time ?: LocalTime.MIN
+    val tempHour = rememberPickerState(time.hour)
+    val tempMinute = rememberPickerState(time.minute)
 
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
@@ -213,19 +215,19 @@ fun TaskEdit(
                     dialogTitle = { Text("Editing scheduled at") },
                     label = "Scheduled at",
                     onConfirm = {
-                        scheduledAt = scheduledAt
+                        time = time
                             .withHour(tempHour.value)
                             .withMinute(tempMinute.value)
                     },
                     onDismiss = {
-                        tempHour.value = scheduledAt.hour
-                        tempMinute.value = scheduledAt.minute
+                        tempHour.value = time.hour
+                        tempMinute.value = time.minute
                     },
                     value = if (task is SportTask && activity!!.supportsDistanceMetrics) {
-                        scheduledAt.format(DateTimeFormatter.ofPattern("hh:mm a"))
+                        time.format(DateTimeFormatter.ofPattern("hh:mm a"))
                     } else {
-                        "${scheduledAt.format(DateTimeFormatter.ofPattern("hh:mm a"))} - " +
-                                (scheduledAt.plus(duration)).format(DateTimeFormatter.ofPattern("hh:mm a"))
+                        "${time.format(DateTimeFormatter.ofPattern("hh:mm a"))} - " +
+                                (time.plus(duration)).format(DateTimeFormatter.ofPattern("hh:mm a"))
                     }
                 )
 
@@ -235,7 +237,7 @@ fun TaskEdit(
                             showPicker = showDialog,
                             onDismiss = onDismiss,
                             onDateSelected = { selectedDate ->
-                                scheduledAt = scheduledAt
+                                date = date
                                     .withYear(selectedDate.year)
                                     .withMonth(selectedDate.monthValue)
                                     .withDayOfMonth(selectedDate.dayOfMonth)
@@ -244,7 +246,7 @@ fun TaskEdit(
                     },
                     label = "Date",
                     onConfirm = { },
-                    value = scheduledAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))
+                    value = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))
                 )
 
                 Row(
@@ -314,7 +316,7 @@ fun TaskEdit(
                                     task.title = title
                                     task.description = description
                                     task.duration = duration
-                                    task.scheduledAt = scheduledAt
+                                    task.date = date
 
                                     when (task) {
                                         is SportTask -> {
