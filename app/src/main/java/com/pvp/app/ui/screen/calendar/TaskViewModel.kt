@@ -1,4 +1,4 @@
-package com.pvp.app.ui.screen.calendar.task
+package com.pvp.app.ui.screen.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

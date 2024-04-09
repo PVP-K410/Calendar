@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.util.TaskUtil.sort
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Duration
@@ -50,36 +50,31 @@ class CalendarWeeklyViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val flowUser = userService.user
+
             val flowTasks = flowUser.flatMapLatest { user ->
                 user
                     ?.let { taskService.get(user.email) }
                     ?: flowOf(listOf())
             }
 
-            combine(
-                flowUser,
-                flowTasks
-            ) { user, tasks ->
-                val now = LocalDateTime.now()
+            flowUser
+                .combine(flowTasks) { user, tasks ->
+                    user ?: return@combine _state.value
 
-                if (user != null) {
-                    _state.update {
-                        CalendarState(
-                            tasksMonth = tasks.filter {
-                                it.scheduledAt.year == now.year &&
-                                        it.scheduledAt.monthValue == now.monthValue
-                            },
-                            tasksWeek = tasks.filter {
+                    val now = LocalDateTime.now()
+
+                    CalendarState(
+                        tasks = tasks
+                            .filter {
                                 it.scheduledAt.year == now.year &&
                                         it.scheduledAt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) ==
                                         now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
-                            },
-                            user = user
-                        )
-                    }
+                            }
+                            .sort(),
+                        user = user
+                    )
                 }
-            }
-                .launchIn(viewModelScope)
+                .collect { state -> _state.update { state } }
         }
     }
 
@@ -87,19 +82,6 @@ class CalendarWeeklyViewModel @Inject constructor(
         val granted = client.permissionController.getGrantedPermissions()
 
         return granted.containsAll(PERMISSIONS)
-    }
-
-    suspend fun getDayCaloriesActive(date: LocalDate): Double {
-        val end = getEndInstant(date)
-
-        val start = date
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant()
-
-        return healthConnectService.aggregateActiveCalories(
-            start,
-            end
-        )
     }
 
     suspend fun getDayCaloriesTotal(date: LocalDate): Double {
@@ -178,8 +160,7 @@ class CalendarWeeklyViewModel @Inject constructor(
 }
 
 data class CalendarState(
-    val tasksMonth: List<Task> = listOf(),
-    val tasksWeek: List<Task> = listOf(),
+    val tasks: List<Task> = listOf(),
     val user: User? = null
 )
 

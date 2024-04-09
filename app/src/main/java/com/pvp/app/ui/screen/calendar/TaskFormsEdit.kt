@@ -1,4 +1,4 @@
-package com.pvp.app.ui.screen.calendar.task
+package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

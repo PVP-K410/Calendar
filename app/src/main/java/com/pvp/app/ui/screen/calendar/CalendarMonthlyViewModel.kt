@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.common.util.DateUtil.getDays
+import com.pvp.app.common.util.TaskUtil.sort
 import com.pvp.app.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -35,29 +35,33 @@ class CalendarMonthlyViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val flowUser = userService.user
+
             val flowTasks = flowUser.flatMapLatest { user ->
                 user
                     ?.let { taskService.get(user.email) }
                     ?: flowOf(listOf())
             }
 
-            combine(
-                flowUser,
-                flowTasks
-            ) { user, tasks ->
-                if (user != null) {
-                    _state.update { currentState ->
-                        currentState.copy(
-                            dates = getDates(
-                                currentState.yearMonth,
-                                tasks
-                            ),
-                            tasks = tasks
+            flowUser
+                .combine(flowTasks) { user, tasks ->
+                    user ?: return@combine _state.value
+
+                    _state.value.copy(
+                        tasks = tasks.sort(),
+                        dates = getDates(
+                            YearMonth.now(),
+                            tasks
+                        )
+                    )
+                }
+                .collect { state ->
+                    _state.update { stateOld ->
+                        stateOld.copy(
+                            tasks = state.tasks,
+                            dates = state.dates
                         )
                     }
                 }
-            }
-                .launchIn(viewModelScope)
         }
     }
 

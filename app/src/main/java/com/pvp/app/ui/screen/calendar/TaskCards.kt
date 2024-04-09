@@ -1,4 +1,4 @@
-package com.pvp.app.ui.screen.calendar.task
+package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -136,9 +136,7 @@ fun TaskCard(
 }
 
 @Composable
-private fun TaskCardContentMeal(
-    task: MealTask
-) {
+private fun TaskCardContentMeal(task: MealTask) {
     task.duration?.let { duration ->
         Row(
             modifier = Modifier.padding(6.dp)
@@ -168,9 +166,7 @@ private fun TaskCardContentMeal(
 }
 
 @Composable
-private fun TaskCardContentSport(
-    task: SportTask
-) {
+private fun TaskCardContentSport(task: SportTask) {
     if (task.distance != null && task.distance!! > 0) {
         Row(
             modifier = Modifier.padding(6.dp)
@@ -217,9 +213,7 @@ private fun TaskCardContentSport(
 }
 
 @Composable
-private fun TaskCardContent(
-    task: Task
-) {
+private fun TaskCardContent(task: Task) {
     task.duration?.let { duration ->
         Row(
             modifier = Modifier.padding(6.dp)
