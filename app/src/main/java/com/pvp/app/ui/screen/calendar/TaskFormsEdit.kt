@@ -224,15 +224,15 @@ fun TaskEdit(
                         tempMinute.value = time.minute
                     },
                     value = if (task is SportTask && activity!!.supportsDistanceMetrics) {
-                        time.format(DateTimeFormatter.ofPattern("hh:mm a"))
+                        time.format(DateTimeFormatter.ofPattern("HH:mm"))
                     } else {
-                        "${time.format(DateTimeFormatter.ofPattern("hh:mm a"))} - " +
-                                (time.plus(duration)).format(DateTimeFormatter.ofPattern("hh:mm a"))
+                        "${time.format(DateTimeFormatter.ofPattern("HH:mm"))} - " +
+                                (time.plus(duration)).format(DateTimeFormatter.ofPattern("HH:mm"))
                     }
                 )
 
                 FieldBox(
-                    dialogContent = { showDialog, onDismiss, onDateSelected ->
+                    dialogContent = { showDialog, onDismiss, _ ->
                         DatePickerDialog(
                             showPicker = showDialog,
                             onDismiss = onDismiss,

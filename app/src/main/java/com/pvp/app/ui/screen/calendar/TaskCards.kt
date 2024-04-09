@@ -123,9 +123,9 @@ fun TaskCard(
 
                 task.time?.let {
                     Text(
-                        fontSize = 18.sp,
+                        fontSize = 20.sp,
                         modifier = Modifier.weight(0.3f),
-                        text = it.format(DateTimeFormatter.ofPattern("HH:mm a"))
+                        text = it.format(DateTimeFormatter.ofPattern("HH:mm"))
                     )
                 }
             }
