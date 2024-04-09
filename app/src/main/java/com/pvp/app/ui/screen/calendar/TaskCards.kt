@@ -47,7 +47,7 @@ fun TaskCard(
     var checked = task.isCompleted
     var showDialog by remember { mutableStateOf(false) }
 
-    if (showDialog) {
+    if (showDialog && (task !is SportTask || !task.isDaily)) {
         TaskEdit(
             task,
             onDismissRequest = { showDialog = false },
@@ -62,7 +62,7 @@ fun TaskCard(
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.surface)
             .border(
-                BorderStroke(
+                border = BorderStroke(
                     1.dp,
                     MaterialTheme.colorScheme.outlineVariant
                 ),
@@ -83,6 +83,9 @@ fun TaskCard(
             ) {
                 Checkbox(
                     checked = checked,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .align(CenterVertically),
                     onCheckedChange = {
                         model.update(
                             { task -> task.isCompleted = it },
@@ -90,30 +93,25 @@ fun TaskCard(
                         )
 
                         checked = it
-                    },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .align(CenterVertically)
+                    }
                 )
 
                 Text(
-                    text = task.title,
-                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp,
                     modifier = Modifier
                         .align(CenterVertically)
                         .weight(1f),
-                    fontSize = 20.sp
+                    text = task.title,
+                    textAlign = TextAlign.Center
                 )
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = CenterVertically
             ) {
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Spacer(modifier = Modifier.height(4.dp))
 
                     when (task) {
@@ -125,9 +123,9 @@ fun TaskCard(
 
                 task.time?.let {
                     Text(
-                        text = it.format(DateTimeFormatter.ofPattern("HH:mm a")),
+                        fontSize = 18.sp,
                         modifier = Modifier.weight(0.3f),
-                        fontSize = 18.sp
+                        text = it.format(DateTimeFormatter.ofPattern("HH:mm a"))
                     )
                 }
             }
@@ -138,108 +136,107 @@ fun TaskCard(
 @Composable
 private fun TaskCardContentMeal(task: MealTask) {
     task.duration?.let { duration ->
-        Row(
-            modifier = Modifier.padding(6.dp)
-        ) {
+        Row(modifier = Modifier.padding(6.dp)) {
             Icon(
-                imageVector = Icons.Outlined.Timelapse,
-                contentDescription = "Duration"
+                contentDescription = "Duration",
+                imageVector = Icons.Outlined.Timelapse
             )
 
             Text(
-                text = duration.asString(),
-                textAlign = TextAlign.Left,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp)
+                    .padding(start = 8.dp),
+                text = duration.asString(),
+                textAlign = TextAlign.Left
             )
         }
     }
 
     Text(
-        "Recipe: " + task.recipe,
-        textAlign = TextAlign.Left,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp)
+            .padding(start = 8.dp),
+        text = "Recipe: " + task.recipe,
+        textAlign = TextAlign.Left
     )
 }
 
 @Composable
 private fun TaskCardContentSport(task: SportTask) {
     if (task.distance != null && task.distance!! > 0) {
-        Row(
-            modifier = Modifier.padding(6.dp)
-        ) {
+        Row(modifier = Modifier.padding(6.dp)) {
             Icon(
-                imageVector = Icons.Outlined.Straighten,
-                contentDescription = "Distance"
+                contentDescription = "Distance",
+                imageVector = Icons.Outlined.Straighten
             )
 
             Text(
-                text = "${task.distance} km",
-                textAlign = TextAlign.Left,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp)
+                    .padding(start = 8.dp),
+                text = "${task.distance} km",
+                textAlign = TextAlign.Left
             )
         }
     } else if (task.duration != null) {
-        Row(
-            modifier = Modifier.padding(6.dp)
-        ) {
+        Row(modifier = Modifier.padding(6.dp)) {
             Icon(
-                imageVector = Icons.Outlined.Timelapse,
-                contentDescription = "Duration"
+                contentDescription = "Duration",
+                imageVector = Icons.Outlined.Timelapse
             )
 
             Text(
-                text = task.duration!!.asString(),
-                textAlign = TextAlign.Left,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp)
+                    .padding(start = 8.dp),
+                text = task.duration!!.asString(),
+                textAlign = TextAlign.Left
             )
         }
     }
 
-    Text(
-        text = task.activity.title,
-        textAlign = TextAlign.Left,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 8.dp)
-    )
+    Row(modifier = Modifier.padding(6.dp)) {
+        Icon(
+            contentDescription = "Activity",
+            imageVector = task.activity.icon
+        )
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp),
+            text = task.activity.title,
+            textAlign = TextAlign.Left
+        )
+    }
 }
 
 @Composable
 private fun TaskCardContent(task: Task) {
     task.duration?.let { duration ->
-        Row(
-            modifier = Modifier.padding(6.dp)
-        ) {
+        Row(modifier = Modifier.padding(6.dp)) {
             Icon(
-                imageVector = Icons.Outlined.Timelapse,
-                contentDescription = "Duration"
+                contentDescription = "Duration",
+                imageVector = Icons.Outlined.Timelapse
             )
 
             Text(
-                text = duration.asString(),
-                textAlign = TextAlign.Left,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp)
+                    .padding(start = 8.dp),
+                text = duration.asString(),
+                textAlign = TextAlign.Left
             )
         }
     }
 
     task.description?.let { description ->
         Text(
-            text = description,
-            textAlign = TextAlign.Left,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp)
+                .padding(start = 8.dp),
+            text = description,
+            textAlign = TextAlign.Left
         )
     }
 }
