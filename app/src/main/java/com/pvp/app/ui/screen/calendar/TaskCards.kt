@@ -123,11 +123,13 @@ fun TaskCard(
                     }
                 }
 
-                Text(
-                    text = task.time?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: "--:--",
-                    modifier = Modifier.weight(0.3f),
-                    fontSize = 22.sp
-                )
+                task.time?.let {
+                    Text(
+                        text = it.format(DateTimeFormatter.ofPattern("HH:mm a")),
+                        modifier = Modifier.weight(0.3f),
+                        fontSize = 18.sp
+                    )
+                }
             }
         }
     }

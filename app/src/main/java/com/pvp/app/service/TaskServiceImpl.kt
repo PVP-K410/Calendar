@@ -325,6 +325,8 @@ class TaskServiceImpl @Inject constructor(
             error("Task id is required to update it.")
         }
 
+        task.time = task.time?.cleanEnd()
+
         if (updatePoints && task.points.claimedAt == null) {
             task.points = task.points.copy(
                 value = pointService.calculate(task)

@@ -17,6 +17,7 @@ object TaskUtil {
         return sortedWith(
             compareBy<Task> { it.isCompleted }
                 .thenBy { it.date }
+                .thenBy { it.time }
                 .thenBy { it.duration }
                 .thenBy { (it as? SportTask)?.distance }
                 .thenBy { (it as? SportTask)?.activity }

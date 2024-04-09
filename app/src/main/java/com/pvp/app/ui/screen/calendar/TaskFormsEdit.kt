@@ -81,7 +81,7 @@ fun TaskEdit(
     var tempTitle by remember { mutableStateOf(title) }
     var tempDescription by remember { mutableStateOf(description) }
     var tempDuration by remember { mutableStateOf(duration) }
-    var time = task.time ?: LocalTime.MIN
+    var time by remember { mutableStateOf(task.time ?: LocalTime.MIN) }
     val tempHour = rememberPickerState(time.hour)
     val tempMinute = rememberPickerState(time.minute)
 
@@ -317,6 +317,7 @@ fun TaskEdit(
                                     task.description = description
                                     task.duration = duration
                                     task.date = date
+                                    task.time = time
 
                                     when (task) {
                                         is SportTask -> {
