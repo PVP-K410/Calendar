@@ -11,9 +11,9 @@ sealed class Setting<T>(
     object Notifications {
 
         /**
-         * Minutes for task reminder notification to execute before [Task.scheduledAt] comes.
+         * Minutes for task reminder notification to execute before [Task.date] comes.
          *
-         * If [Task.scheduledAt] is at **12:30 pm** and this setting is set to **10**, user will get
+         * If [Task.date] is at **12:30 pm** and this setting is set to **10**, user will get
          * reminder notification at **12:20 pm**.
          */
         data object ReminderBeforeTaskMinutes : Setting<Int>(

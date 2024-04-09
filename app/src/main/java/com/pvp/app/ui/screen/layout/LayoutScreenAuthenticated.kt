@@ -59,7 +59,7 @@ import com.pvp.app.R
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
-import com.pvp.app.ui.screen.calendar.CreateTaskDialog
+import com.pvp.app.ui.screen.calendar.TaskCreateDialog
 import com.pvp.app.ui.screen.drawer.DrawerScreen
 import com.pvp.app.ui.screen.profile.ProfileScreen
 import kotlinx.coroutines.CoroutineScope
@@ -344,7 +344,7 @@ fun LayoutScreenAuthenticated(
                     statePager
                 )
             ) {
-                CreateTaskDialog(
+                TaskCreateDialog(
                     onClose = toggleDialog,
                     isOpen = isOpen,
                     shouldCloseOnSubmit = true

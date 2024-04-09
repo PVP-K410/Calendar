@@ -1,18 +1,22 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.pvp.app.ui.screen.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.DateUtil.getDays
+import com.pvp.app.common.TaskUtil.sort
 import com.pvp.app.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -31,29 +35,33 @@ class CalendarMonthlyViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val flowUser = userService.user
+
             val flowTasks = flowUser.flatMapLatest { user ->
                 user
                     ?.let { taskService.get(user.email) }
                     ?: flowOf(listOf())
             }
 
-            combine(
-                flowUser,
-                flowTasks
-            ) { user, tasks ->
-                if (user != null) {
-                    _state.update { currentState ->
-                        currentState.copy(
-                            dates = getDates(
-                                currentState.yearMonth,
-                                tasks
-                            ),
-                            tasks = tasks
+            flowUser
+                .combine(flowTasks) { user, tasks ->
+                    user ?: return@combine _state.value
+
+                    _state.value.copy(
+                        tasks = tasks.sort(),
+                        dates = getDates(
+                            YearMonth.now(),
+                            tasks
+                        )
+                    )
+                }
+                .collect { state ->
+                    _state.update { stateOld ->
+                        stateOld.copy(
+                            tasks = state.tasks,
+                            dates = state.dates
                         )
                     }
                 }
-            }
-                .launchIn(viewModelScope)
         }
     }
 
@@ -99,9 +107,9 @@ class CalendarMonthlyViewModel @Inject constructor(
         tasks: List<Task>
     ): List<Task> {
         return tasks.filter { task ->
-            task.scheduledAt.year == date.year &&
-                    task.scheduledAt.month == date.month &&
-                    task.scheduledAt.dayOfMonth == date.dayOfMonth
+            task.date.year == date.year &&
+                    task.date.month == date.month &&
+                    task.date.dayOfMonth == date.dayOfMonth
         }
     }
 }

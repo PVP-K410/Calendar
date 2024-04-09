@@ -24,9 +24,22 @@ interface Configuration {
     val limitPointsReclaimDays: Int
 
     /**
+     * Cup volume values for the user to select from.
+     */
+    val rangeCupVolume: List<Int>
+
+    /**
      * Height values for the user to select from.
      */
     val rangeHeight: List<Int>
+
+    /**
+     * Kilometers values for the user to select from.
+     *
+     * It should be used together with meters in some picker component. User could select the range
+     * of kilometers provided in this list and also meters in range of 0-999.
+     */
+    val rangeKilometers: List<Int>
 
     /**
      * Mass values for the user to select from.
@@ -37,11 +50,6 @@ interface Configuration {
      * Reminder minutes values for the user to select from.
      */
     val rangeReminderMinutes: List<Int>
-
-    /**
-     * Cup volume values for the user to select from.
-     */
-    val rangeCupVolume: List<Int>
 
     /**
      * The inclusive interval of hours during which water drinking reminders are being sent.

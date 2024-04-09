@@ -1,10 +1,9 @@
 package com.pvp.app.service
 
-import android.util.Log
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.HealthConnectService
-import com.pvp.app.common.getOccurences
+import com.pvp.app.common.ActivityUtil.getOccurrences
 import com.pvp.app.model.ExerciseSessionInfo
 import com.pvp.app.model.SportActivity
 import java.time.Duration
@@ -68,7 +67,7 @@ class ExerciseServiceImpl @Inject constructor(
                 SportActivity
                     .fromId(record.exerciseType)
             }
-            .getOccurences()
+            .getOccurrences()
             .toMap()
     }
 
