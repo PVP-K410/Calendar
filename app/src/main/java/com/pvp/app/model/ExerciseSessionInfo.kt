@@ -5,6 +5,6 @@ import java.time.Duration
 
 data class ExerciseSessionInfo(
     val record: ExerciseSessionRecord,
-    val distance: Double?,
-    val duration: Duration?
+    var distance: Double?,
+    var duration: Duration?
 )
