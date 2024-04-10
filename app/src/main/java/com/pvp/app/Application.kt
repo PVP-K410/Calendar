@@ -15,6 +15,7 @@ import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
+import com.pvp.app.worker.TaskAutocompleteWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
 import dagger.hilt.android.HiltAndroidApp
@@ -48,6 +49,8 @@ class Application : Application(), Configuration.Provider {
         createDrinkReminderWorker()
 
         createNotificationChannels()
+
+        createTaskAutocompleteWorker()
 
         createTaskPointsDeductionWorker()
 
@@ -115,6 +118,22 @@ class Application : Application(), Configuration.Provider {
                 manager.createNotificationChannel(notificationChannel)
             }
         }
+    }
+
+    private fun createTaskAutocompleteWorker(){
+        Log.e("AUTOCOMPLETE", "CREATING")
+        val requestPeriodic = PeriodicWorkRequestBuilder<TaskAutocompleteWorker>(
+            repeatInterval = 15,
+            repeatIntervalTimeUnit = TimeUnit.MINUTES
+        )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            TaskAutocompleteWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            requestPeriodic
+        )
+        Log.e("AUTOCOMPLETE", "CREATED")
     }
 
     private fun createTaskPointsDeductionWorker() {
