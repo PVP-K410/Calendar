@@ -6,14 +6,12 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.common.DurationUtil.asString
 import com.pvp.app.model.ExerciseSessionInfo
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -45,26 +43,22 @@ class TaskAutocompleteService : Service() {
     @Inject
     lateinit var userService: UserService
 
+    companion object {
+
+        private const val NOTIFICATION_ID = Int.MAX_VALUE
+        private const val CHANNEL_ID = "Task Autocomplete"
+    }
+
     private fun checkTaskCompletion(
         tasks: List<Task>,
         exercises: List<ExerciseSessionInfo>
     ): List<SportTask> {
         return tasks.mapNotNull { task ->
             val activity = (task as SportTask).activity
-            var duration = task.duration
-                ?: Duration.ZERO
-            var distance = task.distance
-                ?: 0.0
-            var num = 1
-            Log.e(
-                "AUTOCOMPLETE",
-                "${task.title} ${activity.title} $duration $distance"
-            )
+            var duration = task.duration ?: Duration.ZERO
+            var distance = task.distance ?: 0.0
+
             exercises.forEach { exercise ->
-                Log.e(
-                    "AUTOCOMPLETE",
-                    "${exercise.record.exerciseType}"
-                )
                 when (distance > 0.0 || !duration.isZero) {
                     true -> {
                         if (exercise.record.exerciseType == activity.id) {
@@ -74,14 +68,9 @@ class TaskAutocompleteService : Service() {
                                         exercise.distance = exercise.distance!! - distance
                                         distance = 0.0
                                     } else {
-                                        distance -= exercise.distance
-                                            ?: 0.0
+                                        distance -= exercise.distance ?: 0.0
                                         exercise.distance = 0.0
                                     }
-                                    Log.e(
-                                        "AUTOCOMPLETE",
-                                        "$num task ${task.title} ${activity.title} distance: $distance"
-                                    )
                                 }
 
                                 false -> {
@@ -92,11 +81,6 @@ class TaskAutocompleteService : Service() {
                                         duration -= exercise.duration
                                         exercise.duration = Duration.ZERO
                                     }
-
-                                    Log.e(
-                                        "AUTOCOMPLETE",
-                                        "$num task ${task.title} ${activity.title} distance: ${(duration.asString())}"
-                                    )
                                 }
                             }
                         }
@@ -134,7 +118,7 @@ class TaskAutocompleteService : Service() {
         getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
     }
 
-    suspend fun getActivities(): List<ExerciseSessionRecord> {
+    private suspend fun getActivities(): List<ExerciseSessionRecord> {
         return healthConnectService.readActivityData(
             record = ExerciseSessionRecord::class,
             start = LocalDate
@@ -145,7 +129,7 @@ class TaskAutocompleteService : Service() {
         )
     }
 
-    suspend fun getTasks(): List<Task> {
+    private suspend fun getTasks(): List<Task> {
         return userService.user
             .firstOrNull()
             ?.let { user ->
@@ -159,14 +143,7 @@ class TaskAutocompleteService : Service() {
                         }
                     }
                     .first()
-            }
-            ?: emptyList()
-    }
-
-    suspend fun updateTasks(tasks: List<Task>) {
-        tasks.forEach { task ->
-            taskService.update(task)
-        }
+            } ?: emptyList()
     }
 
     override fun onStartCommand(
@@ -174,23 +151,23 @@ class TaskAutocompleteService : Service() {
         flags: Int,
         startId: Int
     ): Int {
-        Log.e(
-            "AUTOCOMPLETE",
-            "STARTING SERVICE"
-        )
         createNotificationChannel()
+
         val notification = createNotification()
+
         startForeground(
-            9999,
+            NOTIFICATION_ID,
             notification
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            val tasks = getTasks().sortedBy { task -> task.time }
+            val tasks = getTasks()
+                .sortedBy { task -> task.time }
 
-            val exercises = getActivities().map { exercise ->
-                exerciseService.getExerciseInfo(exercise)
-            }
+            val exercises = getActivities()
+                .map { exercise ->
+                    exerciseService.getExerciseInfo(exercise)
+                }
 
             val completedTasks = checkTaskCompletion(
                 tasks,
@@ -198,24 +175,18 @@ class TaskAutocompleteService : Service() {
             )
 
             updateTasks(completedTasks)
-
-            stopSelf()
         }
 
-        Log.e(
-            "AUTOCOMPLETE",
-            "SERVICE FINISHED"
-        )
-
-        return START_NOT_STICKY
+        return START_REDELIVER_INTENT
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
-    companion object {
-        private const val NOTIFICATION_ID = Int.MAX_VALUE
-        private const val CHANNEL_ID = "Task Autocomplete"
+    private suspend fun updateTasks(tasks: List<Task>) {
+        tasks.forEach { task ->
+            taskService.update(task)
+        }
     }
 }

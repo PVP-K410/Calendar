@@ -34,7 +34,8 @@
 
         <service
             android:name=".service.TaskAutocompleteService"
-            android:foregroundServiceType="health">
+            android:foregroundServiceType="health"
+            android:stopWithTask="false">
         </service>
 
         <activity
