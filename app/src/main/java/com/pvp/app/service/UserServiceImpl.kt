@@ -15,8 +15,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Provider
@@ -38,6 +38,7 @@ class UserServiceImpl @Inject constructor(
                     ?: flowOf(null)
             }
 
+    /*
     override suspend fun get(email: String): Flow<User?> {
         return database
             .collection(identifier)
@@ -45,13 +46,65 @@ class UserServiceImpl @Inject constructor(
             .snapshots()
             .map { it.toObject(User::class.java) }
     }
+     */
 
+
+    /*
+    override suspend fun get(email: String): Flow<User?> {
+        return flow {
+            val snapshot = database
+                .collection(identifier)
+                .document(email)
+                .get()
+                .await()
+
+            emit(snapshot.toObject(User::class.java))
+        }
+    }
+    */
+
+    override suspend fun get(email: String): Flow<User?> {
+        return flow {
+            val initialSnapshot = database
+                .collection(identifier)
+                .document(email)
+                .get()
+                .await()
+
+            emit(initialSnapshot.toObject(User::class.java))
+
+            database
+                .collection(identifier)
+                .document(email)
+                .snapshots()
+                .collect { snapshot ->
+                    emit(snapshot.toObject(User::class.java))
+                }
+        }
+    }
+
+
+    /*
     override suspend fun merge(user: User) {
         database
             .collection(identifier)
             .document(user.email)
             .set(user)
             .await()
+    }
+    */
+
+    override suspend fun merge(user: User) {
+        database.runTransaction { transaction ->
+            val document = database
+                .collection(identifier)
+                .document(user.email)
+
+            transaction.set(
+                document,
+                user
+            )
+        }.await()
     }
 
     override suspend fun remove(email: String) {
