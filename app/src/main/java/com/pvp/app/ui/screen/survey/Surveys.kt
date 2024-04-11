@@ -2,7 +2,6 @@
 
 package com.pvp.app.ui.screen.survey
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,7 +51,6 @@ import com.pvp.app.ui.common.PickerState
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
 @Composable
-@SuppressLint("ComposableNaming")
 fun BodyMassIndexSurvey(
     handler: (height: Int, mass: Int) -> Unit,
     model: SurveyViewModel = hiltViewModel(),

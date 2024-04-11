@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +30,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.R
-import com.pvp.app.ui.common.ButtonWithDialog
+import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.router.Route
 
@@ -100,10 +98,10 @@ private fun DrawerFooter(
     modifier: Modifier = Modifier,
     onSignOut: () -> Unit
 ) {
-    val textSignOut = stringResource(R.string.screen_profile_button_sign_out)
+    val signOut = stringResource(R.string.screen_profile_button_sign_out)
 
     Column(modifier = modifier) {
-        ButtonWithDialog(
+        ButtonConfirm(
             modifier = Modifier
                 .padding(
                     top = 20.dp,
@@ -111,22 +109,11 @@ private fun DrawerFooter(
                     end = 10.dp
                 )
                 .fillMaxSize(),
-            contentAlignment = Alignment.BottomEnd,
-            mainButtonContent = { Text(textSignOut) },
-            dismissButtonContent = { Text("Cancel") },
-            confirmButtonContent = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.Logout,
-                        contentDescription = "Sign Out Icon"
-                    )
-
-                    Text("Sign Out")
-                }
-            },
-            dialogTitle = { Text(text = "Sign Out") },
-            dialogContent = { Text(text = "Are you sure you want to sign out?") },
-            onConfirmClick = { onSignOut() }
+            buttonContent = { Text(text = signOut) },
+            buttonContentAlignment = Alignment.BottomEnd,
+            confirmationButtonContent = { Text(text = signOut) },
+            confirmationTitle = { Text(text = "Are you sure you want to sign out?") },
+            onConfirm = { onSignOut() }
         )
     }
 }
