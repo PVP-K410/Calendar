@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -119,9 +120,76 @@ fun EditableInfoItem(
     dialogContent: @Composable () -> Unit,
     dialogTitle: @Composable () -> Unit,
     label: String,
-    onConfirm: (String) -> Unit,
+    onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    value: String,
+    value: String
+) {
+    EditableInfoItem(
+        dialogContent = dialogContent,
+        dialogTitle = dialogTitle,
+        label = {
+            Text(
+                fontWeight = FontWeight.Bold,
+                text = label
+            )
+        },
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+        value = { Text(value) }
+    )
+}
+
+@Composable
+fun EditableInfoItem(
+    dialogContent: @Composable () -> Unit,
+    dialogTitle: @Composable () -> Unit,
+    label: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    value: @Composable ColumnScope.() -> Unit
+) {
+    EditableInfoItem(
+        dialogContent = dialogContent,
+        dialogTitle = dialogTitle,
+        label = {
+            Text(
+                fontWeight = FontWeight.Bold,
+                text = label
+            )
+        },
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+        value = value
+    )
+}
+
+@Composable
+fun EditableInfoItem(
+    dialogContent: @Composable () -> Unit,
+    dialogTitle: @Composable () -> Unit,
+    label: @Composable ColumnScope.() -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    value: String
+) {
+    EditableInfoItem(
+        dialogContent = dialogContent,
+        dialogTitle = dialogTitle,
+        label = label,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+        value = { Text(value) }
+    )
+}
+
+@Composable
+fun EditableInfoItem(
+    dialogContent: @Composable () -> Unit,
+    dialogTitle: @Composable () -> Unit,
+    label: @Composable ColumnScope.() -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    value: @Composable ColumnScope.() -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -137,25 +205,20 @@ fun EditableInfoItem(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                fontWeight = FontWeight.Bold,
-                text = label
-            )
+            label()
 
-            Text(text = value)
+            value()
         }
 
         IconButtonConfirm(
-            confirmationButtonContent = {
-                Text("Save")
-            },
+            confirmationButtonContent = { Text("Save") },
             confirmationDescription = dialogContent,
             confirmationTitle = dialogTitle,
             icon = Icons.Outlined.Edit,
+            iconDescription = "Edit info item icon button",
             iconSize = 30.dp,
-            iconDescription = "Edit Icon Button",
             modifier = Modifier.align(Alignment.TopEnd),
-            onConfirm = { onConfirm(value) },
+            onConfirm = onConfirm,
             onDismiss = onDismiss
         )
     }

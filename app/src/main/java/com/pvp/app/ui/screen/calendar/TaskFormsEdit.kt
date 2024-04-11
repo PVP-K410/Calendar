@@ -16,7 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +23,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -49,6 +47,7 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.DatePickerDialog
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.LabelFieldWrapper
@@ -258,56 +257,34 @@ fun TaskEdit(
                         ),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    var showConfirmationDialog by remember { mutableStateOf(false) }
-
-                    OutlinedButton(
-                        onClick = { showConfirmationDialog = true },
-                        shape = MaterialTheme.shapes.extraLarge,
+                    ButtonConfirm(
                         border = BorderStroke(
                             1.dp,
                             Color.Red
                         ),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Outlined.Delete,
-                                contentDescription = "Remove task"
-                            )
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+                        content = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    contentDescription = "Delete task icon",
+                                    imageVector = Icons.Outlined.Delete
+                                )
 
-                            Text(
-                                "Delete",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    }
+                                Text(
+                                    "Delete",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
+                        },
+                        confirmationDescription = { Text("If the task is deleted, it cannot be recovered") },
+                        confirmationTitle = { Text("Are you sure you want to delete this task?") },
+                        onConfirm = {
+                            model.remove(task)
 
-                    if (showConfirmationDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showConfirmationDialog = false },
-                            confirmButton = {
-                                Button(
-                                    onClick = {
-                                        model.remove(task)
-
-                                        showConfirmationDialog = false
-                                        onDismissRequest()
-                                    }
-                                ) {
-                                    Text("Yes")
-                                }
-                            },
-                            dismissButton = {
-                                Button(
-                                    onClick = { showConfirmationDialog = false }
-                                ) {
-                                    Text("No")
-                                }
-                            },
-                            title = { Text("Confirmation") },
-                            text = { Text("Are you sure you want to delete?") }
-                        )
-                    }
+                            onDismissRequest()
+                        },
+                        shape = MaterialTheme.shapes.extraLarge
+                    )
 
                     Button(
                         onClick = {
