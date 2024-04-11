@@ -150,8 +150,7 @@ class TaskAutocompleteService : Service() {
         flags: Int,
         startId: Int
     ): Int {
-        createNotificationChannel()
-
+//        createNotificationChannel()
         val notification = createNotification()
 
         startForeground(
