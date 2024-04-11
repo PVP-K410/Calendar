@@ -12,8 +12,10 @@ import dagger.assisted.AssistedInject
 
 @HiltWorker
 class TaskAutocompleteWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted workerParams: WorkerParameters
+    @Assisted
+    context: Context,
+    @Assisted
+    workerParams: WorkerParameters
 ) : CoroutineWorker(
     context,
     workerParams
@@ -24,17 +26,16 @@ class TaskAutocompleteWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result {
-        val context = applicationContext
-
         Intent(
-            context,
+            applicationContext,
             TaskAutocompleteService::class.java
-        ).also { intent ->
-            ContextCompat.startForegroundService(
-                context,
-                intent
-            )
-        }
+        )
+            .also { intent ->
+                ContextCompat.startForegroundService(
+                    applicationContext,
+                    intent
+                )
+            }
 
         return Result.success()
     }

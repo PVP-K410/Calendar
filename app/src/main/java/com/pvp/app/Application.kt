@@ -121,7 +121,6 @@ class Application : Application(), Configuration.Provider {
     }
 
     private fun createTaskAutocompleteWorker(){
-        Log.e("AUTOCOMPLETE", "CREATING")
         val requestPeriodic = PeriodicWorkRequestBuilder<TaskAutocompleteWorker>(
             repeatInterval = 15,
             repeatIntervalTimeUnit = TimeUnit.MINUTES

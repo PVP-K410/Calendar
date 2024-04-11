@@ -46,23 +46,21 @@ class TaskAutocompleteService : Service() {
     companion object {
 
         private const val NOTIFICATION_ID = Int.MAX_VALUE
-        private const val CHANNEL_ID = "Task Autocomplete"
     }
 
     private fun checkTaskCompletion(
-        tasks: List<Task>,
+        tasks: List<SportTask>,
         exercises: List<ExerciseSessionInfo>
     ): List<SportTask> {
         return tasks.mapNotNull { task ->
-            val activity = (task as SportTask).activity
             var duration = task.duration ?: Duration.ZERO
             var distance = task.distance ?: 0.0
 
             exercises.forEach { exercise ->
                 when (distance > 0.0 || !duration.isZero) {
                     true -> {
-                        if (exercise.record.exerciseType == activity.id) {
-                            when (activity.supportsDistanceMetrics) {
+                        if (exercise.record.exerciseType == task.activity.id) {
+                            when (task.activity.supportsDistanceMetrics) {
                                 true -> {
                                     if (distance < exercise.distance!!) {
                                         exercise.distance = exercise.distance!! - distance
@@ -101,7 +99,7 @@ class TaskAutocompleteService : Service() {
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(
             this,
-            CHANNEL_ID
+            com.pvp.app.model.NotificationChannel.TaskAutocomplete.channelId
         )
             .setContentTitle("Task Processing")
             .setContentText("Processing your tasks in the background")
@@ -110,12 +108,13 @@ class TaskAutocompleteService : Service() {
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            CHANNEL_ID,
+            com.pvp.app.model.NotificationChannel.TaskAutocomplete.channelId,
             "Task Processing Service",
             NotificationManager.IMPORTANCE_DEFAULT
         )
 
-        getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
+        getSystemService(NotificationManager::class.java)
+            ?.createNotificationChannel(channel)
     }
 
     private suspend fun getActivities(): List<ExerciseSessionRecord> {
@@ -129,18 +128,18 @@ class TaskAutocompleteService : Service() {
         )
     }
 
-    private suspend fun getTasks(): List<Task> {
+    private suspend fun getTasks(): List<SportTask> {
         return userService.user
             .firstOrNull()
             ?.let { user ->
                 taskService
                     .get(userEmail = user.email)
                     .map { tasks ->
-                        tasks.filter { task ->
-                            task is SportTask &&
-                                    task.date
-                                        .isEqual(LocalDate.now())
-                        }
+                        tasks
+                            .mapNotNull { it as? SportTask }
+                            .filter { task ->
+                                task.date.isEqual(LocalDate.now())
+                            }
                     }
                     .first()
             } ?: emptyList()
