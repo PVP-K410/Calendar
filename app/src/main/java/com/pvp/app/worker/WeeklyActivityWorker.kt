@@ -1,7 +1,6 @@
 package com.pvp.app.worker
 
 import android.content.Context
-import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.hilt.work.HiltWorker
@@ -111,16 +110,6 @@ class WeeklyActivityWorker @AssistedInject constructor(
             else -> listOf(SportActivity.Wheelchair)
         }
     }
-
-//    private suspend fun permissionsGranted(): Boolean {
-//        return client.permissionController
-//            .getGrantedPermissions()
-//            .contains(
-//                HealthPermission.getReadPermission(
-//                    ExerciseSessionRecord::class
-//                )
-//            )
-//    }
 
     private fun postActivityNotification(activities: List<SportActivity>) {
         notificationService.show(

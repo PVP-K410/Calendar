@@ -1,8 +1,6 @@
 package com.pvp.app.service
 
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
@@ -79,7 +77,7 @@ class TaskAutocompleteService : Service() {
 
                                 false -> {
                                     if (duration < exercise.duration) {
-                                        exercise.duration = exercise.duration?.minus(duration);
+                                        exercise.duration = exercise.duration?.minus(duration)
                                         duration = Duration.ZERO
                                     } else {
                                         duration -= exercise.duration
@@ -145,7 +143,6 @@ class TaskAutocompleteService : Service() {
         flags: Int,
         startId: Int
     ): Int {
-//        createNotificationChannel()
         val notification = createNotification()
 
         startForeground(
@@ -154,7 +151,7 @@ class TaskAutocompleteService : Service() {
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            if(healthConnectService.permissionsGranted(PERMISSIONS)){
+            if (healthConnectService.permissionsGranted(PERMISSIONS)) {
                 val tasks = getTasks()
                     .sortedBy { task -> task.time }
 

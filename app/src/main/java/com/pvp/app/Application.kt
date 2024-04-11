@@ -120,7 +120,7 @@ class Application : Application(), Configuration.Provider {
         }
     }
 
-    private fun createTaskAutocompleteWorker(){
+    private fun createTaskAutocompleteWorker() {
         val requestPeriodic = PeriodicWorkRequestBuilder<TaskAutocompleteWorker>(
             repeatInterval = 15,
             repeatIntervalTimeUnit = TimeUnit.MINUTES
@@ -132,7 +132,6 @@ class Application : Application(), Configuration.Provider {
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             requestPeriodic
         )
-        Log.e("AUTOCOMPLETE", "CREATED")
     }
 
     private fun createTaskPointsDeductionWorker() {
