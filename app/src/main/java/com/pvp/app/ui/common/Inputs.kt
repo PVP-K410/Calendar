@@ -145,21 +145,18 @@ fun EditableInfoItem(
             Text(text = value)
         }
 
-        IconButtonWithDialog(
-            confirmButtonContent = {
+        IconButtonConfirm(
+            confirmationButtonContent = {
                 Text("Save")
             },
-            dismissButtonContent = {
-                Text("Cancel")
-            },
-            dialogContent = dialogContent,
-            dialogTitle = dialogTitle,
+            confirmationDescription = dialogContent,
+            confirmationTitle = dialogTitle,
             icon = Icons.Outlined.Edit,
             iconSize = 30.dp,
             iconDescription = "Edit Icon Button",
+            modifier = Modifier.align(Alignment.TopEnd),
             onConfirm = { onConfirm(value) },
-            onDismiss = onDismiss,
-            modifier = Modifier.align(Alignment.TopEnd)
+            onDismiss = onDismiss
         )
     }
 }

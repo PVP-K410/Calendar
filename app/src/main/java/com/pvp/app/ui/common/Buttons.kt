@@ -4,13 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -18,6 +13,7 @@ import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
@@ -76,18 +71,7 @@ fun ButtonConfirm(
         contentAlignment = buttonContentAlignment,
         dialogContent = confirmationDescription,
         dialogTitle = confirmationTitle,
-        dismissButtonContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    contentDescription = "Cancel button icon",
-                    imageVector = Icons.AutoMirrored.Outlined.Undo
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text("Cancel")
-            }
-        },
+        dismissButtonContent = { Text("Cancel") },
         modifier = modifier,
         onConfirm = onConfirm,
         onDismiss = onDismiss
@@ -134,6 +118,32 @@ fun ButtonWithDialog(
         },
         show = showDialog,
         title = dialogTitle
+    )
+}
+
+@Composable
+fun IconButtonConfirm(
+    confirmationButtonContent: @Composable RowScope.() -> Unit = { Text("Proceed") },
+    confirmationDescription: @Composable () -> Unit = { },
+    confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
+    icon: ImageVector,
+    iconSize: Dp = 20.dp,
+    iconDescription: String? = null,
+    modifier: Modifier = Modifier,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit = {}
+) {
+    IconButtonWithDialog(
+        confirmButtonContent = confirmationButtonContent,
+        dialogContent = confirmationDescription,
+        dialogTitle = confirmationTitle,
+        dismissButtonContent = { Text("Cancel") },
+        icon = icon,
+        iconSize = iconSize,
+        iconDescription = iconDescription,
+        modifier = modifier,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss
     )
 }
 
@@ -205,19 +215,15 @@ private fun Dialog(
         confirmButton = {
             Box(contentAlignment = Alignment.BottomEnd) {
                 Button(
-                    border = BorderStroke(
-                        1.dp,
-                        Color.Red
-                    ),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
                     content = buttonContentConfirm,
                     onClick = onConfirm
                 )
             }
         },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         dismissButton = {
             Box(contentAlignment = Alignment.BottomEnd) {
-                Button(
+                OutlinedButton(
                     content = buttonContentDismiss,
                     onClick = onDismiss,
                     shape = MaterialTheme.shapes.extraLarge
@@ -225,7 +231,10 @@ private fun Dialog(
             }
         },
         onDismissRequest = onDismiss,
+        shape = MaterialTheme.shapes.extraSmall,
         text = content,
-        title = title
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        title = title,
+        titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
