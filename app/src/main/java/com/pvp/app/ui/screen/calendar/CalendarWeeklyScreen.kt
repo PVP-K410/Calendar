@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ fun Week(
     val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
     var stateDialog by remember { mutableStateOf(false) }
+    var navigateToPage by remember { mutableStateOf<Int?>(null) }
 
     val statePager = rememberPagerState(
         initialPage = dates.indexOf(today),
@@ -50,6 +52,13 @@ fun Week(
     val date = dates[statePager.currentPage]
     var stateShowCards by remember { mutableStateOf(false) }
     val tasksFiltered = tasks.filter { it.date == date }
+
+    LaunchedEffect(navigateToPage) {
+        navigateToPage?.let { page ->
+            statePager.scrollToPage(page)
+            navigateToPage = null
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -63,14 +72,19 @@ fun Week(
             state = statePager
         ) { page ->
             DayCard(
-                clickEnabled = date == dates[page],
+                clickEnabled = true,
                 date = dates[page],
                 day = days[page],
                 onClick = {
-                    if (tasksFiltered.isEmpty()) {
-                        stateDialog = true
-                    } else {
-                        stateShowCards = !stateShowCards
+                    if (date != dates[page]) {
+                        navigateToPage = page
+                    }
+                    else {
+                        if (tasksFiltered.isEmpty()) {
+                            stateDialog = true
+                        } else {
+                            stateShowCards = !stateShowCards
+                        }
                     }
                 },
                 page = page,
