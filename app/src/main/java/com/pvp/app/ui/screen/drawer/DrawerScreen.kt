@@ -109,8 +109,8 @@ private fun DrawerFooter(
                     end = 10.dp
                 )
                 .fillMaxSize(),
-            buttonContent = { Text(text = signOut) },
-            buttonContentAlignment = Alignment.BottomEnd,
+            content = { Text(text = signOut) },
+            contentAlignment = Alignment.BottomEnd,
             confirmationButtonContent = { Text(text = signOut) },
             confirmationTitle = { Text(text = "Are you sure you want to sign out?") },
             onConfirm = { onSignOut() }

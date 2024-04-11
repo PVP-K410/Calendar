@@ -12,6 +12,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -56,31 +58,39 @@ fun Button(
 
 @Composable
 fun ButtonConfirm(
+    border: BorderStroke? = null,
     confirmationButtonContent: @Composable RowScope.() -> Unit = { Text("Proceed") },
     confirmationDescription: @Composable () -> Unit = { },
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
-    buttonContent: @Composable RowScope.() -> Unit = { Text("Open Confirmation") },
-    buttonContentAlignment: Alignment = Alignment.Center,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    content: @Composable RowScope.() -> Unit = { Text("Open Confirmation") },
+    contentAlignment: Alignment = Alignment.Center,
     modifier: Modifier = Modifier,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
+    shape: Shape = MaterialTheme.shapes.extraSmall
 ) {
     ButtonWithDialog(
+        border = border,
+        colors = colors,
         confirmButtonContent = confirmationButtonContent,
-        content = buttonContent,
-        contentAlignment = buttonContentAlignment,
+        content = content,
+        contentAlignment = contentAlignment,
         dialogContent = confirmationDescription,
         dialogTitle = confirmationTitle,
         dismissButtonContent = { Text("Cancel") },
         modifier = modifier,
         onConfirm = onConfirm,
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        shape = shape
     )
 }
 
 @Composable
 fun ButtonWithDialog(
     modifier: Modifier = Modifier,
+    border: BorderStroke? = null,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
     content: @Composable RowScope.() -> Unit = { Text("Open Dialog") },
     contentAlignment: Alignment = Alignment.TopStart,
     confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
@@ -88,7 +98,8 @@ fun ButtonWithDialog(
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
     onConfirm: () -> Unit = {},
-    onDismiss: () -> Unit = {}
+    onDismiss: () -> Unit = {},
+    shape: Shape = MaterialTheme.shapes.extraSmall
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -97,8 +108,11 @@ fun ButtonWithDialog(
         modifier = modifier
     ) {
         Button(
+            border = border,
+            colors = colors,
             content = content,
-            onClick = { showDialog = true }
+            onClick = { showDialog = true },
+            shape = shape
         )
     }
 
@@ -123,24 +137,26 @@ fun ButtonWithDialog(
 
 @Composable
 fun IconButtonConfirm(
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     confirmationButtonContent: @Composable RowScope.() -> Unit = { Text("Proceed") },
     confirmationDescription: @Composable () -> Unit = { },
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
     icon: ImageVector,
-    iconSize: Dp = 20.dp,
     iconDescription: String? = null,
+    iconSize: Dp = 20.dp,
     modifier: Modifier = Modifier,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit = {}
 ) {
     IconButtonWithDialog(
+        colors = colors,
         confirmButtonContent = confirmationButtonContent,
         dialogContent = confirmationDescription,
         dialogTitle = confirmationTitle,
         dismissButtonContent = { Text("Cancel") },
         icon = icon,
-        iconSize = iconSize,
         iconDescription = iconDescription,
+        iconSize = iconSize,
         modifier = modifier,
         onConfirm = onConfirm,
         onDismiss = onDismiss
@@ -153,6 +169,7 @@ fun IconButtonWithDialog(
     icon: ImageVector,
     iconSize: Dp = 20.dp,
     iconDescription: String? = null,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
@@ -166,9 +183,8 @@ fun IconButtonWithDialog(
         modifier = modifier
     ) {
         IconButton(
-            onClick = {
-                showDialog = true
-            },
+            colors = colors,
+            onClick = { showDialog = true },
             modifier = Modifier.size(iconSize)
         ) {
             Icon(
