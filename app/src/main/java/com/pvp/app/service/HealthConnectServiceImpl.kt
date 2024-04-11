@@ -2,8 +2,10 @@ package com.pvp.app.service
 
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.aggregate.AggregateMetric
+import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
@@ -143,5 +145,11 @@ class HealthConnectServiceImpl @Inject constructor(
         )
 
         return client.readRecords(request).records
+    }
+
+    override suspend fun permissionsGranted(permissions: Set<String>): Boolean {
+        return client.permissionController
+            .getGrantedPermissions()
+            .containsAll(permissions)
     }
 }
