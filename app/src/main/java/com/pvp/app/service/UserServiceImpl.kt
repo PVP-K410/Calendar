@@ -83,12 +83,16 @@ class UserServiceImpl @Inject constructor(
             }
             .await()
     }
-
+    
     override suspend fun remove(email: String) {
         database
-            .collection(identifier)
-            .document(email)
-            .delete()
+            .runTransaction { transaction ->
+                val document = database
+                    .collection(identifier)
+                    .document(email)
+
+                transaction.delete(document)
+            }
             .await()
     }
 
