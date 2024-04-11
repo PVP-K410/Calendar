@@ -90,7 +90,9 @@ class DrinkReminderWorker @AssistedInject constructor(
         cupVolume: Int
     ) {
         val recommendedIntake = mass * 30
-        val count = recommendedIntake / cupVolume
+        val initialCount = recommendedIntake / cupVolume
+        val remainder = recommendedIntake % cupVolume
+        val count = if (remainder > 0) initialCount + 1 else initialCount
         val startHour = configuration.intervalDrinkReminder.first
         val endHour = configuration.intervalDrinkReminder.second
         val totalDuration = Duration.ofHours((endHour - startHour).toLong())
@@ -98,14 +100,15 @@ class DrinkReminderWorker @AssistedInject constructor(
         var notificationTime = LocalTime.of(startHour, 0)
 
         repeat(count) {
-            val progress = (it + 1) * cupVolume
+            val currentCupVolume = if (it == initialCount && remainder > 0) remainder else cupVolume
+            val cumulativeVolume = (it * cupVolume) + currentCupVolume
 
             val notification = Notification(
                 channel = NotificationChannel.DrinkReminder,
                 title = "Hydration Reminder 💦",
-                text = "Time for a cup of water ($cupVolume ml)! 😋 " +
+                text = "Time for a cup of water ($currentCupVolume ml)! 😋 " +
                         "Today's progress: " +
-                        "${"%.1f".format(progress / 1000.0)}/" +
+                        "${"%.1f".format(cumulativeVolume / 1000.0)}/" +
                         "${"%.1f".format(recommendedIntake / 1000.0)} liters"
             )
 
