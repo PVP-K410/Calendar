@@ -15,6 +15,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -38,12 +39,34 @@ class UserServiceImpl @Inject constructor(
                     ?: flowOf(null)
             }
 
+    /*
     override suspend fun get(email: String): Flow<User?> {
         return database
             .collection(identifier)
             .document(email)
             .snapshots()
             .map { it.toObject(User::class.java) }
+    }
+    */
+
+    override suspend fun get(email: String): Flow<User?> {
+        return flow {
+            val initialSnapshot = database
+                .collection(identifier)
+                .document(email)
+                .get()
+                .await()
+
+            emit(initialSnapshot.toObject(User::class.java))
+
+            database
+                .collection(identifier)
+                .document(email)
+                .snapshots()
+                .collect { snapshot ->
+                    emit(snapshot.toObject(User::class.java))
+                }
+        }
     }
 
     override suspend fun merge(user: User) {
