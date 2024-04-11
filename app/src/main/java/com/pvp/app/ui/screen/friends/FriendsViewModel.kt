@@ -56,6 +56,11 @@ class FriendsViewModel @Inject constructor(
                 return@launch
             }
 
+            if (friendEmail in user.receivedRequests) {
+                toastMessage.value = "Friend request already received from $friendEmail"
+                return@launch
+            }
+
             val friendNew = friend.copy(receivedRequests = friend.receivedRequests + email)
 
             userService.merge(friendNew)
