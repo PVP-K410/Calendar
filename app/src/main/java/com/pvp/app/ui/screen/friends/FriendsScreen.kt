@@ -26,23 +26,23 @@ fun FriendsScreen(
     model: FriendsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val toastMessage by model.toastMessage
     val user by model.user.collectAsStateWithLifecycle()
     val friends = user?.friends ?: emptyList()
     val receivedRequests = user?.receivedRequests ?: emptyList()
     val sentRequests = user?.sentRequests ?: emptyList()
     val friendEmail = remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        model.toastCallback = object : FriendsViewModel.ToastCallback {
-            override fun showToast(message: String) {
-                Toast
-                    .makeText(
-                        context,
-                        message,
-                        Toast.LENGTH_SHORT
-                    )
-                    .show()
-            }
+    LaunchedEffect(toastMessage) {
+        toastMessage?.let {
+            Toast
+                .makeText(
+                    context,
+                    it,
+                    Toast.LENGTH_SHORT
+                )
+                .show()
+            model.toastMessage.value = null
         }
     }
 

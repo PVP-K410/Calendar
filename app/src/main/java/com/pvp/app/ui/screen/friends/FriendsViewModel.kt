@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.friends
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.UserService
@@ -14,9 +15,7 @@ import javax.inject.Inject
 class FriendsViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
-
-
-    lateinit var toastCallback: ToastCallback
+    val toastMessage = mutableStateOf<String?>(null)
 
     val user = userService.user.stateIn(
         viewModelScope,
@@ -24,18 +23,13 @@ class FriendsViewModel @Inject constructor(
         initialValue = null
     )
 
-    interface ToastCallback {
-
-        fun showToast(message: String)
-    }
-
     fun addFriend(friendEmail: String) {
         viewModelScope.launch {
             val user = user.value ?: return@launch
             val email = user.email
 
             if (email == friendEmail) {
-                toastCallback.showToast("You are always your very best friend!")
+                toastMessage.value = "You are always your very best friend!"
 
                 return@launch
             }
@@ -45,19 +39,19 @@ class FriendsViewModel @Inject constructor(
                 .first()
 
             if (friend == null) {
-                toastCallback.showToast("User with email $friendEmail does not exist")
+                toastMessage.value = "User with email $friendEmail does not exist"
 
                 return@launch
             }
 
             if (friendEmail in user.friends) {
-                toastCallback.showToast("$friendEmail is already your friend")
+                toastMessage.value = "$friendEmail is already your friend"
 
                 return@launch
             }
 
             if (friendEmail in user.sentRequests) {
-                toastCallback.showToast("Friend request already sent to $friendEmail")
+                toastMessage.value = "Friend request already sent to $friendEmail"
 
                 return@launch
             }
@@ -70,7 +64,7 @@ class FriendsViewModel @Inject constructor(
 
             userService.merge(userNew)
 
-            toastCallback.showToast("Friend request sent!")
+            toastMessage.value = "Friend request sent!"
         }
     }
 
@@ -98,7 +92,7 @@ class FriendsViewModel @Inject constructor(
 
             userService.merge(userNew)
 
-            toastCallback.showToast("Friend request accepted!")
+            toastMessage.value = "Friend request accepted!"
         }
     }
 
@@ -120,7 +114,7 @@ class FriendsViewModel @Inject constructor(
 
             userService.merge(userNew)
 
-            toastCallback.showToast("Friend request denied!")
+            toastMessage.value = "Friend request denied!"
         }
     }
 }
