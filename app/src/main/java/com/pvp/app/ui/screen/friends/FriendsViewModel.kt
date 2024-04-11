@@ -1,6 +1,7 @@
 package com.pvp.app.ui.screen.friends
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.FriendService
@@ -52,5 +53,13 @@ class FriendsViewModel @Inject constructor(
                 friendEmail
             )
         }
+    }
+
+    fun getFriendAvatar(friendEmail: String): ImageBitmap {
+        var avatar: ImageBitmap? = null
+        viewModelScope.launch {
+            avatar = friendService.getFriendAvatar(friendEmail)
+        }
+        return avatar ?: ImageBitmap(0, 0)
     }
 }

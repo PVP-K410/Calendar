@@ -1,5 +1,6 @@
 package com.pvp.app.service
 
+import androidx.compose.ui.graphics.ImageBitmap
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.User
@@ -88,5 +89,9 @@ class FriendServiceImpl @Inject constructor(
         userService.merge(userNew)
 
         return "Friend request denied!"
+    }
+
+    override suspend fun getFriendAvatar(friendEmail: String): ImageBitmap {
+        return userService.resolveAvatar(friendEmail)
     }
 }

@@ -83,7 +83,7 @@ class UserServiceImpl @Inject constructor(
             }
             .await()
     }
-    
+
     override suspend fun remove(email: String) {
         database
             .runTransaction { transaction ->
