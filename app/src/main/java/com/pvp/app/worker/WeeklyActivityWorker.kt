@@ -1,10 +1,14 @@
 package com.pvp.app.worker
 
 import android.content.Context
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.pvp.app.api.ExerciseService
+import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Notification
@@ -18,6 +22,7 @@ import kotlinx.coroutines.flow.firstOrNull
 class WeeklyActivityWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParams: WorkerParameters,
+    private val healthConnectService: HealthConnectService,
     private val exerciseService: ExerciseService,
     private val notificationService: NotificationService,
     private val userService: UserService
@@ -32,25 +37,35 @@ class WeeklyActivityWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result {
-        val activities = getRandomInfrequentActivities()
+        val permissions = setOf(
+            HealthPermission.getReadPermission(
+                ExerciseSessionRecord::class
+            )
+        )
 
-        postActivityNotification(activities)
+        return if (healthConnectService.permissionsGranted(permissions)) {
+            val activities = getRandomInfrequentActivities()
 
-        return userService.user
-            .firstOrNull()
-            ?.let { user ->
-                try {
-                    userService.merge(
-                        user.copy(
-                            weeklyActivities = activities
+            postActivityNotification(activities)
+
+            userService.user
+                .firstOrNull()
+                ?.let { user ->
+                    try {
+                        userService.merge(
+                            user.copy(
+                                weeklyActivities = activities
+                            )
                         )
-                    )
 
-                    Result.success()
-                } catch (e: Exception) {
-                    Result.failure()
-                }
-            } ?: Result.failure()
+                        Result.success()
+                    } catch (e: Exception) {
+                        Result.failure()
+                    }
+                } ?: Result.failure()
+        } else {
+            Result.failure()
+        }
     }
 
     private fun formNotificationBody(activities: List<SportActivity>): String {
@@ -96,6 +111,16 @@ class WeeklyActivityWorker @AssistedInject constructor(
             else -> listOf(SportActivity.Wheelchair)
         }
     }
+
+//    private suspend fun permissionsGranted(): Boolean {
+//        return client.permissionController
+//            .getGrantedPermissions()
+//            .contains(
+//                HealthPermission.getReadPermission(
+//                    ExerciseSessionRecord::class
+//                )
+//            )
+//    }
 
     private fun postActivityNotification(activities: List<SportActivity>) {
         notificationService.show(

@@ -7,6 +7,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.HealthConnectService
@@ -46,6 +47,11 @@ class TaskAutocompleteService : Service() {
     companion object {
 
         private const val NOTIFICATION_ID = Int.MAX_VALUE
+        private val PERMISSIONS = setOf(
+            HealthPermission.getReadPermission(
+                ExerciseSessionRecord::class
+            )
+        )
     }
 
     private fun checkTaskCompletion(
@@ -106,17 +112,6 @@ class TaskAutocompleteService : Service() {
             .build()
     }
 
-    private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            com.pvp.app.model.NotificationChannel.TaskAutocomplete.channelId,
-            "Task Processing Service",
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-
-        getSystemService(NotificationManager::class.java)
-            ?.createNotificationChannel(channel)
-    }
-
     private suspend fun getActivities(): List<ExerciseSessionRecord> {
         return healthConnectService.readActivityData(
             record = ExerciseSessionRecord::class,
@@ -159,20 +154,22 @@ class TaskAutocompleteService : Service() {
         )
 
         CoroutineScope(Dispatchers.IO).launch {
-            val tasks = getTasks()
-                .sortedBy { task -> task.time }
+            if(healthConnectService.permissionsGranted(PERMISSIONS)){
+                val tasks = getTasks()
+                    .sortedBy { task -> task.time }
 
-            val exercises = getActivities()
-                .map { exercise ->
-                    exerciseService.getExerciseInfo(exercise)
-                }
+                val exercises = getActivities()
+                    .map { exercise ->
+                        exerciseService.getExerciseInfo(exercise)
+                    }
 
-            val completedTasks = checkTaskCompletion(
-                tasks,
-                exercises
-            )
+                val completedTasks = checkTaskCompletion(
+                    tasks,
+                    exercises
+                )
 
-            updateTasks(completedTasks)
+                updateTasks(completedTasks)
+            }
         }
 
         return START_REDELIVER_INTENT
