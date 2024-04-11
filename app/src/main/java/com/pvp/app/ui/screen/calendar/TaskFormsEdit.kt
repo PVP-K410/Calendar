@@ -271,11 +271,12 @@ fun TaskEdit(
                                 )
 
                                 Text(
-                                    "Delete",
-                                    style = MaterialTheme.typography.titleSmall
+                                    style = MaterialTheme.typography.titleSmall,
+                                    text = "Delete"
                                 )
                             }
                         },
+                        confirmationButtonContent = { Text("Delete") },
                         confirmationDescription = { Text("If the task is deleted, it cannot be recovered") },
                         confirmationTitle = { Text("Are you sure you want to delete this task?") },
                         onConfirm = {
