@@ -33,6 +33,15 @@ interface FriendService {
     suspend fun denyFriendRequest(user: User, friendEmail: String): String
 
     /**
+     * Cancels a friend request that the current user has sent to another user.
+     *
+     * @param user current application user.
+     * @param friendEmail of the user to whom the friend request was sent.
+     * @return a string message indicating the result of the operation.
+     */
+    suspend fun cancelSentRequest(user: User, friendEmail: String): String
+
+    /**
      * Retrieves the avatar of a friend.
      *
      * @param friendEmail of the friend whose avatar is to be retrieved.

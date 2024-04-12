@@ -91,6 +91,25 @@ class FriendServiceImpl @Inject constructor(
         return "Friend request denied!"
     }
 
+    override suspend fun cancelSentRequest(user: User, friendEmail: String): String {
+        val email = user.email
+
+        val friend = userService
+            .get(friendEmail)
+            .first()
+            ?: return "Friend not found"
+
+        val friendNew = friend.copy(receivedRequests = friend.receivedRequests - email)
+
+        userService.merge(friendNew)
+
+        val userNew = user.copy(sentRequests = user.sentRequests - friendEmail)
+
+        userService.merge(userNew)
+
+        return "Friend request cancelled!"
+    }
+
     override suspend fun getFriendAvatar(friendEmail: String): ImageBitmap {
         return userService.resolveAvatar(friendEmail)
     }

@@ -55,6 +55,16 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
+    fun cancelSentRequest(friendEmail: String) {
+        viewModelScope.launch {
+            val user = user.value ?: return@launch
+            toastMessage.value = friendService.cancelSentRequest(
+                user,
+                friendEmail
+            )
+        }
+    }
+
     fun getFriendAvatar(friendEmail: String): ImageBitmap {
         var avatar: ImageBitmap? = null
         viewModelScope.launch {
