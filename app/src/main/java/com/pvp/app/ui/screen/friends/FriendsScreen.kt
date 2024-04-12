@@ -35,6 +35,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,12 +43,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -92,58 +92,10 @@ fun FriendsScreen(
             .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 4.dp
-                ),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            CustomButton(
-                onClick = { showAddFriend.value = true },
-                modifier = Modifier.size(
-                    width = 45.dp,
-                    height = 35.dp
-                ),
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.GroupAdd,
-                    contentDescription = "Add friend",
-                    modifier = Modifier.size(25.dp)
-                )
-            }
-
-            CustomButton(
-                onClick = { showRequests.value = true },
-                modifier = Modifier.size(
-                    width = 160.dp,
-                    height = 35.dp
-                ),
-            ) {
-                Text(
-                    text = "Requests",
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-
-            CustomButton(
-                onClick = { /* TODO */ },
-                modifier = Modifier.size(
-                    width = 45.dp,
-                    height = 35.dp
-                ),
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.FilterAlt,
-                    contentDescription = "Filter",
-                    modifier = Modifier.size(25.dp)
-                )
-            }
-        }
+        TopRowWithButtons(
+            showAddFriend,
+            showRequests
+        )
 
         Text(
             "All friends - ${friends.size}",
@@ -244,6 +196,7 @@ fun FriendsScreen(
                                 denyAction = { request -> model.denyFriendRequest(request) }
                             )
                         }
+
                         1 -> {
                             RequestList(
                                 requests = sentRequests,
@@ -260,10 +213,60 @@ fun FriendsScreen(
 }
 
 @Composable
-fun CustomButton(
+private fun TopRowWithButtons(
+    showAddFriend: MutableState<Boolean>,
+    showRequests: MutableState<Boolean>
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 4.dp
+            ),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RowButton(
+            onClick = { showAddFriend.value = true },
+            modifier = Modifier.size(
+                width = 45.dp,
+                height = 35.dp
+            ),
+            content = ButtonContent.Icon(Icons.Outlined.GroupAdd)
+        )
+
+        RowButton(
+            onClick = { showRequests.value = true },
+            modifier = Modifier.size(
+                width = 160.dp,
+                height = 35.dp
+            ),
+            content = ButtonContent.Text("Requests")
+        )
+
+        RowButton(
+            onClick = { /* TODO */ },
+            modifier = Modifier.size(
+                width = 45.dp,
+                height = 35.dp
+            ),
+            content = ButtonContent.Icon(Icons.Outlined.FilterAlt)
+        )
+    }
+}
+
+private sealed class ButtonContent {
+    data class Icon(val imageVector: ImageVector) : ButtonContent()
+    data class Text(val text: String) : ButtonContent()
+}
+
+@Composable
+private fun RowButton(
     onClick: () -> Unit,
     modifier: Modifier,
-    content: @Composable () -> Unit
+    content: ButtonContent
 ) {
     Button(
         onClick = onClick,
@@ -271,12 +274,27 @@ fun CustomButton(
         shape = MaterialTheme.shapes.small,
         contentPadding = PaddingValues(4.dp)
     ) {
-        content()
+        when (content) {
+            is ButtonContent.Icon -> Icon(
+                imageVector = content.imageVector,
+                contentDescription = null,
+                modifier = Modifier.size(25.dp)
+            )
+
+            is ButtonContent.Text -> Text(
+                text = content.text,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
     }
 }
 
 @Composable
-fun FriendList(friends: List<String>, model: FriendsViewModel, scrollState: ScrollState) {
+private fun FriendList(
+    friends: List<String>,
+    model: FriendsViewModel,
+    scrollState: ScrollState
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -331,7 +349,7 @@ fun FriendList(friends: List<String>, model: FriendsViewModel, scrollState: Scro
 }
 
 @Composable
-fun RequestList(
+private fun RequestList(
     requests: List<String>,
     requestTitle: String,
     acceptAction: (String) -> Unit,
