@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.friends
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,10 +42,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,7 +63,7 @@ fun FriendsScreen(
     val receivedRequests = user?.receivedRequests ?: emptyList()
     val sentRequests = user?.sentRequests ?: emptyList()
     val friendEmail = remember { mutableStateOf("") }
-    val showDialog = remember { mutableStateOf(false) }
+    val showAddFriend = remember { mutableStateOf(false) }
     val showRequests = remember { mutableStateOf(false) }
     val selectedTab = remember { mutableStateOf(0) }
     val scrollState = rememberScrollState()
@@ -100,14 +103,12 @@ fun FriendsScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(
-                onClick = { showDialog.value = true },
+            CustomButton(
+                onClick = { showAddFriend.value = true },
                 modifier = Modifier.size(
                     width = 45.dp,
                     height = 35.dp
                 ),
-                shape = MaterialTheme.shapes.small,
-                contentPadding = PaddingValues(4.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.GroupAdd,
@@ -116,48 +117,12 @@ fun FriendsScreen(
                 )
             }
 
-            if (showDialog.value) {
-                AlertDialog(
-                    onDismissRequest = {
-                        showDialog.value = false
-                        friendEmail.value = ""
-                    },
-                    confirmButton = {
-                        Button(onClick = {
-                            model.addFriend(friendEmail.value)
-                            showDialog.value = false
-                            friendEmail.value = ""
-                        }) {
-                            Text("Add")
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = {
-                            showDialog.value = false
-                            friendEmail.value = ""
-                        }) {
-                            Text("Cancel")
-                        }
-                    },
-                    text = {
-                        OutlinedTextField(
-                            value = friendEmail.value,
-                            onValueChange = { friendEmail.value = it },
-                            label = { Text("Friend's email") },
-                        )
-                    },
-                )
-            }
-
-
-            Button(
+            CustomButton(
                 onClick = { showRequests.value = true },
                 modifier = Modifier.size(
                     width = 160.dp,
                     height = 35.dp
                 ),
-                shape = MaterialTheme.shapes.small,
-                contentPadding = PaddingValues(4.dp)
             ) {
                 Text(
                     text = "Requests",
@@ -165,165 +130,12 @@ fun FriendsScreen(
                 )
             }
 
-            if (showRequests.value) {
-                AlertDialog(
-                    onDismissRequest = {
-                        showRequests.value = false
-                        selectedTab.value = 0
-                    },
-                    confirmButton = {
-                        Button(onClick = {
-                            showRequests.value = false
-                            selectedTab.value = 0
-                        }) {
-                            Text("Back")
-                        }
-                    },
-                    text = {
-                        Column {
-                            TabRow(selectedTabIndex = selectedTab.value) {
-                                Tab(
-                                    selected = selectedTab.value == 0,
-                                    onClick = { selectedTab.value = 0 }
-                                ) {
-                                    Text(
-                                        "Received",
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = if (selectedTab.value == 0) FontWeight.Bold else FontWeight.Normal)
-                                    )
-                                }
-                                Tab(
-                                    selected = selectedTab.value == 1,
-                                    onClick = { selectedTab.value = 1 }
-                                ) {
-                                    Text(
-                                        "Sent",
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = if (selectedTab.value == 1) FontWeight.Bold else FontWeight.Normal)
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(6.dp))
-
-                            when (selectedTab.value) {
-                                0 -> {
-                                    if (receivedRequests.isEmpty()) {
-                                        Text(
-                                            "No received requests",
-                                            fontStyle = FontStyle.Italic,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-                                    } else {
-                                        for (request in receivedRequests) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(30.dp)
-                                                    .padding(
-                                                        vertical = 2.dp
-                                                    )
-                                                    .background(
-                                                        MaterialTheme.colorScheme.secondaryContainer,
-                                                        MaterialTheme.shapes.small
-                                                    ),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    text = request,
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    modifier = Modifier
-                                                        .padding(start = 2.dp)
-                                                        .weight(1f)
-                                                )
-
-                                                Icon(
-                                                    imageVector = Icons.Outlined.CheckCircle,
-                                                    contentDescription = "Accept request",
-                                                    tint = Color.Green,
-                                                    modifier = Modifier
-                                                        .size(28.dp)
-                                                        .clip(CircleShape)
-                                                        .clickable {
-                                                            model.acceptFriendRequest(
-                                                                request
-                                                            )
-                                                        }
-                                                )
-
-                                                Spacer(modifier = Modifier.width(6.dp))
-
-                                                Icon(
-                                                    imageVector = Icons.Outlined.DoNotDisturbOn,
-                                                    contentDescription = "Deny request",
-                                                    tint = Color.Red,
-                                                    modifier = Modifier
-                                                        .size(28.dp)
-                                                        .clip(CircleShape)
-                                                        .clickable { model.denyFriendRequest(request) }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-
-                                1 -> {
-                                    if (sentRequests.isEmpty()) {
-                                        Text(
-                                            "No sent requests",
-                                            fontStyle = FontStyle.Italic,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-                                    } else {
-                                        for (request in sentRequests) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(30.dp)
-                                                    .padding(
-                                                        vertical = 2.dp
-                                                    )
-                                                    .background(
-                                                        MaterialTheme.colorScheme.secondaryContainer,
-                                                        MaterialTheme.shapes.small
-                                                    ),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    text = request,
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    modifier = Modifier
-                                                        .padding(start = 2.dp)
-                                                        .weight(1f)
-                                                )
-                                                Icon(
-                                                    imageVector = Icons.Outlined.DoNotDisturbOn,
-                                                    contentDescription = "Deny request",
-                                                    tint = Color.Red,
-                                                    modifier = Modifier
-                                                        .size(28.dp)
-                                                        .clip(CircleShape)
-                                                        .clickable { model.cancelSentRequest(request) }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-
-                )
-            }
-
-            Button(
+            CustomButton(
                 onClick = { /* TODO */ },
                 modifier = Modifier.size(
                     width = 45.dp,
                     height = 35.dp
                 ),
-                shape = MaterialTheme.shapes.small,
-                contentPadding = PaddingValues(4.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.FilterAlt,
@@ -342,55 +154,242 @@ fun FriendsScreen(
             style = MaterialTheme.typography.titleMedium
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(bottom = 10.dp)
-        ) {
-            for (friend in friends) {
-                val avatar = model.getFriendAvatar(friend)
+        FriendList(
+            friends = friends,
+            model = model,
+            scrollState = scrollState
+        )
+    }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
-                        .padding(
-                            horizontal = 16.dp,
-                            vertical = 2.dp
-                        )
-                        .background(
-                            MaterialTheme.colorScheme.secondaryContainer,
-                            MaterialTheme.shapes.small
-                        ),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = friend,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .padding(start = 25.dp)
-                            .weight(1f)
-                    )
+    if (showAddFriend.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showAddFriend.value = false
+                friendEmail.value = ""
+            },
+            confirmButton = {
+                Button(onClick = {
+                    model.addFriend(friendEmail.value)
+                    showAddFriend.value = false
+                    friendEmail.value = ""
+                }) {
+                    Text("Add")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    showAddFriend.value = false
+                    friendEmail.value = ""
+                }) {
+                    Text("Cancel")
+                }
+            },
+            text = {
+                OutlinedTextField(
+                    value = friendEmail.value,
+                    onValueChange = { friendEmail.value = it },
+                    label = { Text("Friend's email") },
+                )
+            },
+        )
+    }
 
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                    ) {
-                        Image(
-                            bitmap = avatar,
-                            contentDescription = "Friend avatar",
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                        )
+    if (showRequests.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showRequests.value = false
+                selectedTab.value = 0
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showRequests.value = false
+                    selectedTab.value = 0
+                }) {
+                    Text("Back")
+                }
+            },
+            text = {
+                Column {
+                    TabRow(selectedTabIndex = selectedTab.value) {
+                        Tab(
+                            selected = selectedTab.value == 0,
+                            onClick = { selectedTab.value = 0 }
+                        ) {
+                            Text(
+                                "Received",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = if (selectedTab.value == 0) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                        Tab(
+                            selected = selectedTab.value == 1,
+                            onClick = { selectedTab.value = 1 }
+                        ) {
+                            Text(
+                                "Sent",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = if (selectedTab.value == 1) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    when (selectedTab.value) {
+                        0 -> {
+                            RequestList(
+                                requests = receivedRequests,
+                                requestTitle = "received",
+                                acceptAction = { request -> model.acceptFriendRequest(request) },
+                                denyAction = { request -> model.denyFriendRequest(request) }
+                            )
+                        }
+                        1 -> {
+                            RequestList(
+                                requests = sentRequests,
+                                requestTitle = "sent",
+                                acceptAction = { },
+                                denyAction = { request -> model.cancelSentRequest(request) }
+                            )
+                        }
+                    }
+                }
+            },
+        )
+    }
+}
+
+@Composable
+fun CustomButton(
+    onClick: () -> Unit,
+    modifier: Modifier,
+    content: @Composable () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = MaterialTheme.shapes.small,
+        contentPadding = PaddingValues(4.dp)
+    ) {
+        content()
+    }
+}
+
+@Composable
+fun FriendList(friends: List<String>, model: FriendsViewModel, scrollState: ScrollState) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(bottom = 10.dp)
+    ) {
+        for (friend in friends) {
+            val avatar = model.getFriendAvatar(friend)
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .padding(
+                        horizontal = 16.dp,
+                        vertical = 2.dp
+                    )
+                    .background(
+                        MaterialTheme.colorScheme.secondaryContainer,
+                        MaterialTheme.shapes.small
+                    ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = friend,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .padding(start = 25.dp)
+                        .weight(1f)
+                )
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                ) {
+                    Image(
+                        bitmap = avatar,
+                        contentDescription = "Friend avatar",
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun RequestList(
+    requests: List<String>,
+    requestTitle: String,
+    acceptAction: (String) -> Unit,
+    denyAction: (String) -> Unit
+) {
+    if (requests.isEmpty()) {
+        Text(
+            "No $requestTitle requests",
+            fontStyle = FontStyle.Italic,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    } else {
+        for (request in requests) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(30.dp)
+                    .padding(
+                        vertical = 2.dp
+                    )
+                    .background(
+                        MaterialTheme.colorScheme.secondaryContainer,
+                        MaterialTheme.shapes.small
+                    ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = request,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .padding(start = 2.dp)
+                        .weight(1f)
+                )
+
+                if (requestTitle == "received") {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = "Accept request",
+                        tint = Color.Green,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .clickable { acceptAction(request) }
+                    )
 
                     Spacer(modifier = Modifier.width(6.dp))
                 }
+
+                Icon(
+                    imageVector = Icons.Outlined.DoNotDisturbOn,
+                    contentDescription = "Deny request",
+                    tint = Color.Red,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .clickable { denyAction(request) }
+                )
             }
         }
     }
