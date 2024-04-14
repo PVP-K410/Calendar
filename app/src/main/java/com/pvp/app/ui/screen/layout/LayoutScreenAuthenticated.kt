@@ -327,7 +327,7 @@ fun LayoutScreenAuthenticated(
                         route,
                         statePager
                     ),
-                    userAvatar = stateLayout.userAvatar ?: ImageBitmap(1, 1)
+                    userAvatar = stateLayout.user?.avatar ?: ImageBitmap(1, 1)
                 )
             }
         ) {

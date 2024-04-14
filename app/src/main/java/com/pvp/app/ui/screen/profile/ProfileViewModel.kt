@@ -1,6 +1,7 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.pvp.app.ui.screen.profile
 
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
@@ -11,10 +12,11 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -31,12 +33,11 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     val state = userService.user
-        .map { user ->
+        .mapLatest { user ->
             ProfileState(
                 experienceRequired = experienceService.experienceOf((user?.level ?: 0) + 1),
                 isLoading = false,
-                user = user ?: User(),
-                userAvatar = userService.resolveAvatar(user?.email ?: "")
+                user = user ?: User()
             )
         }
         .stateIn(
@@ -45,8 +46,7 @@ class ProfileViewModel @Inject constructor(
             initialValue = ProfileState(
                 experienceRequired = 0,
                 isLoading = true,
-                user = User(),
-                userAvatar = ImageBitmap(1, 1)
+                user = User()
             )
         )
 
@@ -88,6 +88,5 @@ class ProfileViewModel @Inject constructor(
 data class ProfileState(
     val experienceRequired: Int,
     val isLoading: Boolean,
-    val user: User,
-    val userAvatar: ImageBitmap
+    val user: User
 )

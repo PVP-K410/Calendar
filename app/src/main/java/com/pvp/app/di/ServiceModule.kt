@@ -2,8 +2,14 @@ package com.pvp.app.di
 
 import android.content.Context
 import androidx.work.WorkManager
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.app
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.storage
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.DecorationService
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.FriendService
@@ -15,6 +21,7 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.service.AuthenticationServiceImpl
 import com.pvp.app.service.ConfigurationImpl
+import com.pvp.app.service.DecorationServiceImpl
 import com.pvp.app.service.ExerciseServiceImpl
 import com.pvp.app.service.ExperienceServiceImpl
 import com.pvp.app.service.FriendServiceImpl
@@ -47,6 +54,10 @@ interface ServiceBindingsModule {
     @Binds
     @Singleton
     fun bindConfiguration(service: ConfigurationImpl): Configuration
+
+    @Binds
+    @Singleton
+    fun bindDecorationService(service: DecorationServiceImpl): DecorationService
 
     @Binds
     @Singleton
@@ -92,5 +103,17 @@ object ServiceProvidersModule {
         context: Context
     ): WorkManager {
         return WorkManager.getInstance(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseApp(): FirebaseApp {
+        return Firebase.app
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseStorage(): FirebaseStorage {
+        return Firebase.storage
     }
 }

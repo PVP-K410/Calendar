@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.layout
 
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
@@ -43,10 +42,7 @@ class LayoutViewModel @Inject constructor(
                     areSurveysFilled = userApp?.let { areSurveysFilled(it) },
                     isAuthenticated = userFirebase != null,
                     isLoading = false,
-                    user = userApp,
-                    userAvatar = userApp?.let {
-                        userService.resolveAvatar(it.email)
-                    }
+                    user = userApp
                 )
             }
         }
@@ -63,6 +59,5 @@ data class LayoutState(
     val areSurveysFilled: Boolean? = null,
     val isAuthenticated: Boolean = false,
     val isLoading: Boolean = false,
-    val user: User? = null,
-    val userAvatar: ImageBitmap? = null
+    val user: User? = null
 )

@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
@@ -244,7 +245,12 @@ private fun Initials(
                 height = 200.dp,
                 width = 200.dp
             ),
-            painter = BitmapPainter(state.userAvatar)
+            painter = BitmapPainter(
+                state.user.avatar ?: ImageBitmap(
+                    1,
+                    1
+                )
+            )
         )
 
         Username(
