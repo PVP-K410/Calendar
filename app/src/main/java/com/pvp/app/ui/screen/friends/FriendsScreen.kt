@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +63,7 @@ fun FriendsScreen(
     val friendObject by model.friendObject.collectAsStateWithLifecycle()
     val currentUserEmail = model.user.collectAsStateWithLifecycle().value?.email
     val friends = friendObject?.friends ?: emptyList()
+    val isRequestSent by model.isRequestSent.collectAsState(false)
     val receivedRequests = friendObject?.receivedRequests ?: emptyList()
     val sentRequests = friendObject?.sentRequests ?: emptyList()
     val friendEmail = remember { mutableStateOf("") }
@@ -86,6 +88,13 @@ fun FriendsScreen(
     LaunchedEffect(key1 = Unit) {
         currentUserEmail?.let { userEmail ->
             model.createFriendObject(userEmail)
+        }
+    }
+
+    LaunchedEffect(isRequestSent) {
+        if (isRequestSent) {
+            showAddFriend.value = false
+            friendEmail.value = ""
         }
     }
 
@@ -130,8 +139,6 @@ fun FriendsScreen(
             confirmButton = {
                 Button(onClick = {
                     model.addFriend(friendEmail.value)
-                    showAddFriend.value = false
-                    friendEmail.value = ""
                 }) {
                     Text("Add")
                 }
@@ -339,7 +346,7 @@ private fun FriendList(
                     modifier = Modifier
                         .size(30.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Image(
                         bitmap = avatar,
@@ -367,7 +374,6 @@ private fun RequestList(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
         if (requests.isEmpty()) {

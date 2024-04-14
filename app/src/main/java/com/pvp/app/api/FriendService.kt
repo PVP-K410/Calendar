@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface FriendService : DocumentsCollection {
 
     override val identifier: String
-        get() = "friendObjects"
+        get() = "friends"
 
     /**
      * Gets FriendObject by its email. In case it is not found, null is returned.

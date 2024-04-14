@@ -8,7 +8,9 @@ import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -23,6 +25,8 @@ class FriendsViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
     val toastMessage = mutableStateOf<String?>(null)
+    private val _isRequestSent = MutableStateFlow(false)
+    val isRequestSent = _isRequestSent.asStateFlow()
 
     val user = userService.user.stateIn(
         viewModelScope,
@@ -57,24 +61,33 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun addFriend(friendEmail: String) {
+    fun addFriend(friendEmail: String){
         viewModelScope.launch {
+            if (friendEmail.isEmpty()) {
+                toastMessage.value = "Please enter an email"
+                _isRequestSent.value = false
+                return@launch
+            }
+
             val userEmail = user.value?.email ?: return@launch
             val friendObject = friendService.get(userEmail).firstOrNull() ?: return@launch
             val friendUser = userService.get(friendEmail).firstOrNull()
 
             if (friendUser == null) {
                 toastMessage.value = "User with email $friendEmail does not exist"
+                _isRequestSent.value = false
                 return@launch
             }
 
             friendService.createFriendObject(friendEmail)
 
-            toastMessage.value = friendService.addFriend(
+            val toastMessageValue = friendService.addFriend(
                 friendObject,
                 userEmail,
                 friendEmail
             )
+            toastMessage.value = toastMessageValue
+            _isRequestSent.value = toastMessageValue == "Friend request sent!"
         }
     }
 
