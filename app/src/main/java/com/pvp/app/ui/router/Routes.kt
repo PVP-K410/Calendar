@@ -6,12 +6,14 @@ import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import com.pvp.app.R
 import com.pvp.app.ui.screen.authentication.AuthenticationScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
+import com.pvp.app.ui.screen.decoration.DecorationScreen
 import com.pvp.app.ui.screen.friends.FriendsScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
@@ -36,6 +38,7 @@ sealed class Route(
          */
         val routesAuthenticated = listOf(
             Calendar,
+            Decorations,
             Friends,
             None,
             Settings,
@@ -52,6 +55,7 @@ sealed class Route(
          */
         val routesDrawer = listOf(
             Calendar,
+            Decorations,
             Friends,
             Settings,
             Steps
@@ -82,6 +86,14 @@ sealed class Route(
         path = "calendar",
         resourceTitleId = R.string.route_calendar,
         screen = { _, _ -> CalendarScreen() }
+    )
+
+    data object Decorations : Route(
+        icon = Icons.Outlined.Storefront,
+        iconDescription = "Decorations page button icon",
+        path = "decorations",
+        resourceTitleId = R.string.route_decorations,
+        screen = { _, _ -> DecorationScreen() }
     )
 
     data object Friends : Route(
