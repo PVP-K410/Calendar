@@ -114,4 +114,8 @@ interface HealthConnectService {
         start: Instant,
         end: Instant
     ): List<T>
+
+    suspend fun permissionsGranted(
+        permissions: Set<String>
+    ): Boolean
 }

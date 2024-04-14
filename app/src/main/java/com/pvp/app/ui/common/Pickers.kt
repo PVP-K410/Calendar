@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -29,6 +30,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import com.pvp.app.common.CollectionUtil.indexOfOrNull
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -122,36 +124,84 @@ fun <T> Picker(
 }
 
 @Composable
-private fun pixelsToDp(pixels: Int) = with(LocalDensity.current) { pixels.toDp() }
+fun <T1, T2> PickerPair(
+    divider: @Composable RowScope.() -> Unit = {
+        Text(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            text = ":"
+        )
+    },
+    itemsFirst: List<T1>,
+    itemsSecond: List<T2>,
+    labelFirst: (T1) -> String = { it.toString() },
+    labelSecond: (T2) -> String = { it.toString() },
+    modifier: Modifier = Modifier,
+    onChange: (first: T1, second: T2) -> Unit,
+    stateFirst: PickerState<T1>,
+    stateSecond: PickerState<T2>,
+    visibleItemsCount: Int = 3
+) {
+    Row(modifier = modifier) {
+        Picker(
+            items = itemsFirst,
+            label = labelFirst,
+            state = stateFirst,
+            visibleItemsCount = visibleItemsCount,
+            modifier = Modifier.weight(1f),
+            startIndex = itemsFirst.indexOfOrNull(stateFirst.value) ?: 0,
+            onChange = {
+                onChange(
+                    it,
+                    stateSecond.value
+                )
+            }
+        )
+
+        divider()
+
+        Picker(
+            items = itemsSecond,
+            label = labelSecond,
+            state = stateSecond,
+            visibleItemsCount = visibleItemsCount,
+            modifier = Modifier.weight(1f),
+            startIndex = itemsSecond.indexOfOrNull(stateSecond.value) ?: 0,
+            onChange = {
+                onChange(
+                    stateFirst.value,
+                    it
+                )
+            }
+        )
+    }
+}
 
 @Composable
-fun TimePicker(
+fun PickerTime(
     modifier: Modifier = Modifier,
     selectedHour: PickerState<Int>,
     selectedMinute: PickerState<Int>,
     onChange: (hour: Int, minute: Int) -> Unit = { _, _ -> }
 ) {
-    Row(modifier = modifier) {
-        Picker(
-            items = (0..23).toList(),
-            label = { "$it" },
-            state = selectedHour,
-            visibleItemsCount = 3,
-            modifier = Modifier.weight(1f),
-            startIndex = selectedHour.value,
-            onChange = { onChange(it, selectedMinute.value) }
-        )
-
-        Text(text = ":", modifier = Modifier.align(Alignment.CenterVertically))
-
-        Picker(
-            items = (0..59).toList(),
-            label = { it.toString().padStart(2, '0') },
-            state = selectedMinute,
-            visibleItemsCount = 3,
-            modifier = Modifier.weight(1f),
-            startIndex = selectedMinute.value,
-            onChange = { onChange(selectedHour.value, it) }
-        )
-    }
+    PickerPair(
+        itemsFirst = (0..23).toList(),
+        itemsSecond = (0..59).toList(),
+        labelFirst = { "$it" },
+        labelSecond = {
+            it
+                .toString()
+                .padStart(
+                    2,
+                    '0'
+                )
+        },
+        modifier = modifier,
+        onChange = onChange,
+        stateFirst = selectedHour,
+        stateSecond = selectedMinute,
+        visibleItemsCount = 3
+    )
 }
+
+@Composable
+private fun pixelsToDp(pixels: Int) = with(LocalDensity.current) { pixels.toDp() }

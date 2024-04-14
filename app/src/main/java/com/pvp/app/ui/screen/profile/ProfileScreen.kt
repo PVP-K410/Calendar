@@ -51,8 +51,6 @@ import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.showToast
-import com.pvp.app.ui.screen.filters.FiltersDialog
-import com.pvp.app.ui.screen.filters.FiltersItem
 
 private val ACTIVITIES = SportActivity.entries.map { it.title }
 private val INGREDIENTS = Ingredient.entries.map { it.title }
@@ -297,7 +295,12 @@ private fun Properties(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
-                    onValueChange = { massEdit = it.replace(" ", "") },
+                    onValueChange = {
+                        massEdit = it.replace(
+                            " ",
+                            ""
+                        )
+                    },
                     value = massEdit
                 )
             },

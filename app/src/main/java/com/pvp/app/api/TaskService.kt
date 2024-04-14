@@ -6,7 +6,8 @@ import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import kotlinx.coroutines.flow.Flow
 import java.time.Duration
-import java.time.LocalDateTime
+import java.time.LocalDate
+import java.time.LocalTime
 
 interface TaskService : DocumentsCollection {
 
@@ -19,26 +20,26 @@ interface TaskService : DocumentsCollection {
      *
      * @param task task to claim points for
      */
-    suspend fun claim(
-        task: Task
-    )
+    suspend fun claim(task: Task)
 
     /**
      * Creates a general task in the database with the given parameters. Points are calculated
      * automatically upon creation.
      *
-     * @param description description of the task
-     * @param duration duration of the task
-     * @param scheduledAt scheduled date and time of the task
-     * @param title title of the task
+     * @param date scheduled date
+     * @param description description
+     * @param duration duration
+     * @param time scheduled time
+     * @param title title
      * @param userEmail user email to create the task for
      *
      * @return created general task
      */
     suspend fun create(
+        date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String,
         userEmail: String
     ): Task
@@ -47,24 +48,26 @@ interface TaskService : DocumentsCollection {
      * Creates a sport task in the database with the given parameters. Points are calculated
      * automatically upon creation.
      *
-     * @param activity sport activity of the task
-     * @param description description of the task
-     * @param distance distance of the task
-     * @param duration duration of the task
+     * @param date scheduled date
+     * @param activity sport activity
+     * @param description description
+     * @param distance distance
+     * @param duration duration
      * @param isDaily flag to create a daily task
-     * @param scheduledAt scheduled date and time of the task
-     * @param title title of the task
+     * @param time scheduled time
+     * @param title title
      * @param userEmail user email to create the task for
      *
      * @return created sport task
      */
     suspend fun create(
         activity: SportActivity,
+        date: LocalDate,
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
         isDaily: Boolean = false,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String,
         userEmail: String
     ): SportTask
@@ -73,20 +76,22 @@ interface TaskService : DocumentsCollection {
      * Creates a meal task in the database with the given parameters. Points are calculated
      * automatically upon creation.
      *
-     * @param description description of the task
-     * @param duration duration of the task
+     * @param date scheduled date
+     * @param description description
+     * @param duration duration
      * @param recipe recipe of the meal
-     * @param scheduledAt scheduled date and time of the task
-     * @param title title of the task
+     * @param time scheduled time
+     * @param title title
      * @param userEmail user email to create the task for
      *
      * @return created meal task
      */
     suspend fun create(
+        date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
         recipe: String,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String,
         userEmail: String
     ): MealTask
@@ -111,24 +116,20 @@ interface TaskService : DocumentsCollection {
      *
      * @return flow of tasks
      */
-    suspend fun get(
-        userEmail: String
-    ): Flow<List<Task>>
+    suspend fun get(userEmail: String): Flow<List<Task>>
 
     /**
      * Removes a task from the database.
      *
      * @param task task to remove
      */
-    suspend fun remove(
-        task: Task
-    )
+    suspend fun remove(task: Task)
 
     /**
      * Updates the task in the database.
      *
      * @param task task to update
-     * @param updatePoints flag to update the points of the task by recalculating them
+     * @param updatePoints flag to update the points by recalculating them
      *
      * @return updated task
      */

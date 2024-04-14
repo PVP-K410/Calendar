@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -30,6 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.common.DateUtil
+import com.pvp.app.common.DateUtil.getDisplayName
 import com.pvp.app.model.Task
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -37,52 +40,127 @@ import java.time.LocalTime
 import java.time.YearMonth
 
 @Composable
-fun CalendarMonthlyScreen(
-    model: CalendarMonthlyViewModel = hiltViewModel(),
+private fun AnalysisOfDayBox(
+    dateTasks: List<Task>,
+    selectedDate: LocalDate
 ) {
-    val state by model.state.collectAsState()
-    var expand by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var dateTasks by remember { mutableStateOf<List<Task>>(emptyList()) }
-    var showActivitiesBox by remember { mutableStateOf(false) }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 36.dp)
+    ) {
+        AnalysisOfDay(
+            date = selectedDate,
+            tasks = dateTasks
+        )
+    }
+}
 
-    MonthlyCalendar(
-        days = DateUtil.daysOfWeek,
-        month = state.yearMonth,
-        dates = state.dates,
-        expand = expand,
-        onExpandChange = { expand = it },
-        showDialog = showDialog,
-        onShowDialogChange = { showDialog = it },
-        selectedDate = selectedDate,
-        dateTasks = dateTasks,
-        showActivitiesBox = showActivitiesBox,
-        onShowActivitiesBoxChange = { showActivitiesBox = it },
-        onClickListener = { date ->
-            expand = true
-            showDialog = true
-            selectedDate = date.date
-            dateTasks = date.tasks
-            showActivitiesBox = false
+/**
+ * Shown below the monthly calendar
+ */
+@Composable
+private fun Content(
+    tasks: List<Task> = emptyList(),
+    date: LocalDate,
+    showAnalyses: Boolean,
+    showDialog: Boolean,
+    onChangeExpand: (Boolean) -> Unit,
+    onChangeShowAnalyses: (Boolean) -> Unit,
+    onChangeShowDialog: (Boolean) -> Unit
+) {
+    when {
+        tasks.isEmpty() && date == LocalDate.now() -> {
+            AnalysisOfDayBox(
+                tasks,
+                date
+            )
+
+            if (showDialog) {
+                TaskCreateDialog(
+                    date,
+                    onChangeShowDialog
+                )
+            }
         }
-    )
+
+        tasks.isEmpty() && !date.isBefore(LocalDate.now()) -> {
+            TaskCreateDialog(
+                date,
+                onChangeExpand
+            )
+        }
+
+        tasks.isEmpty() && !date.isAfter(LocalDate.now()) -> {
+            AnalysisOfDayBox(
+                tasks,
+                date
+            )
+        }
+
+        else -> {
+            ContentSwitch(
+                date,
+                onChangeShowAnalyses,
+                showAnalyses,
+                tasks
+            )
+        }
+    }
+}
+
+/**
+ * Switches content that is shown below the monthly calendar and displays it accordingly
+ */
+@Composable
+private fun ContentSwitch(
+    date: LocalDate,
+    onShowAnalysesChange: (Boolean) -> Unit,
+    showAnalyses: Boolean,
+    tasks: List<Task>
+) {
+    Box {
+        Row(modifier = Modifier.fillMaxSize()) {
+            if (showAnalyses) {
+                AnalysisOfDayBox(
+                    tasks,
+                    date
+                )
+            } else {
+                TasksOfDay(tasks = tasks)
+            }
+        }
+
+        if (!date.isAfter(LocalDate.now()) && tasks.isNotEmpty()) {
+            Icon(
+                contentDescription = "Swap",
+                imageVector = Icons.Outlined.SwapHoriz,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .size(30.dp)
+                    .zIndex(1f)
+                    .clickable { onShowAnalysesChange(!showAnalyses) },
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
 }
 
 @Composable
-fun MonthlyCalendar(
-    days: Array<String>,
-    month: YearMonth,
+private fun CalendarMonthly(
+    date: LocalDate,
     dates: List<CalendarUiState.DateEntry>,
+    days: Array<String>,
     expand: Boolean,
-    onExpandChange: (Boolean) -> Unit,
+    month: YearMonth,
+    onChangeExpand: (Boolean) -> Unit,
+    onChangeShowAnalyses: (Boolean) -> Unit,
+    onChangeShowDialog: (Boolean) -> Unit,
+    onClick: (CalendarUiState.DateEntry) -> Unit,
+    showAnalyses: Boolean,
     showDialog: Boolean,
-    onShowDialogChange: (Boolean) -> Unit,
-    selectedDate: LocalDate,
-    dateTasks: List<Task>,
-    showActivitiesBox: Boolean,
-    onShowActivitiesBoxChange: (Boolean) -> Unit,
-    onClickListener: (CalendarUiState.DateEntry) -> Unit
+    tasks: List<Task>
 ) {
     Column(
         modifier = Modifier
@@ -91,194 +169,39 @@ fun MonthlyCalendar(
     ) {
         Row {
             repeat(days.size) {
-                DayItem(
+                Day(
                     day = days[it],
                     modifier = Modifier.weight(1f)
                 )
             }
         }
 
-        Header(
-            month = month,
+        Header(month = month)
+
+        CalendarMonthlyContent(
+            dates = dates,
+            onClickListener = onClick,
+            selectedDate = date
         )
+
+        if (!expand) {
+            return
+        }
 
         Content(
-            dates = dates,
-            selectedDate = selectedDate,
-            onClickListener = onClickListener
-        )
-
-        if (expand) {
-            when {
-                dateTasks.isEmpty() && selectedDate == LocalDate.now() -> {
-                    showActivitiesBox(
-                        dateTasks,
-                        selectedDate
-                    )
-                    
-                    if (showDialog) {
-                        createTaskDialog(
-                            selectedDate,
-                            showDialog,
-                            onShowDialogChange
-                        )
-                    }
-                }
-
-                dateTasks.isEmpty() && !selectedDate.isBefore(LocalDate.now()) -> {
-                    createTaskDialog(
-                        selectedDate,
-                        expand,
-                        onExpandChange
-                    )
-                }
-
-                dateTasks.isEmpty() && !selectedDate.isAfter(LocalDate.now()) -> {
-                    showActivitiesBox(
-                        dateTasks,
-                        selectedDate
-                    )
-                }
-
-                else -> {
-                    showDayContentOrActivitiesBox(
-                        dateTasks,
-                        selectedDate,
-                        showActivitiesBox,
-                        onShowActivitiesBoxChange
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun showActivitiesBox(
-    dateTasks: List<Task>,
-    selectedDate: LocalDate
-) {
-    Box {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 32.dp)
-        ) {
-            ActivitiesBox(
-                date = selectedDate,
-                tasks = dateTasks
-            )
-        }
-    }
-}
-
-@Composable
-fun createTaskDialog(
-    selectedDate: LocalDate,
-    isOpen: Boolean,
-    onClose: (Boolean) -> Unit
-) {
-    CreateTaskDialog(
-        date = LocalDateTime.of(
-            selectedDate,
-            LocalTime.now()
-        ),
-        onClose = { onClose(false) },
-        isOpen = isOpen,
-        shouldCloseOnSubmit = true
-    )
-}
-
-@Composable
-fun showDayContentOrActivitiesBox(
-    dateTasks: List<Task>,
-    selectedDate: LocalDate,
-    showActivitiesBox: Boolean,
-    onShowActivitiesBoxChange: (Boolean) -> Unit
-) {
-    Box {
-        Row(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            if (showActivitiesBox) {
-                showActivitiesBox(
-                    dateTasks,
-                    selectedDate
-                )
-            } else {
-                DayContent(tasks = dateTasks)
-            }
-        }
-
-        if (!selectedDate.isAfter(LocalDate.now()) && dateTasks.isNotEmpty()) {
-            Icon(
-                imageVector = Icons.Outlined.SwapHoriz,
-                contentDescription = "Swap",
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .size(30.dp)
-                    .zIndex(1f)
-                    .clickable { onShowActivitiesBoxChange(!showActivitiesBox) },
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
-
-@Composable
-fun Header(
-    month: YearMonth,
-    model: CalendarMonthlyViewModel = hiltViewModel()
-) {
-    Row {
-        IconButton(onClick = {
-            model.changeMonth(month.minusMonths(1))
-        }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "Back"
-            )
-        }
-
-        Text(
-            text = month.getDisplayName(),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically)
-        )
-
-        IconButton(onClick = {
-            model.changeMonth(month.plusMonths(1))
-        }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Forward"
-            )
-        }
-    }
-}
-
-@Composable
-fun DayItem(
-    day: String,
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier) {
-        Text(
-            text = day,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(10.dp)
+            tasks = tasks,
+            date = date,
+            showAnalyses = showAnalyses,
+            showDialog = showDialog,
+            onChangeExpand = onChangeExpand,
+            onChangeShowAnalyses = onChangeShowAnalyses,
+            onChangeShowDialog = onChangeShowDialog
         )
     }
 }
 
 @Composable
-fun Content(
+private fun CalendarMonthlyContent(
     dates: List<CalendarUiState.DateEntry>,
     selectedDate: LocalDate,
     onClickListener: (CalendarUiState.DateEntry) -> Unit,
@@ -299,7 +222,7 @@ fun Content(
                         CalendarUiState.DateEntry.Empty
                     }
 
-                    ContentItem(
+                    CalendarMonthlyContentItem(
                         entry = item,
                         selectedDate = selectedDate,
                         onClickListener = onClickListener,
@@ -314,7 +237,7 @@ fun Content(
 }
 
 @Composable
-fun ContentItem(
+private fun CalendarMonthlyContentItem(
     entry: CalendarUiState.DateEntry,
     selectedDate: LocalDate,
     onClickListener: (CalendarUiState.DateEntry) -> Unit,
@@ -366,4 +289,103 @@ fun ContentItem(
                 .padding(10.dp)
         )
     }
+}
+
+@Composable
+fun CalendarMonthlyScreen(model: CalendarMonthlyViewModel = hiltViewModel()) {
+    var date by remember { mutableStateOf(LocalDate.now()) }
+    var expand by remember { mutableStateOf(false) }
+    var showAnalyses by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    val state by model.state.collectAsState()
+    var tasks by remember { mutableStateOf<List<Task>>(emptyList()) }
+
+    CalendarMonthly(
+        date = date,
+        dates = state.dates,
+        days = DateUtil.daysOfWeek,
+        expand = expand,
+        month = state.yearMonth,
+        onChangeExpand = { expand = it },
+        onChangeShowAnalyses = { showAnalyses = it },
+        onChangeShowDialog = { showDialog = it },
+        onClick = { entry ->
+            date = entry.date
+            expand = true
+            showAnalyses = false
+            showDialog = true
+            tasks = entry.tasks
+        },
+        showAnalyses = showAnalyses,
+        showDialog = showDialog,
+        tasks = tasks
+    )
+}
+
+@Composable
+private fun Day(
+    day: String,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        Text(
+            text = day,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(10.dp)
+        )
+    }
+}
+
+@Composable
+private fun Header(
+    model: CalendarMonthlyViewModel = hiltViewModel(),
+    month: YearMonth
+) {
+    Row {
+        IconButton(onClick = {
+            model.changeMonth(month.minusMonths(1))
+        }) {
+            Icon(
+                contentDescription = "Back",
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft
+            )
+        }
+
+        Text(
+            modifier = Modifier
+                .weight(1f)
+                .align(Alignment.CenterVertically),
+            style = MaterialTheme.typography.bodyLarge,
+            text = month.getDisplayName(),
+            textAlign = TextAlign.Center
+        )
+
+        IconButton(onClick = {
+            model.changeMonth(month.plusMonths(1))
+        }) {
+            Icon(
+                contentDescription = "Forward",
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight
+            )
+        }
+    }
+}
+
+@Composable
+private fun TaskCreateDialog(
+    selectedDate: LocalDate,
+    onClose: (Boolean) -> Unit
+) {
+    TaskCreateDialog(
+        date = LocalDateTime.of(
+            selectedDate,
+            LocalTime.now()
+        ),
+        onClose = { onClose(false) },
+        isOpen = true,
+        shouldCloseOnSubmit = true
+    )
 }

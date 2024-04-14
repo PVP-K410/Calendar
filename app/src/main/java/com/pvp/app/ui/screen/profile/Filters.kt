@@ -1,4 +1,4 @@
-package com.pvp.app.ui.screen.filters
+package com.pvp.app.ui.screen.profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

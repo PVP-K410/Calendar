@@ -4,11 +4,12 @@ enum class NotificationChannel(
     val channelId: String
 ) {
 
-    Unknown("Unknown"),
-    TaskReminder("Task Reminder"),
+    DailyTaskReminder("Daily Task Reminder"),
     DrinkReminder("Water Drinking Reminder"),
-    WeeklyActivityReminder("Weekly Activity Reminder"),
-    DailyTaskReminder("Daily Task Reminder");
+    TaskAutocomplete("Task Autocomplete"),
+    TaskReminder("Task Reminder"),
+    Unknown("Unknown"),
+    WeeklyActivityReminder("Weekly Activity Reminder");
 
     companion object {
 

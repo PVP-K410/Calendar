@@ -1,7 +1,8 @@
-package com.pvp.app.ui.screen.task
+package com.pvp.app.ui.screen.calendar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
@@ -22,16 +23,21 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
+    configuration: Configuration,
     private val notificationService: NotificationService,
     settingService: SettingService,
     private val taskService: TaskService,
     userService: UserService
 ) : ViewModel() {
+
+    val rangeKilometers = configuration.rangeKilometers
 
     private val state = settingService
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
@@ -54,11 +60,12 @@ class TaskViewModel @Inject constructor(
      * Create a meal task for the user with the given parameters
      */
     fun create(
+        date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
         ingredients: String,
         preparation: String,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String
     ) {
         viewModelScope.launch {
@@ -78,10 +85,11 @@ class TaskViewModel @Inject constructor(
 
                     taskService
                         .create(
+                            date,
                             description,
                             duration,
                             recipe,
-                            scheduledAt,
+                            time,
                             title,
                             state.user.email
                         )
@@ -94,11 +102,12 @@ class TaskViewModel @Inject constructor(
      * Create a sport task for the user with the given parameters
      */
     fun create(
+        date: LocalDate,
         activity: SportActivity,
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String
     ) {
         viewModelScope.launch {
@@ -108,11 +117,12 @@ class TaskViewModel @Inject constructor(
                     taskService
                         .create(
                             activity,
+                            date,
                             description,
                             distance,
                             duration,
                             false,
-                            scheduledAt,
+                            time,
                             title,
                             state.user.email
                         )
@@ -125,9 +135,10 @@ class TaskViewModel @Inject constructor(
      * Create a general task for the user with the given parameters
      */
     fun create(
+        date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
-        scheduledAt: LocalDateTime,
+        time: LocalTime? = null,
         title: String
     ) {
         viewModelScope.launch {
@@ -136,9 +147,10 @@ class TaskViewModel @Inject constructor(
                 .let { state ->
                     taskService
                         .create(
+                            date,
                             description,
                             duration,
-                            scheduledAt,
+                            time,
                             title,
                             state.user.email
                         )
@@ -148,13 +160,14 @@ class TaskViewModel @Inject constructor(
     }
 
     private suspend fun Task.postNotification() {
+        time ?: return
+
         val reminderMinutes = state
             .first().reminderMinutes
             .toLong()
 
-        val reminderDateTime = scheduledAt
-            .withSecond(0)
-            .withNano(0)
+        val reminderDateTime = date
+            .atTime(time!!)
             .minusMinutes(reminderMinutes)
 
         if (reminderDateTime.isBefore(LocalDateTime.now())) {
@@ -183,6 +196,7 @@ class TaskViewModel @Inject constructor(
      * @return Pair of the modified task and a boolean indicating if the task points should also
      * be updated
      */
+    @Suppress("UNCHECKED_CAST")
     private fun <T : Task> resolve(
         handle: (T) -> Unit,
         task: T
@@ -241,6 +255,8 @@ class TaskViewModel @Inject constructor(
                 handle,
                 task
             )
+
+            taskModified.id ?: error("Task ID is required. Cannot update task.")
 
             val taskUpdated = taskService.update(
                 taskModified,

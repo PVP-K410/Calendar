@@ -149,9 +149,9 @@ class PointServiceImpl @Inject constructor(
                     .filter { task -> !task.isCompleted }
                     .filter { task -> !task.points.isExpired }
                     .filter { task ->
-                        task.scheduledAt.year == date.year &&
-                                task.scheduledAt.monthValue == date.monthValue &&
-                                task.scheduledAt.dayOfMonth == date.dayOfMonth
+                        task.date.year == date.year &&
+                                task.date.monthValue == date.monthValue &&
+                                task.date.dayOfMonth == date.dayOfMonth
                     }
             }
             .first()
