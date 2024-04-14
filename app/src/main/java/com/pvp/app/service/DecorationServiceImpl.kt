@@ -16,13 +16,13 @@ import com.pvp.app.common.ImageUtil.toImageBitmap
 import com.pvp.app.model.Decoration
 import com.pvp.app.model.User
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.internal.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Provider
 
 class DecorationServiceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
