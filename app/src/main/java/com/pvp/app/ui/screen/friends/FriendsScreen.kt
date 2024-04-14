@@ -177,7 +177,7 @@ fun FriendsScreen(
             },
             text = {
                 Column {
-                    TabRow(selectedTabIndex = selectedTab.value) {
+                    TabRow(selectedTabIndex = selectedTab.intValue) {
                         Tab(
                             selected = selectedTab.intValue == 0,
                             onClick = { selectedTab.intValue = 0 }
@@ -373,8 +373,7 @@ private fun RequestList(
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = Modifier
-            .verticalScroll(scrollState)
+        modifier = Modifier.verticalScroll(scrollState)
     ) {
         if (requests.isEmpty()) {
             Text(
