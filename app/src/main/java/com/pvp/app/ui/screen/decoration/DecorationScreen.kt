@@ -31,6 +31,13 @@ import androidx.compose.ui.unit.dp
 fun DecorationScreen() {
     var screen by remember { mutableIntStateOf(0) }
 
+    fun changePage() {
+        screen = when (screen) {
+            0 -> 1
+            else -> 0
+        }
+    }
+
     @Composable
     fun fontStyle(screenTarget: Int): TextStyle = MaterialTheme.typography.titleLarge.copy(
         textDecoration = if (screen == screenTarget) TextDecoration.Underline else TextDecoration.None,
@@ -55,7 +62,7 @@ fun DecorationScreen() {
                 modifier = Modifier
                     .weight(0.5f)
                     .align(Alignment.CenterVertically)
-                    .clickable { screen = 0 }
+                    .clickable { changePage() }
             ) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
@@ -70,7 +77,7 @@ fun DecorationScreen() {
                 modifier = Modifier
                     .weight(0.5f)
                     .align(Alignment.CenterVertically)
-                    .clickable { screen = 1 }
+                    .clickable { changePage() }
             ) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
@@ -83,8 +90,8 @@ fun DecorationScreen() {
         Spacer(modifier = Modifier.size(8.dp))
 
         when (screen) {
-            0 -> DecorationSelect()
-            1 -> DecorationPurchase()
+            0 -> DecorationPurchase()
+            1 -> DecorationSelect()
         }
     }
 }

@@ -11,6 +11,19 @@ interface DecorationService : DocumentsCollection {
         get() = "decorations"
 
     /**
+     * Apply a decoration to an image.
+     *
+     * @param image The image to apply the decoration to.
+     * @param decoration The decoration to apply.
+     *
+     * @return The decorated image.
+     */
+    suspend fun apply(
+        image: ImageBitmap,
+        decoration: Decoration
+    ): ImageBitmap
+
+    /**
      * Get all decorations.
      */
     suspend fun get(): Flow<List<Decoration>>

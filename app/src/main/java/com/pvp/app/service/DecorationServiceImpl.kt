@@ -30,6 +30,13 @@ class DecorationServiceImpl @Inject constructor(
     private val userServiceProvider: Provider<UserService>
 ) : DecorationService {
 
+    override suspend fun apply(
+        image: ImageBitmap,
+        decoration: Decoration
+    ): ImageBitmap {
+        return image
+    }
+
     override suspend fun get(): Flow<List<Decoration>> {
         return database
             .collection(identifier)
