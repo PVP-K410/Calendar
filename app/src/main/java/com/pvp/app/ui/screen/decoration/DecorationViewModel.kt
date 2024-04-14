@@ -63,6 +63,7 @@ class DecorationViewModel @Inject constructor(
                 .collectLatest { state ->
                     _state.update {
                         it.copy(
+                            avatar = state.avatar,
                             holders = state.holders,
                             user = state.user
                         )

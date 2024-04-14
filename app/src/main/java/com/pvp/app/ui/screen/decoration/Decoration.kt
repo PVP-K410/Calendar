@@ -3,14 +3,11 @@ package com.pvp.app.ui.screen.decoration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Stars
 import androidx.compose.material3.Icon
@@ -54,35 +51,38 @@ fun DecorationCard(
                 text = holder.decoration.description
             )
 
-            IconButton(
-                enabled = if (actionPurchase) !holder.owned else !holder.applied,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .align(Alignment.End),
-                onClick = onClick
-            ) {
-                Icon(
-                    contentDescription = "Action icon",
-                    imageVector = actionImageVector,
-                )
+            if (actionPurchase || !holder.applied) {
+                IconButton(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.End),
+                    onClick = onClick
+                ) {
+                    Icon(
+                        contentDescription = "Action icon",
+                        imageVector = actionImageVector,
+                    )
+                }
             }
         }
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.padding(end = 8.dp),
-                text = "Price: ${holder.decoration.price}"
-            )
+        if (actionPurchase) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier.padding(end = 8.dp),
+                    text = "Price: ${holder.decoration.price}"
+                )
 
-            Icon(
-                contentDescription = "Cost in points icon",
-                imageVector = Icons.Outlined.Stars
-            )
+                Icon(
+                    contentDescription = "Cost in points icon",
+                    imageVector = Icons.Outlined.Stars
+                )
+            }
         }
     }
 }
@@ -94,8 +94,12 @@ fun DecorationCards(
     holders: List<DecorationHolder>,
     onClick: (DecorationHolder) -> Unit
 ) {
-    LazyColumn(contentPadding = PaddingValues(8.dp)) {
-        items(holders) { holder ->
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+    ) {
+        holders.forEachIndexed { index, holder ->
             DecorationCard(
                 actionImageVector = actionImageVector,
                 actionPurchase = actionPurchase,
@@ -103,7 +107,9 @@ fun DecorationCards(
                 onClick = { onClick(holder) }
             )
 
-            Spacer(modifier = Modifier.size(8.dp))
+            if (index < holders.size - 1) {
+                Spacer(modifier = Modifier.size(8.dp))
+            }
         }
     }
 }

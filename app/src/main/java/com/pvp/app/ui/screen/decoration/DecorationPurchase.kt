@@ -25,7 +25,6 @@ fun DecorationPurchase(model: DecorationViewModel = hiltViewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-
         DecorationCards(
             actionImageVector = Icons.Outlined.ShoppingBag,
             actionPurchase = true,
