@@ -1,116 +1,173 @@
 package com.pvp.app.service
 
-import androidx.compose.ui.graphics.ImageBitmap
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
-import com.pvp.app.model.User
+import com.pvp.app.model.FriendObject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class FriendServiceImpl @Inject constructor(
-    private val userService: UserService
+    private val userService: UserService,
+    private val database: FirebaseFirestore
 ) : FriendService {
-    override suspend fun addFriend(user: User, friendEmail: String): String {
-        val email = user.email
 
-        if (email == friendEmail) {
+    override suspend fun get(email: String): Flow<FriendObject?> {
+        return flow {
+            val initialSnapshot = database
+                .collection(identifier)
+                .document(email)
+                .get()
+                .await()
+
+            emit(initialSnapshot.toObject(FriendObject::class.java))
+
+            database
+                .collection(identifier)
+                .document(email)
+                .snapshots()
+                .collect { snapshot ->
+                    emit(snapshot.toObject(FriendObject::class.java))
+                }
+        }
+    }
+
+    override suspend fun merge(friendObject: FriendObject, email: String) {
+        database
+            .runTransaction { transaction ->
+                val document = database
+                    .collection(identifier)
+                    .document(email)
+
+                transaction.set(
+                    document,
+                    friendObject
+                )
+            }
+            .await()
+    }
+
+    override suspend fun remove(email: String) {
+        database
+            .runTransaction { transaction ->
+                val document = database
+                    .collection(identifier)
+                    .document(email)
+
+                transaction.delete(document)
+            }
+            .await()
+    }
+
+    override suspend fun createFriendObject(email: String) {
+        val friendObject = get(email).first()
+        if (friendObject == null) {
+            val newFriendObject = FriendObject(
+                friends = emptyList(),
+                receivedRequests = emptyList(),
+                sentRequests = emptyList()
+            )
+            merge(newFriendObject, email)
+        }
+    }
+
+    override suspend fun addFriend(
+        friendObject: FriendObject,
+        userEmail: String,
+        friendEmail: String
+    ): String {
+        if (userEmail == friendEmail) {
             return "You are always your very best friend!"
         }
 
-        val friend = userService
-            .get(friendEmail)
-            .first()
+        val friend = get(friendEmail).first()!!
 
-        if (friend == null) {
-            return "User with email $friendEmail does not exist"
-        }
-
-        if (friendEmail in user.friends) {
+        if (friendEmail in friendObject.friends) {
             return "$friendEmail is already your friend"
         }
 
-        if (friendEmail in user.sentRequests) {
+        if (friendEmail in friendObject.sentRequests) {
             return "Friend request already sent to $friendEmail"
         }
-        if (friendEmail in user.receivedRequests) {
+        if (friendEmail in friendObject.receivedRequests) {
             return "Friend request already received from $friendEmail"
         }
 
-        val friendNew = friend.copy(receivedRequests = friend.receivedRequests + email)
+        val friendNew = friend.copy(receivedRequests = friend.receivedRequests + userEmail)
 
-        userService.merge(friendNew)
+        merge(friendNew, friendEmail)
 
-        val userNew = user.copy(sentRequests = user.sentRequests + friendEmail)
+        val friendObjectNew =
+            friendObject.copy(sentRequests = friendObject.sentRequests + friendEmail)
 
-        userService.merge(userNew)
+        merge(friendObjectNew, userEmail)
 
         return "Friend request sent!"
     }
 
-    override suspend fun acceptFriendRequest(user: User, friendEmail: String): String {
-        val email = user.email
-
-        val friend = userService
-            .get(friendEmail)
-            .first()
-            ?: return "Friend not found"
+    override suspend fun acceptFriendRequest(
+        friendObject: FriendObject,
+        userEmail: String,
+        friendEmail: String
+    ): String {
+        val friend = get(friendEmail).first() ?: return "Friend not found"
 
         val friendNew = friend.copy(
-            sentRequests = friend.sentRequests - email,
-            friends = friend.friends + email
+            sentRequests = friend.sentRequests - userEmail,
+            friends = friend.friends + userEmail
         )
 
-        userService.merge(friendNew)
+        merge(friendNew, friendEmail)
 
-        val userNew = user.copy(
-            receivedRequests = user.receivedRequests - friendEmail,
-            friends = user.friends + friendEmail
+        val userNew = friendObject.copy(
+            receivedRequests = friendObject.receivedRequests - friendEmail,
+            friends = friendObject.friends + friendEmail
         )
 
-        userService.merge(userNew)
+        merge(userNew, userEmail)
 
         return "Friend request accepted!"
     }
 
-    override suspend fun denyFriendRequest(user: User, friendEmail: String): String {
-        val email = user.email
+    override suspend fun denyFriendRequest(
+        friendObject: FriendObject,
+        userEmail: String,
+        friendEmail: String
+    ): String {
+        val friend = get(friendEmail).first() ?: return "Friend not found"
 
-        val friend = userService
-            .get(friendEmail)
-            .first()
-            ?: return "Friend not found"
+        val friendNew = friend.copy(sentRequests = friend.sentRequests - userEmail)
 
-        val friendNew = friend.copy(sentRequests = friend.sentRequests - email)
+        merge(friendNew, friendEmail)
 
-        userService.merge(friendNew)
+        val userNew =
+            friendObject.copy(receivedRequests = friendObject.receivedRequests - friendEmail)
 
-        val userNew = user.copy(receivedRequests = user.receivedRequests - friendEmail)
-
-        userService.merge(userNew)
+        merge(userNew, userEmail)
 
         return "Friend request denied!"
     }
 
-    override suspend fun cancelSentRequest(user: User, friendEmail: String): String {
-        val email = user.email
+    override suspend fun cancelSentRequest(
+        friendObject: FriendObject,
+        userEmail: String,
+        friendEmail: String
+    ): String {
+        val friend = get(friendEmail).first() ?: return "Friend not found"
 
-        val friend = userService
-            .get(friendEmail)
-            .first()
-            ?: return "Friend not found"
+        val friendNew = friend.copy(receivedRequests = friend.receivedRequests - userEmail)
 
-        val friendNew = friend.copy(receivedRequests = friend.receivedRequests - email)
+        merge(friendNew, friendEmail)
 
-        userService.merge(friendNew)
+        val userNew = friendObject.copy(sentRequests = friendObject.sentRequests - friendEmail)
 
-        val userNew = user.copy(sentRequests = user.sentRequests - friendEmail)
-
-        userService.merge(userNew)
+        merge(userNew, userEmail)
 
         return "Friend request cancelled!"
     }
 
-    override suspend fun getFriendAvatar(friendEmail: String): ImageBitmap {
-        return userService.resolveAvatar(friendEmail)
-    }
 }

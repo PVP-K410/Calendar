@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -58,14 +59,15 @@ fun FriendsScreen(
 ) {
     val context = LocalContext.current
     val toastMessage by model.toastMessage
-    val user by model.user.collectAsStateWithLifecycle()
-    val friends = user?.friends ?: emptyList()
-    val receivedRequests = user?.receivedRequests ?: emptyList()
-    val sentRequests = user?.sentRequests ?: emptyList()
+    val friendObject by model.friendObject.collectAsStateWithLifecycle()
+    val currentUserEmail = model.user.collectAsStateWithLifecycle().value?.email
+    val friends = friendObject?.friends ?: emptyList()
+    val receivedRequests = friendObject?.receivedRequests ?: emptyList()
+    val sentRequests = friendObject?.sentRequests ?: emptyList()
     val friendEmail = remember { mutableStateOf("") }
     val showAddFriend = remember { mutableStateOf(false) }
     val showRequests = remember { mutableStateOf(false) }
-    val selectedTab = remember { mutableStateOf(0) }
+    val selectedTab = remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(toastMessage) {
@@ -78,6 +80,12 @@ fun FriendsScreen(
                 )
                 .show()
             model.toastMessage.value = null
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        currentUserEmail?.let { userEmail ->
+            model.createFriendObject(userEmail)
         }
     }
 
@@ -150,12 +158,12 @@ fun FriendsScreen(
         AlertDialog(
             onDismissRequest = {
                 showRequests.value = false
-                selectedTab.value = 0
+                selectedTab.intValue = 0
             },
             confirmButton = {
                 Button(onClick = {
                     showRequests.value = false
-                    selectedTab.value = 0
+                    selectedTab.intValue = 0
                 }) {
                     Text("Back")
                 }
@@ -164,30 +172,30 @@ fun FriendsScreen(
                 Column {
                     TabRow(selectedTabIndex = selectedTab.value) {
                         Tab(
-                            selected = selectedTab.value == 0,
-                            onClick = { selectedTab.value = 0 }
+                            selected = selectedTab.intValue == 0,
+                            onClick = { selectedTab.intValue = 0 }
                         ) {
                             Text(
                                 "Received",
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = if (selectedTab.value == 0) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
                             )
                         }
                         Tab(
-                            selected = selectedTab.value == 1,
-                            onClick = { selectedTab.value = 1 }
+                            selected = selectedTab.intValue == 1,
+                            onClick = { selectedTab.intValue = 1 }
                         ) {
                             Text(
                                 "Sent",
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = if (selectedTab.value == 1) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    when (selectedTab.value) {
+                    when (selectedTab.intValue) {
                         0 -> {
                             RequestList(
                                 requests = receivedRequests,
@@ -355,59 +363,67 @@ private fun RequestList(
     acceptAction: (String) -> Unit,
     denyAction: (String) -> Unit
 ) {
-    if (requests.isEmpty()) {
-        Text(
-            "No $requestTitle requests",
-            fontStyle = FontStyle.Italic,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-    } else {
-        for (request in requests) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(30.dp)
-                    .padding(
-                        vertical = 2.dp
-                    )
-                    .background(
-                        MaterialTheme.colorScheme.secondaryContainer,
-                        MaterialTheme.shapes.small
-                    ),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = request,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(start = 2.dp)
-                        .weight(1f)
-                )
+    val scrollState = rememberScrollState()
 
-                if (requestTitle == "received") {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        if (requests.isEmpty()) {
+            Text(
+                "No $requestTitle requests",
+                fontStyle = FontStyle.Italic,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            for (request in requests) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp)
+                        .padding(
+                            vertical = 2.dp
+                        )
+                        .background(
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.shapes.small
+                        ),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = request,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .padding(start = 2.dp)
+                            .weight(1f)
+                    )
+
+                    if (requestTitle == "received") {
+                        Icon(
+                            imageVector = Icons.Outlined.CheckCircle,
+                            contentDescription = "Accept request",
+                            tint = Color.Green,
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .clickable { acceptAction(request) }
+                        )
+
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+
                     Icon(
-                        imageVector = Icons.Outlined.CheckCircle,
-                        contentDescription = "Accept request",
-                        tint = Color.Green,
+                        imageVector = Icons.Outlined.DoNotDisturbOn,
+                        contentDescription = "Deny request",
+                        tint = Color.Red,
                         modifier = Modifier
                             .size(28.dp)
                             .clip(CircleShape)
-                            .clickable { acceptAction(request) }
+                            .clickable { denyAction(request) }
                     )
-
-                    Spacer(modifier = Modifier.width(6.dp))
                 }
-
-                Icon(
-                    imageVector = Icons.Outlined.DoNotDisturbOn,
-                    contentDescription = "Deny request",
-                    tint = Color.Red,
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .clickable { denyAction(request) }
-                )
             }
         }
     }

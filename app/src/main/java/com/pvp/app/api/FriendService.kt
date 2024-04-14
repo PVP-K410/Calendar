@@ -1,51 +1,88 @@
 package com.pvp.app.api
 
-import androidx.compose.ui.graphics.ImageBitmap
-import com.pvp.app.model.User
+import com.pvp.app.model.FriendObject
+import kotlinx.coroutines.flow.Flow
 
-interface FriendService {
+interface FriendService : DocumentsCollection {
+
+    override val identifier: String
+        get() = "friendObjects"
+
+    /**
+     * Gets FriendObject by its email. In case it is not found, null is returned.
+     */
+    suspend fun get(email: String): Flow<FriendObject?>
+
+    /**
+     * Creates or updates the FriendObject in the database.
+     */
+    suspend fun merge(friendObject: FriendObject, userEmail: String)
+
+    /**
+     * Removes an FriendObject from the database with all associated children data.
+     */
+    suspend fun remove(email: String)
+
+    /**
+     * Creates a new FriendObject for a given email if it does not already exist.
+     *
+     * @param email for which to create a FriendObject.
+     */
+    suspend fun createFriendObject(email: String)
 
     /**
      * Sends a friend request from the current user to another user.
      *
-     * @param user current application user.
+     * @param friendObject of the current user.
+     * @param userEmail of the current user.
      * @param friendEmail of the user to whom the friend request is being sent.
      * @return a string message indicating the result of the operation.
      */
-    suspend fun addFriend(user: User, friendEmail: String): String
+    suspend fun addFriend(
+        friendObject: FriendObject,
+        userEmail: String,
+        friendEmail: String
+    ): String
 
     /**
      * Accepts a friend request from another user.
      *
-     * @param user current application user.
+     * @param friendObject of the current user.
+     * @param userEmail of the current user.
      * @param friendEmail of the user whose friend request is being accepted.
      * @return a string message indicating the result of the operation.
      */
-    suspend fun acceptFriendRequest(user: User, friendEmail: String): String
+    suspend fun acceptFriendRequest(
+        friendObject: FriendObject,
+        userEmail: String,
+        friendEmail: String
+    ): String
 
     /**
      * Denies a friend request from another user.
      *
-     * @param user current application user.
+     * @param friendObject of the current user.
+     * @param userEmail of the current user.
      * @param friendEmail of the user whose friend request is being denied.
      * @return a string message indicating the result of the operation.
      */
-    suspend fun denyFriendRequest(user: User, friendEmail: String): String
+    suspend fun denyFriendRequest(
+        friendObject: FriendObject,
+        userEmail: String,
+        friendEmail: String
+    ): String
 
     /**
      * Cancels a friend request that the current user has sent to another user.
      *
-     * @param user current application user.
+     * @param friendObject of the current user.
+     * @param userEmail of the current user.
      * @param friendEmail of the user to whom the friend request was sent.
      * @return a string message indicating the result of the operation.
      */
-    suspend fun cancelSentRequest(user: User, friendEmail: String): String
-
-    /**
-     * Retrieves the avatar of a friend.
-     *
-     * @param friendEmail of the friend whose avatar is to be retrieved.
-     * @return avatar of the friend as an ImageBitmap.
-     */
-    suspend fun getFriendAvatar(friendEmail: String): ImageBitmap
+    suspend fun cancelSentRequest(
+        friendObject: FriendObject,
+        userEmail: String,
+        friendEmail: String
+    ): String
 }
