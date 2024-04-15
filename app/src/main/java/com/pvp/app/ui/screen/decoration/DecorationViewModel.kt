@@ -78,7 +78,7 @@ class DecorationViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _state.first()
 
-            if (state.user.decorationsApplied.contains(decoration.id)) {
+            if (decoration.id in state.user.decorationsApplied) {
                 _state.update { it.copy(workState = WorkState.Error.AlreadyApplied) }
 
                 return@launch
