@@ -6,6 +6,7 @@ import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
+import com.pvp.app.api.FriendService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.PointService
@@ -16,6 +17,7 @@ import com.pvp.app.service.AuthenticationServiceImpl
 import com.pvp.app.service.ConfigurationImpl
 import com.pvp.app.service.ExerciseServiceImpl
 import com.pvp.app.service.ExperienceServiceImpl
+import com.pvp.app.service.FriendServiceImpl
 import com.pvp.app.service.HealthConnectServiceImpl
 import com.pvp.app.service.NotificationServiceImpl
 import com.pvp.app.service.PointServiceImpl
@@ -53,6 +55,10 @@ interface ServiceBindingsModule {
     @Binds
     @Singleton
     fun bindExperienceService(service: ExperienceServiceImpl): ExperienceService
+
+    @Binds
+    @Singleton
+    fun bindFriendService(service: FriendServiceImpl): FriendService
 
     @Binds
     @Singleton
