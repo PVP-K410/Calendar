@@ -38,6 +38,7 @@ class FriendsViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val friendObject = user.flatMapLatest { user ->
         user?.email?.let { email ->
+            friendService.create(email)
             friendService.get(email)
         } ?: flowOf(null)
     }.stateIn(
@@ -45,16 +46,6 @@ class FriendsViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
-
-    init {
-        viewModelScope.launch {
-            user.collect { user ->
-                user?.email?.let { email ->
-                    friendService.create(email)
-                }
-            }
-        }
-    }
 
     fun create(email: String) {
         viewModelScope.launch {
@@ -64,6 +55,8 @@ class FriendsViewModel @Inject constructor(
 
     fun addFriend(friendEmail: String) {
         viewModelScope.launch {
+            _isRequestSent.value = false
+
             if (friendEmail.isEmpty()) {
                 toastMessage.value = "Please enter an email"
                 _isRequestSent.value = false
@@ -98,7 +91,10 @@ class FriendsViewModel @Inject constructor(
             )
 
             toastMessage.value = toastMessageValue
-            _isRequestSent.value = toastMessageValue == "Friend request sent!"
+            _isRequestSent.value = (
+                    toastMessageValue == "Friend request sent!" ||
+                    toastMessageValue == "Friend request accepted!"
+                    )
         }
     }
 
@@ -160,6 +156,6 @@ class FriendsViewModel @Inject constructor(
             avatar = userService.resolveAvatar(friendEmail)
         }
 
-        return avatar ?: ImageBitmap(0, 0)
+        return avatar!!
     }
 }

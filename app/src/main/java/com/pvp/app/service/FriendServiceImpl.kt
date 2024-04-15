@@ -105,7 +105,13 @@ class FriendServiceImpl @Inject constructor(
         }
 
         if (friendEmail in friendObject.receivedRequests) {
-            return "Friend request already received from $friendEmail"
+            acceptFriendRequest(
+                friendObject,
+                email,
+                friendEmail
+            )
+
+            return "Friend request accepted!"
         }
 
         val friendNew = friend.copy(

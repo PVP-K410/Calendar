@@ -86,7 +86,7 @@ fun FriendsScreen(
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
         currentUserEmail?.let { email ->
             model.create(email)
         }
