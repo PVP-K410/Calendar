@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -150,5 +151,11 @@ class FriendsViewModel @Inject constructor(
         }
 
         return avatar!!
+    }
+
+    suspend fun getFriendData(email: String): User? {
+        return userService
+            .get(email)
+            .firstOrNull()
     }
 }

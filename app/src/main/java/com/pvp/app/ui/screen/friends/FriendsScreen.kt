@@ -30,6 +30,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -53,6 +54,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.model.User
+
+enum class SortingType {
+    EXPERIENCE,
+    POINTS
+}
 
 @Composable
 fun FriendsScreen(
@@ -61,7 +68,6 @@ fun FriendsScreen(
     val context = LocalContext.current
     val toastMessage by model.toastMessage
     val friendObject by model.friendObject.collectAsStateWithLifecycle()
-    val currentUserEmail = model.user.collectAsStateWithLifecycle().value?.email
     val friends = friendObject?.friends ?: emptyList()
     val isRequestSent by model.isRequestSent.collectAsState(false)
     val receivedRequests = friendObject?.receivedRequests ?: emptyList()
@@ -69,6 +75,10 @@ fun FriendsScreen(
     val friendEmail = remember { mutableStateOf("") }
     val showAddFriend = remember { mutableStateOf(false) }
     val showRequests = remember { mutableStateOf(false) }
+    val showSorting = remember { mutableStateOf(false) }
+    val sortingType = remember { mutableStateOf(SortingType.EXPERIENCE) }
+    val sortedFriends = remember { mutableStateOf(emptyList<String>()) }
+    val friendsData = remember { mutableStateOf<List<User>>(emptyList()) }
     val selectedTab = remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
 
@@ -93,6 +103,17 @@ fun FriendsScreen(
         }
     }
 
+    LaunchedEffect(
+        friends,
+        sortingType.value
+    ) {
+        sortedFriends.value = sortFriends(
+            friends,
+            sortingType.value,
+            model
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -106,7 +127,8 @@ fun FriendsScreen(
     ) {
         TopRowWithButtons(
             showAddFriend,
-            showRequests
+            showRequests,
+            showSorting
         )
 
         Text(
@@ -119,7 +141,7 @@ fun FriendsScreen(
         )
 
         FriendList(
-            friends = friends,
+            friends = sortedFriends.value,
             model = model,
             scrollState = scrollState
         )
@@ -220,12 +242,70 @@ fun FriendsScreen(
             },
         )
     }
+
+    if (showSorting.value) {
+        AlertDialog(
+            onDismissRequest = { showSorting.value = false },
+            title = { Text("Sort by") },
+            text = {
+                Column {
+                    SortingType
+                        .entries
+                        .forEach { type ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable(
+                                onClick = {
+                                    sortingType.value = type
+                                    showSorting.value = false
+                                }
+                            )
+                        ) {
+                            RadioButton(
+                                selected = sortingType.value == type,
+                                onClick = {
+                                    sortingType.value = type
+                                    showSorting.value = false
+                                }
+                            )
+
+                            Text(
+                                text = type
+                                    .name
+                                    .toLowerCase()
+                                    .capitalize(),
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = { }
+        )
+    }
+}
+
+
+private suspend fun sortFriends(
+    friends: List<String>,
+    sortingType: SortingType,
+    model: FriendsViewModel
+): List<String> {
+    val users = friends.map { email -> model.getFriendData(email) }
+
+    val sortedUsers = when (sortingType) {
+        SortingType.EXPERIENCE -> users.sortedByDescending { it!!.experience }
+        SortingType.POINTS -> users.sortedBy { it!!.points }
+    }
+
+    return sortedUsers.map { it!!.email }
 }
 
 @Composable
 private fun TopRowWithButtons(
     showAddFriend: MutableState<Boolean>,
-    showRequests: MutableState<Boolean>
+    showRequests: MutableState<Boolean>,
+    showSorting: MutableState<Boolean>
 ) {
     Row(
         modifier = Modifier
@@ -257,7 +337,7 @@ private fun TopRowWithButtons(
         )
 
         RowButton(
-            onClick = { /* TODO: show leaderboard sorting filters dialog */ },
+            onClick = { showSorting.value = true },
             modifier = Modifier.size(
                 width = 45.dp,
                 height = 35.dp
