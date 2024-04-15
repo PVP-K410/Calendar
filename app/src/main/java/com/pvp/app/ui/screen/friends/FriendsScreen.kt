@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.User
+import androidx.compose.runtime.collectAsState
 
 enum class SortingType {
     EXPERIENCE,
@@ -78,7 +79,7 @@ fun FriendsScreen(
     val showSorting = remember { mutableStateOf(false) }
     val sortingType = remember { mutableStateOf(SortingType.EXPERIENCE) }
     val sortedFriends = remember { mutableStateOf(emptyList<String>()) }
-    val friendsData = remember { mutableStateOf<List<User>>(emptyList()) }
+    val friendsData by model.friendsData.collectAsState()
     val selectedTab = remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
 
@@ -105,7 +106,8 @@ fun FriendsScreen(
 
     LaunchedEffect(
         friends,
-        sortingType.value
+        sortingType.value,
+        friendsData
     ) {
         sortedFriends.value = sortFriends(
             friends,

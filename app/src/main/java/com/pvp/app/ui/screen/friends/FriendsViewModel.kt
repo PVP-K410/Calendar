@@ -11,7 +11,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -29,6 +31,9 @@ class FriendsViewModel @Inject constructor(
 
     private val _isRequestSent = MutableStateFlow(false)
     val isRequestSent = _isRequestSent.asStateFlow()
+
+    private val _friendsData = MutableStateFlow<List<User>>(emptyList())
+    val friendsData: StateFlow<List<User>> = _friendsData.asStateFlow()
 
     val user = userService.user.stateIn(
         viewModelScope,
@@ -48,6 +53,20 @@ class FriendsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
+
+    init {
+        viewModelScope.launch {
+            friendObject.collect { friendObject ->
+                friendObject?.let {
+                    val userFlows = friendService.getFriendsData(it.friends)
+                    val usersFlow = combine(userFlows) { users -> users.filterNotNull() }
+                    usersFlow.collect { users ->
+                        _friendsData.value = users
+                    }
+                }
+            }
+        }
+    }
 
     fun addFriend(friendEmail: String) {
         viewModelScope.launch {

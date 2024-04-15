@@ -5,6 +5,7 @@ import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.FriendObject
+import com.pvp.app.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -209,4 +210,9 @@ class FriendServiceImpl @Inject constructor(
         return "Friend request cancelled!"
     }
 
+    override suspend fun getFriendsData(emails: List<String>): List<Flow<User?>> {
+        return emails.map { email ->
+            userService.get(email)
+        }
+    }
 }
