@@ -38,7 +38,56 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.ui.common.underline
-import com.pvp.app.ui.screen.decoration.WorkState.Error.AlreadyApplied.WorkStateHandler
+import com.pvp.app.ui.screen.decoration.WorkState.Companion.WorkStateHandler
+
+@Composable
+private fun Apply(model: DecorationViewModel = hiltViewModel()) {
+    val state by model.state.collectAsStateWithLifecycle()
+
+    WorkStateHandler(
+        resetState = model::resetWorkState,
+        state = state.workState
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.extraSmall)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    shape = MaterialTheme.shapes.extraSmall
+                )
+                .padding(8.dp)
+                .underline(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                contentDescription = "User avatar with applied decorations",
+                modifier = Modifier.size(256.dp),
+                painter = BitmapPainter(state.avatar)
+            )
+        }
+
+        val holders = state.holders.filter { it.owned }
+
+        if (holders.isEmpty()) {
+            Text(
+                style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                text = "No decorations owned"
+            )
+        } else {
+            DecorationCards(
+                actionImageVector = Icons.Outlined.TouchApp,
+                actionPurchase = false,
+                holders = holders,
+            ) { model.apply(it.decoration) }
+        }
+    }
+}
 
 @Composable
 fun DecorationScreen() {
@@ -103,56 +152,7 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun Select(model: DecorationViewModel = hiltViewModel()) {
-    val state by model.state.collectAsStateWithLifecycle()
-
-    WorkStateHandler(
-        resetState = model::resetWorkState,
-        state = state.workState
-    )
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.extraSmall)
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    shape = MaterialTheme.shapes.extraSmall
-                )
-                .padding(8.dp)
-                .underline(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                contentDescription = "User avatar with applied decorations",
-                modifier = Modifier.size(256.dp),
-                painter = BitmapPainter(state.avatar)
-            )
-        }
-
-        val holders = state.holders.filter { it.owned }
-
-        if (holders.isEmpty()) {
-            Text(
-                style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                text = "No decorations owned"
-            )
-        } else {
-            DecorationCards(
-                actionImageVector = Icons.Outlined.TouchApp,
-                actionPurchase = false,
-                holders = holders,
-            ) { model.apply(it.decoration) }
-        }
-    }
-}
-
-@Composable
 private fun screens() = listOf<Pair<String, @Composable () -> Unit>>(
     "Purchase" to { Purchase() },
-    "Owned" to { Select() },
+    "Owned" to { Apply() },
 )

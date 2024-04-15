@@ -2,18 +2,17 @@
 
 package com.pvp.app.ui.screen.decoration
 
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.DecorationService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Decoration
-import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
@@ -38,26 +37,27 @@ class DecorationViewModel @Inject constructor(
     private fun collectStateChanges() {
         viewModelScope.launch {
             userService.user
+                .filterNotNull()
                 .flatMapLatest { user ->
                     decorationService
                         .get()
                         .mapLatest { decorations ->
-                            DecorationState(
-                                avatar = user?.avatar ?: ImageBitmap(
-                                    1,
-                                    1
-                                ),
-                                holders = decorations.map { decoration ->
-                                    DecorationHolder(
-                                        applied = user?.decorationsApplied?.contains(decoration.id)
-                                            ?: false,
-                                        decoration = decoration,
-                                        image = decorationService.getImage(decoration),
-                                        owned = user?.decorationsOwned?.contains(decoration.id)
-                                            ?: false
-                                    )
-                                },
-                                user = user ?: User()
+                            return@mapLatest DecorationState(
+                                avatar = user.avatar!!,
+                                holders = decorations
+                                    .map { decoration ->
+                                        DecorationHolder(
+                                            applied = decoration.id in user.decorationsApplied,
+                                            decoration = decoration,
+                                            image = decorationService.getImage(decoration),
+                                            owned = decoration.id in user.decorationsOwned
+                                        )
+                                    }
+                                    .sortedWith(
+                                        compareBy<DecorationHolder> { it.decoration.type }
+                                            .thenBy { it.decoration.price }
+                                    ),
+                                user = user
                             )
                         }
                 }
@@ -77,23 +77,14 @@ class DecorationViewModel @Inject constructor(
         _state.update { it.copy(workState = WorkState.Loading) }
 
         viewModelScope.launch {
-            val state = _state.first()
-
-            if (decoration.id in state.user.decorationsApplied) {
-                _state.update { it.copy(workState = WorkState.Error.AlreadyApplied) }
-
-                return@launch
-            }
-
             try {
                 _state.update {
-                    it.copy(
-                        avatar = decorationService.apply(
-                            it.avatar,
-                            decoration
-                        ),
-                        workState = WorkState.Success.Apply
+                    decorationService.apply(
+                        decoration,
+                        user = it.user
                     )
+
+                    it.copy(workState = WorkState.Success.Apply)
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(workState = WorkState.Error) }

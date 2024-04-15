@@ -32,8 +32,6 @@ sealed class WorkState {
 
     sealed class Error : WorkState() {
 
-        data object AlreadyApplied : Error()
-
         data object AlreadyOwned : Error()
 
         data object InsufficientFunds : Error()
@@ -54,37 +52,39 @@ sealed class WorkState {
         companion object : Success()
     }
 
-    @Composable
-    fun WorkStateHandler(
-        resetState: () -> Unit,
-        state: WorkState
-    ) {
-        val context = LocalContext.current
+    companion object {
 
-        LaunchedEffect(state) {
-            when (state) {
-                is NoOperation -> return@LaunchedEffect
+        @Composable
+        fun WorkStateHandler(
+            resetState: () -> Unit,
+            state: WorkState
+        ) {
+            val context = LocalContext.current
 
-                is Success -> when (state) {
-                    is Success.Apply -> context.showToast(message = "Successfully applied decoration")
-                    is Success.Purchase -> context.showToast(message = "Successfully purchased decoration")
+            LaunchedEffect(state) {
+                when (state) {
+                    is NoOperation -> return@LaunchedEffect
 
-                    else -> context.showToast(message = "Success")
+                    is Success -> when (state) {
+                        is Success.Apply -> context.showToast(message = "Successfully applied decoration")
+                        is Success.Purchase -> context.showToast(message = "Successfully purchased decoration")
+
+                        else -> context.showToast(message = "Success")
+                    }
+
+                    is Error -> when (state) {
+                        is Error.AlreadyOwned -> context.showToast(message = "You already own this decoration")
+                        is Error.InsufficientFunds -> context.showToast(message = "Not enough points to purchase decoration")
+
+                        else -> context.showToast(message = "Error has occurred")
+
+                    }
+
+                    else -> {}
                 }
 
-                is Error -> when (state) {
-                    is Error.AlreadyApplied -> context.showToast(message = "You already have this decoration applied")
-                    is Error.AlreadyOwned -> context.showToast(message = "You already own this decoration")
-                    is Error.InsufficientFunds -> context.showToast(message = "Not enough points to purchase decoration")
-
-                    else -> context.showToast(message = "Error has occurred")
-
-                }
-
-                else -> {}
+                resetState()
             }
-
-            resetState()
         }
     }
 }
