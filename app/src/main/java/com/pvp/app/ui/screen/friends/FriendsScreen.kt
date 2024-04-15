@@ -86,12 +86,6 @@ fun FriendsScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        currentUserEmail?.let { email ->
-            model.create(email)
-        }
-    }
-
     LaunchedEffect(isRequestSent) {
         if (isRequestSent) {
             showAddFriend.value = false

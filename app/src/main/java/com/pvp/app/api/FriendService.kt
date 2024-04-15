@@ -27,13 +27,6 @@ interface FriendService : DocumentsCollection {
     suspend fun remove(email: String)
 
     /**
-     * Creates a new FriendObject for a given email if it does not already exist.
-     *
-     * @param email for which to create a FriendObject.
-     */
-    suspend fun create(email: String)
-
-    /**
      * IMPORTANT!!! This method returns a string that is strictly associated with how ViewModel works.
      * IMPORTANT!!! If any changes to the default implementation are made, changes in the ViewModel should also be made.
      *

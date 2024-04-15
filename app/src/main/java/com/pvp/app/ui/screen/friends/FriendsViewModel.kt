@@ -39,7 +39,6 @@ class FriendsViewModel @Inject constructor(
     val friendObject = user
         .flatMapLatest { user ->
             user?.email?.let { email ->
-                friendService.create(email)
                 friendService.get(email)
             } ?: flowOf(null)
         }
@@ -48,12 +47,6 @@ class FriendsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
-
-    fun create(email: String) {
-        viewModelScope.launch {
-            friendService.create(email)
-        }
-    }
 
     fun addFriend(friendEmail: String) {
         viewModelScope.launch {
@@ -83,8 +76,6 @@ class FriendsViewModel @Inject constructor(
 
                 return@launch
             }
-
-            friendService.create(friendEmail)
 
             val toastMessageValue = friendService.addFriend(
                 friendObject,

@@ -66,24 +66,6 @@ class FriendServiceImpl @Inject constructor(
             .await()
     }
 
-    override suspend fun create(email: String) {
-        val friendObject = get(email)
-            .first()
-
-        if (friendObject == null) {
-            val newFriendObject = FriendObject(
-                friends = emptyList(),
-                receivedRequests = emptyList(),
-                sentRequests = emptyList()
-            )
-
-            merge(
-                newFriendObject,
-                email
-            )
-        }
-    }
-
     override suspend fun addFriend(
         friendObject: FriendObject,
         email: String,

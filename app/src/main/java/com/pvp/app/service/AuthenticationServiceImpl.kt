@@ -10,9 +10,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.pvp.app.api.AuthenticationService
+import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
 import com.pvp.app.di.AuthenticationModule
 import com.pvp.app.model.AuthenticationResult
+import com.pvp.app.model.FriendObject
 import com.pvp.app.model.SignOutResult
 import com.pvp.app.model.User
 import com.pvp.app.model.UserProperties
@@ -27,6 +29,7 @@ import javax.inject.Named
 class AuthenticationServiceImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val client: SignInClient,
+    private val friendService: FriendService,
     @Named(AuthenticationModule.INTENT_GOOGLE_SIGN_IN)
     private val intent: Intent,
     private val request: BeginSignInRequest,
@@ -96,6 +99,15 @@ class AuthenticationServiceImpl @Inject constructor(
                 points = 0,
                 username = user.displayName ?: user.email!!.substringBefore("@")
             )
+        )
+
+        friendService.merge(
+            FriendObject(
+                friends = emptyList(),
+                receivedRequests = emptyList(),
+                sentRequests = emptyList()
+            ),
+            user.email!!
         )
     }
 
