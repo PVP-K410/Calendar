@@ -29,7 +29,6 @@ import java.time.LocalDate
 
 @Composable
 fun Day(
-    clickEnabled: Boolean = false,
     date: LocalDate = LocalDate.MIN,
     name: String = "Day",
     onClick: () -> Unit = {}
@@ -59,7 +58,6 @@ fun Day(
                     .fillMaxSize()
                     .clip(RoundedCornerShape(10.dp))
                     .clickable(
-                        enabled = clickEnabled,
                         onClick = onClick
                     )
             ) {
@@ -95,7 +93,6 @@ fun Day(
 
 @Composable
 fun DayCard(
-    clickEnabled: Boolean,
     date: LocalDate,
     day: String,
     onClick: () -> Unit,
@@ -119,7 +116,6 @@ fun DayCard(
         contentAlignment = Alignment.TopCenter
     ) {
         Day(
-            clickEnabled = clickEnabled,
             date = date,
             name = day,
             onClick = onClick
