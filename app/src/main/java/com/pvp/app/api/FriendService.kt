@@ -16,7 +16,10 @@ interface FriendService : DocumentsCollection {
     /**
      * Creates or updates the FriendObject in the database.
      */
-    suspend fun merge(friendObject: FriendObject, userEmail: String)
+    suspend fun merge(
+        friendObject: FriendObject,
+        email: String
+    )
 
     /**
      * Removes an FriendObject from the database with all associated children data.
@@ -28,19 +31,19 @@ interface FriendService : DocumentsCollection {
      *
      * @param email for which to create a FriendObject.
      */
-    suspend fun createFriendObject(email: String)
+    suspend fun create(email: String)
 
     /**
      * Sends a friend request from the current user to another user.
      *
      * @param friendObject of the current user.
-     * @param userEmail of the current user.
+     * @param email of the current user.
      * @param friendEmail of the user to whom the friend request is being sent.
      * @return a string message indicating the result of the operation.
      */
     suspend fun addFriend(
         friendObject: FriendObject,
-        userEmail: String,
+        email: String,
         friendEmail: String
     ): String
 
@@ -48,13 +51,13 @@ interface FriendService : DocumentsCollection {
      * Accepts a friend request from another user.
      *
      * @param friendObject of the current user.
-     * @param userEmail of the current user.
+     * @param email of the current user.
      * @param friendEmail of the user whose friend request is being accepted.
      * @return a string message indicating the result of the operation.
      */
     suspend fun acceptFriendRequest(
         friendObject: FriendObject,
-        userEmail: String,
+        email: String,
         friendEmail: String
     ): String
 
@@ -62,13 +65,13 @@ interface FriendService : DocumentsCollection {
      * Denies a friend request from another user.
      *
      * @param friendObject of the current user.
-     * @param userEmail of the current user.
+     * @param email of the current user.
      * @param friendEmail of the user whose friend request is being denied.
      * @return a string message indicating the result of the operation.
      */
     suspend fun denyFriendRequest(
         friendObject: FriendObject,
-        userEmail: String,
+        email: String,
         friendEmail: String
     ): String
 
@@ -76,13 +79,13 @@ interface FriendService : DocumentsCollection {
      * Cancels a friend request that the current user has sent to another user.
      *
      * @param friendObject of the current user.
-     * @param userEmail of the current user.
+     * @param email of the current user.
      * @param friendEmail of the user to whom the friend request was sent.
      * @return a string message indicating the result of the operation.
      */
     suspend fun cancelSentRequest(
         friendObject: FriendObject,
-        userEmail: String,
+        email: String,
         friendEmail: String
     ): String
 }

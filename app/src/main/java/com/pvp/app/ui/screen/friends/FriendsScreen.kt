@@ -81,13 +81,14 @@ fun FriendsScreen(
                     Toast.LENGTH_SHORT
                 )
                 .show()
+
             model.toastMessage.value = null
         }
     }
 
     LaunchedEffect(key1 = Unit) {
-        currentUserEmail?.let { userEmail ->
-            model.createFriendObject(userEmail)
+        currentUserEmail?.let { email ->
+            model.create(email)
         }
     }
 
@@ -262,7 +263,7 @@ private fun TopRowWithButtons(
         )
 
         RowButton(
-            onClick = { /* TODO */ },
+            onClick = { /* TODO: show leaderboard sorting filters dialog */ },
             modifier = Modifier.size(
                 width = 45.dp,
                 height = 35.dp
@@ -372,9 +373,7 @@ private fun RequestList(
 ) {
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier.verticalScroll(scrollState)
-    ) {
+    Column(modifier = Modifier.verticalScroll(scrollState)) {
         if (requests.isEmpty()) {
             Text(
                 "No $requestTitle requests",
@@ -388,9 +387,7 @@ private fun RequestList(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(30.dp)
-                        .padding(
-                            vertical = 2.dp
-                        )
+                        .padding(vertical = 2.dp)
                         .background(
                             MaterialTheme.colorScheme.secondaryContainer,
                             MaterialTheme.shapes.small

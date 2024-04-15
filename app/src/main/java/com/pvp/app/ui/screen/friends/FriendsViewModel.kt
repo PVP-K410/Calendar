@@ -18,13 +18,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
     private val friendService: FriendService,
     private val userService: UserService
 ) : ViewModel() {
+
     val toastMessage = mutableStateOf<String?>(null)
+
     private val _isRequestSent = MutableStateFlow(false)
     val isRequestSent = _isRequestSent.asStateFlow()
 
@@ -36,8 +37,8 @@ class FriendsViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val friendObject = user.flatMapLatest { user ->
-        user?.email?.let { userEmail ->
-            friendService.get(userEmail)
+        user?.email?.let { email ->
+            friendService.get(email)
         } ?: flowOf(null)
     }.stateIn(
         viewModelScope,
@@ -49,43 +50,53 @@ class FriendsViewModel @Inject constructor(
         viewModelScope.launch {
             user.collect { user ->
                 user?.email?.let { email ->
-                    friendService.createFriendObject(email)
+                    friendService.create(email)
                 }
             }
         }
     }
 
-    fun createFriendObject(email: String) {
+    fun create(email: String) {
         viewModelScope.launch {
-            friendService.createFriendObject(email)
+            friendService.create(email)
         }
     }
 
-    fun addFriend(friendEmail: String){
+    fun addFriend(friendEmail: String) {
         viewModelScope.launch {
             if (friendEmail.isEmpty()) {
                 toastMessage.value = "Please enter an email"
                 _isRequestSent.value = false
+
                 return@launch
             }
 
-            val userEmail = user.value?.email ?: return@launch
-            val friendObject = friendService.get(userEmail).firstOrNull() ?: return@launch
-            val friendUser = userService.get(friendEmail).firstOrNull()
+            val email = user.value?.email ?: return@launch
+
+            val friendObject = friendService
+                .get(email)
+                .firstOrNull()
+                ?: return@launch
+
+            val friendUser = userService
+                .get(friendEmail)
+                .firstOrNull()
 
             if (friendUser == null) {
                 toastMessage.value = "User with email $friendEmail does not exist"
                 _isRequestSent.value = false
+
                 return@launch
             }
 
-            friendService.createFriendObject(friendEmail)
+            friendService.create(friendEmail)
 
             val toastMessageValue = friendService.addFriend(
                 friendObject,
-                userEmail,
+                email,
                 friendEmail
             )
+
             toastMessage.value = toastMessageValue
             _isRequestSent.value = toastMessageValue == "Friend request sent!"
         }
@@ -93,12 +104,16 @@ class FriendsViewModel @Inject constructor(
 
     fun acceptFriendRequest(friendEmail: String) {
         viewModelScope.launch {
-            val userEmail = user.value?.email ?: return@launch
-            val friendObject = friendService.get(userEmail).firstOrNull() ?: return@launch
+            val email = user.value?.email ?: return@launch
+
+            val friendObject = friendService
+                .get(email)
+                .firstOrNull()
+                ?: return@launch
 
             toastMessage.value = friendService.acceptFriendRequest(
                 friendObject,
-                userEmail,
+                email,
                 friendEmail
             )
         }
@@ -106,12 +121,16 @@ class FriendsViewModel @Inject constructor(
 
     fun denyFriendRequest(friendEmail: String) {
         viewModelScope.launch {
-            val userEmail = user.value?.email ?: return@launch
-            val friendObject = friendService.get(userEmail).firstOrNull() ?: return@launch
+            val email = user.value?.email ?: return@launch
+
+            val friendObject = friendService
+                .get(email)
+                .firstOrNull()
+                ?: return@launch
 
             toastMessage.value = friendService.denyFriendRequest(
                 friendObject,
-                userEmail,
+                email,
                 friendEmail
             )
         }
@@ -119,12 +138,16 @@ class FriendsViewModel @Inject constructor(
 
     fun cancelSentRequest(friendEmail: String) {
         viewModelScope.launch {
-            val userEmail = user.value?.email ?: return@launch
-            val friendObject = friendService.get(userEmail).firstOrNull() ?: return@launch
+            val email = user.value?.email ?: return@launch
+
+            val friendObject = friendService
+                .get(email)
+                .firstOrNull()
+                ?: return@launch
 
             toastMessage.value = friendService.cancelSentRequest(
                 friendObject,
-                userEmail,
+                email,
                 friendEmail
             )
         }
