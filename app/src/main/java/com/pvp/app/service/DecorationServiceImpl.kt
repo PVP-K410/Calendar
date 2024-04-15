@@ -74,6 +74,13 @@ class DecorationServiceImpl @Inject constructor(
             }
     }
 
+    override suspend fun getImage(decoration: Decoration): ImageBitmap {
+        return ImageBitmap(
+            1,
+            1
+        )
+    }
+
     override suspend fun merge(decoration: Decoration) {
         database
             .collection(identifier)

@@ -52,6 +52,7 @@ class DecorationViewModel @Inject constructor(
                                         applied = user?.decorationsApplied?.contains(decoration.id)
                                             ?: false,
                                         decoration = decoration,
+                                        image = decorationService.getImage(decoration),
                                         owned = user?.decorationsOwned?.contains(decoration.id)
                                             ?: false
                                     )

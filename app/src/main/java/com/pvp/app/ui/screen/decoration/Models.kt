@@ -11,6 +11,10 @@ import com.pvp.app.ui.common.showToast
 data class DecorationHolder(
     val applied: Boolean = false,
     val decoration: Decoration,
+    val image: ImageBitmap = ImageBitmap(
+        1,
+        1
+    ),
     val owned: Boolean = false
 )
 
