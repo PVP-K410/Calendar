@@ -34,6 +34,9 @@ interface FriendService : DocumentsCollection {
     suspend fun create(email: String)
 
     /**
+     * IMPORTANT!!! This method returns a string that is strictly associated with how ViewModel works.
+     * IMPORTANT!!! If any changes to the default implementation are made, changes in the ViewModel should also be made.
+     *
      * Sends a friend request from the current user to another user.
      *
      * @param friendObject of the current user.

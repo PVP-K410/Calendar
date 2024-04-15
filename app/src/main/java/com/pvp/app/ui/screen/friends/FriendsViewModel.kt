@@ -36,16 +36,18 @@ class FriendsViewModel @Inject constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val friendObject = user.flatMapLatest { user ->
-        user?.email?.let { email ->
-            friendService.create(email)
-            friendService.get(email)
-        } ?: flowOf(null)
-    }.stateIn(
-        viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
-    )
+    val friendObject = user
+        .flatMapLatest { user ->
+            user?.email?.let { email ->
+                friendService.create(email)
+                friendService.get(email)
+            } ?: flowOf(null)
+        }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
 
     fun create(email: String) {
         viewModelScope.launch {
@@ -93,7 +95,7 @@ class FriendsViewModel @Inject constructor(
             toastMessage.value = toastMessageValue
             _isRequestSent.value = (
                     toastMessageValue == "Friend request sent!" ||
-                    toastMessageValue == "Friend request accepted!"
+                    toastMessageValue == "Both of you want to be friends! Request accepted!"
                     )
         }
     }

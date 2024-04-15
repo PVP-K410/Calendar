@@ -111,7 +111,7 @@ class FriendServiceImpl @Inject constructor(
                 friendEmail
             )
 
-            return "Friend request accepted!"
+            return "Both of you want to be friends! Request accepted!"
         }
 
         val friendNew = friend.copy(
