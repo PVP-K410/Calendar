@@ -5,6 +5,7 @@ package com.pvp.app.service
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.AuthenticationService
+import com.pvp.app.api.DecorationService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi

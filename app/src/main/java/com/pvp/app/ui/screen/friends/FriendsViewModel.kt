@@ -16,6 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -159,12 +160,14 @@ class FriendsViewModel @Inject constructor(
     }
 
     fun getFriendAvatar(friendEmail: String): ImageBitmap {
-        var avatar: ImageBitmap? = null
+        lateinit var avatar: ImageBitmap
 
         viewModelScope.launch {
-            avatar = userService.resolveAvatar(friendEmail)
+            avatar = userService
+                .get(friendEmail)
+                .first()!!.avatar!!
         }
 
-        return avatar!!
+        return avatar
     }
 }
