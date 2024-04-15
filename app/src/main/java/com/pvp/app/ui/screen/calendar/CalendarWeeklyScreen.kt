@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Task
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -42,7 +44,7 @@ fun Week(
     val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
     var stateDialog by remember { mutableStateOf(false) }
-    var navigateToPage by remember { mutableStateOf<Int?>(null) }
+    val scope = rememberCoroutineScope()
 
     val statePager = rememberPagerState(
         initialPage = dates.indexOf(today),
@@ -52,13 +54,6 @@ fun Week(
     val date = dates[statePager.currentPage]
     var stateShowCards by remember { mutableStateOf(false) }
     val tasksFiltered = tasks.filter { it.date == date }
-
-    LaunchedEffect(navigateToPage) {
-        navigateToPage?.let { page ->
-            statePager.scrollToPage(page)
-            navigateToPage = null
-        }
-    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -72,12 +67,13 @@ fun Week(
             state = statePager
         ) { page ->
             DayCard(
-                clickEnabled = true,
                 date = dates[page],
                 day = days[page],
                 onClick = {
                     if (date != dates[page]) {
-                        navigateToPage = page
+                        scope.launch {
+                            statePager.scrollToPage(page)
+                        }
                     }
                     else {
                         if (tasksFiltered.isEmpty()) {
