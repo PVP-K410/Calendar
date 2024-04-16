@@ -44,6 +44,13 @@ interface DecorationService : DocumentsCollection {
     suspend fun get(): Flow<List<Decoration>>
 
     /**
+     *  Get a decoration by its id.
+     *
+     *  @return A flow of the decoration.
+     */
+    suspend fun get(id: String): Flow<Decoration>
+
+    /**
      * Gets decorated version of user's avatar.
      *
      * @param user The user to get the avatar for.

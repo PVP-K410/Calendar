@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pvp.app.ui.common.AsyncImage
 import com.pvp.app.ui.common.darken
@@ -124,8 +125,9 @@ private fun DecorationCard(
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(0.35f)
+                    .fillMaxWidth(0.4f)
                     .size(128.dp)
+                    .padding(end = 8.dp)
             ) {
                 AsyncImage(
                     contentDescription = "Decoration ${holder.decoration.name} image",
@@ -142,7 +144,7 @@ private fun DecorationCard(
                             shape = MaterialTheme.shapes.extraSmall
                         )
                         .padding(16.dp),
-                    url = holder.decoration.imageUrl
+                    url = holder.decoration.imageRepresentativeUrl
                 )
             }
 
@@ -154,12 +156,14 @@ private fun DecorationCard(
             ) {
                 Text(
                     style = MaterialTheme.typography.titleLarge,
-                    text = holder.decoration.name
+                    text = holder.decoration.name,
+                    textAlign = TextAlign.Justify
                 )
 
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
-                    text = holder.decoration.description
+                    text = holder.decoration.description,
+                    textAlign = TextAlign.Justify
                 )
             }
         }

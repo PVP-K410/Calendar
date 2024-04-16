@@ -2,7 +2,11 @@
 
 package com.pvp.app.service
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.Configuration
@@ -10,9 +14,12 @@ import com.pvp.app.api.DecorationService
 import com.pvp.app.api.ImageService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Decoration
+import com.pvp.app.model.Type
 import com.pvp.app.model.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -29,7 +36,31 @@ class DecorationServiceImpl @Inject constructor(
         decoration: Decoration,
         image: ImageBitmap
     ): ImageBitmap {
-        return image
+        val bitmapBase = image
+            .asAndroidBitmap()
+            .copy(
+                Bitmap.Config.ARGB_8888,
+                true
+            )
+
+        val bitmapDecoration = imageService
+            .get(decoration.imageLayerUrl)
+            .asAndroidBitmap()
+            .resize(
+                bitmapBase.width,
+                bitmapBase.height
+            )
+
+        val canvas = Canvas(bitmapBase)
+
+        canvas.drawBitmap(
+            bitmapDecoration,
+            0f,
+            0f,
+            null
+        )
+
+        return bitmapBase.asImageBitmap()
     }
 
     override suspend fun apply(
@@ -64,8 +95,44 @@ class DecorationServiceImpl @Inject constructor(
             }
     }
 
+    override suspend fun get(id: String): Flow<Decoration> {
+        return database
+            .collection(identifier)
+            .document(id)
+            .snapshots()
+            .mapLatest { snapshot -> snapshot.toObject(Decoration::class.java) }
+            .filterNotNull()
+    }
+
     override suspend fun getAvatar(user: Flow<User?>): Flow<ImageBitmap> {
-        return user.mapLatest { imageService.getOrDefault(configuration.imageUrlDefaultAvatar) }
+        return user.mapLatest { user ->
+            var avatar = imageService.getOrDefault(configuration.imageUrlDefaultAvatar)
+
+            if (user == null) {
+                return@mapLatest avatar
+            }
+
+            user.decorationsApplied
+                .mapNotNull {
+                    get(it)
+                        .firstOrNull()
+                }
+                .sortedWith(
+                    compareBy<Decoration> { it.type == Type.AVATAR_BODY }
+                        .thenBy { it.type == Type.AVATAR_FACE }
+                        .thenBy { it.type == Type.AVATAR_HEAD }
+                        .thenBy { it.type == Type.AVATAR_LEGGINGS }
+                        .thenBy { it.type == Type.AVATAR_SHOES }
+                )
+                .forEach {
+                    avatar = apply(
+                        it,
+                        avatar
+                    )
+                }
+
+            avatar
+        }
     }
 
     override suspend fun merge(decoration: Decoration) {
@@ -111,5 +178,20 @@ class DecorationServiceImpl @Inject constructor(
                     .let { document -> transaction.delete(document) }
             }
             .await()
+    }
+
+    companion object {
+
+        private fun Bitmap.resize(
+            width: Int,
+            height: Int
+        ): Bitmap {
+            return Bitmap.createScaledBitmap(
+                this,
+                width,
+                height,
+                true
+            )
+        }
     }
 }
