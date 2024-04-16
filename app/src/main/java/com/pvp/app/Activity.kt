@@ -14,8 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.api.SettingService
-import com.pvp.app.service.SettingServiceImpl
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.screen.layout.LayoutScreenBootstrap
 import com.pvp.app.ui.theme.CalendarTheme

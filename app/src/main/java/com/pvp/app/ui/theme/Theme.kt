@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModel
-import com.pvp.app.api.Configuration
 import com.pvp.app.api.SettingService
 import com.pvp.app.model.Setting
 import dagger.hilt.android.lifecycle.HiltViewModel

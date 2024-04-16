@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
@@ -25,7 +24,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,7 +37,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Setting
-import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
@@ -188,18 +185,12 @@ private fun SettingApplicationTheme(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .selectable(
-                            selected = themeValue == 1,
-                            onClick = {
-                                state.value = 1
-                            }
-                        )
                 ) {
                     RadioButton(
-                        selected = state.value == 1,
                         onClick = {
                             state.value = 1
-                        }
+                        },
+                        selected = state.value == 1,
                     )
 
                     Text(
@@ -215,18 +206,12 @@ private fun SettingApplicationTheme(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .selectable(
-                            selected = themeValue == 2,
-                            onClick = {
-                                state.value = 2
-                            }
-                        )
                 ) {
                     RadioButton(
-                        selected = state.value == 2,
                         onClick = {
                             state.value = 2
-                        }
+                        },
+                        selected = state.value == 2,
                     )
 
                     Text(
@@ -242,18 +227,12 @@ private fun SettingApplicationTheme(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .selectable(
-                            selected = themeValue == 3,
-                            onClick = {
-                                state.value = 3
-                            }
-                        )
                 ) {
                     RadioButton(
-                        selected = state.value == 3,
                         onClick = {
                             state.value = 3
-                        }
+                        },
+                        selected = state.value == 3,
                     )
 
                     Text(
