@@ -17,7 +17,9 @@ import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.ImageService
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.PointService
+import com.pvp.app.api.RewardService
 import com.pvp.app.api.SettingService
+import com.pvp.app.api.StreakService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.service.AuthenticationServiceImpl
@@ -30,7 +32,9 @@ import com.pvp.app.service.HealthConnectServiceImpl
 import com.pvp.app.service.ImageServiceImpl
 import com.pvp.app.service.NotificationServiceImpl
 import com.pvp.app.service.PointServiceImpl
+import com.pvp.app.service.RewardServiceImpl
 import com.pvp.app.service.SettingServiceImpl
+import com.pvp.app.service.StreakServiceImpl
 import com.pvp.app.service.TaskServiceImpl
 import com.pvp.app.service.UserServiceImpl
 import dagger.Binds
@@ -87,7 +91,15 @@ interface ServiceBindingsModule {
 
     @Binds
     @Singleton
+    fun bindRewardService(service: RewardServiceImpl): RewardService
+
+    @Binds
+    @Singleton
     fun bindSettingService(service: SettingServiceImpl): SettingService
+
+    @Binds
+    @Singleton
+    fun bindStreakService(service: StreakServiceImpl): StreakService
 
     @Binds
     @Singleton
