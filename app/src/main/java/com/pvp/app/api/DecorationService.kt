@@ -53,15 +53,6 @@ interface DecorationService : DocumentsCollection {
     suspend fun getAvatar(user: Flow<User?>): Flow<ImageBitmap>
 
     /**
-     * Get the image for a decoration.
-     *
-     * @param decoration The decoration to get the image for with [Decoration.imageUrl]
-     *
-     * @return The image for the decoration.
-     */
-    suspend fun getImage(decoration: Decoration): ImageBitmap
-
-    /**
      * Add a new decoration to the database or update an existing one.
      *
      * @param decoration The decoration to add or update.

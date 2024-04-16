@@ -14,7 +14,6 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.SvgDecoder
 import coil.disk.DiskCache
-import coil.request.CachePolicy
 import com.pvp.app.common.DateUtil.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.DailyTaskWorker
@@ -24,6 +23,7 @@ import com.pvp.app.worker.TaskAutocompleteWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
 import dagger.hilt.android.HiltAndroidApp
+import okhttp3.OkHttpClient
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -187,6 +187,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader = ImageLoader
         .Builder(this)
+        .addLastModifiedToFileCacheKey(true)
         .components { add(SvgDecoder.Factory()) }
         .diskCache {
             DiskCache
@@ -194,6 +195,22 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
                 .directory(applicationContext.cacheDir.resolve("images"))
                 .build()
         }
-        .diskCachePolicy(CachePolicy.ENABLED)
+        .okHttpClient {
+            OkHttpClient
+                .Builder()
+                .addInterceptor { chain ->
+                    chain
+                        .proceed(chain.request())
+                        .newBuilder()
+                        .removeHeader("cache-control")
+                        .removeHeader("expires")
+                        .addHeader(
+                            "cache-control",
+                            "public, max-age=259200"
+                        )
+                        .build()
+                }
+                .build()
+        }
         .build()
 }

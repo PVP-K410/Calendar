@@ -2,11 +2,11 @@ package com.pvp.app.di
 
 import android.content.Context
 import androidx.work.WorkManager
+import coil.Coil
+import coil.ImageLoader
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.app
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.storage
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.DecorationService
@@ -14,6 +14,7 @@ import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.HealthConnectService
+import com.pvp.app.api.ImageService
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.SettingService
@@ -26,6 +27,7 @@ import com.pvp.app.service.ExerciseServiceImpl
 import com.pvp.app.service.ExperienceServiceImpl
 import com.pvp.app.service.FriendServiceImpl
 import com.pvp.app.service.HealthConnectServiceImpl
+import com.pvp.app.service.ImageServiceImpl
 import com.pvp.app.service.NotificationServiceImpl
 import com.pvp.app.service.PointServiceImpl
 import com.pvp.app.service.SettingServiceImpl
@@ -73,6 +75,10 @@ interface ServiceBindingsModule {
 
     @Binds
     @Singleton
+    fun bindImageService(service: ImageServiceImpl): ImageService
+
+    @Binds
+    @Singleton
     fun bindNotificationService(service: NotificationServiceImpl): NotificationService
 
     @Binds
@@ -98,22 +104,22 @@ object ServiceProvidersModule {
 
     @Provides
     @Singleton
-    fun provideWorkManager(
-        @ApplicationContext
-        context: Context
-    ): WorkManager {
-        return WorkManager.getInstance(context)
-    }
-
-    @Provides
-    @Singleton
     fun provideFirebaseApp(): FirebaseApp {
         return Firebase.app
     }
 
     @Provides
     @Singleton
-    fun provideFirebaseStorage(): FirebaseStorage {
-        return Firebase.storage
+    fun provideImageLoader(@ApplicationContext context: Context): ImageLoader {
+        return Coil.imageLoader(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(
+        @ApplicationContext
+        context: Context
+    ): WorkManager {
+        return WorkManager.getInstance(context)
     }
 }

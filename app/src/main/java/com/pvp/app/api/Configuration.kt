@@ -52,6 +52,11 @@ interface Configuration {
     val rangeReminderMinutes: List<Int>
 
     /**
+     * The default image URL for the user avatar.
+     */
+    val imageUrlDefaultAvatar: String
+
+    /**
      * The inclusive interval of hours during which water drinking reminders are being sent.
      * Represents a range from startHour to endHour.
      */

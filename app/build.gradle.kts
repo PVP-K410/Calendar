@@ -128,7 +128,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.paging:paging-common-android:3.3.0-beta01")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
-    implementation("com.caverock:androidsvg-aar:1.4")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("com.google.code.gson:gson:2.10.1")
@@ -138,7 +137,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("io.coil-kt:coil-svg:2.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
@@ -146,8 +144,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     kapt("androidx.hilt:hilt-compiler:1.2.0")
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("androidx.hilt:hilt-work:1.2.0")
 
     // Test
     testImplementation("junit:junit:4.13.2")

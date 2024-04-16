@@ -27,11 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEachIndexed
-import coil.compose.AsyncImage
+import com.pvp.app.ui.common.AsyncImage
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
-import com.pvp.app.ui.common.requestImage
 import com.pvp.app.ui.common.underline
 
 @Composable
@@ -131,7 +129,6 @@ private fun DecorationCard(
             ) {
                 AsyncImage(
                     contentDescription = "Decoration ${holder.decoration.name} image",
-                    model = requestImage(url = holder.decoration.imageUrl),
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(MaterialTheme.shapes.extraSmall)
@@ -144,7 +141,8 @@ private fun DecorationCard(
                             color = MaterialTheme.colorScheme.inversePrimary,
                             shape = MaterialTheme.shapes.extraSmall
                         )
-                        .padding(16.dp)
+                        .padding(16.dp),
+                    url = holder.decoration.imageUrl
                 )
             }
 
@@ -204,7 +202,7 @@ fun DecorationCards(
                     text = type.toString()
                 )
 
-                holdersGrouped.fastForEachIndexed { index, holder ->
+                holdersGrouped.forEachIndexed { index, holder ->
                     DecorationCard(
                         actionImageVector = actionImageVector,
                         actionPurchase = actionPurchase,
