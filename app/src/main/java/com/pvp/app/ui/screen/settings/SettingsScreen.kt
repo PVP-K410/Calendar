@@ -54,7 +54,10 @@ private fun SettingNotificationReminderMinutes(
     val state = rememberPickerState(initialValue = minutes)
 
     SettingCard(
+        title = "Set Reminder Time",
         description = "Choose minutes before tasks reminder executes. Default is 10 minutes",
+        iconDescription = "Clickable icon to edit reminder time",
+        value = "$minutes minute${if (minutes != 1) "s" else ""}",
         editContent = {
             Column(
                 modifier = Modifier
@@ -87,9 +90,7 @@ private fun SettingNotificationReminderMinutes(
                     state.value
                 )
             }
-        },
-        title = "Set Reminder Time",
-        value = "$minutes minute${if (minutes != 1) "s" else ""}"
+        }
     )
 }
 
@@ -112,6 +113,7 @@ private fun SettingCupVolumeMl(
     SettingCard(
         title = "Set Cup Volume",
         description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
+        iconDescription = "Clickable icon to edit cup volume",
         value = "$volume ml",
         isEnabled = isEnabled,
         editContent = {
@@ -227,6 +229,7 @@ fun <T> SettingCard(
     onEdit: () -> Unit,
     title: String,
     value: T,
+    iconDescription: String? = null,
     isEnabled: Boolean = true
 ) {
     var textColor = MaterialTheme.colorScheme.onPrimary
@@ -324,7 +327,7 @@ fun <T> SettingCard(
 
                 Icon(
                     tint = textColor,
-                    contentDescription = "Open dialog to edit a setting",
+                    contentDescription = iconDescription,
                     imageVector = Icons.Outlined.Edit
                 )
             }
