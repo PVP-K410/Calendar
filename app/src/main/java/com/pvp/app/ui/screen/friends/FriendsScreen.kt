@@ -55,9 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.User
-import androidx.compose.runtime.collectAsState
 
-enum class SortingType {
+private enum class SortingType {
     EXPERIENCE,
     POINTS
 }
@@ -105,14 +104,13 @@ fun FriendsScreen(
     }
 
     LaunchedEffect(
-        friends,
+        //friends,
         sortingType.value,
         friendsData
     ) {
         sortedFriends.value = sortFriends(
-            friends,
-            sortingType.value,
-            model
+            friendsData,
+            sortingType.value
         )
     }
 
@@ -254,32 +252,32 @@ fun FriendsScreen(
                     SortingType
                         .entries
                         .forEach { type ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable(
-                                onClick = {
-                                    sortingType.value = type
-                                    showSorting.value = false
-                                }
-                            )
-                        ) {
-                            RadioButton(
-                                selected = sortingType.value == type,
-                                onClick = {
-                                    sortingType.value = type
-                                    showSorting.value = false
-                                }
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.clickable(
+                                    onClick = {
+                                        sortingType.value = type
+                                        showSorting.value = false
+                                    }
+                                )
+                            ) {
+                                RadioButton(
+                                    selected = sortingType.value == type,
+                                    onClick = {
+                                        sortingType.value = type
+                                        showSorting.value = false
+                                    }
+                                )
 
-                            Text(
-                                text = type
-                                    .name
-                                    .toLowerCase()
-                                    .capitalize(),
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
+                                Text(
+                                    text = type
+                                        .name
+                                        .toLowerCase()
+                                        .capitalize(),
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
                         }
-                    }
                 }
             },
             confirmButton = { }
@@ -288,19 +286,16 @@ fun FriendsScreen(
 }
 
 
-private suspend fun sortFriends(
-    friends: List<String>,
-    sortingType: SortingType,
-    model: FriendsViewModel
+private fun sortFriends(
+    friends: List<User>,
+    sortingType: SortingType
 ): List<String> {
-    val users = friends.map { email -> model.getFriendData(email) }
-
     val sortedUsers = when (sortingType) {
-        SortingType.EXPERIENCE -> users.sortedByDescending { it!!.experience }
-        SortingType.POINTS -> users.sortedBy { it!!.points }
+        SortingType.EXPERIENCE -> friends.sortedByDescending { it.experience }
+        SortingType.POINTS -> friends.sortedByDescending { it.points }
     }
 
-    return sortedUsers.map { it!!.email }
+    return sortedUsers.map { it.email }
 }
 
 @Composable

@@ -1,11 +1,13 @@
 package com.pvp.app.ui.screen.friends
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.FriendObject
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,27 +43,35 @@ class FriendsViewModel @Inject constructor(
         initialValue = null
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val friendObject = user
-        .flatMapLatest { user ->
-            user?.email?.let { email ->
-                friendService.get(email)
-            } ?: flowOf(null)
+    private val _friendObject = MutableStateFlow<FriendObject?>(null)
+    val friendObject: StateFlow<FriendObject?> = _friendObject.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            user.collect { newUser ->
+                Log.d("FriendsViewModel", "newUser: $friendObject")
+                newUser?.email?.let { email ->
+                    friendService.get(email).collect { newFriendObject ->
+                        Log.d("FriendsViewModel", "newFriendObject: $friendObject")
+                        _friendObject.value = newFriendObject
+                    }
+                }
+            }
         }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    }
 
     init {
         viewModelScope.launch {
             friendObject.collect { friendObject ->
+                Log.d("FriendsViewModel", "friendObject: $friendObject")
                 friendObject?.let {
                     val userFlows = friendService.getFriendsData(it.friends)
+                    Log.d("FriendsViewModel", "userFlows: $userFlows")
                     val usersFlow = combine(userFlows) { users -> users.filterNotNull() }
+                    Log.d("FriendsViewModel", "usersFlow: $usersFlow")
                     usersFlow.collect { users ->
                         _friendsData.value = users
+                        Log.d("FriendsViewModel", "_friendsData.value: ${_friendsData.value}")
                     }
                 }
             }
