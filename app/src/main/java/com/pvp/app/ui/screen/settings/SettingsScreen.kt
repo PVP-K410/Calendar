@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -160,7 +161,7 @@ private fun SettingHydrationNotificationToggle(
             )
         },
         title = "Hydration Notifications",
-        checkboxChecked = isEnabled,
+        value = isEnabled,
     )
 }
 
@@ -214,13 +215,12 @@ fun CategoryRow(
 }
 
 @Composable
-fun SettingCard(
+fun <T> SettingCard(
     description: String,
     editContent: @Composable () -> Unit = {},
     onEdit: () -> Unit,
-    title: String? = null,
-    value: String? = null,
-    checkboxChecked: Boolean? = null,
+    title: String,
+    value: T
 ) {
     Column(
         modifier = Modifier
@@ -237,15 +237,14 @@ fun SettingCard(
             )
             .padding(8.dp)
     ) {
-        if (title != null) {
-            Text(
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 18.sp,
-                text = title
-            )
+        Text(
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = 18.sp,
+            text = title
+        )
 
-            Spacer(modifier = Modifier.size(8.dp))
-        }
+        Spacer(modifier = Modifier.size(8.dp))
+
 
         Text(
             color = MaterialTheme.colorScheme.onPrimary,
@@ -255,7 +254,7 @@ fun SettingCard(
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        if (checkboxChecked != null) {
+        if (value is Boolean) {
             Row(
                 modifier = Modifier
                     .align(Alignment.End)
@@ -263,7 +262,15 @@ fun SettingCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
-                    checked = checkboxChecked,
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.secondary,
+                        uncheckedColor = MaterialTheme.colorScheme.onBackground,
+                        checkmarkColor = MaterialTheme.colorScheme.background,
+                        disabledCheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        disabledUncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        disabledIndeterminateColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    ),
+                    checked = value,
                     onCheckedChange = null
                 )
             }
@@ -279,7 +286,7 @@ fun SettingCard(
                 Text(
                     color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.bodyMedium,
-                    text = value
+                    text = value.toString()
                 )
 
                 Spacer(modifier = Modifier.size(8.dp))
