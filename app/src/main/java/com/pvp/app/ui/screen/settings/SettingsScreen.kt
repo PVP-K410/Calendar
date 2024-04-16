@@ -14,13 +14,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -182,9 +183,9 @@ fun SettingsScreen(
 
         SettingNotificationReminderMinutes(model)
 
-        SettingCupVolumeMl(model)
-
         SettingHydrationNotificationToggle(model)
+
+        SettingCupVolumeMl(model)
     }
 }
 
@@ -255,32 +256,47 @@ fun <T> SettingCard(
         Spacer(modifier = Modifier.size(16.dp))
 
         if (value is Boolean) {
+            var checked by remember { mutableStateOf(value) }
+
             Row(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .clickable { onEdit() },
+                modifier = Modifier.align(Alignment.End),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.secondary,
-                        uncheckedColor = MaterialTheme.colorScheme.onBackground,
-                        checkmarkColor = MaterialTheme.colorScheme.background,
-                        disabledCheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        disabledUncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        disabledIndeterminateColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    ),
-                    checked = value,
-                    onCheckedChange = null
+                Switch(
+                    checked = checked,
+                    onCheckedChange = {
+                        checked = it
+
+                        onEdit()
+                    },
+                    thumbContent = if (checked) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = MaterialTheme.colorScheme.surface,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceDim,
+                        checkedThumbColor = MaterialTheme.colorScheme.outline,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                        checkedBorderColor = MaterialTheme.colorScheme.outline,
+                        uncheckedBorderColor = MaterialTheme.colorScheme.outline
+                    )
                 )
             }
         } else if (value != null) {
-            var state by remember { mutableStateOf(false) }
+            var dialogOpen by remember { mutableStateOf(false) }
 
             Row(
                 modifier = Modifier
                     .align(Alignment.End)
-                    .clickable { state = true },
+                    .clickable { dialogOpen = true },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -298,12 +314,12 @@ fun <T> SettingCard(
                 )
             }
 
-            if (state) {
+            if (dialogOpen) {
                 Dialog(
                     onDismissRequest = {
                         onEdit()
 
-                        state = false
+                        dialogOpen = false
                     }
                 ) {
                     editContent()
