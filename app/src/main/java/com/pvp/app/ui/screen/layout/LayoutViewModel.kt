@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.DecorationService
+import com.pvp.app.api.RewardService
+import com.pvp.app.api.StreakService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Survey
 import com.pvp.app.model.User
@@ -23,7 +25,9 @@ import javax.inject.Inject
 class LayoutViewModel @Inject constructor(
     private val authenticationService: AuthenticationService,
     private val decorationService: DecorationService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val rewardService: RewardService,
+    private val streakService: StreakService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LayoutState())
@@ -45,7 +49,8 @@ class LayoutViewModel @Inject constructor(
                     areSurveysFilled = userApp?.let { areSurveysFilled(it) },
                     isAuthenticated = userFirebase != null,
                     isLoading = false,
-                    user = userApp
+                    user = userApp,
+                    needsStreakReward = streakService.checkStreak()
                 )
             }
                 .collect { state ->
@@ -70,6 +75,14 @@ class LayoutViewModel @Inject constructor(
     private fun areSurveysFilled(user: User): Boolean {
         return user.surveys.containsAll(Survey.entries)
     }
+
+    suspend fun giveReward() {
+        viewModelScope.launch {
+            rewardService.rewardUser(
+                rewardService.get()
+            )
+        }
+    }
 }
 
 data class LayoutState(
@@ -80,5 +93,6 @@ data class LayoutState(
     ),
     val isAuthenticated: Boolean = false,
     val isLoading: Boolean = false,
-    val user: User? = null
+    val user: User? = null,
+    val needsStreakReward: Boolean = false
 )

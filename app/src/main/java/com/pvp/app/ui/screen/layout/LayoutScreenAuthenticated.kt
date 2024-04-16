@@ -5,6 +5,7 @@
 
 package com.pvp.app.ui.screen.layout
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -38,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -266,6 +268,12 @@ fun LayoutScreenAuthenticated(
         initialPage = 0,
         pageCount = { 2 }
     )
+
+    if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward){
+        LaunchedEffect(null) {
+            viewModel.giveReward()
+        }
+    }
 
     ModalNavigationDrawer(
         drawerContent = {
