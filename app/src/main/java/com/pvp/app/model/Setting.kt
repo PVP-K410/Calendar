@@ -1,6 +1,7 @@
 package com.pvp.app.model
 
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 
 sealed class Setting<T>(
@@ -24,6 +25,11 @@ sealed class Setting<T>(
         data object CupVolumeMl : Setting<Int>(
             intPreferencesKey("cupVolumeMl"),
             250
+        )
+
+        data object HydrationNotificationsEnabled : Setting<Boolean>(
+            booleanPreferencesKey("HydrationNotificationsEnabled"),
+            true
         )
     }
 }

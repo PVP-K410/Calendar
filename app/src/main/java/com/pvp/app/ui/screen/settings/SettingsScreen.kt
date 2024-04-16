@@ -14,11 +14,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,7 +54,10 @@ private fun SettingNotificationReminderMinutes(
     val state = rememberPickerState(initialValue = minutes)
 
     SettingCard(
+        title = "Set Reminder Time",
         description = "Choose minutes before tasks reminder executes. Default is 10 minutes",
+        iconDescription = "Clickable icon to edit reminder time",
+        value = "$minutes minute${if (minutes != 1) "s" else ""}",
         editContent = {
             Column(
                 modifier = Modifier
@@ -84,9 +90,7 @@ private fun SettingNotificationReminderMinutes(
                     state.value
                 )
             }
-        },
-        title = "Set Reminder Time",
-        value = "$minutes minute${if (minutes != 1) "s" else ""}"
+        }
     )
 }
 
@@ -100,10 +104,18 @@ private fun SettingCupVolumeMl(
         .get(Setting.Notifications.CupVolumeMl)
         .collectAsStateWithLifecycle()
 
+    val isEnabled by model
+        .get(Setting.Notifications.HydrationNotificationsEnabled)
+        .collectAsStateWithLifecycle()
+
     val state = rememberPickerState(initialValue = volume)
 
     SettingCard(
+        title = "Set Cup Volume",
         description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
+        iconDescription = "Clickable icon to edit cup volume",
+        value = "$volume ml",
+        isEnabled = isEnabled,
         editContent = {
             Column(
                 modifier = Modifier
@@ -136,9 +148,28 @@ private fun SettingCupVolumeMl(
                     state.value
                 )
             }
-        },
-        title = "Set Cup Volume",
-        value = "$volume ml"
+        }
+    )
+}
+
+@Composable
+private fun SettingHydrationNotificationToggle(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    val isEnabled by model
+        .get(Setting.Notifications.HydrationNotificationsEnabled)
+        .collectAsStateWithLifecycle()
+
+    SettingCard(
+        title = "Hydration Notifications",
+        description = "Toggle water drinking reminder notifications",
+        value = isEnabled,
+        onEdit = {
+            model.merge(
+                Setting.Notifications.HydrationNotificationsEnabled,
+                !isEnabled
+            )
+        }
     )
 }
 
@@ -158,6 +189,8 @@ fun SettingsScreen(
         )
 
         SettingNotificationReminderMinutes(model)
+
+        SettingHydrationNotificationToggle(model)
 
         SettingCupVolumeMl(model)
     }
@@ -190,13 +223,23 @@ fun CategoryRow(
 }
 
 @Composable
-fun SettingCard(
+fun <T> SettingCard(
     description: String,
-    editContent: @Composable () -> Unit,
+    editContent: @Composable () -> Unit = {},
     onEdit: () -> Unit,
-    title: String? = null,
-    value: String
+    title: String,
+    value: T,
+    iconDescription: String? = null,
+    isEnabled: Boolean = true
 ) {
+    var textColor = MaterialTheme.colorScheme.onPrimary
+    var backgroundColor = MaterialTheme.colorScheme.primary
+
+    if (!isEnabled) {
+        textColor = textColor.copy(alpha = 0.5f)
+        backgroundColor = backgroundColor.copy(alpha = 0.5f)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -207,61 +250,98 @@ fun SettingCard(
                 width = 1.dp
             )
             .background(
-                color = MaterialTheme.colorScheme.primary,
+                color = backgroundColor,
                 shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
     ) {
-        if (title != null) {
-            Text(
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 18.sp,
-                text = title
-            )
+        Text(
+            color = textColor,
+            fontSize = 18.sp,
+            text = title
+        )
 
-            Spacer(modifier = Modifier.size(8.dp))
-        }
+        Spacer(modifier = Modifier.size(8.dp))
+
 
         Text(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = textColor,
             fontSize = 14.sp,
             text = description
         )
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        var state by remember { mutableStateOf(false) }
-
-        Row(
-            modifier = Modifier
-                .align(Alignment.End)
-                .clickable { state = true },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                color = MaterialTheme.colorScheme.onPrimary,
-                style = MaterialTheme.typography.bodyMedium,
-                text = value
-            )
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Icon(
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = "Open dialog to edit a setting",
-                imageVector = Icons.Outlined.Edit
-            )
-        }
-
-        if (state) {
-            Dialog(
-                onDismissRequest = {
-                    onEdit()
-
-                    state = false
-                }
+        if (value is Boolean) {
+            Row(
+                modifier = Modifier.align(Alignment.End),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                editContent()
+                Switch(
+                    checked = value,
+                    onCheckedChange = {
+                        onEdit()
+                    },
+                    thumbContent = if (value) {
+                        {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = MaterialTheme.colorScheme.surface,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceDim,
+                        checkedThumbColor = MaterialTheme.colorScheme.outline,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                        checkedBorderColor = MaterialTheme.colorScheme.outline,
+                        uncheckedBorderColor = MaterialTheme.colorScheme.outline
+                    ),
+                    enabled = isEnabled
+                )
+            }
+        } else if (value != null) {
+            var dialogOpen by remember { mutableStateOf(false) }
+
+            Row(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .clickable {
+                        if (isEnabled) {
+                            dialogOpen = true
+                        }
+                    },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    color = textColor,
+                    style = MaterialTheme.typography.bodyMedium,
+                    text = value.toString()
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                Icon(
+                    tint = textColor,
+                    contentDescription = iconDescription,
+                    imageVector = Icons.Outlined.Edit
+                )
+            }
+
+            if (dialogOpen) {
+                Dialog(
+                    onDismissRequest = {
+                        onEdit()
+
+                        dialogOpen = false
+                    }
+                ) {
+                    editContent()
+                }
             }
         }
     }
