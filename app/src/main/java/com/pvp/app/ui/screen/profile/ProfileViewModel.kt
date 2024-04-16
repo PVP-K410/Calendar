@@ -66,8 +66,6 @@ class ProfileViewModel @Inject constructor(
 
                 authenticationService.user.first()?.delete()?.await()
 
-                authenticationService.signOut()
-
                 Result.success(true)
             } catch (e: Exception) {
                 Result.failure(e)

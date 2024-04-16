@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +59,7 @@ import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.showToast
+import kotlinx.coroutines.launch
 
 private val ACTIVITIES = SportActivity.entries.map { it.title }
 private val INGREDIENTS = Ingredient.entries.map { it.title }
@@ -69,6 +71,7 @@ private fun AccountDeleteButton(
     val context = LocalContext.current
     val username by remember { mutableStateOf(viewModel.state.value.user.username) }
     var input by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -130,9 +133,15 @@ private fun AccountDeleteButton(
             },
             onConfirm = {
                 if (input == username) {
-                    viewModel.deleteAccount()
+                    coroutineScope.launch {
+                        val result = viewModel.deleteAccount()
 
-                    context.showToast(message = "Account deleted successfully")
+                        if (result.isSuccess) {
+                            context.showToast(message = "Account deleted successfully")
+                        } else {
+                            context.showToast(message = "An error occurred while deleting the account")
+                        }
+                    }
                 } else {
                     input = ""
 
