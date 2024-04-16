@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -143,6 +144,27 @@ private fun SettingCupVolumeMl(
 }
 
 @Composable
+private fun SettingHydrationNotificationToggle(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    val isEnabled by model
+        .get(Setting.Notifications.HydrationNotificationsEnabled)
+        .collectAsStateWithLifecycle()
+
+    SettingCard(
+        description = "Toggle water drinking reminder notifications",
+        onEdit = {
+            model.merge(
+                Setting.Notifications.HydrationNotificationsEnabled,
+                !isEnabled
+            )
+        },
+        title = "Hydration Notifications",
+        checkboxChecked = isEnabled,
+    )
+}
+
+@Composable
 fun SettingsScreen(
     model: SettingsViewModel = hiltViewModel()
 ) {
@@ -160,6 +182,8 @@ fun SettingsScreen(
         SettingNotificationReminderMinutes(model)
 
         SettingCupVolumeMl(model)
+
+        SettingHydrationNotificationToggle(model)
     }
 }
 
@@ -192,10 +216,11 @@ fun CategoryRow(
 @Composable
 fun SettingCard(
     description: String,
-    editContent: @Composable () -> Unit,
+    editContent: @Composable () -> Unit = {},
     onEdit: () -> Unit,
     title: String? = null,
-    value: String
+    value: String? = null,
+    checkboxChecked: Boolean? = null,
 ) {
     Column(
         modifier = Modifier
@@ -230,38 +255,52 @@ fun SettingCard(
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        var state by remember { mutableStateOf(false) }
-
-        Row(
-            modifier = Modifier
-                .align(Alignment.End)
-                .clickable { state = true },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                color = MaterialTheme.colorScheme.onPrimary,
-                style = MaterialTheme.typography.bodyMedium,
-                text = value
-            )
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Icon(
-                tint = MaterialTheme.colorScheme.onPrimary,
-                contentDescription = "Open dialog to edit a setting",
-                imageVector = Icons.Outlined.Edit
-            )
-        }
-
-        if (state) {
-            Dialog(
-                onDismissRequest = {
-                    onEdit()
-
-                    state = false
-                }
+        if (checkboxChecked != null) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .clickable { onEdit() },
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                editContent()
+                Checkbox(
+                    checked = checkboxChecked,
+                    onCheckedChange = null
+                )
+            }
+        } else if (value != null) {
+            var state by remember { mutableStateOf(false) }
+
+            Row(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .clickable { state = true },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    text = value
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                Icon(
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    contentDescription = "Open dialog to edit a setting",
+                    imageVector = Icons.Outlined.Edit
+                )
+            }
+
+            if (state) {
+                Dialog(
+                    onDismissRequest = {
+                        onEdit()
+
+                        state = false
+                    }
+                ) {
+                    editContent()
+                }
             }
         }
     }
