@@ -32,12 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Setting
+import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
@@ -193,6 +195,31 @@ fun SettingsScreen(
         SettingHydrationNotificationToggle(model)
 
         SettingCupVolumeMl(model)
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ButtonConfirm(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(
+                        top = 20.dp,
+                        bottom = 20.dp
+                    ),
+                content = {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        text = "Reset to Default"
+                    )
+                },
+                contentAlignment = Alignment.BottomCenter,
+                confirmationButtonContent = { Text(text = "Reset to Default") },
+                confirmationTitle = { Text(text = "Are you sure you want to reset all of your settings to default?") },
+                onConfirm = { model.clear() }
+            )
+        }
     }
 }
 
