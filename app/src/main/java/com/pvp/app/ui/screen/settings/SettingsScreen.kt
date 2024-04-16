@@ -103,10 +103,17 @@ private fun SettingCupVolumeMl(
         .get(Setting.Notifications.CupVolumeMl)
         .collectAsStateWithLifecycle()
 
+    val isEnabled by model
+        .get(Setting.Notifications.HydrationNotificationsEnabled)
+        .collectAsStateWithLifecycle()
+
     val state = rememberPickerState(initialValue = volume)
 
     SettingCard(
+        title = "Set Cup Volume",
         description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
+        value = "$volume ml",
+        isEnabled = isEnabled,
         editContent = {
             Column(
                 modifier = Modifier
@@ -139,9 +146,7 @@ private fun SettingCupVolumeMl(
                     state.value
                 )
             }
-        },
-        title = "Set Cup Volume",
-        value = "$volume ml"
+        }
     )
 }
 
@@ -154,15 +159,15 @@ private fun SettingHydrationNotificationToggle(
         .collectAsStateWithLifecycle()
 
     SettingCard(
+        title = "Hydration Notifications",
         description = "Toggle water drinking reminder notifications",
+        value = isEnabled,
         onEdit = {
             model.merge(
                 Setting.Notifications.HydrationNotificationsEnabled,
                 !isEnabled
             )
-        },
-        title = "Hydration Notifications",
-        value = isEnabled,
+        }
     )
 }
 
@@ -221,7 +226,8 @@ fun <T> SettingCard(
     editContent: @Composable () -> Unit = {},
     onEdit: () -> Unit,
     title: String,
-    value: T
+    value: T,
+    isEnabled: Boolean = true
 ) {
     Column(
         modifier = Modifier
@@ -233,13 +239,17 @@ fun <T> SettingCard(
                 width = 1.dp
             )
             .background(
-                color = MaterialTheme.colorScheme.primary,
+                color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
+                    alpha = 0.5f
+                ),
                 shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
     ) {
         Text(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(
+                alpha = 0.5f
+            ),
             fontSize = 18.sp,
             text = title
         )
@@ -248,7 +258,9 @@ fun <T> SettingCard(
 
 
         Text(
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(
+                alpha = 0.5f
+            ),
             fontSize = 14.sp,
             text = description
         )
@@ -287,7 +299,8 @@ fun <T> SettingCard(
                         uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                         checkedBorderColor = MaterialTheme.colorScheme.outline,
                         uncheckedBorderColor = MaterialTheme.colorScheme.outline
-                    )
+                    ),
+                    enabled = isEnabled
                 )
             }
         } else if (value != null) {
@@ -296,11 +309,17 @@ fun <T> SettingCard(
             Row(
                 modifier = Modifier
                     .align(Alignment.End)
-                    .clickable { dialogOpen = true },
+                    .clickable {
+                        if (isEnabled) {
+                            dialogOpen = true
+                        }
+                    },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(
+                        alpha = 0.5f
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     text = value.toString()
                 )
@@ -308,7 +327,9 @@ fun <T> SettingCard(
                 Spacer(modifier = Modifier.size(8.dp))
 
                 Icon(
-                    tint = MaterialTheme.colorScheme.onPrimary,
+                    tint = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(
+                        alpha = 0.5f
+                    ),
                     contentDescription = "Open dialog to edit a setting",
                     imageVector = Icons.Outlined.Edit
                 )
