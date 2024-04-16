@@ -229,6 +229,14 @@ fun <T> SettingCard(
     value: T,
     isEnabled: Boolean = true
 ) {
+    var textColor = MaterialTheme.colorScheme.onPrimary
+    var backgroundColor = MaterialTheme.colorScheme.primary
+
+    if (!isEnabled) {
+        textColor = textColor.copy(alpha = 0.5f)
+        backgroundColor = backgroundColor.copy(alpha = 0.5f)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -239,17 +247,13 @@ fun <T> SettingCard(
                 width = 1.dp
             )
             .background(
-                color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(
-                    alpha = 0.5f
-                ),
+                color = backgroundColor,
                 shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
     ) {
         Text(
-            color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(
-                alpha = 0.5f
-            ),
+            color = textColor,
             fontSize = 18.sp,
             text = title
         )
@@ -258,9 +262,7 @@ fun <T> SettingCard(
 
 
         Text(
-            color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(
-                alpha = 0.5f
-            ),
+            color = textColor,
             fontSize = 14.sp,
             text = description
         )
@@ -268,20 +270,16 @@ fun <T> SettingCard(
         Spacer(modifier = Modifier.size(16.dp))
 
         if (value is Boolean) {
-            var checked by remember { mutableStateOf(value) }
-
             Row(
                 modifier = Modifier.align(Alignment.End),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Switch(
-                    checked = checked,
+                    checked = value,
                     onCheckedChange = {
-                        checked = it
-
                         onEdit()
                     },
-                    thumbContent = if (checked) {
+                    thumbContent = if (value) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Check,
@@ -317,9 +315,7 @@ fun <T> SettingCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(
-                        alpha = 0.5f
-                    ),
+                    color = textColor,
                     style = MaterialTheme.typography.bodyMedium,
                     text = value.toString()
                 )
@@ -327,9 +323,7 @@ fun <T> SettingCard(
                 Spacer(modifier = Modifier.size(8.dp))
 
                 Icon(
-                    tint = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(
-                        alpha = 0.5f
-                    ),
+                    tint = textColor,
                     contentDescription = "Open dialog to edit a setting",
                     imageVector = Icons.Outlined.Edit
                 )

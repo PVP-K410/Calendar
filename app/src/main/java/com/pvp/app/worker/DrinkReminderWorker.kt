@@ -80,7 +80,10 @@ class DrinkReminderWorker @AssistedInject constructor(
 
         stateFlow.collect { (volume, isEnabled, userMass) ->
             cancelScheduledNotifications()
-            Log.e("DrinkReminderWorker", "User mass: $userMass")
+
+            if (!isEnabled) {
+                Log.e("DrinkReminderWorker", "Cancelling notifications")
+            }
 
             if (userMass != 0 && isEnabled) {
                 Log.e("DrinkReminderWorker", "Scheduling notifications")
