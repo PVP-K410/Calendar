@@ -1,7 +1,6 @@
 package com.pvp.app.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -81,12 +80,7 @@ class DrinkReminderWorker @AssistedInject constructor(
         stateFlow.collect { (volume, isEnabled, userMass) ->
             cancelScheduledNotifications()
 
-            if (!isEnabled) {
-                Log.e("DrinkReminderWorker", "Cancelling notifications")
-            }
-
             if (userMass != 0 && isEnabled) {
-                Log.e("DrinkReminderWorker", "Scheduling notifications")
                 scheduleNotifications(
                     mass = userMass,
                     cupVolume = volume
