@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.friends
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
@@ -8,17 +7,16 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.FriendObject
-import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,46 +32,77 @@ class FriendsViewModel @Inject constructor(
     private val _isRequestSent = MutableStateFlow(false)
     val isRequestSent = _isRequestSent.asStateFlow()
 
-    private val _friendsData = MutableStateFlow<List<User>>(emptyList())
-    val friendsData: StateFlow<List<User>> = _friendsData.asStateFlow()
-
     val user = userService.user.stateIn(
         viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = null
     )
 
-    private val _friendObject = MutableStateFlow<FriendObject?>(null)
-    val friendObject: StateFlow<FriendObject?> = _friendObject.asStateFlow()
+    val userFriendObject = user
+        .filterNotNull()
+        .flatMapLatest { user ->
+            friendService
+                .get(user.email)
+                .filterNotNull()
+
+        }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = FriendObject()
+        )
+
+    val userFriends = user
+        .filterNotNull()
+        .flatMapLatest { user ->
+            friendService
+                .get(user.email)
+                .filterNotNull()
+                .mapLatest { friend ->
+                    friendService
+                        .getFriendsData(friend.friends)
+                        .mapNotNull { it.firstOrNull() }
+                }
+        }
+        .stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     init {
-        viewModelScope.launch {
-            user.collect { newUser ->
-                Log.d("FriendsViewModel", "newUser: $friendObject")
-                newUser?.email?.let { email ->
-                    friendService.get(email).collect { newFriendObject ->
-                        Log.d("FriendsViewModel", "newFriendObject: $friendObject")
-                        _friendObject.value = newFriendObject
-                    }
-                }
-            }
-        }
+        collectStateChanges()
     }
 
-    init {
+    private fun collectStateChanges() {
         viewModelScope.launch {
-            friendObject.collect { friendObject ->
-                Log.d("FriendsViewModel", "friendObject: $friendObject")
-                friendObject?.let {
-                    val userFlows = friendService.getFriendsData(it.friends)
-                    Log.d("FriendsViewModel", "userFlows: $userFlows")
-                    val usersFlow = combine(userFlows) { users -> users.filterNotNull() }
-                    Log.d("FriendsViewModel", "usersFlow: $usersFlow")
-                    usersFlow.collect { users ->
-                        _friendsData.value = users
-                        Log.d("FriendsViewModel", "_friendsData.value: ${_friendsData.value}")
-                    }
+            val flowUser = user.filterNotNull()
+
+            val flowUserFriends = flowUser
+                .flatMapLatest { user ->
+                    friendService
+                        .get(user.email)
+                        .filterNotNull()
+                        .mapLatest { friend ->
+                            friendService
+                                .getFriendsData(friend.friends)
+                                .mapNotNull { it.firstOrNull() }
+                        }
                 }
+
+            val flowUserFriendObject = flowUser.flatMapLatest { user ->
+                friendService
+                    .get(user.email)
+                    .filterNotNull()
+            }
+
+            combine(
+                flowUserFriendObject,
+                flowUserFriends
+            ) { friendObject, friends ->
+                userFriendObject.update { friendObject }
+
+                userFriends.update { friends }
             }
         }
     }
@@ -181,10 +210,8 @@ class FriendsViewModel @Inject constructor(
 
         return avatar!!
     }
+}
 
-    suspend fun getFriendData(email: String): User? {
-        return userService
-            .get(email)
-            .firstOrNull()
-    }
+private fun <T> StateFlow<T>.update(function: (Any?) -> T?) {
+
 }

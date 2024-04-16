@@ -67,18 +67,18 @@ fun FriendsScreen(
 ) {
     val context = LocalContext.current
     val toastMessage by model.toastMessage
-    val friendObject by model.friendObject.collectAsStateWithLifecycle()
-    val friends = friendObject?.friends ?: emptyList()
+    val friendObject by model.userFriendObject.collectAsStateWithLifecycle()
+    val friends = friendObject.friends
     val isRequestSent by model.isRequestSent.collectAsState(false)
-    val receivedRequests = friendObject?.receivedRequests ?: emptyList()
-    val sentRequests = friendObject?.sentRequests ?: emptyList()
+    val receivedRequests = friendObject.receivedRequests
+    val sentRequests = friendObject.sentRequests
     val friendEmail = remember { mutableStateOf("") }
     val showAddFriend = remember { mutableStateOf(false) }
     val showRequests = remember { mutableStateOf(false) }
     val showSorting = remember { mutableStateOf(false) }
     val sortingType = remember { mutableStateOf(SortingType.EXPERIENCE) }
     val sortedFriends = remember { mutableStateOf(emptyList<String>()) }
-    val friendsData by model.friendsData.collectAsState()
+    val friendsData by model.userFriends.collectAsState()
     val selectedTab = remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
 
