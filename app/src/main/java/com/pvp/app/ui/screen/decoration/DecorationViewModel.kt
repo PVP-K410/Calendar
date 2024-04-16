@@ -78,20 +78,20 @@ class DecorationViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                _state.update {
-                    val state = if (decoration.id in it.user.decorationsApplied) {
-                        WorkState.Success.Unapply
-                    } else {
-                        WorkState.Success.Apply
-                    }
+                val user = state.first().user
 
-                    decorationService.apply(
-                        decoration,
-                        user = it.user
-                    )
+                decorationService.apply(
+                    decoration,
+                    user = user
+                )
 
-                    it.copy(workState = state)
+                val state = if (decoration.id in user.decorationsApplied) {
+                    WorkState.Success.Unapply
+                } else {
+                    WorkState.Success.Apply
                 }
+
+                _state.update { it.copy(workState = state) }
             } catch (e: Exception) {
                 _state.update { it.copy(workState = WorkState.Error) }
             }
