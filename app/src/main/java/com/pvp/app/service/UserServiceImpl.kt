@@ -48,17 +48,28 @@ class UserServiceImpl @Inject constructor(
 
     override suspend fun merge(user: User) {
         database
-            .collection(identifier)
-            .document(user.email)
-            .set(user)
+            .runTransaction { transaction ->
+                val document = database
+                    .collection(identifier)
+                    .document(user.email)
+
+                transaction.set(
+                    document,
+                    user
+                )
+            }
             .await()
     }
 
     override suspend fun remove(email: String) {
         database
-            .collection(identifier)
-            .document(email)
-            .delete()
+            .runTransaction { transaction ->
+                val document = database
+                    .collection(identifier)
+                    .document(email)
+
+                transaction.delete(document)
+            }
             .await()
     }
 

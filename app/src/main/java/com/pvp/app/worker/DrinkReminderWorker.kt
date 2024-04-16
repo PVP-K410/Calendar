@@ -61,10 +61,14 @@ class DrinkReminderWorker @AssistedInject constructor(
     private suspend fun initializeReminderListener(): Result {
         val stateFlow = settingService
             .get(Setting.Notifications.CupVolumeMl)
-            .combine(userService.user) { volume, user ->
+            .combine(settingService.get(Setting.Notifications.HydrationNotificationsEnabled)) { volume, isEnabled ->
+                Pair(volume, isEnabled)
+            }
+            .combine(userService.user) { (volume, isEnabled), user ->
                 DrinkReminderState(
-                    cupVolume = volume,
-                    userMass = user?.mass ?: 0
+                    volume,
+                    isEnabled,
+                    user?.mass ?: 0
                 )
             }
             .stateIn(
@@ -73,13 +77,13 @@ class DrinkReminderWorker @AssistedInject constructor(
                 initialValue = DrinkReminderState()
             )
 
-        stateFlow.collect { state ->
-            if (state.userMass != 0) {
-                cancelScheduledNotifications()
+        stateFlow.collect { (volume, isEnabled, userMass) ->
+            cancelScheduledNotifications()
 
+            if (userMass != 0 && isEnabled) {
                 scheduleNotifications(
-                    mass = state.userMass,
-                    cupVolume = state.cupVolume
+                    mass = userMass,
+                    cupVolume = volume
                 )
             }
         }
@@ -169,5 +173,6 @@ class DrinkReminderWorker @AssistedInject constructor(
 
 data class DrinkReminderState(
     val cupVolume: Int = Setting.Notifications.CupVolumeMl.defaultValue,
+    val hydrationNotificationsEnabled: Boolean = Setting.Notifications.HydrationNotificationsEnabled.defaultValue,
     val userMass: Int = 0
 )
