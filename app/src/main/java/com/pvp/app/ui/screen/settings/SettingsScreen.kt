@@ -12,16 +12,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Snowboarding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,6 +39,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Setting
+import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
@@ -143,6 +148,136 @@ private fun SettingCupVolumeMl(
 }
 
 @Composable
+private fun SettingApplicationTheme(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    val themeValue by model
+        .get(Setting.ApplicationTheme)
+        .collectAsStateWithLifecycle()
+
+    val state = rememberPickerState(initialValue = themeValue)
+
+    val valueText = when (themeValue) {
+        1 -> "Dark"
+        2 -> "Light"
+        3 -> "Dynamic"
+        else -> themeValue.toString()
+    }
+
+    SettingCard(
+        description = "Choose the theme of the application. Default is the 'Dynamic Theme'.",
+        editContent = {
+            Column(
+                modifier = Modifier
+                    .clip(shape = MaterialTheme.shapes.small)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .wrapContentSize()
+                    .padding(32.dp)
+            ) {
+                Text(
+                    style = MaterialTheme.typography.titleLarge,
+                    text = "Select Application Theme"
+                )
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .selectable(
+                            selected = themeValue == 1,
+                            onClick = {
+                                state.value = 1
+                            }
+                        )
+                ) {
+                    RadioButton(
+                        selected = state.value == 1,
+                        onClick = {
+                            state.value = 1
+                        }
+                    )
+
+                    Text(
+                        text = "Dark",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .selectable(
+                            selected = themeValue == 2,
+                            onClick = {
+                                state.value = 2
+                            }
+                        )
+                ) {
+                    RadioButton(
+                        selected = state.value == 2,
+                        onClick = {
+                            state.value = 2
+                        }
+                    )
+
+                    Text(
+                        text = "Light",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .selectable(
+                            selected = themeValue == 3,
+                            onClick = {
+                                state.value = 3
+                            }
+                        )
+                ) {
+                    RadioButton(
+                        selected = state.value == 3,
+                        onClick = {
+                            state.value = 3
+                        }
+                    )
+
+                    Text(
+                        text = "Dynamic",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+            }
+        },
+        onEdit = {
+            if (state.value != themeValue) {
+                model.merge(
+                    Setting.ApplicationTheme,
+                    state.value
+                )
+            }
+        },
+        value = valueText,
+        title = "Set Application Theme"
+    )
+}
+
+@Composable
 fun SettingsScreen(
     model: SettingsViewModel = hiltViewModel()
 ) {
@@ -160,6 +295,13 @@ fun SettingsScreen(
         SettingNotificationReminderMinutes(model)
 
         SettingCupVolumeMl(model)
+
+        CategoryRow(
+            icon = Icons.Outlined.Snowboarding,
+            title = "Theme"
+        )
+
+        SettingApplicationTheme(model)
     }
 }
 

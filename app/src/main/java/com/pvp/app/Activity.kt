@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationManagerCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.api.SettingService
+import com.pvp.app.service.SettingServiceImpl
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.screen.layout.LayoutScreenBootstrap
 import com.pvp.app.ui.theme.CalendarTheme
+import com.pvp.app.ui.theme.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,7 +35,8 @@ class Activity : ComponentActivity() {
         prepareRoutes()
 
         setContent {
-            CalendarTheme {
+            val themeViewModel: ThemeViewModel = hiltViewModel()
+            CalendarTheme (model = themeViewModel) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     LayoutScreenBootstrap()
                 }

@@ -26,4 +26,9 @@ sealed class Setting<T>(
             250
         )
     }
+
+    data object ApplicationTheme : Setting<Int>(
+        intPreferencesKey("applicationTheme"),
+        1
+    )
 }
