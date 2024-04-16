@@ -8,6 +8,7 @@ import com.pvp.app.api.DecorationService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Decoration
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,14 +36,14 @@ class DecorationViewModel @Inject constructor(
     }
 
     private fun collectStateChanges() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             userService.user
                 .filterNotNull()
                 .flatMapLatest { user ->
                     decorationService
                         .get()
                         .mapLatest { decorations ->
-                            return@mapLatest DecorationState(
+                            DecorationState(
                                 avatar = user.avatar!!,
                                 holders = decorations
                                     .map { decoration ->
@@ -78,12 +79,18 @@ class DecorationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _state.update {
+                    val state = if (decoration.id in it.user.decorationsApplied) {
+                        WorkState.Success.Unapply
+                    } else {
+                        WorkState.Success.Apply
+                    }
+
                     decorationService.apply(
                         decoration,
                         user = it.user
                     )
 
-                    it.copy(workState = WorkState.Success.Apply)
+                    it.copy(workState = state)
                 }
             } catch (e: Exception) {
                 _state.update { it.copy(workState = WorkState.Error) }

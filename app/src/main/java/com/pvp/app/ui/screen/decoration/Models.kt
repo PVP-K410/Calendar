@@ -41,9 +41,11 @@ sealed class WorkState {
 
     sealed class Success : WorkState() {
 
-        data object Apply : Error()
+        data object Apply : Success()
 
-        data object Purchase : Error()
+        data object Purchase : Success()
+
+        data object Unapply : Success()
 
         companion object : Success()
     }
@@ -64,6 +66,7 @@ sealed class WorkState {
                     is Success -> when (state) {
                         is Success.Apply -> context.showToast(message = "Successfully applied decoration")
                         is Success.Purchase -> context.showToast(message = "Successfully purchased decoration")
+                        is Success.Unapply -> context.showToast(message = "Successfully removed decoration")
 
                         else -> context.showToast(message = "Success")
                     }
