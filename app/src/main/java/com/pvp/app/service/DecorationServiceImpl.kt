@@ -105,7 +105,7 @@ class DecorationServiceImpl @Inject constructor(
 
     override suspend fun getImage(decoration: Decoration): ImageBitmap =
         withContext(Dispatchers.IO) {
-            val extension = decoration.imagePath.substringAfterLast('.')
+            val extension = decoration.imageUrl.substringAfterLast('.')
 
             if (extension != "svg") {
                 error("Unsupported image format: .$extension")
@@ -218,7 +218,7 @@ class DecorationServiceImpl @Inject constructor(
             )
 
             storage
-                .getReferenceFromUrl(decoration.imagePath)
+                .getReferenceFromUrl(decoration.imageUrl)
                 .getFile(file)
                 .await()
 

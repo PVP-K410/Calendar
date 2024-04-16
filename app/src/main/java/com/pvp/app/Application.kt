@@ -10,6 +10,11 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.decode.SvgDecoder
+import coil.disk.DiskCache
+import coil.request.CachePolicy
 import com.pvp.app.common.DateUtil.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.DailyTaskWorker
@@ -26,7 +31,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
-class Application : Application(), Configuration.Provider {
+class Application : Application(), Configuration.Provider, ImageLoaderFactory {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -179,4 +184,16 @@ class Application : Application(), Configuration.Provider {
             requestPeriodic
         )
     }
+
+    override fun newImageLoader(): ImageLoader = ImageLoader
+        .Builder(this)
+        .components { add(SvgDecoder.Factory()) }
+        .diskCache {
+            DiskCache
+                .Builder()
+                .directory(applicationContext.cacheDir.resolve("images"))
+                .build()
+        }
+        .diskCachePolicy(CachePolicy.ENABLED)
+        .build()
 }

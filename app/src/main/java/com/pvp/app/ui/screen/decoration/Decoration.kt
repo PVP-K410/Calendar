@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.decoration
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Stars
@@ -26,13 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
+import coil.compose.AsyncImage
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
+import com.pvp.app.ui.common.requestImage
 import com.pvp.app.ui.common.underline
 
 @Composable
@@ -130,22 +129,22 @@ private fun DecorationCard(
                     .fillMaxWidth(0.35f)
                     .size(128.dp)
             ) {
-                Image(
+                AsyncImage(
                     contentDescription = "Decoration ${holder.decoration.name} image",
+                    model = requestImage(url = holder.decoration.imageUrl),
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(CircleShape)
+                        .clip(MaterialTheme.shapes.extraSmall)
                         .background(
                             color = MaterialTheme.colorScheme.primaryContainer.lighten(0.2f),
-                            shape = CircleShape
+                            shape = MaterialTheme.shapes.extraSmall
                         )
                         .border(
                             width = 1.dp,
                             color = MaterialTheme.colorScheme.inversePrimary,
-                            shape = CircleShape
+                            shape = MaterialTheme.shapes.extraSmall
                         )
-                        .padding(16.dp),
-                    painter = BitmapPainter(holder.image),
+                        .padding(16.dp)
                 )
             }
 

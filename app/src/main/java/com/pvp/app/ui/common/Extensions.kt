@@ -5,8 +5,11 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.ColorUtils
 import androidx.navigation.NavHostController
+import coil.request.ImageRequest
+import coil.size.Size
 
 /**
  * Extension function to navigate to a route. This function will pop up to the start destination
@@ -80,4 +83,17 @@ fun Color.lighten(
             fraction
         )
         .run { Color(this) }
+}
+
+@Composable
+fun requestImage(
+    context: Context = LocalContext.current,
+    size: Size = Size.ORIGINAL,
+    url: String
+): ImageRequest {
+    return ImageRequest
+        .Builder(context)
+        .data(url)
+        .size(size)
+        .build()
 }

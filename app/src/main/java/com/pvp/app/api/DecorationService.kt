@@ -55,7 +55,7 @@ interface DecorationService : DocumentsCollection {
     /**
      * Get the image for a decoration.
      *
-     * @param decoration The decoration to get the image for with [Decoration.imagePath]
+     * @param decoration The decoration to get the image for with [Decoration.imageUrl]
      *
      * @return The image for the decoration.
      */

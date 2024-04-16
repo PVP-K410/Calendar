@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class Decoration(
     val description: String = "",
     val id: String = "",
-    val imagePath: String = "",
+    val imageUrl: String = "",
     val name: String = "",
     val price: Int = 0,
     val type: Type = Type.AVATAR_FACE
