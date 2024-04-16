@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Reward (
-    val points: Int = -1,
-    val experience: Int = -1,
+    var points: Int = -1,
+    var experience: Int = -1,
     val decorationId: Int = -1
 )
