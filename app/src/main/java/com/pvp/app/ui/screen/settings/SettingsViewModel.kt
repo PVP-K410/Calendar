@@ -18,6 +18,12 @@ class SettingsViewModel @Inject constructor(
     private val settingService: SettingService
 ) : ViewModel() {
 
+    fun clear() {
+        viewModelScope.launch {
+            settingService.clear()
+        }
+    }
+
     fun <T> get(setting: Setting<T>): StateFlow<T> {
         return settingService
             .get(setting)
