@@ -187,7 +187,6 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader = ImageLoader
         .Builder(this)
-        .addLastModifiedToFileCacheKey(true)
         .components { add(SvgDecoder.Factory()) }
         .diskCache {
             DiskCache

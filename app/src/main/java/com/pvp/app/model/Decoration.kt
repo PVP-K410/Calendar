@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Decoration(
-    val description: String = "",
     val id: String = "",
     val imageLayerUrl: String = "",
     val imageRepresentativeUrl: String = "",

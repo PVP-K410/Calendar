@@ -93,7 +93,6 @@ fun ButtonWithDialog(
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     content: @Composable RowScope.() -> Unit = { Text("Open Dialog") },
     contentAlignment: Alignment = Alignment.TopStart,
-    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },

@@ -19,6 +19,9 @@ object ImageUtil {
         return ImageRequest
             .Builder(context)
             .data(url)
+            .diskCacheKey(url)
+            .memoryCacheKey(url)
+            .placeholderMemoryCacheKey(url)
             .size(size)
             .transformations(transformations)
             .build()

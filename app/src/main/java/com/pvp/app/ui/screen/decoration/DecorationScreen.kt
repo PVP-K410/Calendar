@@ -16,9 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material.icons.outlined.TouchApp
+import androidx.compose.material.icons.outlined.Stars
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
@@ -27,6 +28,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,15 +36,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pvp.app.ui.common.underline
+import com.pvp.app.ui.common.Dialog
 import com.pvp.app.ui.screen.decoration.WorkState.Companion.WorkStateHandler
 
 @Composable
 private fun Apply(model: DecorationViewModel = hiltViewModel()) {
     val state by model.state.collectAsStateWithLifecycle()
+    val holdersOwned by remember(state.holders) { mutableStateOf(state.holders.filter { it.owned }) }
 
     WorkStateHandler(
         resetState = model::resetWorkState,
@@ -61,8 +65,7 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
                     color = MaterialTheme.colorScheme.surfaceContainerHighest,
                     shape = MaterialTheme.shapes.extraSmall
                 )
-                .padding(8.dp)
-                .underline(),
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -72,18 +75,21 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
             )
         }
 
-        val holders = state.holders.filter { it.owned }
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.padding(16.dp)
+        )
 
-        if (holders.isEmpty()) {
+        if (holdersOwned.isEmpty()) {
             Text(
                 style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
                 text = "No decorations owned"
             )
         } else {
             DecorationCards(
-                actionImageVector = Icons.Outlined.TouchApp,
                 actionPurchase = false,
-                holders = holders,
+                holders = state.holders.filter { h -> h in holdersOwned },
+                isClickable = state.workState is WorkState.NoOperation
             ) { model.apply(it.decoration) }
         }
     }
@@ -117,9 +123,7 @@ fun DecorationScreen() {
                         modifier = Modifier.height(32.dp),
                         onClick = { screen = index },
                         selected = screen == index,
-                    ) {
-                        Text(title)
-                    }
+                    ) { Text(title) }
                 }
         }
 
@@ -132,7 +136,10 @@ fun DecorationScreen() {
 
 @Composable
 private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
+    var item by remember { mutableStateOf<DecorationHolder?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
     val state by model.state.collectAsStateWithLifecycle()
+    val holdersOwned by remember(state.holders) { mutableStateOf(state.holders.filter { it.owned }) }
 
     WorkStateHandler(
         resetState = model::resetWorkState,
@@ -143,12 +150,72 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        DecorationCards(
-            actionImageVector = Icons.Outlined.ShoppingBag,
-            actionPurchase = true,
-            holders = state.holders,
-        ) { model.purchase(it.decoration) }
+        if (holdersOwned.size == state.holders.size) {
+            Text(
+                style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                text = "No decorations to purchase"
+            )
+        } else {
+            DecorationCards(
+                actionPurchase = true,
+                holders = state.holders.filter { h -> h !in holdersOwned },
+                isClickable = state.workState is WorkState.NoOperation
+            ) {
+                // Order of operations is important here, else NPE will occur
+                item = it
+                showDialog = true
+            }
+        }
     }
+
+    Dialog(
+        content = {
+            Column {
+                Text(
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    text = "Decoration"
+                )
+
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    text = item!!.decoration.name
+                )
+
+                Text(
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    text = "Price"
+                )
+
+                Row {
+                    Text(
+                        modifier = Modifier.padding(end = 4.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        text = "${item!!.decoration.price}"
+                    )
+
+                    Icon(
+                        contentDescription = "Decoration ${item!!.decoration.name} cost in points icon",
+                        imageVector = Icons.Outlined.Stars
+                    )
+                }
+            }
+        },
+        buttonContentConfirm = { Text("Purchase") },
+        buttonContentDismiss = { Text("Cancel") },
+        onConfirm = {
+            model.purchase(item!!.decoration)
+
+            showDialog = false
+            item = null
+        },
+        onDismiss = {
+            showDialog = false
+            item = null
+        },
+        show = showDialog,
+        title = { Text("Confirm purchase") }
+    )
 }
 
 @Composable
