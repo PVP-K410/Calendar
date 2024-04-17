@@ -74,6 +74,10 @@ class DecorationServiceImpl @Inject constructor(
         val decorations = user.decorationsApplied.toMutableList()
 
         if (decoration.id in user.decorationsApplied) {
+            if (isDefault(decoration)) {
+                error("Cannot remove default decoration ${decoration.id}")
+            }
+
             decorations.remove(decoration.id)
         } else {
             decorations.add(decoration.id)
@@ -105,20 +109,22 @@ class DecorationServiceImpl @Inject constructor(
     }
 
     override suspend fun getAvatar(user: Flow<User?>): Flow<ImageBitmap> {
-        return user.mapLatest { user ->
+        return user.mapLatest { userLatest ->
             var avatar = imageService.getOrDefault(configuration.imageUrlDefaultAvatar)
 
-            if (user == null) {
+            if (userLatest == null) {
                 return@mapLatest avatar
             }
 
-            user.decorationsApplied
+            userLatest.decorationsApplied
                 .mapNotNull {
                     get(it)
                         .firstOrNull()
                 }
                 .sortedWith(
-                    compareBy<Decoration> { it.type == Type.AVATAR_BODY }
+                    compareBy<Decoration> { isDefault(it) }
+                        .thenBy { it.type == Type.AVATAR_HANDS }
+                        .thenBy { it.type == Type.AVATAR_BODY }
                         .thenBy { it.type == Type.AVATAR_FACE }
                         .thenBy { it.type == Type.AVATAR_HEAD }
                         .thenBy { it.type == Type.AVATAR_LEGGINGS }

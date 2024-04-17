@@ -15,6 +15,7 @@ data class Decoration(
 enum class Type {
     AVATAR_BODY,
     AVATAR_FACE,
+    AVATAR_HANDS,
     AVATAR_HEAD,
     AVATAR_LEGGINGS,
     AVATAR_SHOES;
@@ -23,6 +24,7 @@ enum class Type {
         return when (this) {
             AVATAR_BODY -> "Body"
             AVATAR_FACE -> "Face"
+            AVATAR_HANDS -> "Hands"
             AVATAR_HEAD -> "Head"
             AVATAR_LEGGINGS -> "Leggings"
             AVATAR_SHOES -> "Shoes"

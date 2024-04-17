@@ -60,6 +60,16 @@ interface DecorationService : DocumentsCollection {
     suspend fun getAvatar(user: Flow<User?>): Flow<ImageBitmap>
 
     /**
+     * Check if a decoration is one of the default decorations.
+     */
+    fun isDefault(decoration: Decoration): Boolean {
+        return decoration.id.startsWith(
+            "default-",
+            ignoreCase = true
+        )
+    }
+
+    /**
      * Add a new decoration to the database or update an existing one.
      *
      * @param decoration The decoration to add or update.
