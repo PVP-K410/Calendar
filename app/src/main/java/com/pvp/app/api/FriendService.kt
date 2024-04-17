@@ -1,7 +1,6 @@
 package com.pvp.app.api
 
 import com.pvp.app.model.FriendObject
-import com.pvp.app.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface FriendService : DocumentsCollection {
@@ -85,6 +84,4 @@ interface FriendService : DocumentsCollection {
         email: String,
         friendEmail: String
     ): String
-
-    suspend fun getFriendsData(emails: List<String>): List<Flow<User?>>
 }

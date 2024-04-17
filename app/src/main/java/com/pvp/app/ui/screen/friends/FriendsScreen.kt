@@ -23,8 +23,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.GroupAdd
+import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -68,10 +70,7 @@ fun FriendsScreen(
     val context = LocalContext.current
     val toastMessage by model.toastMessage
     val friendObject by model.userFriendObject.collectAsStateWithLifecycle()
-    val friends = friendObject.friends
     val isRequestSent by model.isRequestSent.collectAsState(false)
-    val receivedRequests = friendObject.receivedRequests
-    val sentRequests = friendObject.sentRequests
     val friendEmail = remember { mutableStateOf("") }
     val showAddFriend = remember { mutableStateOf(false) }
     val showRequests = remember { mutableStateOf(false) }
@@ -104,7 +103,6 @@ fun FriendsScreen(
     }
 
     LaunchedEffect(
-        //friends,
         sortingType.value,
         friendsData
     ) {
@@ -132,7 +130,7 @@ fun FriendsScreen(
         )
 
         Text(
-            "All friends - ${friends.size}",
+            "All friends - ${friendsData.size}",
             modifier = Modifier.padding(
                 horizontal = 16.dp,
                 vertical = 8.dp
@@ -222,7 +220,7 @@ fun FriendsScreen(
                     when (selectedTab.intValue) {
                         0 -> {
                             RequestList(
-                                requests = receivedRequests,
+                                requests = friendObject.receivedRequests,
                                 requestTitle = "received",
                                 acceptAction = { request -> model.acceptFriendRequest(request) },
                                 denyAction = { request -> model.denyFriendRequest(request) }
@@ -231,7 +229,7 @@ fun FriendsScreen(
 
                         1 -> {
                             RequestList(
-                                requests = sentRequests,
+                                requests = friendObject.sentRequests,
                                 requestTitle = "sent",
                                 acceptAction = { },
                                 denyAction = { request -> model.cancelSentRequest(request) }
@@ -285,7 +283,6 @@ fun FriendsScreen(
     }
 }
 
-
 private fun sortFriends(
     friends: List<User>,
     sortingType: SortingType
@@ -295,7 +292,7 @@ private fun sortFriends(
         SortingType.POINTS -> friends.sortedByDescending { it.points }
     }
 
-    return sortedUsers.map { it.email }
+    return sortedUsers.map { it.username }
 }
 
 @Composable
@@ -388,7 +385,7 @@ private fun FriendList(
             .verticalScroll(scrollState)
             .padding(bottom = 10.dp)
     ) {
-        for (friend in friends) {
+        for ((index, friend) in friends.withIndex()) {
             val avatar = model.getFriendAvatar(friend)
 
             Row(
@@ -405,11 +402,41 @@ private fun FriendList(
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                when {
+                    index == 0 -> {
+                        Icon(
+                            imageVector = Icons.Outlined.EmojiEvents,
+                            contentDescription = "Top 1",
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(24.dp)
+                        )
+                    }
+
+                    index == 1 || index == 2 -> {
+                        Icon(
+                            imageVector = Icons.Outlined.WorkspacePremium,
+                            contentDescription = "Top 2-3",
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(24.dp)
+                        )
+                    }
+
+                    else -> {
+                        Spacer(
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(24.dp)
+                        )
+                    }
+                }
+
                 Text(
                     text = friend,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
-                        .padding(start = 25.dp)
+                        .padding(start = 4.dp)
                         .weight(1f)
                 )
 
