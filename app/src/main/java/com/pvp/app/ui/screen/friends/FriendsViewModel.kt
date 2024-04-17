@@ -13,9 +13,7 @@ import com.pvp.app.model.FriendObject
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
@@ -31,9 +29,6 @@ class FriendsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val toastMessage = mutableStateOf<String?>(null)
-
-    private val _isRequestSent = MutableStateFlow(false)
-    val isRequestSent = _isRequestSent.asStateFlow()
 
     val user = userService.user
         .filterNotNull()
@@ -78,11 +73,9 @@ class FriendsViewModel @Inject constructor(
 
     fun addFriend(friendEmail: String) {
         viewModelScope.launch {
-            _isRequestSent.value = false
 
             if (friendEmail.isEmpty()) {
                 toastMessage.value = "Please enter an email"
-                _isRequestSent.value = false
 
                 return@launch
             }
@@ -100,7 +93,6 @@ class FriendsViewModel @Inject constructor(
 
             if (friendUser == null) {
                 toastMessage.value = "User with email $friendEmail does not exist"
-                _isRequestSent.value = false
 
                 return@launch
             }
@@ -112,10 +104,6 @@ class FriendsViewModel @Inject constructor(
             )
 
             toastMessage.value = toastMessageValue
-            _isRequestSent.value = (
-                    toastMessageValue == "Friend request sent!" ||
-                    toastMessageValue == "Both of you want to be friends! Request accepted!"
-                    )
         }
     }
 

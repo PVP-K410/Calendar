@@ -27,8 +27,6 @@ import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.WorkspacePremium
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -38,7 +36,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.User
+import com.pvp.app.ui.common.ButtonWithDialog
 
 private enum class SortingType {
     EXPERIENCE,
@@ -70,16 +67,12 @@ fun FriendsScreen(
     val context = LocalContext.current
     val toastMessage by model.toastMessage
     val friendObject by model.userFriendObject.collectAsStateWithLifecycle()
-    val isRequestSent by model.isRequestSent.collectAsState(false)
     val friendEmail = remember { mutableStateOf("") }
-    val showAddFriend = remember { mutableStateOf(false) }
-    val showRequests = remember { mutableStateOf(false) }
-    val showSorting = remember { mutableStateOf(false) }
     val sortingType = remember { mutableStateOf(SortingType.EXPERIENCE) }
     val sortedFriends = remember { mutableStateOf(emptyList<String>()) }
     val friendsData by model.userFriends.collectAsState()
-    val selectedTab = remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
+    val tempSortingType = remember { mutableStateOf(sortingType.value) }
 
     LaunchedEffect(toastMessage) {
         toastMessage?.let {
@@ -92,13 +85,6 @@ fun FriendsScreen(
                 .show()
 
             model.toastMessage.value = null
-        }
-    }
-
-    LaunchedEffect(isRequestSent) {
-        if (isRequestSent) {
-            showAddFriend.value = false
-            friendEmail.value = ""
         }
     }
 
@@ -123,11 +109,168 @@ fun FriendsScreen(
             .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        TopRowWithButtons(
-            showAddFriend,
-            showRequests,
-            showSorting
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 4.dp
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ButtonWithDialog(
+                modifier = Modifier.size(
+                    45.dp,
+                    35.dp
+                ),
+                content = {
+                    Icon(
+                        Icons.Outlined.GroupAdd,
+                        contentDescription = null,
+                        modifier = Modifier.size(25.dp)
+                    )
+                },
+                contentPadding = PaddingValues(2.dp),
+                dialogTitle = { Text("Add Friend") },
+                dialogContent = {
+                    OutlinedTextField(
+                        value = friendEmail.value,
+                        onValueChange = { friendEmail.value = it },
+                        label = { Text("Friend's email") },
+                    )
+                },
+                confirmButtonContent = { Text("Add") },
+                onConfirm = {
+                    model.addFriend(friendEmail.value)
+                    friendEmail.value = ""
+                },
+                onDismiss = { friendEmail.value = "" },
+                shape = MaterialTheme.shapes.small
+            )
+
+            ButtonWithDialog(
+                modifier = Modifier.size(
+                    160.dp,
+                    35.dp
+                ),
+                content = {
+                    Text(
+                        "Requests",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                },
+                contentAlignment = Alignment.Center,
+                contentPadding = PaddingValues(
+                    horizontal = 45.dp,
+                    vertical = 2.dp
+                ),
+                dialogTitle = { Text("Friend Requests") },
+                dialogContent = {
+                    val selectedTab = remember { mutableIntStateOf(0) }
+                    Column {
+                        TabRow(selectedTabIndex = selectedTab.intValue) {
+                            Tab(
+                                selected = selectedTab.intValue == 0,
+                                onClick = { selectedTab.intValue = 0 }
+                            ) {
+                                Text(
+                                    "Received",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                            Tab(
+                                selected = selectedTab.intValue == 1,
+                                onClick = { selectedTab.intValue = 1 }
+                            ) {
+                                Text(
+                                    "Sent",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        when (selectedTab.intValue) {
+                            0 -> {
+                                RequestList(
+                                    requests = friendObject.receivedRequests,
+                                    requestTitle = "received",
+                                    acceptAction = { request -> model.acceptFriendRequest(request) },
+                                    denyAction = { request -> model.denyFriendRequest(request) }
+                                )
+                            }
+
+                            1 -> {
+                                RequestList(
+                                    requests = friendObject.sentRequests,
+                                    requestTitle = "sent",
+                                    acceptAction = { },
+                                    denyAction = { request -> model.cancelSentRequest(request) }
+                                )
+                            }
+                        }
+                    }
+                },
+                shape = MaterialTheme.shapes.small,
+                showConfirmButton = false
+            )
+
+            ButtonWithDialog(
+                modifier = Modifier.size(
+                    45.dp,
+                    35.dp
+                ),
+                content = {
+                    Icon(
+                        Icons.Outlined.FilterAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(25.dp)
+                    )
+                },
+                contentPadding = PaddingValues(2.dp),
+                dialogTitle = { Text("Sort by") },
+                dialogContent = {
+                    Column {
+                        SortingType
+                            .entries
+                            .forEach { type ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.clickable(
+                                        onClick = {
+                                            tempSortingType.value = type
+                                        }
+                                    )
+                                ) {
+                                    RadioButton(
+                                        selected = tempSortingType.value == type,
+                                        onClick = {
+                                            tempSortingType.value = type
+                                        }
+                                    )
+
+                                    Text(
+                                        text = type
+                                            .name
+                                            .toLowerCase()
+                                            .capitalize(),
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
+                            }
+                    }
+                },
+                onConfirm = { sortingType.value = tempSortingType.value },
+                onDismiss = { tempSortingType.value = sortingType.value },
+                shape = MaterialTheme.shapes.small
+            )
+        }
 
         Text(
             "All friends - ${friendsData.size}",
@@ -144,143 +287,6 @@ fun FriendsScreen(
             scrollState = scrollState
         )
     }
-
-    if (showAddFriend.value) {
-        AlertDialog(
-            onDismissRequest = {
-                showAddFriend.value = false
-                friendEmail.value = ""
-            },
-            confirmButton = {
-                Button(onClick = {
-                    model.addFriend(friendEmail.value)
-                }) {
-                    Text("Add")
-                }
-            },
-            dismissButton = {
-                Button(onClick = {
-                    showAddFriend.value = false
-                    friendEmail.value = ""
-                }) {
-                    Text("Cancel")
-                }
-            },
-            text = {
-                OutlinedTextField(
-                    value = friendEmail.value,
-                    onValueChange = { friendEmail.value = it },
-                    label = { Text("Friend's email") },
-                )
-            },
-        )
-    }
-
-    if (showRequests.value) {
-        AlertDialog(
-            onDismissRequest = {
-                showRequests.value = false
-                selectedTab.intValue = 0
-            },
-            confirmButton = {
-                Button(onClick = {
-                    showRequests.value = false
-                    selectedTab.intValue = 0
-                }) {
-                    Text("Back")
-                }
-            },
-            text = {
-                Column {
-                    TabRow(selectedTabIndex = selectedTab.intValue) {
-                        Tab(
-                            selected = selectedTab.intValue == 0,
-                            onClick = { selectedTab.intValue = 0 }
-                        ) {
-                            Text(
-                                "Received",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
-                        Tab(
-                            selected = selectedTab.intValue == 1,
-                            onClick = { selectedTab.intValue = 1 }
-                        ) {
-                            Text(
-                                "Sent",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    when (selectedTab.intValue) {
-                        0 -> {
-                            RequestList(
-                                requests = friendObject.receivedRequests,
-                                requestTitle = "received",
-                                acceptAction = { request -> model.acceptFriendRequest(request) },
-                                denyAction = { request -> model.denyFriendRequest(request) }
-                            )
-                        }
-
-                        1 -> {
-                            RequestList(
-                                requests = friendObject.sentRequests,
-                                requestTitle = "sent",
-                                acceptAction = { },
-                                denyAction = { request -> model.cancelSentRequest(request) }
-                            )
-                        }
-                    }
-                }
-            },
-        )
-    }
-
-    if (showSorting.value) {
-        AlertDialog(
-            onDismissRequest = { showSorting.value = false },
-            title = { Text("Sort by") },
-            text = {
-                Column {
-                    SortingType
-                        .entries
-                        .forEach { type ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable(
-                                    onClick = {
-                                        sortingType.value = type
-                                        showSorting.value = false
-                                    }
-                                )
-                            ) {
-                                RadioButton(
-                                    selected = sortingType.value == type,
-                                    onClick = {
-                                        sortingType.value = type
-                                        showSorting.value = false
-                                    }
-                                )
-
-                                Text(
-                                    text = type
-                                        .name
-                                        .toLowerCase()
-                                        .capitalize(),
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
-                }
-            },
-            confirmButton = { }
-        )
-    }
 }
 
 private fun sortFriends(
@@ -293,84 +299,6 @@ private fun sortFriends(
     }
 
     return sortedUsers.map { it.username }
-}
-
-@Composable
-private fun TopRowWithButtons(
-    showAddFriend: MutableState<Boolean>,
-    showRequests: MutableState<Boolean>,
-    showSorting: MutableState<Boolean>
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 16.dp,
-                end = 16.dp,
-                top = 4.dp
-            ),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RowButton(
-            onClick = { showAddFriend.value = true },
-            modifier = Modifier.size(
-                width = 45.dp,
-                height = 35.dp
-            ),
-            content = ButtonContent.Icon(Icons.Outlined.GroupAdd)
-        )
-
-        RowButton(
-            onClick = { showRequests.value = true },
-            modifier = Modifier.size(
-                width = 160.dp,
-                height = 35.dp
-            ),
-            content = ButtonContent.Text("Requests")
-        )
-
-        RowButton(
-            onClick = { showSorting.value = true },
-            modifier = Modifier.size(
-                width = 45.dp,
-                height = 35.dp
-            ),
-            content = ButtonContent.Icon(Icons.Outlined.FilterAlt)
-        )
-    }
-}
-
-private sealed class ButtonContent {
-    data class Icon(val imageVector: ImageVector) : ButtonContent()
-    data class Text(val text: String) : ButtonContent()
-}
-
-@Composable
-private fun RowButton(
-    onClick: () -> Unit,
-    modifier: Modifier,
-    content: ButtonContent
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        contentPadding = PaddingValues(4.dp)
-    ) {
-        when (content) {
-            is ButtonContent.Icon -> Icon(
-                imageVector = content.imageVector,
-                contentDescription = null,
-                modifier = Modifier.size(25.dp)
-            )
-
-            is ButtonContent.Text -> Text(
-                text = content.text,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-    }
 }
 
 @Composable

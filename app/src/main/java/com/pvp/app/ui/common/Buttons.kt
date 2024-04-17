@@ -93,13 +93,15 @@ fun ButtonWithDialog(
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     content: @Composable RowScope.() -> Unit = { Text("Open Dialog") },
     contentAlignment: Alignment = Alignment.TopStart,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
     onConfirm: () -> Unit = {},
     onDismiss: () -> Unit = {},
-    shape: Shape = MaterialTheme.shapes.extraSmall
+    shape: Shape = MaterialTheme.shapes.extraSmall,
+    showConfirmButton: Boolean = true
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -111,6 +113,7 @@ fun ButtonWithDialog(
             border = border,
             colors = colors,
             content = content,
+            contentPadding = contentPadding,
             onClick = { showDialog = true },
             shape = shape
         )
@@ -131,6 +134,7 @@ fun ButtonWithDialog(
             showDialog = false
         },
         show = showDialog,
+        showConfirmButton = showConfirmButton,
         title = dialogTitle
     )
 }
@@ -221,7 +225,8 @@ private fun Dialog(
     buttonContentDismiss: @Composable RowScope.() -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    show: Boolean
+    show: Boolean,
+    showConfirmButton: Boolean = true
 ) {
     if (!show) {
         return
@@ -229,11 +234,13 @@ private fun Dialog(
 
     AlertDialog(
         confirmButton = {
-            Box(contentAlignment = Alignment.BottomEnd) {
-                Button(
-                    content = buttonContentConfirm,
-                    onClick = onConfirm
-                )
+            if (showConfirmButton) {
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    Button(
+                        content = buttonContentConfirm,
+                        onClick = onConfirm
+                    )
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
