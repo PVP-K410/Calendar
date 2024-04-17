@@ -126,6 +126,13 @@ interface TaskService : DocumentsCollection {
     suspend fun remove(task: Task)
 
     /**
+     * Removes all tasks from the database.
+     *
+     * @param userEmail email of the user to remove tasks for
+     */
+    suspend fun removeAll(userEmail: String)
+
+    /**
      * Updates the task in the database.
      *
      * @param task task to update

@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -56,15 +55,10 @@ class ProfileViewModel @Inject constructor(
             try {
                 val email = state.value.user.email
 
-                taskService.get(email).first().forEach { task ->
-                    taskService.remove(task)
-                }
-
+                taskService.removeAll(email)
                 friendService.remove(email)
-
                 userService.remove(email)
-
-                authenticationService.user.first()?.delete()?.await()
+                authenticationService.deleteAccount()
 
                 Result.success(true)
             } catch (e: Exception) {

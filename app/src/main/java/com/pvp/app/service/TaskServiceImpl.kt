@@ -317,6 +317,21 @@ class TaskServiceImpl @Inject constructor(
             .await()
     }
 
+    override suspend fun removeAll(userEmail: String) {
+        database
+            .collection(identifier)
+            .whereEqualTo(
+                Task::userEmail.name,
+                userEmail
+            )
+            .get()
+            .await()
+            .documents
+            .forEach { d ->
+                d.reference.delete()
+            }
+    }
+
     override suspend fun update(
         task: Task,
         updatePoints: Boolean
