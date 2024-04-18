@@ -44,7 +44,6 @@ import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.PickerTime
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
 
@@ -125,7 +124,7 @@ fun TaskCreateDialog(
                 }
             }
 
-            TaskCreateNew(
+            TaskCreateForm(
                 targetClass = target,
                 date = date,
                 onCreate = ::closeIfShould
@@ -135,7 +134,7 @@ fun TaskCreateDialog(
 }
 
 @Composable
-fun TaskCreateNew(
+fun TaskCreateForm(
     model: TaskViewModel = hiltViewModel(),
     date: LocalDateTime? = null,
     targetClass: KClass<out Task>,
@@ -144,16 +143,17 @@ fun TaskCreateNew(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(Duration.ofMinutes(0)) }
+    var reminderTime by remember { mutableStateOf(Duration.ofMinutes(0)) }
     var activity by remember { mutableStateOf(SportActivity.Walking) }
     var distance by remember { mutableDoubleStateOf(0.0) }
     var recipe by remember { mutableStateOf("") }
-    var tempTitle by remember { mutableStateOf("") }
-    var tempDescription by remember { mutableStateOf("") }
-    var tempDuration by remember { mutableStateOf(Duration.ofMinutes(0)) }
-    var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
-    var time by remember { mutableStateOf(selectedDateTime.toLocalTime()) }
-    val tempHour = rememberPickerState(time.hour)
-    val tempMinute = rememberPickerState(time.minute)
+    var dateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
+    var editingTitle by remember { mutableStateOf("") }
+    var editingDescription by remember { mutableStateOf("") }
+    var editingDuration by remember { mutableStateOf(Duration.ofMinutes(0)) }
+    var editingReminderTime by remember { mutableStateOf(Duration.ofMinutes(0)) }
+    val editingHour = rememberPickerState(dateTime.hour)
+    val editingMinute = rememberPickerState(dateTime.minute)
 
     val isFormValid by remember(targetClass) {
         derivedStateOf {
@@ -188,15 +188,15 @@ fun TaskCreateNew(
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
                         onValueChange = { newText ->
-                            tempTitle = newText
+                            editingTitle = newText
                         },
-                        value = tempTitle
+                        value = editingTitle
                     )
                 },
                 dialogTitle = { Text("Editing title") },
                 label = "Title",
-                onConfirm = { title = tempTitle },
-                onDismiss = { tempTitle = title },
+                onConfirm = { title = editingTitle },
+                onDismiss = { editingTitle = title },
                 value = title
             )
 
@@ -208,15 +208,15 @@ fun TaskCreateNew(
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
                         onValueChange = { newText ->
-                            tempDescription = newText
+                            editingDescription = newText
                         },
-                        value = tempDescription
+                        value = editingDescription
                     )
                 },
                 dialogTitle = { Text("Editing description") },
                 label = "Description",
-                onConfirm = { description = tempDescription },
-                onDismiss = { tempDescription = description },
+                onConfirm = { description = editingDescription },
+                onDismiss = { editingDescription = description },
                 value = description
             )
 
@@ -247,7 +247,7 @@ fun TaskCreateNew(
                     dialogContent = {
                         Column {
                             Text(
-                                text = "Duration: ${tempDuration?.toMinutes()} minutes",
+                                text = "Duration: ${editingDuration?.toMinutes()} minutes",
                                 style = TextStyle(fontSize = 16.sp),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -255,11 +255,11 @@ fun TaskCreateNew(
                             )
 
                             Slider(
-                                value = tempDuration
+                                value = editingDuration
                                     ?.toMinutes()
                                     ?.toFloat() ?: 0f,
                                 onValueChange = { newValue ->
-                                    tempDuration = Duration.ofMinutes(newValue.toLong())
+                                    editingDuration = Duration.ofMinutes(newValue.toLong())
                                 },
                                 valueRange = 1f..180f,
                                 steps = 180,
@@ -275,8 +275,8 @@ fun TaskCreateNew(
                     },
                     dialogTitle = { Text("Editing duration") },
                     label = "Duration",
-                    onConfirm = { duration = tempDuration },
-                    onDismiss = { tempDuration = duration },
+                    onConfirm = { duration = editingDuration },
+                    onDismiss = { editingDuration = duration },
                     value = "${duration?.toMinutes()} minutes"
                 )
             }
@@ -284,75 +284,111 @@ fun TaskCreateNew(
             EditableInfoItem(
                 dialogContent = {
                     PickerTime(
-                        selectedHour = tempHour,
-                        selectedMinute = tempMinute,
+                        selectedHour = editingHour,
+                        selectedMinute = editingMinute,
                         onChange = { hour, minute ->
-                            tempHour.value = hour
-                            tempMinute.value = minute
+                            editingHour.value = hour
+                            editingMinute.value = minute
                         }
                     )
                 },
                 dialogTitle = { Text("Editing scheduled at") },
                 label = "Scheduled at",
                 onConfirm = {
-                    time = time
-                        .withHour(tempHour.value)
-                        .withMinute(tempMinute.value)
+                    dateTime = dateTime
+                        .withHour(editingHour.value)
+                        .withMinute(editingMinute.value)
                 },
                 onDismiss = {
-                    tempHour.value = time.hour
-                    tempMinute.value = time.minute
+                    editingHour.value = dateTime.hour
+                    editingMinute.value = dateTime.minute
                 },
                 value = if (activity.supportsDistanceMetrics) {
-                    time.format(DateTimeFormatter.ofPattern("HH:mm"))
+                    dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
                 } else {
-                    "${time.format(DateTimeFormatter.ofPattern("HH:mm"))} - " +
-                            (time.plus(duration)).format(DateTimeFormatter.ofPattern("HH:mm"))
+                    "${dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))} - " +
+                            (dateTime.plus(duration)).format(DateTimeFormatter.ofPattern("HH:mm"))
                 }
             )
 
             EditableDateItem(
                 label = "Date",
-                value = selectedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE")),
+                value = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE")),
                 onDateSelected = { selectedDate ->
-                    selectedDateTime = selectedDateTime
+                    dateTime = dateTime
                         .withYear(selectedDate.year)
                         .withMonth(selectedDate.monthValue)
                         .withDayOfMonth(selectedDate.dayOfMonth)
                 }
             )
 
+            EditableInfoItem(
+                dialogContent = {
+                    Column {
+                        Text(
+                            text = "Reminder Time: ${editingReminderTime?.toMinutes()} minutes",
+                            style = TextStyle(fontSize = 16.sp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 4.dp)
+                        )
+
+                        Slider(
+                            value = editingReminderTime
+                                ?.toMinutes()
+                                ?.toFloat() ?: 0f,
+                            onValueChange = { newValue ->
+                                editingReminderTime = Duration.ofMinutes(newValue.toLong())
+                            },
+                            valueRange = 1f..120f,
+                            steps = 120,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = 8.dp,
+                                    end = 8.dp,
+                                    bottom = 8.dp
+                                )
+                        )
+                    }
+                },
+                dialogTitle = { Text("Editing reminder time") },
+                label = "Reminder Time",
+                onConfirm = { reminderTime = editingReminderTime },
+                onDismiss = { editingReminderTime = reminderTime },
+                value = "${reminderTime?.toMinutes()} minutes before task"
+            )
+
             Button(
                 onClick = {
                     when (targetClass) {
                         SportTask::class -> model.create(
-                            date = selectedDateTime.toLocalDate(),
+                            date = dateTime.toLocalDate(),
                             activity = activity,
                             description = description,
                             distance = distance,
                             duration = duration,
-                            time = selectedDateTime
-                                .toLocalTime()
-                                .let { if (it == LocalTime.MIN) null else it },
+                            reminderTime = reminderTime,
+                            time = dateTime.toLocalTime(),
                             title = title
                         )
 
                         MealTask::class -> model.create(
-                            date = selectedDateTime.toLocalDate(),
+                            date = dateTime.toLocalDate(),
                             description = description,
                             duration = duration,
+                            reminderTime = reminderTime,
                             recipe = recipe,
-                            time = selectedDateTime
-                                .toLocalTime()
-                                .let { if (it == LocalTime.MIN) null else it },
+                            time = dateTime.toLocalTime(),
                             title = title
                         )
 
                         else -> model.create(
-                            date = selectedDateTime.toLocalDate(),
+                            date = dateTime.toLocalDate(),
                             description = description,
                             duration = duration,
-                            time = selectedDateTime.toLocalTime(),
+                            reminderTime = reminderTime,
+                            time = dateTime.toLocalTime(),
                             title = title
                         )
 
@@ -361,8 +397,7 @@ fun TaskCreateNew(
                     onCreate()
                 },
                 enabled = isFormValid,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text("Create")
             }

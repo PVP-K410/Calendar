@@ -63,6 +63,7 @@ class TaskViewModel @Inject constructor(
         date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
+        reminderTime: Duration? = null,
         recipe: String,
         time: LocalTime? = null,
         title: String
@@ -76,6 +77,7 @@ class TaskViewModel @Inject constructor(
                             date,
                             description,
                             duration,
+                            reminderTime,
                             recipe,
                             time,
                             title,
@@ -95,6 +97,7 @@ class TaskViewModel @Inject constructor(
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
+        reminderTime: Duration? = null,
         time: LocalTime? = null,
         title: String
     ) {
@@ -109,6 +112,7 @@ class TaskViewModel @Inject constructor(
                             description,
                             distance,
                             duration,
+                            reminderTime,
                             false,
                             time,
                             title,
@@ -126,6 +130,7 @@ class TaskViewModel @Inject constructor(
         date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
+        reminderTime: Duration? = null,
         time: LocalTime? = null,
         title: String
     ) {
@@ -138,6 +143,7 @@ class TaskViewModel @Inject constructor(
                             date,
                             description,
                             duration,
+                            reminderTime,
                             time,
                             title,
                             state.user.email

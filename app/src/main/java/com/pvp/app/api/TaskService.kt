@@ -29,6 +29,7 @@ interface TaskService : DocumentsCollection {
      * @param date scheduled date
      * @param description description
      * @param duration duration
+     * @param reminderTime minutes before the task to send a reminder
      * @param time scheduled time
      * @param title title
      * @param userEmail user email to create the task for
@@ -39,6 +40,7 @@ interface TaskService : DocumentsCollection {
         date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
+        reminderTime: Duration? = null,
         time: LocalTime? = null,
         title: String,
         userEmail: String
@@ -53,6 +55,7 @@ interface TaskService : DocumentsCollection {
      * @param description description
      * @param distance distance
      * @param duration duration
+     * @param reminderTime minutes before the task to send a reminder
      * @param isDaily flag to create a daily task
      * @param time scheduled time
      * @param title title
@@ -66,6 +69,7 @@ interface TaskService : DocumentsCollection {
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
+        reminderTime: Duration? = null,
         isDaily: Boolean = false,
         time: LocalTime? = null,
         title: String,
@@ -79,6 +83,7 @@ interface TaskService : DocumentsCollection {
      * @param date scheduled date
      * @param description description
      * @param duration duration
+     * @param reminderTime minutes before the task to send a reminder
      * @param recipe recipe of the meal
      * @param time scheduled time
      * @param title title
@@ -90,6 +95,7 @@ interface TaskService : DocumentsCollection {
         date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
+        reminderTime: Duration? = null,
         recipe: String,
         time: LocalTime? = null,
         title: String,

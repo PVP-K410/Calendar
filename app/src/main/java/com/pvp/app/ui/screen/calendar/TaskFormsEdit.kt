@@ -68,6 +68,9 @@ fun TaskEdit(
     var time by remember { mutableStateOf(task.time ?: LocalTime.MIN) }
     val tempHour = rememberPickerState(time.hour)
     val tempMinute = rememberPickerState(time.minute)
+    var reminderTime by remember { mutableStateOf(task.reminderTime ?: Duration.ZERO) }
+    var editingReminderTime by remember { mutableStateOf(reminderTime) }
+
 
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
@@ -226,6 +229,43 @@ fun TaskEdit(
                     }
                 )
 
+                EditableInfoItem(
+                    dialogContent = {
+                        Column {
+                            Text(
+                                text = "Reminder Time: ${editingReminderTime?.toMinutes()} minutes",
+                                style = TextStyle(fontSize = 16.sp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 4.dp)
+                            )
+
+                            Slider(
+                                value = editingReminderTime
+                                    ?.toMinutes()
+                                    ?.toFloat() ?: 0f,
+                                onValueChange = { newValue ->
+                                    editingReminderTime = Duration.ofMinutes(newValue.toLong())
+                                },
+                                valueRange = 1f..120f,
+                                steps = 120,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 8.dp
+                                    )
+                            )
+                        }
+                    },
+                    dialogTitle = { Text("Editing reminder time") },
+                    label = "Reminder Time",
+                    onConfirm = { reminderTime = editingReminderTime },
+                    onDismiss = { editingReminderTime = reminderTime },
+                    value = "${reminderTime?.toMinutes()} minutes before task"
+                )
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -272,6 +312,7 @@ fun TaskEdit(
                                     task.title = title
                                     task.description = description
                                     task.duration = duration
+                                    task.reminderTime = reminderTime
                                     task.date = date
                                     task.time = time
 
