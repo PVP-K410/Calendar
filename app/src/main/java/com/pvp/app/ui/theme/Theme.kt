@@ -50,7 +50,7 @@ fun CalendarTheme(
             } else if (themeValue == 1) {
                 dynamicLightColorScheme(context)
             } else {
-                if (darkTheme) dynamicLightColorScheme(context)
+                if (darkTheme) dynamicDarkColorScheme(context)
                 else dynamicLightColorScheme(context)
             }
         }
@@ -58,7 +58,7 @@ fun CalendarTheme(
         themeValue == 0 -> DarkColorScheme
         themeValue == 1 -> LightColorScheme
         else -> {
-            if (darkTheme) LightColorScheme
+            if (darkTheme) DarkColorScheme
             else LightColorScheme
         }
     }

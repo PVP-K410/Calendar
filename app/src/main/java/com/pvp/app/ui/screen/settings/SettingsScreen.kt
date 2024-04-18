@@ -61,7 +61,7 @@ private fun SettingNotificationReminderMinutes(
     val state = rememberPickerState(initialValue = minutes)
 
     SettingCard(
-        title = "Set Reminder Time",
+        title = "Reminder Time",
         description = "Choose minutes before tasks reminder executes. Default is 10 minutes",
         iconDescription = "Clickable icon to edit reminder time",
         value = "$minutes minute${if (minutes != 1) "s" else ""}",
@@ -118,7 +118,7 @@ private fun SettingCupVolumeMl(
     val state = rememberPickerState(initialValue = volume)
 
     SettingCard(
-        title = "Set Cup Volume",
+        title = "Cup Volume",
         description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
         iconDescription = "Clickable icon to edit cup volume",
         value = "$volume ml",
@@ -245,8 +245,16 @@ private fun SettingApplicationTheme(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = state.value == it.ordinal,
-                            onClick = { state.value = it.ordinal}
+                            selected = themeValue == it.ordinal,
+                            onClick = {
+                                state.value = it.ordinal
+                                if (state.value != themeValue) {
+                                    model.merge(
+                                        Setting.Appearance.ApplicationTheme,
+                                        state.value
+                                    )
+                                }
+                            }
                         )
 
                         Text(
@@ -258,16 +266,9 @@ private fun SettingApplicationTheme(
                 }
             }
         },
-        onEdit = {
-            if (state.value != themeValue) {
-                model.merge(
-                    Setting.Appearance.ApplicationTheme,
-                    state.value
-                )
-            }
-        },
-        value = state.value.toString(),
-        title = "Set Application Theme"
+        onEdit = {},
+        value = Theme.entries[themeValue],
+        title = "Application Theme"
     )
 }
 
