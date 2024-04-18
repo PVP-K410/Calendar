@@ -15,12 +15,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.ViewModel
-import com.pvp.app.api.SettingService
-import com.pvp.app.model.Setting
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
