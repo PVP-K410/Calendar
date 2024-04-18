@@ -10,17 +10,22 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Dehaze
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -38,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,11 +57,16 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pvp.app.R
+import com.pvp.app.model.Decoration
+import com.pvp.app.model.Reward
+import com.pvp.app.ui.common.AsyncImage
+import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
@@ -267,6 +278,26 @@ fun LayoutScreenAuthenticated(
         pageCount = { 2 }
     )
 
+    var isRewardDialogOpen by remember { mutableStateOf(false) }
+
+    val toggleRewardDialog = remember { { isRewardDialogOpen = !isRewardDialogOpen } }
+
+    if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward) {
+        LaunchedEffect(null) {
+            viewModel.giveReward()
+
+            isRewardDialogOpen = true
+        }
+    }
+
+    val reward = viewModel.reward.collectAsStateWithLifecycle().value
+
+    RewardDialog(
+        reward = reward,
+        isOpen = isRewardDialogOpen,
+        onClose = toggleRewardDialog
+    )
+
     ModalNavigationDrawer(
         drawerContent = {
             DrawerScreen(
@@ -285,9 +316,9 @@ fun LayoutScreenAuthenticated(
         },
         drawerState = stateDrawer
     ) {
-        var isOpen by remember { mutableStateOf(false) }
+        var isTaskDialogOpen by remember { mutableStateOf(false) }
 
-        val toggleDialog = remember { { isOpen = !isOpen } }
+        val toggleTaskDialog = remember { { isTaskDialogOpen = !isTaskDialogOpen } }
 
         Scaffold(
             floatingActionButton = {
@@ -297,7 +328,7 @@ fun LayoutScreenAuthenticated(
                         statePager
                     )
                 ) {
-                    FloatingActionButton(toggleDialog)
+                    FloatingActionButton(toggleTaskDialog)
                 }
             },
             floatingActionButtonPosition = FabPosition.End,
@@ -344,11 +375,106 @@ fun LayoutScreenAuthenticated(
                 )
             ) {
                 TaskCreateDialog(
-                    onClose = toggleDialog,
-                    isOpen = isOpen,
+                    onClose = toggleTaskDialog,
+                    isOpen = isTaskDialogOpen,
                     shouldCloseOnSubmit = true
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun RewardDialog(
+    reward: Reward,
+    isOpen: Boolean,
+    onClose: () -> Unit
+) {
+    if (!isOpen) {
+        return
+    }
+
+    Dialog(
+        onDismissRequest = onClose
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = "You've earned a reward!",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+
+                IconButton(onClick = onClose) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Close button"
+                    )
+                }
+            }
+
+            if (reward.points > 0) {
+                Text(
+                    text = "${reward.points} points!",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+
+            if (reward.experience > 0) {
+                Text(
+                    text = "${reward.experience} experience!",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+
+            reward.decoration?.let {
+                DecorationCard(decoration = it)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DecorationCard(
+    decoration: Decoration
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Text(
+            text = "${decoration.name} decoration!",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(8.dp)
+        )
+
+        AsyncImage(
+            contentDescription = "Decoration ${decoration.name} image",
+            modifier = Modifier
+                .size(96.dp)
+                .clip(MaterialTheme.shapes.extraSmall)
+                .background(
+                    color = MaterialTheme.colorScheme.inverseOnSurface.lighten(),
+                    shape = MaterialTheme.shapes.extraSmall
+                ),
+            url = decoration.imageRepresentativeUrl
+        )
     }
 }

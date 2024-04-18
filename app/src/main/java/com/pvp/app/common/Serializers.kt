@@ -38,7 +38,7 @@ object DurationSerializer : KSerializer<Duration?> {
 object LocalDateSerializer : KSerializer<LocalDate> {
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
-        "java.time.LocalDateTime",
+        "java.time.LocalDate",
         PrimitiveKind.STRING
     )
 
