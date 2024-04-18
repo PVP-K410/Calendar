@@ -450,7 +450,7 @@ private fun RewardDialog(
 
 @Composable
 private fun DecorationCard(
-    decoration: Decoration,
+    decoration: Decoration
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
