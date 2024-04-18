@@ -5,6 +5,7 @@ import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.FriendObject
+import com.pvp.app.model.Friends
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -70,7 +71,7 @@ class FriendServiceImpl @Inject constructor(
                 val user = userDoc.toObject(FriendObject::class.java)
 
                 if (user != null) {
-                    val updatedFriends = user.friends - email
+                    val updatedFriends = user.friends.filter { it.email != email }
                     val updatedSentRequests = user.sentRequests - email
                     val updatedReceivedRequests = user.receivedRequests - email
 
@@ -101,7 +102,7 @@ class FriendServiceImpl @Inject constructor(
         val friend = get(friendEmail)
             .first()!!
 
-        if (friendEmail in friendObject.friends) {
+        if (friendObject.friends.any { it.email == friendEmail }) {
             return "$friendEmail is already your friend"
         }
 
@@ -151,7 +152,7 @@ class FriendServiceImpl @Inject constructor(
 
         val friendNew = friend.copy(
             sentRequests = friend.sentRequests - email,
-            friends = friend.friends + email
+            friends = friend.friends + Friends(email)
         )
 
         merge(
@@ -161,7 +162,7 @@ class FriendServiceImpl @Inject constructor(
 
         val friendObjectNew = friendObject.copy(
             receivedRequests = friendObject.receivedRequests - friendEmail,
-            friends = friendObject.friends + friendEmail
+            friends = friendObject.friends + Friends(friendEmail)
         )
 
         merge(

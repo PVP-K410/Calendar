@@ -56,8 +56,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.model.FriendObject
 import com.pvp.app.model.User
 import com.pvp.app.ui.common.ButtonWithDialog
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 private enum class SortingType {
     EXPERIENCE,
@@ -289,6 +294,7 @@ fun FriendsScreen(
 
         FriendList(
             friends = sortedFriends.value,
+            friendObject = friendObject,
             model = model,
             scrollState = scrollState
         )
@@ -308,6 +314,7 @@ private fun sortFriends(
 @Composable
 private fun FriendList(
     friends: List<User>,
+    friendObject: FriendObject,
     model: FriendsViewModel,
     scrollState: ScrollState
 ) {
@@ -396,6 +403,15 @@ private fun FriendList(
                     model.tasksCompleted(friend.email)
                     val mutualFriends by model.mutualFriends.collectAsState()
                     model.getMutualFriends(friend.email)
+                    val friendInfo = friendObject.friends.find { it.email == friend.email }
+                    val sinceDateTime = LocalDateTime.ofInstant(friendInfo?.let {
+                        Instant.ofEpochMilli(
+                            it.since
+                        )
+                    }, ZoneId.systemDefault())
+                    val formattedDate =
+                        sinceDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
 
                     Column(
                         modifier = Modifier
@@ -557,7 +573,7 @@ private fun FriendList(
                                     .padding(vertical = 4.dp, horizontal = 14.dp)
                             ) {
                                 Text(
-                                    text = "Friends since - ",
+                                    text = "Friends since - $formattedDate",
                                     style = MaterialTheme.typography.titleSmall
                                 )
 

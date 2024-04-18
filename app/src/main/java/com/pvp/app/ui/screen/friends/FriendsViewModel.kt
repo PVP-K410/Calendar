@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -61,13 +62,17 @@ class FriendsViewModel @Inject constructor(
         .flatMapLatest { friendService.get(it.email) }
         .filterNotNull()
         .flatMapLatest { friendObject ->
-            friendObject.friends
-                .map {
-                    userService
-                        .get(it)
-                        .filterNotNull()
-                }
-                .flattenFlow()
+            if (friendObject.friends.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                friendObject.friends
+                    .map { friend ->
+                        userService
+                            .get(friend.email)
+                            .filterNotNull()
+                    }
+                    .flattenFlow()
+            }
         }
         .stateIn(
             viewModelScope,
@@ -181,7 +186,9 @@ class FriendsViewModel @Inject constructor(
                 .firstOrNull()
 
             val mutualFriendsList =
-                friendObject?.friends?.intersect(userFriends.value.map { it.email }.toSet())
+                friendObject?.friends?.map { it.email }
+                    ?.intersect(userFriends.value.map { it.email }
+                        .toSet())
 
             if (mutualFriendsList != null) {
                 val mutualFriendsUsers = mutualFriendsList.mapNotNull {
