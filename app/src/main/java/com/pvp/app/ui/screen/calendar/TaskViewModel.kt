@@ -63,8 +63,7 @@ class TaskViewModel @Inject constructor(
         date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
-        ingredients: String,
-        preparation: String,
+        recipe: String,
         time: LocalTime? = null,
         title: String
     ) {
@@ -72,17 +71,6 @@ class TaskViewModel @Inject constructor(
             state
                 .first()
                 .let { state ->
-                    val recipe = if (
-                        ingredients.isNotEmpty() &&
-                        preparation.isNotEmpty()
-                    ) {
-                        "$ingredients\n$preparation"
-                    } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
-                        ingredients
-                    } else {
-                        preparation
-                    }
-
                     taskService
                         .create(
                             date,

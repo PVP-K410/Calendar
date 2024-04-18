@@ -1,57 +1,51 @@
 package com.pvp.app.ui.screen.calendar
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Place
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.common.InputValidator
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
-import com.pvp.app.ui.common.DateTimePicker
-import com.pvp.app.ui.common.LabelFieldWrapper
-import com.pvp.app.ui.common.PickerPair
+import com.pvp.app.ui.common.EditableDateItem
+import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
-import com.pvp.app.ui.common.TextField
+import com.pvp.app.ui.common.PickerTime
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
 
 @Composable
@@ -72,119 +66,6 @@ private fun TaskTypeSelector(
             style = MaterialTheme.typography.labelLarge,
             text = text
         )
-    }
-}
-
-@SuppressLint("UnrememberedMutableState")
-@Composable
-fun TaskCreate(
-    date: LocalDateTime? = null,
-    model: TaskViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier,
-    onCreate: () -> Unit
-) {
-    var title by remember { mutableStateOf("") }
-    var titleError by remember { mutableStateOf(true) }
-    var description by remember { mutableStateOf("") }
-    var descriptionError by remember { mutableStateOf(true) }
-    var duration by remember { mutableFloatStateOf(0.0f) }
-    var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
-
-    val isFormValid by derivedStateOf {
-        !titleError && !descriptionError
-    }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center
-    ) {
-        TextField(
-            value = title,
-            onValueChange = { newText, errors ->
-                title = newText
-                titleError = errors.isNotEmpty()
-            },
-            validationPolicies = { input ->
-                InputValidator.validateBlank(
-                    input,
-                    "Title"
-                )
-            },
-            label = { Text("Title") }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = description,
-            onValueChange = { newText, errors ->
-                description = newText
-                descriptionError = errors.isNotEmpty()
-            },
-            validationPolicies = { input ->
-                InputValidator.validateBlank(
-                    input,
-                    "Description"
-                )
-            },
-            label = { Text("Description") }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Duration: ${duration.toInt()} minutes",
-            style = TextStyle(fontSize = 16.sp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 8.dp,
-                    end = 8.dp,
-                    top = 8.dp
-                )
-        )
-
-        Slider(
-            value = duration,
-            onValueChange = { duration = it },
-            valueRange = 1f..180f,
-            steps = 180,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 8.dp,
-                    end = 8.dp,
-                    bottom = 8.dp
-                )
-        )
-
-        DateTimePicker(
-            dateTime = selectedDateTime,
-            onDateTimeChanged = { newDateTime ->
-                selectedDateTime = newDateTime
-            }
-        )
-
-        Button(
-            onClick = {
-                model.create(
-                    date = selectedDateTime.toLocalDate(),
-                    description = description,
-                    duration = Duration.ofMinutes(duration.toLong()),
-                    time = selectedDateTime.toLocalTime(),
-                    title = title
-                )
-
-                onCreate()
-            },
-            enabled = isFormValid,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 20.dp)
-        ) {
-            Text("Submit")
-        }
     }
 }
 
@@ -244,319 +125,247 @@ fun TaskCreateDialog(
                 }
             }
 
-            val modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(8.dp)
-                .verticalScroll(rememberScrollState())
-
-            when (target) {
-                MealTask::class -> TaskCreateMeal(
-                    date = date,
-                    modifier = modifier,
-                    onCreate = ::closeIfShould
-                )
-
-                SportTask::class -> TaskCreateSport(
-                    date = date,
-                    modifier = modifier,
-                    onCreate = ::closeIfShould
-                )
-
-                Task::class -> TaskCreate(
-                    date = date,
-                    modifier = modifier,
-                    onCreate = ::closeIfShould
-                )
-            }
-        }
-    }
-}
-
-@SuppressLint("UnrememberedMutableState")
-@Composable
-fun TaskCreateMeal(
-    date: LocalDateTime? = null,
-    model: TaskViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier,
-    onCreate: () -> Unit
-) {
-    var title by remember { mutableStateOf("") }
-    var titleError by remember { mutableStateOf(true) }
-    var description by remember { mutableStateOf("") }
-    var descriptionError by remember { mutableStateOf(true) }
-    var ingredients by remember { mutableStateOf("") }
-    var preparation by remember { mutableStateOf("") }
-    var duration by remember { mutableIntStateOf(0) }
-    var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
-
-    val isFormValid by derivedStateOf {
-        !titleError && !descriptionError && duration > 0
-    }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center
-    ) {
-        TextField(
-            value = title,
-            onValueChange = { newText, errors ->
-                title = newText
-                titleError = errors.isNotEmpty()
-            },
-            validationPolicies = { input ->
-                InputValidator.validateBlank(
-                    input,
-                    "Title"
-                )
-            },
-            label = { Text("Meal Title") }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = description,
-            onValueChange = { newText, errors ->
-                description = newText
-                descriptionError = errors.isNotEmpty()
-            },
-            validationPolicies = { input ->
-                InputValidator.validateBlank(
-                    input,
-                    "Description"
-                )
-            },
-            label = { Text("Description") }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = ingredients,
-            onValueChange = { newText, _ -> ingredients = newText },
-            label = { Text("Ingredients") }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = preparation,
-            onValueChange = { newText, _ -> preparation = newText },
-            label = { Text("Preparation") }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            modifier = Modifier.padding(vertical = 8.dp),
-            text = "Duration (minutes): $duration"
-        )
-
-        Slider(
-            value = duration.toFloat(),
-            onValueChange = { duration = it.toInt() },
-            valueRange = 1f..180f,
-            steps = 179,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        DateTimePicker(
-            dateTime = selectedDateTime,
-            onDateTimeChanged = { newDateTime -> selectedDateTime = newDateTime }
-        )
-
-        Button(
-            onClick = {
-                model.create(
-                    date = selectedDateTime.toLocalDate(),
-                    description = description,
-                    duration = Duration.ofMinutes(duration.toLong()),
-                    ingredients = ingredients,
-                    preparation = preparation,
-                    time = selectedDateTime
-                        .toLocalTime()
-                        .let { if (it == LocalTime.MIN) null else it },
-                    title = title
-                )
-
-                onCreate()
-            },
-            enabled = isFormValid,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 20.dp)
-        ) {
-            Text(
-                modifier = Modifier.padding(8.dp),
-                text = "Submit"
+            TaskCreateNew(
+                targetClass = target,
+                date = date,
+                onCreate = ::closeIfShould
             )
         }
     }
 }
 
-@SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskCreateSport(
-    date: LocalDateTime? = null,
+fun TaskCreateNew(
     model: TaskViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier,
+    date: LocalDateTime? = null,
+    targetClass: KClass<out Task>,
     onCreate: () -> Unit
 ) {
     var title by remember { mutableStateOf("") }
-    var titleValid by remember { mutableStateOf(false) }
     var description by remember { mutableStateOf("") }
+    var duration by remember { mutableStateOf(Duration.ofMinutes(0)) }
     var activity by remember { mutableStateOf(SportActivity.Walking) }
-    var duration by remember { mutableIntStateOf(0) }
+    var distance by remember { mutableDoubleStateOf(0.0) }
+    var recipe by remember { mutableStateOf("") }
+    var tempTitle by remember { mutableStateOf("") }
+    var tempDescription by remember { mutableStateOf("") }
+    var tempDuration by remember { mutableStateOf(Duration.ofMinutes(0)) }
     var selectedDateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
-    var isExpanded by remember { mutableStateOf(false) }
-    val stateKilometers = rememberPickerState(model.rangeKilometers.first())
-    val stateMeters = rememberPickerState(0)
+    var time by remember { mutableStateOf(selectedDateTime.toLocalTime()) }
+    val tempHour = rememberPickerState(time.hour)
+    val tempMinute = rememberPickerState(time.minute)
 
-    val distance by remember {
+    val isFormValid by remember(targetClass) {
         derivedStateOf {
-            stateKilometers.value + (stateMeters.value / 1000.0)
+            when (targetClass) {
+                MealTask::class -> title.isNotEmpty() && description.isNotEmpty() && !duration.isZero
+                SportTask::class -> title.isNotEmpty()
+                else -> title.isNotEmpty() && description.isNotEmpty()
+            }
         }
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
-        TextField(
-            value = title,
-            onValueChange = { newText, errors ->
-                title = newText
-                titleValid = errors.isEmpty()
-            },
-            validationPolicies = { input ->
-                InputValidator.validateBlank(
-                    input,
-                    "Title"
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    end = 15.dp,
+                    start = 15.dp,
+                    top = 15.dp
                 )
-            },
-            label = { Text("Title") },
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ExposedDropdownMenuBox(
-            expanded = isExpanded,
-            onExpandedChange = { isExpanded = !isExpanded },
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            androidx.compose.material3.TextField(
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth(),
-                value = activity.title,
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-                }
-            )
-
-            ExposedDropdownMenu(
-                expanded = isExpanded,
-                onDismissRequest = { isExpanded = false }
-            ) {
-                SportActivity.entries.forEach {
-                    DropdownMenuItem(
-                        text = { Text(text = it.title) },
-                        onClick = {
-                            activity = it
-                            isExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextField(
-            value = description,
-            onValueChange = { newText, _ -> description = newText },
-            label = { Text("Description") },
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (activity.supportsDistanceMetrics) {
-            LabelFieldWrapper(
-                content = {
-                    PickerPair(
-                        itemsFirst = model.rangeKilometers,
-                        itemsSecond = (0..900 step 100).toList(),
-                        labelFirst = { "$it (km)" },
-                        labelSecond = { "$it (m)" },
-                        onChange = { stateFirst, stateSecond ->
-                            stateKilometers.value = stateFirst
-                            stateMeters.value = stateSecond
+            EditableInfoItem(
+                dialogContent = {
+                    OutlinedTextField(
+                        label = { Text("Title") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        onValueChange = { newText ->
+                            tempTitle = newText
                         },
-                        stateFirst = stateKilometers,
-                        stateSecond = stateMeters
+                        value = tempTitle
                     )
                 },
-                putBelow = true,
-                text = "$distance (km) distance",
-                textAlign = TextAlign.End
-            )
-        } else {
-            Text(
-                text = "Duration: $duration minutes",
-                style = TextStyle(fontSize = 15.sp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
+                dialogTitle = { Text("Editing title") },
+                label = "Title",
+                onConfirm = { title = tempTitle },
+                onDismiss = { tempTitle = title },
+                value = title
             )
 
-            Slider(
-                value = duration.toFloat(),
-                onValueChange = { newValue -> duration = newValue.toInt() },
-                valueRange = 1f..180f,
-                steps = 180,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
+            EditableInfoItem(
+                dialogContent = {
+                    OutlinedTextField(
+                        label = { Text("Description") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        onValueChange = { newText ->
+                            tempDescription = newText
+                        },
+                        value = tempDescription
+                    )
+                },
+                dialogTitle = { Text("Editing description") },
+                label = "Description",
+                onConfirm = { description = tempDescription },
+                onDismiss = { tempDescription = description },
+                value = description
             )
-        }
 
-        Spacer(modifier = Modifier.height((32.dp)))
-
-        DateTimePicker(
-            dateTime = selectedDateTime,
-            onDateTimeChanged = { newDateTime ->
-                selectedDateTime = newDateTime
-            }
-        )
-
-        Button(
-            onClick = {
-                model.create(
-                    date = selectedDateTime.toLocalDate(),
-                    activity = activity,
-                    description = description,
-                    distance = distance,
-                    duration = Duration.ofMinutes(duration.toLong()),
-                    time = selectedDateTime
-                        .toLocalTime()
-                        .let { if (it == LocalTime.MIN) null else it },
-                    title = title
+            when (targetClass) {
+                SportTask::class -> TaskEditFieldsSport(
+                    onActivityChange = { newActivity ->
+                        if (newActivity != null) {
+                            activity = newActivity
+                        }
+                    },
+                    onDistanceChange = { newDistance ->
+                        distance = newDistance
+                    },
+                    onDurationChange = { newDuration ->
+                        duration = newDuration
+                    }
                 )
 
-                onCreate()
-            },
-            enabled = titleValid,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 20.dp)
-        ) {
-            Text("Submit")
+                MealTask::class -> TaskEditFieldsMeal() { newRecipe ->
+                    recipe = newRecipe
+                }
+
+                else -> {}
+            }
+
+            if (targetClass != MealTask::class) {
+                EditableInfoItem(
+                    dialogContent = {
+                        Column {
+                            Text(
+                                text = "Duration: ${tempDuration?.toMinutes()} minutes",
+                                style = TextStyle(fontSize = 16.sp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 4.dp)
+                            )
+
+                            Slider(
+                                value = tempDuration
+                                    ?.toMinutes()
+                                    ?.toFloat() ?: 0f,
+                                onValueChange = { newValue ->
+                                    tempDuration = Duration.ofMinutes(newValue.toLong())
+                                },
+                                valueRange = 1f..180f,
+                                steps = 180,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 8.dp
+                                    )
+                            )
+                        }
+                    },
+                    dialogTitle = { Text("Editing duration") },
+                    label = "Duration",
+                    onConfirm = { duration = tempDuration },
+                    onDismiss = { tempDuration = duration },
+                    value = "${duration?.toMinutes()} minutes"
+                )
+            }
+
+            EditableInfoItem(
+                dialogContent = {
+                    PickerTime(
+                        selectedHour = tempHour,
+                        selectedMinute = tempMinute,
+                        onChange = { hour, minute ->
+                            tempHour.value = hour
+                            tempMinute.value = minute
+                        }
+                    )
+                },
+                dialogTitle = { Text("Editing scheduled at") },
+                label = "Scheduled at",
+                onConfirm = {
+                    time = time
+                        .withHour(tempHour.value)
+                        .withMinute(tempMinute.value)
+                },
+                onDismiss = {
+                    tempHour.value = time.hour
+                    tempMinute.value = time.minute
+                },
+                value = if (activity.supportsDistanceMetrics) {
+                    time.format(DateTimeFormatter.ofPattern("HH:mm"))
+                } else {
+                    "${time.format(DateTimeFormatter.ofPattern("HH:mm"))} - " +
+                            (time.plus(duration)).format(DateTimeFormatter.ofPattern("HH:mm"))
+                }
+            )
+
+            EditableDateItem(
+                label = "Date",
+                value = selectedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE")),
+                onDateSelected = { selectedDate ->
+                    selectedDateTime = selectedDateTime
+                        .withYear(selectedDate.year)
+                        .withMonth(selectedDate.monthValue)
+                        .withDayOfMonth(selectedDate.dayOfMonth)
+                }
+            )
+
+            Button(
+                onClick = {
+                    when (targetClass) {
+                        SportTask::class -> model.create(
+                            date = selectedDateTime.toLocalDate(),
+                            activity = activity,
+                            description = description,
+                            distance = distance,
+                            duration = duration,
+                            time = selectedDateTime
+                                .toLocalTime()
+                                .let { if (it == LocalTime.MIN) null else it },
+                            title = title
+                        )
+
+                        MealTask::class -> model.create(
+                            date = selectedDateTime.toLocalDate(),
+                            description = description,
+                            duration = duration,
+                            recipe = recipe,
+                            time = selectedDateTime
+                                .toLocalTime()
+                                .let { if (it == LocalTime.MIN) null else it },
+                            title = title
+                        )
+
+                        else -> model.create(
+                            date = selectedDateTime.toLocalDate(),
+                            description = description,
+                            duration = duration,
+                            time = selectedDateTime.toLocalTime(),
+                            title = title
+                        )
+
+                    }
+
+                    onCreate()
+                },
+                enabled = isFormValid,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Text("Create")
+            }
         }
     }
 }
