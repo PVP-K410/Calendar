@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -373,9 +375,6 @@ private fun Properties(
     var ingredientsUnselectedEdit by remember { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
     var mass by remember { mutableIntStateOf(state.user.mass) }
     var massEdit by remember { mutableStateOf(mass.toString()) }
-    var weeklyActivities = remember(state.user.weeklyActivities) {
-        state.user.weeklyActivities.map {it.title}
-    }
 
     Column(
         modifier = Modifier
@@ -464,36 +463,9 @@ private fun Properties(
             value = "$height cm"
         )
 
-        FiltersItem(
-            dialogContent = {
-                FiltersDialog(
-                    boxTitle = "My weekly activities",
-                    onValueChange = { selected, unselected ->
-                        activitiesSelectedEdit = selected
-                        activitiesUnselected = unselected
-                    },
-                    selectedFilters = activitiesSelectedEdit,
-                    title = "weekly activities",
-                    unselectedFilters = activitiesUnselected
-                )
-            },
-            dialogTitle = {
-                Text("Editing preferable sport activities")
-            },
-            filtersType = "activities",
-            onConfirmClick = {
-                activitiesSelected = activitiesSelectedEdit
-
-                onUpdateActivities(activitiesSelectedEdit.map { SportActivity.fromTitle(it) })
-
-                context.showToast(message = "Your sport activities have been updated")
-            },
-            onDismiss = {
-                activitiesSelectedEdit = activitiesSelected
-                activitiesUnselected = ACTIVITIES - activitiesSelected.toSet()
-            },
-            selectedFilters = activitiesSelected,
-            title = "My weekly activities"
+        WeeklyActivitiesItem(
+            title = "Your weekly activities",
+            activities = state.user.weeklyActivities.map { it.title }
         )
 
         FiltersItem(
@@ -608,25 +580,40 @@ private fun Username(
 }
 
 @Composable
-private fun WeeklyActivitiesItem(
-    weeklyActivities: List<SportActivity>
+fun WeeklyActivitiesItem(
+    title: String,
+    activities: List<String>
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = "Weekly Activities",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        for (activity in weeklyActivities) {
-            Text(
-                text = "• ${activity.title}",
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(bottom = 4.dp)
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
             )
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        fontWeight = FontWeight.Bold,
+                        text = title
+                    )
+                }
+            }
+
+            FiltersBox(filters = activities)
         }
     }
 }
