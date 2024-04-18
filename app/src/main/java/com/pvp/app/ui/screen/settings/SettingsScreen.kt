@@ -293,8 +293,6 @@ fun SettingsScreen(
 
         SettingCupVolumeMl(model)
 
-        ResetToDefaultButton(model)
-
         CategoryRow(
             icon = Icons.Outlined.Style,
             title = "Appearance"
@@ -303,6 +301,8 @@ fun SettingsScreen(
         SettingApplicationTheme(model)
 
         SettingDynamicTheme(model)
+
+        ResetToDefaultButton(model)
     }
 }
 
