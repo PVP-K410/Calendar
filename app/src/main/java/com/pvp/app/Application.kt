@@ -2,6 +2,7 @@ package com.pvp.app
 
 import android.app.Application
 import android.app.NotificationManager
+import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorkerFactory
@@ -44,17 +45,25 @@ class Application : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        createDailyTaskWorker()
+        val prefs = getSharedPreferences("FirstInstall", Context.MODE_PRIVATE)
 
-        createDrinkReminderWorker()
+        if(!prefs.getBoolean("SetupComplete", false)){
+            createDailyTaskWorker()
 
-        createNotificationChannels()
+            createDrinkReminderWorker()
 
+            createNotificationChannels()
+
+            createTaskPointsDeductionWorker()
+
+            createWeeklyActivitiesWorker()
+
+            prefs.edit().putBoolean("SetupComplete", true).apply()
+        }
+
+        // Should be left out to ensure the TaskAutocompleteService is persisted
+        // as a running foreground service
         createTaskAutocompleteWorker()
-
-        createTaskPointsDeductionWorker()
-
-        createWeeklyActivitiesWorker()
     }
 
     private fun createDailyTaskWorker() {
