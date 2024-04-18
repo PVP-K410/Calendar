@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,7 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Snowboarding
+import androidx.compose.material.icons.outlined.Style
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,13 +35,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Setting
+import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
@@ -175,25 +180,45 @@ private fun SettingHydrationNotificationToggle(
     )
 }
 
+enum class Theme {
+    Dark,
+    Light,
+    Auto
+}
+
+@Composable
+private fun SettingDynamicTheme(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    val isEnabled by model
+        .get(Setting.Appearance.DynamicThemeEnabled)
+        .collectAsStateWithLifecycle()
+
+    SettingCard(
+        title = "Dynamic Theme",
+        description = "Choose whether or not you want to use the dynamic theme",
+        value = isEnabled,
+        onEdit = {
+            model.merge(
+                Setting.Appearance.DynamicThemeEnabled,
+                !isEnabled
+            )
+        }
+    )
+}
+
 @Composable
 private fun SettingApplicationTheme(
     model: SettingsViewModel = hiltViewModel()
 ) {
     val themeValue by model
-        .get(Setting.ApplicationTheme)
+        .get(Setting.Appearance.ApplicationTheme)
         .collectAsStateWithLifecycle()
 
     val state = rememberPickerState(initialValue = themeValue)
 
-    val valueText = when (themeValue) {
-        1 -> "Dark"
-        2 -> "Light"
-        3 -> "Dynamic"
-        else -> themeValue.toString()
-    }
-
     SettingCard(
-        description = "Choose the theme of the application. Default is the 'Dynamic Theme'.",
+        description = "Choose the theme of the application",
         editContent = {
             Column(
                 modifier = Modifier
@@ -212,77 +237,36 @@ private fun SettingApplicationTheme(
 
                 Spacer(modifier = Modifier.size(16.dp))
 
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    RadioButton(
-                        onClick = {
-                            state.value = 1
-                        },
-                        selected = state.value == 1,
-                    )
+                Theme.entries.forEach {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = state.value == it.ordinal,
+                            onClick = { state.value = it.ordinal}
+                        )
 
-                    Text(
-                        text = "Dark",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.size(16.dp))
-
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    RadioButton(
-                        onClick = {
-                            state.value = 2
-                        },
-                        selected = state.value == 2,
-                    )
-
-                    Text(
-                        text = "Light",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.size(16.dp))
-
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    RadioButton(
-                        onClick = {
-                            state.value = 3
-                        },
-                        selected = state.value == 3,
-                    )
-
-                    Text(
-                        text = "Dynamic",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
+                        Text(
+                            text = it.toString(),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(start = 10.dp)
+                        )
+                    }
                 }
             }
         },
         onEdit = {
             if (state.value != themeValue) {
                 model.merge(
-                    Setting.ApplicationTheme,
+                    Setting.Appearance.ApplicationTheme,
                     state.value
                 )
             }
         },
-        value = valueText,
+        value = state.value.toString(),
         title = "Set Application Theme"
     )
 }
@@ -308,12 +292,16 @@ fun SettingsScreen(
 
         SettingCupVolumeMl(model)
 
+        ResetToDefaultButton(model)
+
         CategoryRow(
-            icon = Icons.Outlined.Snowboarding,
-            title = "Theme"
+            icon = Icons.Outlined.Style,
+            title = "Appearance"
         )
 
         SettingApplicationTheme(model)
+
+        SettingDynamicTheme(model)
     }
 }
 
@@ -341,6 +329,42 @@ fun CategoryRow(
         thickness = 1.dp,
         color = MaterialTheme.colorScheme.tertiary
     )
+}
+
+@Composable
+fun ResetToDefaultButton(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ButtonConfirm(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .padding(
+                    top = 30.dp,
+                    bottom = 20.dp
+                ),
+            border = BorderStroke(
+                1.dp,
+                Color.Red
+            ),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+            contentAlignment = Alignment.BottomCenter,
+            shape = MaterialTheme.shapes.extraLarge,
+            content = {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    text = "Reset to Default"
+                )
+            },
+            confirmationButtonContent = { Text(text = "Reset to Default") },
+            confirmationTitle = { Text(text = "Are you sure you want to reset all of your settings to default?") },
+            onConfirm = { model.clear() }
+        )
+    }
 }
 
 @Composable

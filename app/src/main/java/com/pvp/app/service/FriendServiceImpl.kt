@@ -56,15 +56,38 @@ class FriendServiceImpl @Inject constructor(
 
     override suspend fun remove(email: String) {
         database
-            .runTransaction { transaction ->
-                val document = database
-                    .collection(identifier)
-                    .document(email)
-
-                transaction.delete(document)
-            }
+            .collection(identifier)
+            .document(email)
+            .delete()
             .await()
+
+        database
+            .collection(identifier)
+            .get()
+            .await()
+            .documents
+            .forEach { userDoc ->
+                val user = userDoc.toObject(FriendObject::class.java)
+
+                if (user != null) {
+                    val updatedFriends = user.friends - email
+                    val updatedSentRequests = user.sentRequests - email
+                    val updatedReceivedRequests = user.receivedRequests - email
+
+                    val updatedUser = FriendObject(
+                        friends = updatedFriends,
+                        sentRequests = updatedSentRequests,
+                        receivedRequests = updatedReceivedRequests
+                    )
+
+                    merge(
+                        updatedUser,
+                        userDoc.id
+                    )
+                }
+            }
     }
+
 
     override suspend fun addFriend(
         friendObject: FriendObject,
@@ -208,5 +231,4 @@ class FriendServiceImpl @Inject constructor(
 
         return "Friend request cancelled!"
     }
-
 }

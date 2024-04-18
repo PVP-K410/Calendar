@@ -34,6 +34,7 @@ class Activity : ComponentActivity() {
 
         setContent {
             val themeViewModel: ThemeViewModel = hiltViewModel()
+
             CalendarTheme (model = themeViewModel) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     LayoutScreenBootstrap()

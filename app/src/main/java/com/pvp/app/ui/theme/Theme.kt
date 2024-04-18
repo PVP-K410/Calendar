@@ -34,33 +34,33 @@ private val LightColorScheme = lightColorScheme(
     tertiary = LightTertiary
 )
 
-@HiltViewModel
-class ThemeViewModel @Inject constructor(
-    private val settingService: SettingService
-) : ViewModel() {
-    fun getSetting(): Flow<Int> {
-        return settingService.get(Setting.ApplicationTheme)
-    }
-}
-
 @Composable
 fun CalendarTheme(
     model: ThemeViewModel,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val themeValue = model.getSetting().collectAsState(initial = 1).value
-    val dynamicColor = themeValue == 3
-
+    val themeValue = model.getGeneralThemeSetting().collectAsState(initial = 1).value
+    val dynamicColor = model.getDynamicThemeSetting().collectAsState(initial = false).value
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (themeValue == 0) {
+                dynamicDarkColorScheme(context)
+            } else if (themeValue == 1) {
+                dynamicLightColorScheme(context)
+            } else {
+                if (darkTheme) dynamicLightColorScheme(context)
+                else dynamicLightColorScheme(context)
+            }
         }
 
-        themeValue == 1 -> DarkColorScheme
-        else -> LightColorScheme
+        themeValue == 0 -> DarkColorScheme
+        themeValue == 1 -> LightColorScheme
+        else -> {
+            if (darkTheme) LightColorScheme
+            else LightColorScheme
+        }
     }
 
     val view = LocalView.current
