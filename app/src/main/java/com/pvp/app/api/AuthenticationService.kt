@@ -41,6 +41,11 @@ interface AuthenticationService {
     suspend fun beginSignInOneTap(): IntentSender?
 
     /**
+     * Deletes the currently signed-in user's authentication account.
+     */
+    suspend fun deleteAccount()
+
+    /**
      * Completes the sign-in process.
      *
      * @param intent The [Intent] that contains the reference to the user's data from following any

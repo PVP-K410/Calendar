@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,13 +33,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Setting
+import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 
@@ -193,6 +198,8 @@ fun SettingsScreen(
         SettingHydrationNotificationToggle(model)
 
         SettingCupVolumeMl(model)
+
+        ResetToDefaultButton(model)
     }
 }
 
@@ -220,6 +227,42 @@ fun CategoryRow(
         thickness = 1.dp,
         color = MaterialTheme.colorScheme.tertiary
     )
+}
+
+@Composable
+fun ResetToDefaultButton(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ButtonConfirm(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .padding(
+                    top = 30.dp,
+                    bottom = 20.dp
+                ),
+            border = BorderStroke(
+                1.dp,
+                Color.Red
+            ),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+            contentAlignment = Alignment.BottomCenter,
+            shape = MaterialTheme.shapes.extraLarge,
+            content = {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    text = "Reset to Default"
+                )
+            },
+            confirmationButtonContent = { Text(text = "Reset to Default") },
+            confirmationTitle = { Text(text = "Are you sure you want to reset all of your settings to default?") },
+            onConfirm = { model.clear() }
+        )
+    }
 }
 
 @Composable
