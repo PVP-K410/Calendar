@@ -67,27 +67,32 @@ class FriendServiceImpl @Inject constructor(
             .await()
             .documents
             .forEach { userDoc ->
-                val user = userDoc.toObject(FriendObject::class.java)
+                try {
+                    val user = userDoc.toObject(FriendObject::class.java)
 
-                if (user != null) {
-                    val updatedFriends = user.friends - email
-                    val updatedSentRequests = user.sentRequests - email
-                    val updatedReceivedRequests = user.receivedRequests - email
+                    if (user != null) {
+                        val updatedFriends = user.friends - email
+                        val updatedSentRequests = user.sentRequests - email
+                        val updatedReceivedRequests = user.receivedRequests - email
 
-                    val updatedUser = FriendObject(
-                        friends = updatedFriends,
-                        sentRequests = updatedSentRequests,
-                        receivedRequests = updatedReceivedRequests
-                    )
+                        if (updatedFriends != user.friends || updatedSentRequests != user.sentRequests || updatedReceivedRequests != user.receivedRequests) {
+                            val updatedUser = FriendObject(
+                                friends = updatedFriends,
+                                sentRequests = updatedSentRequests,
+                                receivedRequests = updatedReceivedRequests
+                            )
 
-                    merge(
-                        updatedUser,
-                        userDoc.id
-                    )
+                            merge(
+                                updatedUser,
+                                userDoc.id
+                            )
+                        }
+                    }
+                } catch (_: Exception) {
+
                 }
             }
     }
-
 
     override suspend fun addFriend(
         friendObject: FriendObject,
