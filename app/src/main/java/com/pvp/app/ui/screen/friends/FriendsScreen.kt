@@ -27,6 +27,7 @@ import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.WorkspacePremium
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -69,7 +70,7 @@ fun FriendsScreen(
     val friendObject by model.userFriendObject.collectAsStateWithLifecycle()
     val friendEmail = remember { mutableStateOf("") }
     val sortingType = remember { mutableStateOf(SortingType.EXPERIENCE) }
-    val sortedFriends = remember { mutableStateOf(emptyList<String>()) }
+    val sortedFriends = remember { mutableStateOf(emptyList<User>()) }
     val friendsData by model.userFriends.collectAsState()
     val scrollState = rememberScrollState()
     val tempSortingType = remember { mutableStateOf(sortingType.value) }
@@ -294,18 +295,16 @@ fun FriendsScreen(
 private fun sortFriends(
     friends: List<User>,
     sortingType: SortingType
-): List<String> {
-    val sortedUsers = when (sortingType) {
+): List<User> {
+    return when (sortingType) {
         SortingType.EXPERIENCE -> friends.sortedByDescending { it.experience }
         SortingType.POINTS -> friends.sortedByDescending { it.points }
     }
-
-    return sortedUsers.map { it.username }
 }
 
 @Composable
 private fun FriendList(
-    friends: List<String>,
+    friends: List<User>,
     model: FriendsViewModel,
     scrollState: ScrollState
 ) {
@@ -316,9 +315,9 @@ private fun FriendList(
             .padding(bottom = 10.dp)
     ) {
         for ((index, friend) in friends.withIndex()) {
-            val avatar = model.getFriendAvatar(friend)
+            val avatar = model.getFriendAvatar(friend.email)
 
-            Row(
+            ButtonWithDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
@@ -330,64 +329,261 @@ private fun FriendList(
                         MaterialTheme.colorScheme.secondaryContainer,
                         MaterialTheme.shapes.small
                     ),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                when {
-                    index == 0 -> {
-                        Icon(
-                            imageVector = Icons.Outlined.EmojiEvents,
-                            contentDescription = "Top 1",
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                                .size(24.dp)
-                        )
+                content = {
+                    when {
+                        index == 0 -> {
+                            Icon(
+                                imageVector = Icons.Outlined.EmojiEvents,
+                                contentDescription = "Top 1",
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .size(24.dp)
+                            )
+                        }
+
+                        index <= 2 -> {
+                            Icon(
+                                imageVector = Icons.Outlined.WorkspacePremium,
+                                contentDescription = "Top 2-3",
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .size(24.dp)
+                            )
+                        }
+
+                        else -> {
+                            Spacer(
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .size(24.dp)
+                            )
+                        }
                     }
 
-                    index <= 2 -> {
-                        Icon(
-                            imageVector = Icons.Outlined.WorkspacePremium,
-                            contentDescription = "Top 2-3",
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                                .size(24.dp)
-                        )
-                    }
-
-                    else -> {
-                        Spacer(
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                                .size(24.dp)
-                        )
-                    }
-                }
-
-                Text(
-                    text = friend,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .weight(1f)
-                )
-
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                ) {
-                    Image(
-                        bitmap = avatar,
-                        contentDescription = "Friend avatar",
+                    Text(
+                        text = friend.username,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
+                            .padding(start = 4.dp)
+                            .weight(1f)
                     )
-                }
 
-                Spacer(modifier = Modifier.width(6.dp))
-            }
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Image(
+                            bitmap = avatar,
+                            contentDescription = "Friend avatar",
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+                },
+                contentPadding = PaddingValues(2.dp),
+                dialogTitle = { Text("${friend.username} information") },
+                dialogContent = {
+                    val mutualFriends by model.mutualFriends.collectAsState()
+                    model.getMutualFriends(friend.email)
+
+                    Column(
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .fillMaxWidth()
+                            .height(300.dp)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer)
+                        ) {
+                            Image(
+                                bitmap = avatar,
+                                contentDescription = "Friend avatar",
+                                modifier = Modifier
+                                    .size(96.dp)
+                                    .clip(CircleShape)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = "Level ${friend.level}",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surface,
+                                        shape = MaterialTheme.shapes.small
+                                    )
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "7 days activity",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .height(80.dp)
+                                    .clip(MaterialTheme.shapes.small)
+                                    .background(MaterialTheme.colorScheme.surface),
+                                verticalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = "steps",
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                }
+
+                                HorizontalDivider(
+                                    color = Color.Gray,
+                                    thickness = 1.dp,
+                                    modifier = Modifier.padding(horizontal = 14.dp)
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = "calories",
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                }
+
+                                HorizontalDivider(
+                                    color = Color.Gray,
+                                    thickness = 1.dp,
+                                    modifier = Modifier.padding(horizontal = 14.dp)
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = "sports tasks completed",
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                }
+                            }
+
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surface,
+                                        shape = MaterialTheme.shapes.small
+                                    )
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Friend information",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(3.dp))
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(MaterialTheme.shapes.small)
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(vertical = 4.dp, horizontal = 14.dp)
+                            ) {
+                                Text(
+                                    text = "Friends since - ",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                if (mutualFriends.isEmpty()) {
+                                    Text(
+                                        text = "No mutual friends",
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                } else {
+                                    Text(
+                                        text = "Mutual friends",
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    for (mutualFriend in mutualFriends) {
+                                        val mutualAvatar = model.getFriendAvatar(mutualFriend.email)
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = mutualFriend.username,
+                                                style = MaterialTheme.typography.titleSmall,
+                                            )
+
+                                            Box(
+                                                contentAlignment = Alignment.Center,
+                                                modifier = Modifier
+                                                    .size(20.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                            ) {
+                                                Image(
+                                                    bitmap = mutualAvatar,
+                                                    contentDescription = "Friend avatar",
+                                                    modifier = Modifier
+                                                        .size(18.dp)
+                                                        .clip(CircleShape)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButtonContent = { Text("Close") },
+                onConfirm = {},
+                onDismiss = {},
+                shape = MaterialTheme.shapes.small
+            )
         }
     }
 }

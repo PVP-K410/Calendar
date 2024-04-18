@@ -13,6 +13,7 @@ import com.pvp.app.model.FriendObject
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -166,5 +167,28 @@ class FriendsViewModel @Inject constructor(
         }
 
         return avatar!!
+    }
+
+    val mutualFriends = MutableStateFlow<List<User>>(emptyList())
+
+    fun getMutualFriends(friendEmail: String) {
+        viewModelScope.launch {
+            val friendObject = friendService
+                .get(friendEmail)
+                .firstOrNull()
+
+            val mutualFriendsList =
+                friendObject?.friends?.intersect(userFriends.value.map { it.email }.toSet())
+
+            if (mutualFriendsList != null) {
+                val mutualFriendsUsers = mutualFriendsList.mapNotNull {
+                    val user = userService.get(it).firstOrNull()
+                    user
+                }
+                mutualFriends.value = mutualFriendsUsers
+            } else {
+                mutualFriends.value = emptyList()
+            }
+        }
     }
 }
