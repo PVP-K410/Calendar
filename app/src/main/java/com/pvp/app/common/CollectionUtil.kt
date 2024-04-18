@@ -9,4 +9,8 @@ object CollectionUtil {
 
         return if (index == -1) null else index
     }
+
+    fun <T> List<T>.firstOr(fallbackValue: T): T {
+        return if (isEmpty()) fallbackValue else first()
+    }
 }

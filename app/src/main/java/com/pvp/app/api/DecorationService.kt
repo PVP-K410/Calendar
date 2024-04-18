@@ -55,19 +55,23 @@ interface DecorationService : DocumentsCollection {
      *
      * @param user The user to get the avatar for.
      *
-     * @return A flow of the decorated avatar. In case user is null, returns a default avatar.
+     * @return A flow of the decorated avatar.
      */
-    suspend fun getAvatar(user: Flow<User?>): Flow<ImageBitmap>
+    suspend fun getAvatar(user: Flow<User>): Flow<ImageBitmap>
+
+    /**
+     * Gets decorated version of user's avatar.
+     *
+     * @param user The user to get the avatar for.
+     *
+     * @return Decorated avatar.
+     */
+    suspend fun getAvatar(user: User): ImageBitmap
 
     /**
      * Check if a decoration is one of the default decorations.
      */
-    fun isDefault(decoration: Decoration): Boolean {
-        return decoration.id.startsWith(
-            "default-",
-            ignoreCase = true
-        )
-    }
+    fun isDefault(decoration: Decoration): Boolean
 
     /**
      * Add a new decoration to the database or update an existing one.

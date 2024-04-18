@@ -13,9 +13,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -39,12 +40,12 @@ class DecorationViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             userService.user
                 .filterNotNull()
-                .flatMapLatest { user ->
+                .combine(decorationService.getAvatar(userService.user.filterNotNull())) { user, avatar ->
                     decorationService
                         .get()
                         .mapLatest { decorations ->
                             DecorationState(
-                                avatar = user.avatar!!,
+                                avatar = avatar,
                                 holders = decorations
                                     .map { decoration ->
                                         DecorationHolder(
@@ -61,6 +62,7 @@ class DecorationViewModel @Inject constructor(
                             )
                         }
                 }
+                .flattenMerge()
                 .collectLatest { state ->
                     _state.update {
                         it.copy(
@@ -76,13 +78,6 @@ class DecorationViewModel @Inject constructor(
     fun apply(decoration: Decoration) {
         viewModelScope.launch {
             val state = _state.first()
-
-            if (
-                decorationService.isDefault(decoration) &&
-                decoration.id in state.user.decorationsApplied
-            ) {
-                return@launch
-            }
 
             _state.update { it.copy(workState = WorkState.Loading) }
 

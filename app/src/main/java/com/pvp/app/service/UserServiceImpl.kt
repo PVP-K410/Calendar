@@ -10,7 +10,6 @@ import com.pvp.app.api.UserService
 import com.pvp.app.model.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
@@ -34,15 +33,11 @@ class UserServiceImpl @Inject constructor(
             }
 
     override suspend fun get(email: String): Flow<User?> {
-        val flow = database
+        return database
             .collection(identifier)
             .document(email)
             .snapshots()
             .mapLatest { it.toObject(User::class.java) }
-
-        return flow.combine(decorationService.getAvatar(flow)) { user, avatar ->
-            user?.apply { this.avatar = avatar }
-        }
     }
 
     override suspend fun merge(user: User) {
@@ -54,7 +49,7 @@ class UserServiceImpl @Inject constructor(
 
                 transaction.set(
                     document,
-                    user.apply { avatar = null }
+                    user
                 )
             }
             .await()

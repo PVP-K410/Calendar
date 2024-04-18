@@ -8,6 +8,11 @@ interface Configuration {
     val dailyTaskCount: Int
 
     /**
+     * Default decorations that are applied to the user avatar when no decorations are owned.
+     */
+    val defaultDecorationIds: List<String>
+
+    /**
      * The Google OAuth client ID used for authentication.
      */
     val googleOAuthClientId: String
@@ -50,11 +55,6 @@ interface Configuration {
      * Reminder minutes values for the user to select from.
      */
     val rangeReminderMinutes: List<Int>
-
-    /**
-     * The default image URL for the user avatar.
-     */
-    val imageUrlDefaultAvatar: String
 
     /**
      * The inclusive interval of hours during which water drinking reminders are being sent.

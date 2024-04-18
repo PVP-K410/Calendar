@@ -13,14 +13,21 @@ import com.pvp.app.api.Configuration
 import com.pvp.app.api.DecorationService
 import com.pvp.app.api.ImageService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.FlowUtil.firstOr
+import com.pvp.app.common.FlowUtil.flattenFlow
 import com.pvp.app.model.Decoration
 import com.pvp.app.model.Type
 import com.pvp.app.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Provider
@@ -31,6 +38,21 @@ class DecorationServiceImpl @Inject constructor(
     private val imageService: ImageService,
     private val userServiceProvider: Provider<UserService>
 ) : DecorationService {
+
+    private var defaults = MutableStateFlow<List<Decoration>>(emptyList())
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            initializeDefaults()
+        }
+    }
+
+    private suspend fun initializeDefaults() {
+        configuration.defaultDecorationIds
+            .map { get(it) }
+            .flattenFlow()
+            .collect { decorations -> defaults.update { decorations } }
+    }
 
     override suspend fun apply(
         decoration: Decoration,
@@ -71,21 +93,27 @@ class DecorationServiceImpl @Inject constructor(
             error("${user.username} does not own ${decoration.id} decoration. Cannot apply.")
         }
 
-        val decorations = user.decorationsApplied.toMutableList()
+        val decorations = user.decorationsApplied
+            .map { get(it) }
+            .flattenFlow()
+            .firstOr(emptyList())
+            .toMutableList()
 
-        if (decoration.id in user.decorationsApplied) {
-            if (isDefault(decoration)) {
-                error("Cannot remove default decoration ${decoration.id}")
+        val current = decorations
+            .firstOrNull { it.type == decoration.type }
+            ?.let {
+                decorations.remove(it)
+
+                it
             }
 
-            decorations.remove(decoration.id)
-        } else {
-            decorations.add(decoration.id)
+        if (current == null || current.id != decoration.id) {
+            decorations.add(decoration)
         }
 
         userServiceProvider
             .get()
-            .merge(user.copy(decorationsApplied = decorations))
+            .merge(user.copy(decorationsApplied = decorations.map { it.id }))
     }
 
     override suspend fun get(): Flow<List<Decoration>> {
@@ -108,28 +136,22 @@ class DecorationServiceImpl @Inject constructor(
             .filterNotNull()
     }
 
-    override suspend fun getAvatar(user: Flow<User?>): Flow<ImageBitmap> {
-        return user.mapLatest { userLatest ->
-            var avatar = imageService.getOrDefault(configuration.imageUrlDefaultAvatar)
+    override suspend fun getAvatar(user: Flow<User>): Flow<ImageBitmap> {
+        return user.combine(defaults) { user, defaults ->
+            var avatar = AVATAR
 
-            if (userLatest == null) {
-                return@mapLatest avatar
-            }
+            val decorations = user.decorationsApplied
+                .map { decoration -> get(decoration) }
+                .flattenFlow()
+                .firstOr(emptyList())
 
-            userLatest.decorationsApplied
-                .mapNotNull {
-                    get(it)
-                        .firstOrNull()
-                }
-                .sortedWith(
-                    compareBy<Decoration> { isDefault(it) }
-                        .thenBy { it.type == Type.AVATAR_HANDS }
-                        .thenBy { it.type == Type.AVATAR_BODY }
-                        .thenBy { it.type == Type.AVATAR_FACE }
-                        .thenBy { it.type == Type.AVATAR_HEAD }
-                        .thenBy { it.type == Type.AVATAR_LEGGINGS }
-                        .thenBy { it.type == Type.AVATAR_SHOES }
+            decorations
+                .plus(
+                    defaults.filter { default ->
+                        default.type !in decorations.map { it.type }
+                    }
                 )
+                .sorted()
                 .forEach {
                     avatar = apply(
                         it,
@@ -139,6 +161,37 @@ class DecorationServiceImpl @Inject constructor(
 
             avatar
         }
+    }
+
+    override suspend fun getAvatar(user: User): ImageBitmap {
+        var avatar = AVATAR
+
+        val decorations = user.decorationsApplied
+            .map { decoration -> get(decoration) }
+            .flattenFlow()
+            .firstOr(emptyList())
+
+        val defaults = defaults.firstOr(emptyList())
+
+        decorations
+            .plus(
+                defaults.filter { default ->
+                    default.type !in decorations.map { it.type }
+                }
+            )
+            .sorted()
+            .forEach {
+                avatar = apply(
+                    it,
+                    avatar
+                )
+            }
+
+        return avatar
+    }
+
+    override fun isDefault(decoration: Decoration): Boolean {
+        return decoration.id in configuration.defaultDecorationIds
     }
 
     override suspend fun merge(decoration: Decoration) {
@@ -188,6 +241,12 @@ class DecorationServiceImpl @Inject constructor(
 
     companion object {
 
+        private val AVATAR: ImageBitmap
+            get() = ImageBitmap(
+                700,
+                920
+            )
+
         private fun Bitmap.resize(
             width: Int,
             height: Int
@@ -197,6 +256,17 @@ class DecorationServiceImpl @Inject constructor(
                 width,
                 height,
                 true
+            )
+        }
+
+        private fun List<Decoration>.sorted(): List<Decoration> {
+            return sortedWith(
+                compareBy<Decoration> { it.type == Type.AVATAR_FACE }
+                    .thenBy { it.type == Type.AVATAR_HEAD }
+                    .thenBy { it.type == Type.AVATAR_SHOES }
+                    .thenBy { it.type == Type.AVATAR_BODY }
+                    .thenBy { it.type == Type.AVATAR_LEGGINGS }
+                    .thenBy { it.type == Type.AVATAR_HANDS }
             )
         }
     }

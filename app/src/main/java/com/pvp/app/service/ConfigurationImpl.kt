@@ -7,6 +7,16 @@ import javax.inject.Inject
 class ConfigurationImpl @Inject constructor() : Configuration {
 
     override val dailyTaskCount: Int = 3
+
+    override val defaultDecorationIds: List<String> = listOf(
+        "default-body",
+        "default-face",
+        "default-hands",
+        "default-head",
+        "default-leggings",
+        "default-shoes"
+    )
+
     override val googleOAuthClientId: String = BuildConfig.GOOGLE_OAUTH_CLIENT_ID
     override val limitPointsDeduction: Int = 5
     override val limitPointsReclaimDays: Int = 2
@@ -25,10 +35,6 @@ class ConfigurationImpl @Inject constructor() : Configuration {
 
     override val rangeReminderMinutes: List<Int> = (1..120)
         .toList()
-
-    override val imageUrlDefaultAvatar: String = "https://firebasestorage.googleapis.com/v0/b/" +
-            "calendar-a1a00.appspot.com/o/default-avatar.svg" +
-            "?alt=media&token=ee0e2caa-e5e1-4184-b033-09b38f786c41"
 
     override val intervalDrinkReminder: Pair<Int, Int> = Pair(
         8,

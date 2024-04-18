@@ -139,7 +139,10 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
     var item by remember { mutableStateOf<DecorationHolder?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     val state by model.state.collectAsStateWithLifecycle()
-    val holdersOwned by remember(state.holders) { mutableStateOf(state.holders.filter { it.owned }) }
+
+    val holders by remember(state.holders) {
+        mutableStateOf(state.holders.filter { it.owned || it.decoration.price < 0 })
+    }
 
     WorkStateHandler(
         resetState = model::resetWorkState,
@@ -150,7 +153,7 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        if (holdersOwned.size == state.holders.size) {
+        if (holders.size == state.holders.size) {
             Text(
                 style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
                 text = "No decorations to purchase"
@@ -158,7 +161,7 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
         } else {
             DecorationCards(
                 actionPurchase = true,
-                holders = state.holders.filter { h -> h !in holdersOwned },
+                holders = state.holders.filter { h -> h !in holders },
                 isClickable = state.workState is WorkState.NoOperation
             ) {
                 // Order of operations is important here, else NPE will occur

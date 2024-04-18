@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.DecorationService
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
 import com.pvp.app.common.FlowUtil.flattenFlow
@@ -19,12 +20,14 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
+    private val decorationService: DecorationService,
     private val friendService: FriendService,
     private val userService: UserService
 ) : ViewModel() {
@@ -60,9 +63,28 @@ class FriendsViewModel @Inject constructor(
         .flatMapLatest { friendObject ->
             friendObject.friends
                 .map {
-                    userService
+                    val user = userService
                         .get(it)
                         .filterNotNull()
+
+                    flowOf(
+                        Pair(
+                            user,
+                            decorationService.getAvatar(user)
+                        )
+                    )
+                }
+                .flattenFlow()
+        }
+        .flatMapLatest { pairs ->
+            pairs
+                .map { (user, avatar) ->
+                    flowOf(
+                        FriendEntry(
+                            avatar = avatar.first(),
+                            user = user.first()
+                        )
+                    )
                 }
                 .flattenFlow()
         }
@@ -158,16 +180,12 @@ class FriendsViewModel @Inject constructor(
             )
         }
     }
-
-    fun getFriendAvatar(friendEmail: String): ImageBitmap {
-        lateinit var avatar: ImageBitmap
-
-        viewModelScope.launch {
-            avatar = userService
-                .get(friendEmail)
-                .first()!!.avatar!!
-        }
-
-        return avatar
-    }
 }
+
+data class FriendEntry(
+    val avatar: ImageBitmap = ImageBitmap(
+        1,
+        1
+    ),
+    val user: User = User()
+)
