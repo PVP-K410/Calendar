@@ -63,7 +63,8 @@ class LayoutViewModel @Inject constructor(
                             areSurveysFilled = state.areSurveysFilled,
                             isAuthenticated = state.isAuthenticated,
                             isLoading = state.isLoading,
-                            user = state.user
+                            user = state.user,
+                            needsStreakReward = state.needsStreakReward
                         )
                     }
                 }

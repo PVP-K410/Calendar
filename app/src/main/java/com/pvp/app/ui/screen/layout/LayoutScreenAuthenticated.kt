@@ -5,6 +5,7 @@
 
 package com.pvp.app.ui.screen.layout
 
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -277,7 +278,6 @@ fun LayoutScreenAuthenticated(
     var isRewardDialogOpen by remember { mutableStateOf(false) }
 
     val toggleRewardDialog = remember { { isRewardDialogOpen = !isRewardDialogOpen } }
-
 
     if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward) {
         LaunchedEffect(null) {
