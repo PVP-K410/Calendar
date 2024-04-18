@@ -231,5 +231,4 @@ class FriendServiceImpl @Inject constructor(
 
         return "Friend request cancelled!"
     }
-
 }

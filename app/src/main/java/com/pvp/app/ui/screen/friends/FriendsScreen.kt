@@ -23,19 +23,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.GroupAdd
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +52,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.model.User
+import com.pvp.app.ui.common.ButtonWithDialog
+
+private enum class SortingType {
+    EXPERIENCE,
+    POINTS
+}
 
 @Composable
 fun FriendsScreen(
@@ -60,17 +66,13 @@ fun FriendsScreen(
 ) {
     val context = LocalContext.current
     val toastMessage by model.toastMessage
-    val friendObject by model.friendObject.collectAsStateWithLifecycle()
-    val currentUserEmail = model.user.collectAsStateWithLifecycle().value?.email
-    val friends = friendObject?.friends ?: emptyList()
-    val isRequestSent by model.isRequestSent.collectAsState(false)
-    val receivedRequests = friendObject?.receivedRequests ?: emptyList()
-    val sentRequests = friendObject?.sentRequests ?: emptyList()
+    val friendObject by model.userFriendObject.collectAsStateWithLifecycle()
     val friendEmail = remember { mutableStateOf("") }
-    val showAddFriend = remember { mutableStateOf(false) }
-    val showRequests = remember { mutableStateOf(false) }
-    val selectedTab = remember { mutableIntStateOf(0) }
+    val sortingType = remember { mutableStateOf(SortingType.EXPERIENCE) }
+    val sortedFriends = remember { mutableStateOf(emptyList<String>()) }
+    val friendsData by model.userFriends.collectAsState()
     val scrollState = rememberScrollState()
+    val tempSortingType = remember { mutableStateOf(sortingType.value) }
 
     LaunchedEffect(toastMessage) {
         toastMessage?.let {
@@ -86,11 +88,14 @@ fun FriendsScreen(
         }
     }
 
-    LaunchedEffect(isRequestSent) {
-        if (isRequestSent) {
-            showAddFriend.value = false
-            friendEmail.value = ""
-        }
+    LaunchedEffect(
+        sortingType.value,
+        friendsData
+    ) {
+        sortedFriends.value = sortFriends(
+            friendsData,
+            sortingType.value
+        )
     }
 
     Column(
@@ -104,13 +109,173 @@ fun FriendsScreen(
             .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        TopRowWithButtons(
-            showAddFriend,
-            showRequests
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 4.dp
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ButtonWithDialog(
+                modifier = Modifier.size(
+                    45.dp,
+                    35.dp
+                ),
+                content = {
+                    Icon(
+                        Icons.Outlined.GroupAdd,
+                        contentDescription = null,
+                        modifier = Modifier.size(25.dp)
+                    )
+                },
+                contentPadding = PaddingValues(2.dp),
+                dialogTitle = { Text("Add Friend") },
+                dialogContent = {
+                    OutlinedTextField(
+                        value = friendEmail.value,
+                        onValueChange = { friendEmail.value = it },
+                        label = { Text("Friend's email") },
+                    )
+                },
+                confirmButtonContent = { Text("Add") },
+                onConfirm = {
+                    model.addFriend(friendEmail.value)
+                    friendEmail.value = ""
+                },
+                onDismiss = { friendEmail.value = "" },
+                shape = MaterialTheme.shapes.small
+            )
+
+            ButtonWithDialog(
+                modifier = Modifier.size(
+                    160.dp,
+                    35.dp
+                ),
+                content = {
+                    Text(
+                        "Requests",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                },
+                contentAlignment = Alignment.Center,
+                contentPadding = PaddingValues(
+                    horizontal = 45.dp,
+                    vertical = 2.dp
+                ),
+                dialogTitle = { Text("Friend Requests") },
+                dialogContent = {
+                    val selectedTab = remember { mutableIntStateOf(0) }
+
+                    Column {
+                        TabRow(selectedTabIndex = selectedTab.intValue) {
+                            Tab(
+                                selected = selectedTab.intValue == 0,
+                                onClick = { selectedTab.intValue = 0 }
+                            ) {
+                                Text(
+                                    "Received",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+
+                            Tab(
+                                selected = selectedTab.intValue == 1,
+                                onClick = { selectedTab.intValue = 1 }
+                            ) {
+                                Text(
+                                    "Sent",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        when (selectedTab.intValue) {
+                            0 -> {
+                                RequestList(
+                                    requests = friendObject.receivedRequests,
+                                    requestTitle = "received",
+                                    acceptAction = { request -> model.acceptFriendRequest(request) },
+                                    denyAction = { request -> model.denyFriendRequest(request) }
+                                )
+                            }
+
+                            1 -> {
+                                RequestList(
+                                    requests = friendObject.sentRequests,
+                                    requestTitle = "sent",
+                                    acceptAction = { },
+                                    denyAction = { request -> model.cancelSentRequest(request) }
+                                )
+                            }
+                        }
+                    }
+                },
+                shape = MaterialTheme.shapes.small,
+                showConfirmButton = false
+            )
+
+            ButtonWithDialog(
+                modifier = Modifier.size(
+                    45.dp,
+                    35.dp
+                ),
+                content = {
+                    Icon(
+                        Icons.Outlined.FilterAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(25.dp)
+                    )
+                },
+                contentPadding = PaddingValues(2.dp),
+                dialogTitle = { Text("Sort by") },
+                dialogContent = {
+                    Column {
+                        SortingType
+                            .entries
+                            .forEach { type ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.clickable(
+                                        onClick = {
+                                            tempSortingType.value = type
+                                        }
+                                    )
+                                ) {
+                                    RadioButton(
+                                        selected = tempSortingType.value == type,
+                                        onClick = {
+                                            tempSortingType.value = type
+                                        }
+                                    )
+
+                                    Text(
+                                        text = type
+                                            .name
+                                            .toLowerCase()
+                                            .capitalize(),
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
+                            }
+                    }
+                },
+                onConfirm = { sortingType.value = tempSortingType.value },
+                onDismiss = { tempSortingType.value = sortingType.value },
+                shape = MaterialTheme.shapes.small
+            )
+        }
 
         Text(
-            "All friends - ${friends.size}",
+            "All friends - ${friendsData.size}",
             modifier = Modifier.padding(
                 horizontal = 16.dp,
                 vertical = 8.dp
@@ -119,184 +284,23 @@ fun FriendsScreen(
         )
 
         FriendList(
-            friends = friends,
+            friends = sortedFriends.value,
             model = model,
             scrollState = scrollState
         )
     }
-
-    if (showAddFriend.value) {
-        AlertDialog(
-            onDismissRequest = {
-                showAddFriend.value = false
-                friendEmail.value = ""
-            },
-            confirmButton = {
-                Button(onClick = {
-                    model.addFriend(friendEmail.value)
-                }) {
-                    Text("Add")
-                }
-            },
-            dismissButton = {
-                Button(onClick = {
-                    showAddFriend.value = false
-                    friendEmail.value = ""
-                }) {
-                    Text("Cancel")
-                }
-            },
-            text = {
-                OutlinedTextField(
-                    value = friendEmail.value,
-                    onValueChange = { friendEmail.value = it },
-                    label = { Text("Friend's email") },
-                )
-            },
-        )
-    }
-
-    if (showRequests.value) {
-        AlertDialog(
-            onDismissRequest = {
-                showRequests.value = false
-                selectedTab.intValue = 0
-            },
-            confirmButton = {
-                Button(onClick = {
-                    showRequests.value = false
-                    selectedTab.intValue = 0
-                }) {
-                    Text("Back")
-                }
-            },
-            text = {
-                Column {
-                    TabRow(selectedTabIndex = selectedTab.intValue) {
-                        Tab(
-                            selected = selectedTab.intValue == 0,
-                            onClick = { selectedTab.intValue = 0 }
-                        ) {
-                            Text(
-                                "Received",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
-                        Tab(
-                            selected = selectedTab.intValue == 1,
-                            onClick = { selectedTab.intValue = 1 }
-                        ) {
-                            Text(
-                                "Sent",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    when (selectedTab.intValue) {
-                        0 -> {
-                            RequestList(
-                                requests = receivedRequests,
-                                requestTitle = "received",
-                                acceptAction = { request -> model.acceptFriendRequest(request) },
-                                denyAction = { request -> model.denyFriendRequest(request) }
-                            )
-                        }
-
-                        1 -> {
-                            RequestList(
-                                requests = sentRequests,
-                                requestTitle = "sent",
-                                acceptAction = { },
-                                denyAction = { request -> model.cancelSentRequest(request) }
-                            )
-                        }
-                    }
-                }
-            },
-        )
-    }
 }
 
-@Composable
-private fun TopRowWithButtons(
-    showAddFriend: MutableState<Boolean>,
-    showRequests: MutableState<Boolean>
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 16.dp,
-                end = 16.dp,
-                top = 4.dp
-            ),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RowButton(
-            onClick = { showAddFriend.value = true },
-            modifier = Modifier.size(
-                width = 45.dp,
-                height = 35.dp
-            ),
-            content = ButtonContent.Icon(Icons.Outlined.GroupAdd)
-        )
-
-        RowButton(
-            onClick = { showRequests.value = true },
-            modifier = Modifier.size(
-                width = 160.dp,
-                height = 35.dp
-            ),
-            content = ButtonContent.Text("Requests")
-        )
-
-        RowButton(
-            onClick = { /* TODO: show leaderboard sorting filters dialog */ },
-            modifier = Modifier.size(
-                width = 45.dp,
-                height = 35.dp
-            ),
-            content = ButtonContent.Icon(Icons.Outlined.FilterAlt)
-        )
+private fun sortFriends(
+    friends: List<User>,
+    sortingType: SortingType
+): List<String> {
+    val sortedUsers = when (sortingType) {
+        SortingType.EXPERIENCE -> friends.sortedByDescending { it.experience }
+        SortingType.POINTS -> friends.sortedByDescending { it.points }
     }
-}
 
-private sealed class ButtonContent {
-    data class Icon(val imageVector: ImageVector) : ButtonContent()
-    data class Text(val text: String) : ButtonContent()
-}
-
-@Composable
-private fun RowButton(
-    onClick: () -> Unit,
-    modifier: Modifier,
-    content: ButtonContent
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        contentPadding = PaddingValues(4.dp)
-    ) {
-        when (content) {
-            is ButtonContent.Icon -> Icon(
-                imageVector = content.imageVector,
-                contentDescription = null,
-                modifier = Modifier.size(25.dp)
-            )
-
-            is ButtonContent.Text -> Text(
-                text = content.text,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-    }
+    return sortedUsers.map { it.username }
 }
 
 @Composable
@@ -311,7 +315,7 @@ private fun FriendList(
             .verticalScroll(scrollState)
             .padding(bottom = 10.dp)
     ) {
-        for (friend in friends) {
+        for ((index, friend) in friends.withIndex()) {
             val avatar = model.getFriendAvatar(friend)
 
             Row(
@@ -328,11 +332,41 @@ private fun FriendList(
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                when {
+                    index == 0 -> {
+                        Icon(
+                            imageVector = Icons.Outlined.EmojiEvents,
+                            contentDescription = "Top 1",
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(24.dp)
+                        )
+                    }
+
+                    index <= 2 -> {
+                        Icon(
+                            imageVector = Icons.Outlined.WorkspacePremium,
+                            contentDescription = "Top 2-3",
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(24.dp)
+                        )
+                    }
+
+                    else -> {
+                        Spacer(
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(24.dp)
+                        )
+                    }
+                }
+
                 Text(
                     text = friend,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
-                        .padding(start = 25.dp)
+                        .padding(start = 4.dp)
                         .weight(1f)
                 )
 
