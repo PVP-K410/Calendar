@@ -400,18 +400,21 @@ private fun FriendList(
                 dialogTitle = { Text("${friend.username} information") },
                 dialogContent = {
                     val tasksCompleted by model.tasksCompleted.collectAsState()
-                    model.tasksCompleted(friend.email)
                     val mutualFriends by model.mutualFriends.collectAsState()
-                    model.getMutualFriends(friend.email)
-                    val friendInfo = friendObject.friends.find { it.email == friend.email }
-                    val sinceDateTime = LocalDateTime.ofInstant(friendInfo?.let {
-                        Instant.ofEpochMilli(
-                            it.since
-                        )
-                    }, ZoneId.systemDefault())
-                    val formattedDate =
-                        sinceDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 
+                    val friendInfo = friendObject.friends.find { it.email == friend.email }
+                    val sinceDateTime = LocalDateTime.ofInstant(
+                        friendInfo?.let { Instant.ofEpochMilli(it.since) },
+                        ZoneId.systemDefault()
+                    )
+                    val formattedDate = sinceDateTime.format(
+                        DateTimeFormatter.ofPattern(
+                            "yyyy/MM/dd"
+                        )
+                    )
+
+                    model.tasksCompleted(friend.email)
+                    model.getMutualFriends(friend.email)
 
                     Column(
                         modifier = Modifier
@@ -447,8 +450,7 @@ private fun FriendList(
                         Spacer(modifier = Modifier.height(6.dp))
 
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
+                            modifier = Modifier.fillMaxSize()
                         ) {
                             Row(
                                 modifier = Modifier
@@ -509,7 +511,7 @@ private fun FriendList(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.LocalFireDepartment,
-                                        contentDescription = "steps",
+                                        contentDescription = "calories",
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Text(
@@ -533,7 +535,7 @@ private fun FriendList(
                                 ) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Outlined.FactCheck,
-                                        contentDescription = "steps",
+                                        contentDescription = "tasks",
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Text(
@@ -543,7 +545,6 @@ private fun FriendList(
                                     )
                                 }
                             }
-
 
                             Spacer(modifier = Modifier.height(6.dp))
 
@@ -625,9 +626,8 @@ private fun FriendList(
                         }
                     }
                 },
-                confirmButtonContent = { Text("Close") },
-                onConfirm = {},
-                onDismiss = {},
+                confirmButtonContent = { Text("Remove") },
+                onConfirm = { model.removeFriend(friend.email) },
                 shape = MaterialTheme.shapes.small
             )
         }

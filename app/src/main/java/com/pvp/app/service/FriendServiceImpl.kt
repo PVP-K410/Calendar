@@ -89,6 +89,32 @@ class FriendServiceImpl @Inject constructor(
             }
     }
 
+    override suspend fun removeFriend(
+        friendObject: FriendObject,
+        friendObjectEmail: String,
+        friendEmail: String
+    ) {
+        val friendObjectFriendsNew = friendObject.friends.filter { it.email != friendEmail }
+        val friendObjectNew = friendObject.copy(friends = friendObjectFriendsNew)
+
+        merge(
+            friendObjectNew,
+            friendObjectEmail
+        )
+
+        val friendNew = get(friendEmail).first()
+        val friendFriendsNew = friendNew?.friends?.filter { it.email != friendObjectEmail }
+
+        friendNew?.let {
+            val updatedFriendUser = it.copy(friends = friendFriendsNew ?: emptyList())
+
+            merge(
+                updatedFriendUser,
+                friendEmail
+            )
+        }
+    }
+
 
     override suspend fun addFriend(
         friendObject: FriendObject,

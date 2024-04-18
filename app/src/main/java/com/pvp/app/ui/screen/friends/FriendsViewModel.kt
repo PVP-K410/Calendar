@@ -213,5 +213,14 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-
+    fun removeFriend(friendEmail: String) {
+        viewModelScope.launch {
+            friendService.removeFriend(
+                userFriendObject.value,
+                user.value.email,
+                friendEmail
+            )
+            toastMessage.value = "Friend removed successfully!"
+        }
+    }
 }
