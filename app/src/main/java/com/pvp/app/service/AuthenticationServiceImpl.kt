@@ -75,6 +75,12 @@ class AuthenticationServiceImpl @Inject constructor(
         return result?.pendingIntent?.intentSender
     }
 
+    override suspend fun deleteAccount() {
+        val user = auth.currentUser ?: return
+
+        user.delete().await()
+    }
+
     /**
      * If the [User] does not exist in the database, it is registered.
      */
