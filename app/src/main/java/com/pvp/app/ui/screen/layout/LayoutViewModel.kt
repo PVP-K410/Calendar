@@ -8,6 +8,7 @@ import com.pvp.app.api.DecorationService
 import com.pvp.app.api.RewardService
 import com.pvp.app.api.StreakService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.Reward
 import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,6 +33,9 @@ class LayoutViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(LayoutState())
     val state: StateFlow<LayoutState> = _state.asStateFlow()
+
+    private val _reward = MutableStateFlow(Reward())
+    val reward: StateFlow<Reward> = _reward.asStateFlow()
 
     init {
         _state.update { it.copy(isLoading = true) }
@@ -78,8 +82,10 @@ class LayoutViewModel @Inject constructor(
 
     suspend fun giveReward() {
         viewModelScope.launch {
+            _reward.value = rewardService.get()
+
             rewardService.rewardUser(
-                rewardService.get()
+                _reward.value
             )
         }
     }
