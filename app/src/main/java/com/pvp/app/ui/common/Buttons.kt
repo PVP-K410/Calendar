@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import java.time.LocalDateTime
 
 @Composable
 fun Button(
@@ -164,6 +165,45 @@ fun IconButtonConfirm(
         modifier = modifier,
         onConfirm = onConfirm,
         onDismiss = onDismiss
+    )
+}
+
+@Composable
+fun IconButtonWithDatePickerDialog(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    iconSize: Dp = 20.dp,
+    iconDescription: String? = null,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    onDateSelected: (LocalDateTime) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = modifier
+    ) {
+        IconButton(
+            colors = colors,
+            onClick = { showDialog = true },
+            modifier = Modifier.size(iconSize)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = iconDescription
+            )
+        }
+    }
+
+    DatePickerDialog(
+        showPicker = showDialog,
+        onDismiss = {
+            showDialog = false
+        },
+        onDateSelected = { selectedDate ->
+            onDateSelected(selectedDate)
+
+            showDialog = false
+        }
     )
 }
 

@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import java.time.LocalDateTime
 
 /**
  * @param keyboardOptions (optional) software keyboard options that contains configuration such
@@ -220,6 +221,44 @@ fun EditableInfoItem(
             modifier = Modifier.align(Alignment.TopEnd),
             onConfirm = onConfirm,
             onDismiss = onDismiss
+        )
+    }
+}
+
+@Composable
+fun EditableDateItem(
+    label: String,
+    value: String,
+    onDateSelected: (LocalDateTime) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                fontWeight = FontWeight.Bold,
+                text = label
+            )
+
+            Text(value)
+        }
+
+        IconButtonWithDatePickerDialog(
+            modifier = Modifier.align(Alignment.TopEnd),
+            icon = Icons.Outlined.Edit,
+            iconDescription = "Edit info item icon button",
+            iconSize = 30.dp,
+            onDateSelected = onDateSelected
         )
     }
 }
