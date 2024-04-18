@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.FriendService
+import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.common.FlowUtil.flattenFlow
 import com.pvp.app.model.FriendObject
@@ -21,12 +22,14 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
     private val friendService: FriendService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val taskService: TaskService
 ) : ViewModel() {
 
     val toastMessage = mutableStateOf<String?>(null)
@@ -191,4 +194,17 @@ class FriendsViewModel @Inject constructor(
             }
         }
     }
+
+    val tasksCompleted = MutableStateFlow(0)
+
+    fun tasksCompleted(friendEmail: String) {
+        viewModelScope.launch {
+            val tasks = taskService.get(friendEmail).firstOrNull() ?: emptyList()
+            tasksCompleted.value = tasks.count {
+                it.isCompleted && it.date in LocalDate.now().minusDays(7)..LocalDate.now()
+            }
+        }
+    }
+
+
 }

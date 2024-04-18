@@ -21,11 +21,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.FactCheck
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
+import androidx.compose.material.icons.outlined.DoNotStep
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.GroupAdd
+import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -389,6 +392,8 @@ private fun FriendList(
                 contentPadding = PaddingValues(2.dp),
                 dialogTitle = { Text("${friend.username} information") },
                 dialogContent = {
+                    val tasksCompleted by model.tasksCompleted.collectAsState()
+                    model.tasksCompleted(friend.email)
                     val mutualFriends by model.mutualFriends.collectAsState()
                     model.getMutualFriends(friend.email)
 
@@ -450,18 +455,27 @@ private fun FriendList(
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .height(80.dp)
+                                    .height(90.dp)
                                     .clip(MaterialTheme.shapes.small)
-                                    .background(MaterialTheme.colorScheme.surface),
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(vertical = 4.dp),
                                 verticalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Center
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.DoNotStep,
+                                        contentDescription = "steps",
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                     Text(
-                                        text = "steps",
-                                        style = MaterialTheme.typography.titleSmall
+                                        text = "63819 steps made",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        modifier = Modifier.padding(start = 8.dp)
                                     )
                                 }
 
@@ -472,12 +486,20 @@ private fun FriendList(
                                 )
 
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Center
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.LocalFireDepartment,
+                                        contentDescription = "steps",
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                     Text(
-                                        text = "calories",
-                                        style = MaterialTheme.typography.titleSmall
+                                        text = "6571 calories burned",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        modifier = Modifier.padding(start = 8.dp)
                                     )
                                 }
 
@@ -488,12 +510,20 @@ private fun FriendList(
                                 )
 
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.Center
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Outlined.FactCheck,
+                                        contentDescription = "steps",
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                     Text(
-                                        text = "sports tasks completed",
-                                        style = MaterialTheme.typography.titleSmall
+                                        text = "$tasksCompleted tasks completed",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        modifier = Modifier.padding(start = 8.dp)
                                     )
                                 }
                             }
