@@ -169,6 +169,7 @@ fun FriendsScreen(
                 dialogTitle = { Text("Friend Requests") },
                 dialogContent = {
                     val selectedTab = remember { mutableIntStateOf(0) }
+
                     Column {
                         TabRow(selectedTabIndex = selectedTab.intValue) {
                             Tab(
@@ -181,6 +182,7 @@ fun FriendsScreen(
                                     fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
                                 )
                             }
+
                             Tab(
                                 selected = selectedTab.intValue == 1,
                                 onClick = { selectedTab.intValue = 1 }
@@ -341,7 +343,7 @@ private fun FriendList(
                         )
                     }
 
-                    index == 1 || index == 2 -> {
+                    index <= 2 -> {
                         Icon(
                             imageVector = Icons.Outlined.WorkspacePremium,
                             contentDescription = "Top 2-3",
