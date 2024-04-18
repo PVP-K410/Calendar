@@ -278,18 +278,16 @@ fun LayoutScreenAuthenticated(
 
     val toggleRewardDialog = remember { { isRewardDialogOpen = !isRewardDialogOpen } }
 
-    var reward = Reward()
 
-    if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward){
+    if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward) {
         LaunchedEffect(null) {
             viewModel.giveReward()
 
             isRewardDialogOpen = true
-            reward = viewModel.reward.value
         }
     }
 
-    reward = viewModel.reward.collectAsStateWithLifecycle().value
+    val reward = viewModel.reward.collectAsStateWithLifecycle().value
 
     RewardDialog(
         reward = reward,
@@ -388,8 +386,8 @@ fun RewardDialog(
     reward: Reward,
     isOpen: Boolean,
     onClose: () -> Unit
-){
-    if(!isOpen){
+) {
+    if (!isOpen) {
         return
     }
 
@@ -406,14 +404,16 @@ fun RewardDialog(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
-            ){
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
                 Text(
                     text = "You've earned a reward!",
                     style = MaterialTheme.typography.headlineSmall
                 )
 
-                IconButton(onClick = onClose){
+                IconButton(onClick = onClose) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Close button"
@@ -421,7 +421,7 @@ fun RewardDialog(
                 }
             }
 
-            if(reward.points > 0){
+            if (reward.points > 0) {
                 Text(
                     text = "${reward.points} points!",
                     style = MaterialTheme.typography.titleMedium,
@@ -429,7 +429,7 @@ fun RewardDialog(
                 )
             }
 
-            if(reward.experience > 0){
+            if (reward.experience > 0) {
                 Text(
                     text = "${reward.experience} experience!",
                     style = MaterialTheme.typography.titleMedium,
@@ -437,7 +437,7 @@ fun RewardDialog(
                 )
             }
 
-            if(reward.decorationId != null){
+            if (reward.decorationId != null) {
                 TODO("Finish after decoration implementation")
             }
         }

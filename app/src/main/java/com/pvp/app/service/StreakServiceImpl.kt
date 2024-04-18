@@ -1,6 +1,5 @@
 package com.pvp.app.service
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import com.pvp.app.api.StreakService
 import com.pvp.app.api.UserService
@@ -32,7 +31,7 @@ class StreakServiceImpl @Inject constructor(
 
                 when (date) {
                     LocalDate.now() -> {
-                        if (value == 0){
+                        if (value == 0) {
                             value = 1
                             needsReward = true
                         }
@@ -52,7 +51,7 @@ class StreakServiceImpl @Inject constructor(
                     }
                 }
 
-                if(value != user.streak.value || incrementedAt != user.streak.incrementedAt){
+                if (value != user.streak.value || incrementedAt != user.streak.incrementedAt) {
                     userService.merge(
                         user.copy(
                             streak = Streak(
