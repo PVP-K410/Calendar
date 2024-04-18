@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -461,6 +463,11 @@ private fun Properties(
             value = "$height cm"
         )
 
+        WeeklyActivitiesItem(
+            title = "Your weekly activities",
+            activities = state.user.weeklyActivities.map { it.title }
+        )
+
         FiltersItem(
             dialogContent = {
                 FiltersDialog(
@@ -569,5 +576,44 @@ private fun Username(
             onConfirm = onSave,
             onDismiss = onDismiss
         )
+    }
+}
+
+@Composable
+fun WeeklyActivitiesItem(
+    title: String,
+    activities: List<String>
+) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        fontWeight = FontWeight.Bold,
+                        text = title
+                    )
+                }
+            }
+
+            FiltersBox(filters = activities)
+        }
     }
 }

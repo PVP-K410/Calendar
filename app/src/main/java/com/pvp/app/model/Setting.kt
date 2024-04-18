@@ -32,4 +32,16 @@ sealed class Setting<T>(
             true
         )
     }
+
+    object Appearance {
+        data object ApplicationTheme : Setting<Int>(
+            intPreferencesKey("applicationTheme"),
+            1
+        )
+
+        data object DynamicThemeEnabled : Setting<Boolean>(
+            booleanPreferencesKey("DynamicThemeEnabled"),
+            false
+        )
+    }
 }
