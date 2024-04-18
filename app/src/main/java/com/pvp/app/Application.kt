@@ -45,9 +45,16 @@ class Application : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        val prefs = getSharedPreferences("FirstInstall", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(
+            "FirstInstall",
+            Context.MODE_PRIVATE
+        )
 
-        if(!prefs.getBoolean("SetupComplete", false)){
+        if (!prefs.getBoolean(
+                "SetupComplete",
+                false
+            )
+        ) {
             createDailyTaskWorker()
 
             createDrinkReminderWorker()
@@ -58,7 +65,13 @@ class Application : Application(), Configuration.Provider {
 
             createWeeklyActivitiesWorker()
 
-            prefs.edit().putBoolean("SetupComplete", true).apply()
+            prefs
+                .edit()
+                .putBoolean(
+                    "SetupComplete",
+                    true
+                )
+                .apply()
         }
 
         // Should be left out to ensure the TaskAutocompleteService is persisted
