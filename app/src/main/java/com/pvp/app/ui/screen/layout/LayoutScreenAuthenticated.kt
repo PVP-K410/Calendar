@@ -5,7 +5,6 @@
 
 package com.pvp.app.ui.screen.layout
 
-import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -63,7 +63,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pvp.app.R
+import com.pvp.app.model.Decoration
 import com.pvp.app.model.Reward
+import com.pvp.app.ui.common.AsyncImage
+import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
@@ -382,7 +385,7 @@ fun LayoutScreenAuthenticated(
 }
 
 @Composable
-fun RewardDialog(
+private fun RewardDialog(
     reward: Reward,
     isOpen: Boolean,
     onClose: () -> Unit
@@ -395,11 +398,12 @@ fun RewardDialog(
         onDismissRequest = onClose
     ) {
         Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(8.dp)
-                .clip(RoundedCornerShape(10.dp))
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -433,13 +437,44 @@ fun RewardDialog(
                 Text(
                     text = "${reward.experience} experience!",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(8.dp)
                 )
             }
 
-            if (reward.decorationId != null) {
-                TODO("Finish after decoration implementation")
+            reward.decoration?.let {
+                DecorationCard(decoration = it)
             }
         }
+    }
+}
+
+@Composable
+private fun DecorationCard(
+    decoration: Decoration,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Text(
+            text = "${decoration.name} decoration!",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(8.dp)
+        )
+
+        AsyncImage(
+            contentDescription = "Decoration ${decoration.name} image",
+            modifier = Modifier
+                .size(96.dp)
+                .clip(MaterialTheme.shapes.extraSmall)
+                .background(
+                    color = MaterialTheme.colorScheme.inverseOnSurface.lighten(),
+                    shape = MaterialTheme.shapes.extraSmall
+                ),
+            url = decoration.imageRepresentativeUrl
+        )
     }
 }

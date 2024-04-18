@@ -2,6 +2,7 @@ package com.pvp.app.service
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
+import com.pvp.app.api.DecorationService
 import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.RewardService
 import com.pvp.app.api.UserService
@@ -13,22 +14,17 @@ import javax.inject.Inject
 
 class RewardServiceImpl @Inject constructor(
     private val database: FirebaseFirestore,
+    private val decorationService: DecorationService,
     private val experienceService: ExperienceService,
     private val userService: UserService
 ) : RewardService {
 
     private fun calculatePoints(streak: Int): Int {
-        return 1 + 2 * (min(
-            streak,
-            7
-        ) - 1)
+        return 1 + 2 * (min(streak, 7) - 1)
     }
 
     private fun calculateExperience(streak: Int): Int {
-        return 10 + 10 * (min(
-            streak,
-            7
-        ) - 1)
+        return 10 + 10 * (min(streak, 7) - 1)
     }
 
     override suspend fun get(): Reward {
@@ -39,12 +35,24 @@ class RewardServiceImpl @Inject constructor(
             ?.let { user ->
                 streak = user.streak.value
 
-                database
+                val userReward = database
                     .collection(identifier)
                     .document(user.streak.value.toString())
                     .snapshots()
                     .map { it.toObject(Reward::class.java) }
                     .firstOrNull() ?: Reward()
+
+
+                if (userReward.decorationId != null
+                    && !user.decorationsOwned.contains(userReward.decorationId)
+                    && !user.decorationsApplied.contains(userReward.decorationId)
+                ) {
+                    userReward.decoration = decorationService
+                        .get(userReward.decorationId)
+                        .firstOrNull()
+                }
+
+                userReward
             } ?: Reward()
 
         reward.points += calculatePoints(streak)
@@ -54,10 +62,6 @@ class RewardServiceImpl @Inject constructor(
     }
 
     override suspend fun rewardUser(reward: Reward) {
-        if (reward.decorationId != null) {
-            TODO("Decorations not yet implemented")
-        }
-
         userService.user
             .firstOrNull()
             ?.let { user ->
@@ -68,6 +72,13 @@ class RewardServiceImpl @Inject constructor(
                         experience = experience,
                         level = experienceService.levelOf(experience),
                         points = user.points + reward.points,
+                        decorationsOwned = if (reward.decorationId != null
+                            && reward.decoration != null
+                        ) {
+                            user.decorationsOwned + reward.decorationId
+                        } else {
+                            user.decorationsOwned
+                        }
                     )
                 )
             }
