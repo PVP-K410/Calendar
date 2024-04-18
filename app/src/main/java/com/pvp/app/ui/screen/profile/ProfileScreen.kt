@@ -373,6 +373,9 @@ private fun Properties(
     var ingredientsUnselectedEdit by remember { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
     var mass by remember { mutableIntStateOf(state.user.mass) }
     var massEdit by remember { mutableStateOf(mass.toString()) }
+    var weeklyActivities = remember(state.user.weeklyActivities) {
+        state.user.weeklyActivities.map {it.title}
+    }
 
     Column(
         modifier = Modifier
@@ -459,6 +462,38 @@ private fun Properties(
                 heightEdit = height.toString()
             },
             value = "$height cm"
+        )
+
+        FiltersItem(
+            dialogContent = {
+                FiltersDialog(
+                    boxTitle = "My weekly activities",
+                    onValueChange = { selected, unselected ->
+                        activitiesSelectedEdit = selected
+                        activitiesUnselected = unselected
+                    },
+                    selectedFilters = activitiesSelectedEdit,
+                    title = "weekly activities",
+                    unselectedFilters = activitiesUnselected
+                )
+            },
+            dialogTitle = {
+                Text("Editing preferable sport activities")
+            },
+            filtersType = "activities",
+            onConfirmClick = {
+                activitiesSelected = activitiesSelectedEdit
+
+                onUpdateActivities(activitiesSelectedEdit.map { SportActivity.fromTitle(it) })
+
+                context.showToast(message = "Your sport activities have been updated")
+            },
+            onDismiss = {
+                activitiesSelectedEdit = activitiesSelected
+                activitiesUnselected = ACTIVITIES - activitiesSelected.toSet()
+            },
+            selectedFilters = activitiesSelected,
+            title = "My weekly activities"
         )
 
         FiltersItem(
@@ -569,5 +604,29 @@ private fun Username(
             onConfirm = onSave,
             onDismiss = onDismiss
         )
+    }
+}
+
+@Composable
+private fun WeeklyActivitiesItem(
+    weeklyActivities: List<SportActivity>
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Weekly Activities",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        for (activity in weeklyActivities) {
+            Text(
+                text = "• ${activity.title}",
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+        }
     }
 }
