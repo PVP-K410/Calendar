@@ -244,7 +244,7 @@ private fun Initials(
                 height = 200.dp,
                 width = 200.dp
             ),
-            painter = BitmapPainter(state.userAvatar)
+            painter = BitmapPainter(state.avatar)
         )
 
         Username(

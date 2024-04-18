@@ -163,7 +163,6 @@ private fun Content(
             0 -> Router(
                 controller = controller,
                 destinationStart = Route.Calendar,
-                modifier = modifier,
                 routes = Route.routesAuthenticated,
                 scope = scope
             )
@@ -327,7 +326,7 @@ fun LayoutScreenAuthenticated(
                         route,
                         statePager
                     ),
-                    userAvatar = stateLayout.userAvatar ?: ImageBitmap(1, 1)
+                    userAvatar = stateLayout.avatar
                 )
             }
         ) {

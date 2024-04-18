@@ -2,6 +2,7 @@ package com.pvp.app.common
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 
 object FlowUtil {
 
@@ -9,4 +10,8 @@ object FlowUtil {
         combine(this@flattenFlow) {
             it.toList()
         }
+
+    suspend fun <T : Any?> Flow<T>.firstOr(fallbackValue: T): T {
+        return firstOrNull() ?: fallbackValue
+    }
 }
