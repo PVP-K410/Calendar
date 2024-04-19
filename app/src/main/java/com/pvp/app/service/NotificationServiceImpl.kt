@@ -12,8 +12,13 @@ import androidx.core.app.NotificationManagerCompat
 import com.pvp.app.Activity
 import com.pvp.app.R
 import com.pvp.app.api.NotificationService
+import com.pvp.app.api.SettingService
 import com.pvp.app.model.Notification
+import com.pvp.app.model.NotificationChannel
+import com.pvp.app.model.Setting
+import com.pvp.app.model.Task
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,8 +28,23 @@ import javax.inject.Inject
 
 class NotificationServiceImpl @Inject constructor(
     @ApplicationContext
-    private val context: Context
+    private val context: Context,
+    private val settingService: SettingService,
 ) : NotificationService {
+
+    override fun post(notification: Notification) {
+        if (notification.dateTime == null) {
+            error("Notification dateTime must not be null")
+        }
+
+        postNotification(
+            notification,
+            notification.dateTime
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+        )
+    }
 
     override fun post(
         notification: Notification,
@@ -114,9 +134,7 @@ class NotificationServiceImpl @Inject constructor(
         )
     }
 
-    override fun show(
-        notification: Notification
-    ) {
+    override fun show(notification: Notification) {
         if (
             ActivityCompat.checkSelfPermission(
                 context,
@@ -160,21 +178,15 @@ class NotificationServiceImpl @Inject constructor(
         )
     }
 
-    override fun cancel(
-        notification: Notification
-    ) {
+    override fun cancel(notification: Notification) {
         cancelNotification(id = notification.id)
     }
 
-    override fun cancel(
-        id: Int
-    ) {
+    override fun cancel(id: Int) {
         cancelNotification(id = id)
     }
 
-    private fun cancelNotification(
-        id: Int
-    ) {
+    private fun cancelNotification(id: Int) {
         val intent = Intent(
             context,
             NotificationReceiver::class.java
@@ -192,5 +204,35 @@ class NotificationServiceImpl @Inject constructor(
             manager.cancel(it)
             it.cancel()
         }
+    }
+
+    override suspend fun getNotificationForTask(task: Task): Notification? {
+        if (task.time == null || task.isCompleted) {
+            return null
+        }
+
+        var reminderMinutes = settingService
+            .get(Setting.Notifications.ReminderBeforeTaskMinutes)
+            .first().toLong()
+
+        if (task.reminderTime != null) {
+            reminderMinutes = task.reminderTime?.toMinutes() ?: reminderMinutes
+        }
+
+        val reminderDateTime = task.date
+            .atTime(task.time)
+            .minusMinutes(reminderMinutes)
+
+        if (reminderDateTime.isBefore(LocalDateTime.now())) {
+            return null
+        }
+
+        return Notification(
+            channel = NotificationChannel.TaskReminder,
+            title = "Task Reminder",
+            text = "Task '${task.title}' is in $reminderMinutes minute" +
+                    "${if (reminderMinutes > 1) "s" else ""}...",
+            dateTime = reminderDateTime
+        )
     }
 }

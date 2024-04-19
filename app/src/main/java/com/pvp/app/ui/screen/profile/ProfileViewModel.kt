@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.DecorationService
 import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.TaskService
@@ -12,10 +13,12 @@ import com.pvp.app.api.UserService
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,31 +27,36 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val authenticationService: AuthenticationService,
     private val configuration: Configuration,
+    private val decorationService: DecorationService,
     private val experienceService: ExperienceService,
     private val friendService: FriendService,
     private val userService: UserService,
     private val taskService: TaskService
 ) : ViewModel() {
 
-    val state = userService.user
-        .map { user ->
-            ProfileState(
-                experienceRequired = experienceService.experienceOf((user?.level ?: 0) + 1),
-                isLoading = false,
-                user = user ?: User(),
-                userAvatar = userService.resolveAvatar(user?.email ?: "")
-            )
+    private val _state: MutableStateFlow<ProfileState> = MutableStateFlow(ProfileState())
+    val state = _state.asStateFlow()
+
+    init {
+        collectStateChanges()
+    }
+
+    private fun collectStateChanges() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val flow = userService.user.filterNotNull()
+
+            flow
+                .combine(decorationService.getAvatar(flow)) { user, avatar ->
+                    ProfileState(
+                        avatar = avatar,
+                        experienceRequired = experienceService.experienceOf(user.level + 1),
+                        isLoading = false,
+                        user = user
+                    )
+                }
+                .collect { state -> _state.update { state } }
         }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ProfileState(
-                experienceRequired = 0,
-                isLoading = true,
-                user = User(),
-                userAvatar = ImageBitmap(1, 1)
-            )
-        )
+    }
 
     suspend fun deleteAccount(): Result<Boolean> {
         return withContext(Dispatchers.IO) {
@@ -67,12 +75,9 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-
-    fun update(
-        function: (User) -> Unit
-    ) {
+    fun update(function: (User) -> Unit) {
         viewModelScope.launch {
-            val user = state.first().user.copy()
+            val user = _state.first().user.copy()
 
             function(user)
 
@@ -86,8 +91,11 @@ class ProfileViewModel @Inject constructor(
 }
 
 data class ProfileState(
-    val experienceRequired: Int,
-    val isLoading: Boolean,
-    val user: User,
-    val userAvatar: ImageBitmap
+    val avatar: ImageBitmap = ImageBitmap(
+        1,
+        1
+    ),
+    val experienceRequired: Int = 0,
+    val isLoading: Boolean = true,
+    val user: User = User()
 )

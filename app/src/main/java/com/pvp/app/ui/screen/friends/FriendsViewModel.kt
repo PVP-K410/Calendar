@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.DecorationService
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -28,6 +30,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
+    private val decorationService: DecorationService,
     private val friendService: FriendService,
     private val userService: UserService,
     private val taskService: TaskService
@@ -66,13 +69,32 @@ class FriendsViewModel @Inject constructor(
                 flowOf(emptyList())
             } else {
                 friendObject.friends
-                    .map { friend ->
-                        userService
-                            .get(friend.email)
+                    .map {
+                        val user = userService
+                            .get(it.email)
                             .filterNotNull()
+
+                        flowOf(
+                            Pair(
+                                user,
+                                decorationService.getAvatar(user)
+                            )
+                        )
                     }
                     .flattenFlow()
             }
+        }
+        .flatMapLatest { pairs ->
+            pairs
+                .map { (user, avatar) ->
+                    flowOf(
+                        FriendEntry(
+                            avatar = avatar.first(),
+                            user = user.first()
+                        )
+                    )
+                }
+                .flattenFlow()
         }
         .stateIn(
             viewModelScope,
@@ -167,17 +189,7 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun getFriendAvatar(friendEmail: String): ImageBitmap {
-        var avatar: ImageBitmap? = null
-
-        viewModelScope.launch {
-            avatar = userService.resolveAvatar(friendEmail)
-        }
-
-        return avatar!!
-    }
-
-    val mutualFriends = MutableStateFlow<List<User>>(emptyList())
+    val mutualFriends = MutableStateFlow<List<FriendEntry>>(emptyList())
 
     fun getMutualFriends(friendEmail: String) {
         viewModelScope.launch {
@@ -187,13 +199,19 @@ class FriendsViewModel @Inject constructor(
 
             val mutualFriendsList =
                 friendObject?.friends?.map { it.email }
-                    ?.intersect(userFriends.value.map { it.email }
+                    ?.intersect(userFriends.value.map { it.user.email }
                         .toSet())
 
             if (mutualFriendsList != null) {
                 val mutualFriendsUsers = mutualFriendsList.mapNotNull {
                     val user = userService.get(it).firstOrNull()
-                    user
+
+                    user?.let {
+                        FriendEntry(
+                            avatar = decorationService.getAvatar(user),
+                            user = user
+                        )
+                    }
                 }
                 mutualFriends.value = mutualFriendsUsers
             } else {
@@ -224,3 +242,11 @@ class FriendsViewModel @Inject constructor(
         }
     }
 }
+
+data class FriendEntry(
+    val avatar: ImageBitmap = ImageBitmap(
+        1,
+        1
+    ),
+    val user: User = User()
+)

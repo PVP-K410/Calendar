@@ -1,7 +1,7 @@
 package com.pvp.app.ui.common
 
 import androidx.compose.foundation.background
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pvp.app.ui.theme.BackgroundGradientDefault
@@ -37,7 +39,10 @@ fun Modifier.backgroundGradientRadial(
     tileMode: TileMode = TileMode.Repeated
 ): Modifier = this.background(
     brush = Brush.radialGradient(
-        colorStops = colorsToPairs(colors, radius),
+        colorStops = colorsToPairs(
+            colors,
+            radius
+        ),
         radius = radius,
         tileMode = tileMode
     ),
@@ -101,9 +106,11 @@ fun Modifier.fadingEdge(
 
 @Composable
 fun Modifier.underline(
-    color: Color = MaterialTheme.colorScheme.onPrimaryContainer
+    color: Color = LocalContentColor.current,
+    offset: TextUnit = 0.sp,
+    width: Dp = 1.dp
 ): Modifier = this.drawBehind {
-    val verticalOffset = size.height - 2.sp.toPx()
+    val verticalOffset = size.height - offset.toPx()
 
     drawLine(
         color = color,
@@ -115,6 +122,6 @@ fun Modifier.underline(
             0f,
             verticalOffset
         ),
-        strokeWidth = 1.dp.toPx()
+        strokeWidth = width.toPx()
     )
 }

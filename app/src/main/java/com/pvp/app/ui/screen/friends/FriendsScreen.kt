@@ -82,15 +82,16 @@ private enum class SortingType {
 
 @Composable
 fun FriendsScreen(
-    model: FriendsViewModel = hiltViewModel()
+    model: FriendsViewModel = hiltViewModel(),
+    modifier: Modifier
 ) {
     val context = LocalContext.current
     val toastMessage by model.toastMessage
     val friendObject by model.userFriendObject.collectAsStateWithLifecycle()
     val friendEmail = remember { mutableStateOf("") }
     val sortingType = remember { mutableStateOf(SortingType.EXPERIENCE) }
-    val sortedFriends = remember { mutableStateOf(emptyList<User>()) }
-    val friendsData by model.userFriends.collectAsState()
+    val friends by model.userFriends.collectAsState()
+    val friendsSorted = remember { mutableStateOf(friends) }
     val scrollState = rememberScrollState()
     val tempSortingType = remember { mutableStateOf(sortingType.value) }
 
@@ -110,16 +111,16 @@ fun FriendsScreen(
 
     LaunchedEffect(
         sortingType.value,
-        friendsData
+        friends
     ) {
-        sortedFriends.value = sortFriends(
-            friendsData,
-            sortingType.value
-        )
+        friendsSorted.value = when (sortingType.value) {
+            SortingType.EXPERIENCE -> friends.sortedByDescending { it.user.experience }
+            SortingType.POINTS -> friends.sortedByDescending { it.user.points }
+        }
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(
                 start = 16.dp,
@@ -295,7 +296,7 @@ fun FriendsScreen(
         }
 
         Text(
-            "All friends - ${friendsData.size}",
+            "All friends - ${friends.size}",
             modifier = Modifier.padding(
                 horizontal = 16.dp,
                 vertical = 8.dp
@@ -304,7 +305,7 @@ fun FriendsScreen(
         )
 
         FriendList(
-            friends = sortedFriends.value,
+            friends = friendsSorted.value,
             friendObject = friendObject,
             model = model,
             scrollState = scrollState
@@ -312,19 +313,9 @@ fun FriendsScreen(
     }
 }
 
-private fun sortFriends(
-    friends: List<User>,
-    sortingType: SortingType
-): List<User> {
-    return when (sortingType) {
-        SortingType.EXPERIENCE -> friends.sortedByDescending { it.experience }
-        SortingType.POINTS -> friends.sortedByDescending { it.points }
-    }
-}
-
 @Composable
 private fun FriendList(
-    friends: List<User>,
+    friends: List<FriendEntry>,
     friendObject: FriendObject,
     model: FriendsViewModel,
     scrollState: ScrollState
@@ -336,8 +327,6 @@ private fun FriendList(
             .padding(bottom = 10.dp)
     ) {
         for ((index, friend) in friends.withIndex()) {
-            val avatar = model.getFriendAvatar(friend.email)
-
             CustomButtonWithDialog(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -382,7 +371,7 @@ private fun FriendList(
                     }
 
                     Text(
-                        text = friend.username,
+                        text = friend.user.username,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier
                             .padding(start = 4.dp)
@@ -397,7 +386,7 @@ private fun FriendList(
                             .background(MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         Image(
-                            bitmap = avatar,
+                            bitmap = friend.avatar,
                             contentDescription = "Friend avatar",
                             modifier = Modifier
                                 .size(28.dp)
@@ -408,12 +397,12 @@ private fun FriendList(
                     Spacer(modifier = Modifier.width(6.dp))
                 },
                 contentPadding = PaddingValues(2.dp),
-                dialogTitle = { Text("${friend.username} information") },
+                dialogTitle = { Text("${friend.user.username} information") },
                 dialogContent = {
                     val tasksCompleted by model.tasksCompleted.collectAsState()
                     val mutualFriends by model.mutualFriends.collectAsState()
 
-                    val friendInfo = friendObject.friends.find { it.email == friend.email }
+                    val friendInfo = friendObject.friends.find { it.email == friend.user.email }
                     if (friendInfo != null) {
                         val sinceDateTime = LocalDateTime.ofInstant(
                             Instant.ofEpochMilli(friendInfo.since),
@@ -425,8 +414,8 @@ private fun FriendList(
                             )
                         )
 
-                        model.tasksCompleted(friend.email)
-                        model.getMutualFriends(friend.email)
+                        model.tasksCompleted(friend.user.email)
+                        model.getMutualFriends(friend.user.email)
 
                         Column(
                             modifier = Modifier
@@ -444,7 +433,7 @@ private fun FriendList(
                                     .background(MaterialTheme.colorScheme.primaryContainer)
                             ) {
                                 Image(
-                                    bitmap = avatar,
+                                    bitmap = friend.avatar,
                                     contentDescription = "Friend avatar",
                                     modifier = Modifier
                                         .size(96.dp)
@@ -455,9 +444,9 @@ private fun FriendList(
                             Spacer(modifier = Modifier.height(6.dp))
 
                             Experience(
-                                experience = friend.experience,
-                                experienceRequired = (friend.level + 1) * (friend.level + 1) * 13,
-                                level = friend.level,
+                                experience = friend.user.experience,
+                                experienceRequired = (friend.user.level + 1) * (friend.user.level + 1) * 13,
+                                level = friend.user.level,
                                 paddingStart = 0.dp,
                                 paddingEnd = 0.dp,
                                 fontSize = 14,
@@ -614,14 +603,12 @@ private fun FriendList(
                                         Spacer(modifier = Modifier.height(4.dp))
 
                                         for (mutualFriend in mutualFriends) {
-                                            val mutualAvatar =
-                                                model.getFriendAvatar(mutualFriend.email)
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.SpaceBetween
                                             ) {
                                                 Text(
-                                                    text = mutualFriend.username,
+                                                    text = mutualFriend.user.username,
                                                     style = MaterialTheme.typography.titleSmall,
                                                 )
 
@@ -633,7 +620,7 @@ private fun FriendList(
                                                         .background(MaterialTheme.colorScheme.primaryContainer)
                                                 ) {
                                                     Image(
-                                                        bitmap = mutualAvatar,
+                                                        bitmap = mutualFriend.avatar,
                                                         contentDescription = "Friend avatar",
                                                         modifier = Modifier
                                                             .size(18.dp)
@@ -652,7 +639,7 @@ private fun FriendList(
                 onConfirm = { },
                 shape = MaterialTheme.shapes.small,
                 confirmationTitle = { Text("Are you sure you want to delete this friend?") },
-                confirmationOnConfirm = { model.removeFriend(friend.email) },
+                confirmationOnConfirm = { model.removeFriend(friend.user.email) },
                 confirmationDescription = { Text("If the friend is deleted, it cannot be recovered") },
             )
         }

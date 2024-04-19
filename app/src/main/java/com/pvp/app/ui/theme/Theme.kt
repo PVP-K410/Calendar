@@ -10,6 +10,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -29,19 +30,31 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun CalendarTheme(
+    model: ThemeViewModel,
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val themeValue = model.getGeneralThemeSetting().collectAsState(initial = 1).value
+    val dynamicColor = model.getDynamicThemeSetting().collectAsState(initial = false).value
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (themeValue == 0) {
+                dynamicDarkColorScheme(context)
+            } else if (themeValue == 1) {
+                dynamicLightColorScheme(context)
+            } else {
+                if (darkTheme) dynamicDarkColorScheme(context)
+                else dynamicLightColorScheme(context)
+            }
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        themeValue == 0 -> DarkColorScheme
+        themeValue == 1 -> LightColorScheme
+        else -> {
+            if (darkTheme) DarkColorScheme
+            else LightColorScheme
+        }
     }
 
     val view = LocalView.current

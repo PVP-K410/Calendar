@@ -6,12 +6,15 @@ import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import com.pvp.app.R
 import com.pvp.app.ui.screen.authentication.AuthenticationScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
+import com.pvp.app.ui.screen.decoration.DecorationScreen
 import com.pvp.app.ui.screen.friends.FriendsScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
@@ -23,7 +26,7 @@ sealed class Route(
     val iconDescription: String? = null,
     val path: String,
     val resourceTitleId: Int,
-    val screen: @Composable (NavHostController, CoroutineScope) -> Unit
+    val screen: @Composable (NavHostController, Modifier, CoroutineScope) -> Unit
 ) {
 
     companion object {
@@ -36,6 +39,7 @@ sealed class Route(
          */
         val routesAuthenticated = listOf(
             Calendar,
+            Decorations,
             Friends,
             None,
             Settings,
@@ -52,6 +56,7 @@ sealed class Route(
          */
         val routesDrawer = listOf(
             Calendar,
+            Decorations,
             Friends,
             Settings,
             Steps
@@ -73,7 +78,7 @@ sealed class Route(
     data object Authentication : Route(
         path = "authentication",
         resourceTitleId = R.string.empty,
-        screen = { _, _ -> AuthenticationScreen() }
+        screen = { _, _, _ -> AuthenticationScreen() }
     )
 
     data object Calendar : Route(
@@ -81,7 +86,15 @@ sealed class Route(
         iconDescription = "Calendar page button icon",
         path = "calendar",
         resourceTitleId = R.string.route_calendar,
-        screen = { _, _ -> CalendarScreen() }
+        screen = { _, m, _ -> CalendarScreen(modifier = m) }
+    )
+
+    data object Decorations : Route(
+        icon = Icons.Outlined.Storefront,
+        iconDescription = "Decorations page button icon",
+        path = "decorations",
+        resourceTitleId = R.string.route_decorations,
+        screen = { _, m, _ -> DecorationScreen(modifier = m) }
     )
 
     data object Friends : Route(
@@ -89,13 +102,13 @@ sealed class Route(
         iconDescription = "Friends page button icon",
         path = "friends",
         resourceTitleId = R.string.route_friends,
-        screen = { _, _ -> FriendsScreen() }
+        screen = { _, m, _ -> FriendsScreen(modifier = m) }
     )
 
     data object None : Route(
         path = "none",
         resourceTitleId = R.string.empty,
-        screen = { _, _ -> }
+        screen = { _, _, _ -> }
     )
 
     data object Settings : Route(
@@ -103,7 +116,7 @@ sealed class Route(
         iconDescription = "Settings page button icon",
         path = "settings",
         resourceTitleId = R.string.route_settings,
-        screen = { _, _ -> SettingsScreen() }
+        screen = { _, m, _ -> SettingsScreen(modifier = m) }
     )
 
     @SuppressLint("NewApi")
@@ -112,12 +125,12 @@ sealed class Route(
         iconDescription = "Step counter page button icon",
         path = "steps",
         resourceTitleId = R.string.route_steps,
-        screen = { _, _ -> StepScreen() }
+        screen = { _, m, _ -> StepScreen(modifier = m) }
     )
 
     data object Survey : Route(
         path = "survey",
         resourceTitleId = R.string.route_survey,
-        screen = { _, _ -> SurveyScreen() }
+        screen = { _, _, _ -> SurveyScreen() }
     )
 }

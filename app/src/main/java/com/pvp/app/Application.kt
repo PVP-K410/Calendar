@@ -2,6 +2,7 @@ package com.pvp.app
 
 import android.app.Application
 import android.app.NotificationManager
+import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorkerFactory
@@ -10,15 +11,21 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.decode.SvgDecoder
+import coil.disk.DiskCache
 import com.pvp.app.common.DateUtil.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.TaskAutocompleteWorker
+import com.pvp.app.worker.TaskNotificationWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
 import dagger.hilt.android.HiltAndroidApp
+import okhttp3.OkHttpClient
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -26,7 +33,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
-class Application : Application(), Configuration.Provider {
+class Application : Application(), Configuration.Provider, ImageLoaderFactory {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -44,17 +51,40 @@ class Application : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        createDailyTaskWorker()
+        val prefs = getSharedPreferences(
+            "FirstInstall",
+            Context.MODE_PRIVATE
+        )
 
-        createDrinkReminderWorker()
+        if (!prefs.getBoolean(
+                "SetupComplete",
+                false
+            )
+        ) {
+            createDailyTaskWorker()
 
-        createNotificationChannels()
+            createDrinkReminderWorker()
 
+            createNotificationChannels()
+
+            createTaskPointsDeductionWorker()
+
+            createTaskNotificationWorker()
+
+            createWeeklyActivitiesWorker()
+
+            prefs
+                .edit()
+                .putBoolean(
+                    "SetupComplete",
+                    true
+                )
+                .apply()
+        }
+
+        // Should be left out to ensure the TaskAutocompleteService is persisted
+        // as a running foreground service
         createTaskAutocompleteWorker()
-
-        createTaskPointsDeductionWorker()
-
-        createWeeklyActivitiesWorker()
     }
 
     private fun createDailyTaskWorker() {
@@ -91,7 +121,7 @@ class Application : Application(), Configuration.Provider {
     }
 
     private fun createDrinkReminderWorker() {
-        val drinkWorkerRequest = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
+        val request = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.DAYS
         )
@@ -100,7 +130,7 @@ class Application : Application(), Configuration.Provider {
         workManager.enqueueUniquePeriodicWork(
             DrinkReminderWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            drinkWorkerRequest
+            request
         )
     }
 
@@ -160,6 +190,20 @@ class Application : Application(), Configuration.Provider {
             .enqueue()
     }
 
+    private fun createTaskNotificationWorker() {
+        val request = PeriodicWorkRequestBuilder<TaskNotificationWorker>(
+            repeatInterval = 1,
+            repeatIntervalTimeUnit = TimeUnit.DAYS
+        )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            TaskNotificationWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            request
+        )
+    }
+
     private fun createWeeklyActivitiesWorker() {
         val requestPeriodic = PeriodicWorkRequestBuilder<WeeklyActivityWorker>(
             repeatInterval = 7,
@@ -179,4 +223,32 @@ class Application : Application(), Configuration.Provider {
             requestPeriodic
         )
     }
+
+    override fun newImageLoader(): ImageLoader = ImageLoader
+        .Builder(this)
+        .components { add(SvgDecoder.Factory()) }
+        .diskCache {
+            DiskCache
+                .Builder()
+                .directory(applicationContext.cacheDir.resolve("images"))
+                .build()
+        }
+        .okHttpClient {
+            OkHttpClient
+                .Builder()
+                .addInterceptor { chain ->
+                    chain
+                        .proceed(chain.request())
+                        .newBuilder()
+                        .removeHeader("cache-control")
+                        .removeHeader("expires")
+                        .addHeader(
+                            "cache-control",
+                            "public, max-age=259200"
+                        )
+                        .build()
+                }
+                .build()
+        }
+        .build()
 }

@@ -153,6 +153,7 @@ private fun CalendarMonthly(
     dates: List<CalendarUiState.DateEntry>,
     days: Array<String>,
     expand: Boolean,
+    modifier: Modifier,
     month: YearMonth,
     onChangeExpand: (Boolean) -> Unit,
     onChangeShowAnalyses: (Boolean) -> Unit,
@@ -163,7 +164,7 @@ private fun CalendarMonthly(
     tasks: List<Task>
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
@@ -292,7 +293,10 @@ private fun CalendarMonthlyContentItem(
 }
 
 @Composable
-fun CalendarMonthlyScreen(model: CalendarMonthlyViewModel = hiltViewModel()) {
+fun CalendarMonthlyScreen(
+    model: CalendarMonthlyViewModel = hiltViewModel(),
+    modifier: Modifier
+) {
     var date by remember { mutableStateOf(LocalDate.now()) }
     var expand by remember { mutableStateOf(false) }
     var showAnalyses by remember { mutableStateOf(false) }
@@ -305,6 +309,7 @@ fun CalendarMonthlyScreen(model: CalendarMonthlyViewModel = hiltViewModel()) {
         dates = state.dates,
         days = DateUtil.daysOfWeek,
         expand = expand,
+        modifier = modifier,
         month = state.yearMonth,
         onChangeExpand = { expand = it },
         onChangeShowAnalyses = { showAnalyses = it },

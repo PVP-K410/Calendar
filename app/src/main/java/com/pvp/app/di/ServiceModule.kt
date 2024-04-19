@@ -2,26 +2,39 @@ package com.pvp.app.di
 
 import android.content.Context
 import androidx.work.WorkManager
+import coil.Coil
+import coil.ImageLoader
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.app
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
+import com.pvp.app.api.DecorationService
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.HealthConnectService
+import com.pvp.app.api.ImageService
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.PointService
+import com.pvp.app.api.RewardService
 import com.pvp.app.api.SettingService
+import com.pvp.app.api.StreakService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.service.AuthenticationServiceImpl
 import com.pvp.app.service.ConfigurationImpl
+import com.pvp.app.service.DecorationServiceImpl
 import com.pvp.app.service.ExerciseServiceImpl
 import com.pvp.app.service.ExperienceServiceImpl
 import com.pvp.app.service.FriendServiceImpl
 import com.pvp.app.service.HealthConnectServiceImpl
+import com.pvp.app.service.ImageServiceImpl
 import com.pvp.app.service.NotificationServiceImpl
 import com.pvp.app.service.PointServiceImpl
+import com.pvp.app.service.RewardServiceImpl
 import com.pvp.app.service.SettingServiceImpl
+import com.pvp.app.service.StreakServiceImpl
 import com.pvp.app.service.TaskServiceImpl
 import com.pvp.app.service.UserServiceImpl
 import dagger.Binds
@@ -50,6 +63,10 @@ interface ServiceBindingsModule {
 
     @Binds
     @Singleton
+    fun bindDecorationService(service: DecorationServiceImpl): DecorationService
+
+    @Binds
+    @Singleton
     fun bindExerciseService(service: ExerciseServiceImpl): ExerciseService
 
     @Binds
@@ -62,6 +79,10 @@ interface ServiceBindingsModule {
 
     @Binds
     @Singleton
+    fun bindImageService(service: ImageServiceImpl): ImageService
+
+    @Binds
+    @Singleton
     fun bindNotificationService(service: NotificationServiceImpl): NotificationService
 
     @Binds
@@ -70,7 +91,15 @@ interface ServiceBindingsModule {
 
     @Binds
     @Singleton
+    fun bindRewardService(service: RewardServiceImpl): RewardService
+
+    @Binds
+    @Singleton
     fun bindSettingService(service: SettingServiceImpl): SettingService
+
+    @Binds
+    @Singleton
+    fun bindStreakService(service: StreakServiceImpl): StreakService
 
     @Binds
     @Singleton
@@ -84,6 +113,18 @@ interface ServiceBindingsModule {
 @Module
 @InstallIn(SingletonComponent::class)
 object ServiceProvidersModule {
+
+    @Provides
+    @Singleton
+    fun provideFirebaseApp(): FirebaseApp {
+        return Firebase.app
+    }
+
+    @Provides
+    @Singleton
+    fun provideImageLoader(@ApplicationContext context: Context): ImageLoader {
+        return Coil.imageLoader(context)
+    }
 
     @Provides
     @Singleton

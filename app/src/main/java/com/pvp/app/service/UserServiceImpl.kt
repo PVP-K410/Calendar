@@ -1,39 +1,33 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.pvp.app.service
 
-import android.content.Context
-import androidx.compose.ui.graphics.ImageBitmap
-import com.caverock.androidsvg.SVG
-import com.caverock.androidsvg.SVGParseException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
-import com.pvp.app.R
 import com.pvp.app.api.AuthenticationService
+import com.pvp.app.api.DecorationService
 import com.pvp.app.api.UserService
-import com.pvp.app.common.ImageUtil.toImageBitmap
 import com.pvp.app.model.User
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Provider
 
 class UserServiceImpl @Inject constructor(
     private val authenticationServiceProvider: Provider<AuthenticationService>,
-    @ApplicationContext
-    private val context: Context,
-    private val database: FirebaseFirestore
+    private val database: FirebaseFirestore,
+    private val decorationService: DecorationService
 ) : UserService {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val user
         get() = authenticationServiceProvider
             .get().user
-            .flatMapConcat {
-                it?.email
+            .flatMapLatest { user ->
+                user?.email
                     ?.run { get(this) }
                     ?: flowOf(null)
             }
@@ -43,7 +37,7 @@ class UserServiceImpl @Inject constructor(
             .collection(identifier)
             .document(email)
             .snapshots()
-            .map { it.toObject(User::class.java) }
+            .mapLatest { it.toObject(User::class.java) }
     }
 
     override suspend fun merge(user: User) {
@@ -71,23 +65,5 @@ class UserServiceImpl @Inject constructor(
                 transaction.delete(document)
             }
             .await()
-    }
-
-    override suspend fun resolveAvatar(email: String): ImageBitmap {
-        // TODO: In the future, we will resolve the avatar by checking user's bought decorations.
-        // For now, we will just return a default avatar.
-        return try {
-            SVG
-                .getFromResource(
-                    context.resources,
-                    R.raw.avatar
-                )
-                .renderToPicture()
-                .toImageBitmap()
-        } catch (e: SVGParseException) {
-            e.printStackTrace()
-
-            error("Failed to resolve user avatar")
-        }
     }
 }

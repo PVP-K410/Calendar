@@ -18,10 +18,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -59,7 +61,7 @@ private fun SettingNotificationReminderMinutes(
     val state = rememberPickerState(initialValue = minutes)
 
     SettingCard(
-        title = "Set Reminder Time",
+        title = "Reminder Time",
         description = "Choose minutes before tasks reminder executes. Default is 10 minutes",
         iconDescription = "Clickable icon to edit reminder time",
         value = "$minutes minute${if (minutes != 1) "s" else ""}",
@@ -116,7 +118,7 @@ private fun SettingCupVolumeMl(
     val state = rememberPickerState(initialValue = volume)
 
     SettingCard(
-        title = "Set Cup Volume",
+        title = "Cup Volume",
         description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
         iconDescription = "Clickable icon to edit cup volume",
         value = "$volume ml",
@@ -178,15 +180,109 @@ private fun SettingHydrationNotificationToggle(
     )
 }
 
+enum class Theme {
+    Dark,
+    Light,
+    Auto
+}
+
+@Composable
+private fun SettingDynamicTheme(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    val isEnabled by model
+        .get(Setting.Appearance.DynamicThemeEnabled)
+        .collectAsStateWithLifecycle()
+
+    SettingCard(
+        title = "Dynamic Theme",
+        description = "Choose whether or not you want to use the dynamic theme",
+        value = isEnabled,
+        onEdit = {
+            model.merge(
+                Setting.Appearance.DynamicThemeEnabled,
+                !isEnabled
+            )
+        }
+    )
+}
+
+@Composable
+private fun SettingApplicationTheme(
+    model: SettingsViewModel = hiltViewModel()
+) {
+    val themeValue by model
+        .get(Setting.Appearance.ApplicationTheme)
+        .collectAsStateWithLifecycle()
+
+    val state = rememberPickerState(initialValue = themeValue)
+
+    SettingCard(
+        description = "Choose the theme of the application",
+        editContent = {
+            Column(
+                modifier = Modifier
+                    .clip(shape = MaterialTheme.shapes.small)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .wrapContentSize()
+                    .padding(32.dp)
+            ) {
+                Text(
+                    style = MaterialTheme.typography.titleLarge,
+                    text = "Select Application Theme"
+                )
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                Theme.entries.forEach {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = themeValue == it.ordinal,
+                            onClick = {
+                                state.value = it.ordinal
+                                if (state.value != themeValue) {
+                                    model.merge(
+                                        Setting.Appearance.ApplicationTheme,
+                                        state.value
+                                    )
+                                }
+                            }
+                        )
+
+                        Text(
+                            text = it.toString(),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(start = 10.dp)
+                        )
+                    }
+                }
+            }
+        },
+        onEdit = {},
+        value = Theme.entries[themeValue],
+        title = "Application Theme"
+    )
+}
+
 @Composable
 fun SettingsScreen(
-    model: SettingsViewModel = hiltViewModel()
+    model: SettingsViewModel = hiltViewModel(),
+    modifier: Modifier
 ) {
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .then(modifier)
             .fillMaxSize()
             .padding(horizontal = 24.dp)
-            .verticalScroll(rememberScrollState())
     ) {
         CategoryRow(
             icon = Icons.Outlined.Notifications,
@@ -198,6 +294,15 @@ fun SettingsScreen(
         SettingHydrationNotificationToggle(model)
 
         SettingCupVolumeMl(model)
+
+        CategoryRow(
+            icon = Icons.Outlined.Style,
+            title = "Appearance"
+        )
+
+        SettingApplicationTheme(model)
+
+        SettingDynamicTheme(model)
 
         ResetToDefaultButton(model)
     }

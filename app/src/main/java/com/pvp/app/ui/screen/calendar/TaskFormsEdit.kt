@@ -1,26 +1,17 @@
 package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -36,55 +27,49 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.MealTask
-import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ButtonConfirm
-import com.pvp.app.ui.common.DatePickerDialog
+import com.pvp.app.ui.common.EditableDateItem
 import com.pvp.app.ui.common.EditableInfoItem
-import com.pvp.app.ui.common.LabelFieldWrapper
-import com.pvp.app.ui.common.PickerPair
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.PickerTime
 import java.time.Duration
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun TaskEdit(
+fun TaskEditDialog(
     task: Task,
-    onDismissRequest: () -> Unit,
-    showDialog: Boolean,
+    onDialogClose: () -> Unit,
     model: TaskViewModel = hiltViewModel()
 ) {
-    if (!showDialog) {
-        return
-    }
-
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description) }
     var duration by remember { mutableStateOf(task.duration) }
     var date by remember { mutableStateOf(task.date) }
     var activity by remember { mutableStateOf((task as? SportTask)?.activity) }
     var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
-    var recipe by remember { mutableStateOf((task as? MealTask)?.recipe) }
     var tempTitle by remember { mutableStateOf(title) }
     var tempDescription by remember { mutableStateOf(description) }
     var tempDuration by remember { mutableStateOf(duration) }
     var time by remember { mutableStateOf(task.time ?: LocalTime.MIN) }
     val tempHour = rememberPickerState(time.hour)
     val tempMinute = rememberPickerState(time.minute)
+    var reminderTime by remember { mutableStateOf(task.reminderTime) }
+    var editingReminderTime by remember { mutableStateOf(reminderTime) }
+    val descriptionLabel = when (task::class) {
+        MealTask::class -> "Recipe"
+        else -> "Description"
+    }
 
-    Dialog(onDismissRequest = onDismissRequest) {
+    Dialog(onDismissRequest = onDialogClose) {
         Surface(
             shape = RoundedCornerShape(10.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
@@ -123,7 +108,7 @@ fun TaskEdit(
                 EditableInfoItem(
                     dialogContent = {
                         OutlinedTextField(
-                            label = { Text("Description") },
+                            label = { Text(descriptionLabel) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
@@ -133,8 +118,8 @@ fun TaskEdit(
                             value = tempDescription ?: ""
                         )
                     },
-                    dialogTitle = { Text("Editing description") },
-                    label = "Description",
+                    dialogTitle = { Text("Editing $descriptionLabel") },
+                    label = descriptionLabel,
                     onConfirm = { description = tempDescription },
                     onDismiss = { tempDescription = description },
                     value = description ?: ""
@@ -153,10 +138,6 @@ fun TaskEdit(
                             duration = newDuration
                         }
                     )
-
-                    is MealTask -> TaskEditFieldsMeal(task) { newRecipe ->
-                        recipe = newRecipe
-                    }
 
                     else -> {}
                 }
@@ -180,7 +161,7 @@ fun TaskEdit(
                                     onValueChange = { newValue ->
                                         tempDuration = Duration.ofMinutes(newValue.toLong())
                                     },
-                                    valueRange = 1f..180f,
+                                    valueRange = 1f..180f, // TODO: take range from configuration
                                     steps = 180,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -230,22 +211,55 @@ fun TaskEdit(
                     }
                 )
 
-                FieldBox(
-                    dialogContent = { showDialog, onDismiss, _ ->
-                        DatePickerDialog(
-                            showPicker = showDialog,
-                            onDismiss = onDismiss,
-                            onDateSelected = { selectedDate ->
-                                date = date
-                                    .withYear(selectedDate.year)
-                                    .withMonth(selectedDate.monthValue)
-                                    .withDayOfMonth(selectedDate.dayOfMonth)
-                            }
-                        )
-                    },
+                EditableDateItem(
                     label = "Date",
-                    onConfirm = { },
-                    value = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))
+                    value = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE")),
+                    onDateSelected = { selectedDate ->
+                        date = date
+                            .withYear(selectedDate.year)
+                            .withMonth(selectedDate.monthValue)
+                            .withDayOfMonth(selectedDate.dayOfMonth)
+                    }
+                )
+
+                EditableInfoItem(
+                    dialogContent = {
+                        Column {
+                            Text(
+                                text = "Reminder Time: ${editingReminderTime?.toMinutes() ?: 0} minutes",
+                                style = TextStyle(fontSize = 16.sp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 4.dp)
+                            )
+
+                            Slider(
+                                value = editingReminderTime
+                                    ?.toMinutes()
+                                    ?.toFloat() ?: 0f,
+                                onValueChange = { newValue ->
+                                    editingReminderTime = Duration.ofMinutes(newValue.toLong())
+                                },
+                                valueRange = 1f..120f,
+                                steps = 120,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 8.dp,
+                                        end = 8.dp,
+                                        bottom = 8.dp
+                                    )
+                            )
+                        }
+                    },
+                    dialogTitle = { Text("Editing reminder time") },
+                    label = "Reminder Time",
+                    onConfirm = { reminderTime = editingReminderTime },
+                    onDismiss = { editingReminderTime = reminderTime },
+                    value = if (reminderTime != null)
+                        "${reminderTime?.toMinutes()} ${
+                            if (reminderTime?.toMinutes()?.toInt() == 1) "minute" else "minutes"
+                        } before task" else ""
                 )
 
                 Row(
@@ -282,7 +296,7 @@ fun TaskEdit(
                         onConfirm = {
                             model.remove(task)
 
-                            onDismissRequest()
+                            onDialogClose()
                         },
                         shape = MaterialTheme.shapes.extraLarge
                     )
@@ -294,6 +308,7 @@ fun TaskEdit(
                                     task.title = title
                                     task.description = description
                                     task.duration = duration
+                                    task.reminderTime = reminderTime
                                     task.date = date
                                     task.time = time
 
@@ -303,13 +318,16 @@ fun TaskEdit(
                                             task.distance = distance
                                         }
 
-                                        is MealTask -> task.recipe = recipe.toString()
+                                        is MealTask -> {
+                                            task.recipe = description ?: ""
+                                            task.description = ""
+                                        }
                                     }
                                 },
                                 task
                             )
 
-                            onDismissRequest()
+                            onDialogClose()
                         }
                     ) {
                         Text("Save")
@@ -317,239 +335,5 @@ fun TaskEdit(
                 }
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TaskEditFieldsSport(
-    task: SportTask,
-    model: TaskViewModel = hiltViewModel(),
-    onActivityChange: (SportActivity?) -> Unit,
-    onDistanceChange: (Double) -> Unit,
-    onDurationChange: (Duration) -> Unit
-) {
-    var activity by remember { mutableStateOf(task.activity) }
-    var distance by remember { mutableStateOf(task.distance) }
-    var duration by remember { mutableStateOf(task.duration) }
-
-    var tempActivity by remember { mutableStateOf(activity) }
-    var tempDuration by remember { mutableStateOf(duration) }
-
-    EditableInfoItem(
-        dialogContent = {
-            var isExpanded by remember { mutableStateOf(false) }
-
-            ExposedDropdownMenuBox(
-                expanded = isExpanded,
-                onExpandedChange = { isExpanded = it },
-            ) {
-                androidx.compose.material3.TextField(
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
-                    value = tempActivity.title,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-                    }
-                )
-
-                ExposedDropdownMenu(
-                    expanded = isExpanded,
-                    onDismissRequest = { isExpanded = false }
-                ) {
-                    SportActivity.entries.forEach {
-                        DropdownMenuItem(
-                            text = { Text(text = it.title) },
-                            onClick = {
-                                tempActivity = it
-                                isExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-        },
-        dialogTitle = { Text("Editing activity") },
-        label = "Activity",
-        onConfirm = { activity = tempActivity },
-        onDismiss = { tempActivity = activity },
-        value = activity.title
-    )
-
-    if (activity.supportsDistanceMetrics) {
-        val stateKilometers = rememberPickerState(
-            task.distance
-                ?.toInt()
-                ?: model.rangeKilometers.first()
-        )
-
-        val stateMeters = rememberPickerState(
-            task.distance
-                ?.let { ((it - stateKilometers.value) * 900).toInt() }
-                ?: 0
-        )
-
-        EditableInfoItem(
-            dialogContent = {
-                LabelFieldWrapper(
-                    content = {
-                        PickerPair(
-                            itemsFirst = model.rangeKilometers,
-                            itemsSecond = (0..1000 step 100).toList(),
-                            labelFirst = { "$it (km)" },
-                            labelSecond = { "$it (m)" },
-                            onChange = { stateFirst, stateSecond ->
-                                stateKilometers.value = stateFirst
-                                stateMeters.value = stateSecond
-                            },
-                            stateFirst = stateKilometers,
-                            stateSecond = stateMeters
-                        )
-                    },
-                    putBelow = true,
-                    text = "${stateKilometers.value + (stateMeters.value / 1000.0)} (km) distance",
-                    textAlign = TextAlign.End
-                )
-            },
-            dialogTitle = { Text("Editing distance") },
-            label = "Distance",
-            onConfirm = { distance = stateKilometers.value.toDouble() },
-            onDismiss = { distance = (task as? SportTask)?.distance },
-            value = "$distance (km)"
-        )
-    } else {
-        EditableInfoItem(
-            dialogContent = {
-                Column {
-                    Text(
-                        text = "Duration: ${tempDuration?.toMinutes()} minutes",
-                        style = TextStyle(fontSize = 16.sp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 4.dp)
-                    )
-
-                    Slider(
-                        value = tempDuration
-                            ?.toMinutes()
-                            ?.toFloat() ?: 0f,
-                        onValueChange = { newValue ->
-                            tempDuration = Duration.ofMinutes(newValue.toLong())
-                        },
-                        valueRange = 1f..180f,
-                        steps = 180,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = 8.dp,
-                                end = 8.dp,
-                                bottom = 8.dp
-                            )
-                    )
-                }
-            },
-            dialogTitle = { Text("Editing duration") },
-            label = "Duration",
-            onConfirm = { duration = tempDuration },
-            onDismiss = { tempDuration = duration },
-            value = "${duration?.toMinutes()} minutes"
-        )
-    }
-
-    onActivityChange(activity)
-
-    distance?.let { onDistanceChange(it) }
-
-    duration?.let { onDurationChange(it) }
-}
-
-@Composable
-private fun TaskEditFieldsMeal(
-    task: MealTask,
-    onRecipeChange: (String?) -> Unit
-) {
-    var recipe by remember { mutableStateOf(task.recipe) }
-    var tempRecipe by remember { mutableStateOf(recipe) }
-
-    EditableInfoItem(
-        dialogContent = {
-            OutlinedTextField(
-                label = { Text("Recipe") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                onValueChange = { newText ->
-                    tempRecipe = newText
-                },
-                value = tempRecipe
-            )
-        },
-        dialogTitle = { Text("Editing recipe") },
-        label = "Recipe",
-        onConfirm = { recipe = tempRecipe },
-        onDismiss = { tempRecipe = recipe },
-        value = recipe
-    )
-
-    onRecipeChange(recipe)
-}
-
-@Composable
-private fun FieldBox(
-    dialogContent: @Composable (Boolean, () -> Unit, (LocalDateTime) -> Unit) -> Unit,
-    label: String,
-    onConfirm: (String) -> Unit,
-    value: String,
-) {
-    var showDialog by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 3.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    fontWeight = FontWeight.Bold,
-                    text = label
-                )
-
-                Icon(
-                    imageVector = Icons.Outlined.Edit,
-                    contentDescription = "Edit Icon Button",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { showDialog = true }
-                )
-            }
-
-            Text(text = value)
-        }
-
-        dialogContent(
-            showDialog,
-            { showDialog = false },
-            { selectedDate ->
-                onConfirm(selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                showDialog = false
-            }
-        )
     }
 }

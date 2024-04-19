@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,10 +26,13 @@ import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 
 @Composable
-fun CalendarWeeklyScreen(model: CalendarWeeklyViewModel = hiltViewModel()) {
+fun CalendarWeeklyScreen(
+    model: CalendarWeeklyViewModel = hiltViewModel(),
+    modifier: Modifier
+) {
     val state by model.state.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize()) { Week(tasks = state.tasks) }
+    Column(modifier = modifier.fillMaxSize()) { Week(tasks = state.tasks) }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -74,8 +76,7 @@ fun Week(
                         scope.launch {
                             statePager.scrollToPage(page)
                         }
-                    }
-                    else {
+                    } else {
                         if (tasksFiltered.isEmpty()) {
                             stateDialog = true
                         } else {
