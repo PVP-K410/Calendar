@@ -69,7 +69,6 @@ interface DecorationService : DocumentsCollection {
     suspend fun getAvatar(user: User): ImageBitmap
 
     /**
-
      * Add a new decoration to the database or update an existing one.
      *
      * @param decoration The decoration to add or update.
