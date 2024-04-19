@@ -414,229 +414,232 @@ private fun FriendList(
                     val mutualFriends by model.mutualFriends.collectAsState()
 
                     val friendInfo = friendObject.friends.find { it.email == friend.email }
-                    val sinceDateTime = LocalDateTime.ofInstant(
-                        friendInfo?.let { Instant.ofEpochMilli(it.since) },
-                        ZoneId.systemDefault()
-                    )
-                    val formattedDate = sinceDateTime.format(
-                        DateTimeFormatter.ofPattern(
-                            "yyyy/MM/dd"
+                    if (friendInfo != null) {
+                        val sinceDateTime = LocalDateTime.ofInstant(
+                            Instant.ofEpochMilli(friendInfo.since),
+                            ZoneId.systemDefault()
                         )
-                    )
-
-                    model.tasksCompleted(friend.email)
-                    model.getMutualFriends(friend.email)
-
-                    Column(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .fillMaxWidth()
-                            .height(300.dp)
-                            .verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                        ) {
-                            Image(
-                                bitmap = avatar,
-                                contentDescription = "Friend avatar",
-                                modifier = Modifier
-                                    .size(96.dp)
-                                    .clip(CircleShape)
+                        val formattedDate = sinceDateTime.format(
+                            DateTimeFormatter.ofPattern(
+                                "yyyy/MM/dd"
                             )
-                        }
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Experience(
-                            experience = friend.experience,
-                            experienceRequired = (friend.level + 1) * (friend.level + 1) * 13,
-                            level = friend.level,
-                            paddingStart = 0.dp,
-                            paddingEnd = 0.dp,
-                            fontSize = 14,
-                            fontWeight = FontWeight.Normal,
-                            height = 26.dp,
-                            textStyle = MaterialTheme.typography.titleSmall,
-                            progressTextStyle = MaterialTheme.typography.bodySmall
                         )
 
-                        Spacer(modifier = Modifier.height(6.dp))
+                        model.tasksCompleted(friend.email)
+                        model.getMutualFriends(friend.email)
 
                         Column(
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .fillMaxWidth()
+                                .height(300.dp)
+                                .verticalScroll(rememberScrollState()),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Row(
+                            Box(
+                                contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        color = MaterialTheme.colorScheme.surface,
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.Center
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
                             ) {
-                                Text(
-                                    text = "7 days activity",
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(2.dp))
-
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .height(90.dp)
-                                    .clip(MaterialTheme.shapes.small)
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(vertical = 4.dp),
-                                verticalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                Row(
+                                Image(
+                                    bitmap = avatar,
+                                    contentDescription = "Friend avatar",
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.DoNotStep,
-                                        contentDescription = "steps",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = "63819 steps made",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        modifier = Modifier.padding(start = 8.dp)
-                                    )
-                                }
-
-                                HorizontalDivider(
-                                    color = Color.Gray,
-                                    thickness = 1.dp,
-                                    modifier = Modifier.padding(horizontal = 14.dp)
+                                        .size(96.dp)
+                                        .clip(CircleShape)
                                 )
-
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.LocalFireDepartment,
-                                        contentDescription = "calories",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = "6571 calories burned",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        modifier = Modifier.padding(start = 8.dp)
-                                    )
-                                }
-
-                                HorizontalDivider(
-                                    color = Color.Gray,
-                                    thickness = 1.dp,
-                                    modifier = Modifier.padding(horizontal = 14.dp)
-                                )
-
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Outlined.FactCheck,
-                                        contentDescription = "tasks",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = "$tasksCompleted tasks completed",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        modifier = Modifier.padding(start = 8.dp)
-                                    )
-                                }
                             }
 
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        color = MaterialTheme.colorScheme.surface,
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = "Friend information",
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-                            }
+                            Experience(
+                                experience = friend.experience,
+                                experienceRequired = (friend.level + 1) * (friend.level + 1) * 13,
+                                level = friend.level,
+                                paddingStart = 0.dp,
+                                paddingEnd = 0.dp,
+                                fontSize = 14,
+                                fontWeight = FontWeight.Normal,
+                                height = 26.dp,
+                                textStyle = MaterialTheme.typography.titleSmall,
+                                progressTextStyle = MaterialTheme.typography.bodySmall
+                            )
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
                             Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(MaterialTheme.shapes.small)
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(vertical = 4.dp, horizontal = 14.dp)
+                                modifier = Modifier.fillMaxSize()
                             ) {
-                                Text(
-                                    text = "Friends since - $formattedDate",
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-
-                                Spacer(modifier = Modifier.height(4.dp))
-
-                                if (mutualFriends.isEmpty()) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(
+                                            color = MaterialTheme.colorScheme.surface,
+                                            shape = MaterialTheme.shapes.small
+                                        )
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
                                     Text(
-                                        text = "No mutual friends",
+                                        text = "7 days activity",
                                         style = MaterialTheme.typography.titleSmall
                                     )
-                                } else {
+                                }
+
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .height(90.dp)
+                                        .clip(MaterialTheme.shapes.small)
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(vertical = 4.dp),
+                                    verticalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.DoNotStep,
+                                            contentDescription = "steps",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = "63819 steps made",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+
+                                    HorizontalDivider(
+                                        color = Color.Gray,
+                                        thickness = 1.dp,
+                                        modifier = Modifier.padding(horizontal = 14.dp)
+                                    )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.LocalFireDepartment,
+                                            contentDescription = "calories",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = "6571 calories burned",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+
+                                    HorizontalDivider(
+                                        color = Color.Gray,
+                                        thickness = 1.dp,
+                                        modifier = Modifier.padding(horizontal = 14.dp)
+                                    )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Outlined.FactCheck,
+                                            contentDescription = "tasks",
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Text(
+                                            text = "$tasksCompleted tasks completed",
+                                            style = MaterialTheme.typography.titleSmall,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(
+                                            color = MaterialTheme.colorScheme.surface,
+                                            shape = MaterialTheme.shapes.small
+                                        )
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
                                     Text(
-                                        text = "Mutual friends",
+                                        text = "Friend information",
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(3.dp))
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(MaterialTheme.shapes.small)
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(vertical = 4.dp, horizontal = 14.dp)
+                                ) {
+                                    Text(
+                                        text = "Friends since - $formattedDate",
                                         style = MaterialTheme.typography.titleSmall
                                     )
 
                                     Spacer(modifier = Modifier.height(4.dp))
 
-                                    for (mutualFriend in mutualFriends) {
-                                        val mutualAvatar = model.getFriendAvatar(mutualFriend.email)
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween
-                                        ) {
-                                            Text(
-                                                text = mutualFriend.username,
-                                                style = MaterialTheme.typography.titleSmall,
-                                            )
+                                    if (mutualFriends.isEmpty()) {
+                                        Text(
+                                            text = "No mutual friends",
+                                            style = MaterialTheme.typography.titleSmall
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "Mutual friends",
+                                            style = MaterialTheme.typography.titleSmall
+                                        )
 
-                                            Box(
-                                                contentAlignment = Alignment.Center,
-                                                modifier = Modifier
-                                                    .size(20.dp)
-                                                    .clip(CircleShape)
-                                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        for (mutualFriend in mutualFriends) {
+                                            val mutualAvatar =
+                                                model.getFriendAvatar(mutualFriend.email)
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween
                                             ) {
-                                                Image(
-                                                    bitmap = mutualAvatar,
-                                                    contentDescription = "Friend avatar",
-                                                    modifier = Modifier
-                                                        .size(18.dp)
-                                                        .clip(CircleShape)
+                                                Text(
+                                                    text = mutualFriend.username,
+                                                    style = MaterialTheme.typography.titleSmall,
                                                 )
+
+                                                Box(
+                                                    contentAlignment = Alignment.Center,
+                                                    modifier = Modifier
+                                                        .size(20.dp)
+                                                        .clip(CircleShape)
+                                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                                ) {
+                                                    Image(
+                                                        bitmap = mutualAvatar,
+                                                        contentDescription = "Friend avatar",
+                                                        modifier = Modifier
+                                                            .size(18.dp)
+                                                            .clip(CircleShape)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
