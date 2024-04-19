@@ -40,7 +40,7 @@ class TaskViewModel @Inject constructor(
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
         .combine(userService.user) { minutes, user ->
             TaskState(
-                reminderMinutes = minutes,
+                reminderMinutesSetting = minutes,
                 user = user!!
             )
         }
@@ -244,35 +244,24 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    private fun Task.postNotification() {
+    private suspend fun Task.postNotification() {
         notificationService
             .getNotificationForTask(this)
             ?.let { notification ->
-            if (time == null || reminderTime == null) {
-                return
+                notificationService.post(notification = notification)
             }
-
-            val reminderDateTime = date
-                .atTime(time)
-                .minusMinutes(reminderTime!!.toMinutes())
-
-            notificationService.post(
-                notification = notification,
-                dateTime = reminderDateTime
-            )
-        }
     }
 
-    private fun Task.cancelNotification() {
+    private suspend fun Task.cancelNotification() {
         notificationService
             .getNotificationForTask(this)
             ?.let { notification ->
-            notificationService.cancel(notification)
-        }
+                notificationService.cancel(notification)
+            }
     }
 }
 
 data class TaskState(
-    val reminderMinutes: Int = Setting.Notifications.ReminderBeforeTaskMinutes.defaultValue,
+    val reminderMinutesSetting: Int = Setting.Notifications.ReminderBeforeTaskMinutes.defaultValue,
     val user: User = User()
 )

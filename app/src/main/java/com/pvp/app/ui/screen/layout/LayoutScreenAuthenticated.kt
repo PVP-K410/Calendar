@@ -181,6 +181,7 @@ private fun Content(
             0 -> Router(
                 controller = controller,
                 destinationStart = Route.Calendar,
+                modifier = modifier,
                 routes = Route.routesAuthenticated,
                 scope = scope
             )

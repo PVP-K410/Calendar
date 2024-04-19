@@ -9,6 +9,14 @@ import java.time.LocalTime
 interface NotificationService {
 
     /**
+     * Posts a notification to the android alarm manager.
+     * Notification object must include dateTime at which the notification will be posted.
+     */
+    fun post(
+        notification: Notification
+    )
+
+    /**
      * Posts a notification to the android alarm manager with the specified delay.
      */
     fun post(
@@ -59,7 +67,7 @@ interface NotificationService {
     /**
      * Converts task object to a notification object.
      */
-    fun getNotificationForTask(
+    suspend fun getNotificationForTask(
         task: Task
     ): Notification?
 }

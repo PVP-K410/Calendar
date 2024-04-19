@@ -97,14 +97,6 @@ sealed class Route(
         screen = { _, m, _ -> DecorationScreen(modifier = m) }
     )
 
-    data object Decorations : Route(
-        icon = Icons.Outlined.Storefront,
-        iconDescription = "Decorations page button icon",
-        path = "decorations",
-        resourceTitleId = R.string.route_decorations,
-        screen = { _, _ -> DecorationScreen() }
-    )
-
     data object Friends : Route(
         icon = Icons.Outlined.People,
         iconDescription = "Friends page button icon",
