@@ -127,7 +127,6 @@ class FriendServiceImpl @Inject constructor(
         }
     }
 
-
     override suspend fun addFriend(
         friendObject: FriendObject,
         email: String,
