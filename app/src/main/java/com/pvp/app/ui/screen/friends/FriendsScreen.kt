@@ -1,6 +1,8 @@
 package com.pvp.app.ui.screen.friends
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -42,13 +45,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -442,9 +448,10 @@ private fun FriendList(
 
                         Spacer(modifier = Modifier.height(6.dp))
 
-                        Text(
-                            text = "Level ${friend.level}",
-                            style = MaterialTheme.typography.titleSmall
+                        Experience(
+                            experience = friend.experience,
+                            experienceRequired = (friend.level + 1) * (friend.level + 1) * 13,
+                            level = friend.level
                         )
 
                         Spacer(modifier = Modifier.height(6.dp))
@@ -697,6 +704,57 @@ private fun RequestList(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun Experience(
+    experience: Int,
+    experienceRequired: Int,
+    level: Int
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "Level $level",
+            style = MaterialTheme.typography.titleSmall
+        )
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(top = 6.dp)
+        ) {
+            var target by remember { mutableFloatStateOf(0f) }
+
+            val progress by animateFloatAsState(
+                animationSpec = tween(durationMillis = 1000),
+                label = "ExperienceProgressAnimation",
+                targetValue = target,
+            )
+
+            LaunchedEffect(Unit) {
+                target = experience / experienceRequired.toFloat()
+            }
+
+            LinearProgressIndicator(
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(26.dp),
+                progress = { progress },
+                strokeCap = StrokeCap.Round,
+                trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
+            )
+
+            Text(
+                style = MaterialTheme.typography.titleSmall,
+                text = "$experience / $experienceRequired Exp",
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
