@@ -45,34 +45,31 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun TaskEdit(
+fun TaskEditDialog(
     task: Task,
-    onDismissRequest: () -> Unit,
-    showDialog: Boolean,
+    onDialogClose: () -> Unit,
     model: TaskViewModel = hiltViewModel()
 ) {
-    if (!showDialog) {
-        return
-    }
-
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description) }
     var duration by remember { mutableStateOf(task.duration) }
     var date by remember { mutableStateOf(task.date) }
     var activity by remember { mutableStateOf((task as? SportTask)?.activity) }
     var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
-    var recipe by remember { mutableStateOf((task as? MealTask)?.recipe) }
     var tempTitle by remember { mutableStateOf(title) }
     var tempDescription by remember { mutableStateOf(description) }
     var tempDuration by remember { mutableStateOf(duration) }
     var time by remember { mutableStateOf(task.time ?: LocalTime.MIN) }
     val tempHour = rememberPickerState(time.hour)
     val tempMinute = rememberPickerState(time.minute)
-    var reminderTime by remember { mutableStateOf(task.reminderTime ?: Duration.ZERO) }
+    var reminderTime by remember { mutableStateOf(task.reminderTime) }
     var editingReminderTime by remember { mutableStateOf(reminderTime) }
+    val descriptionLabel = when (task::class) {
+        MealTask::class -> "Recipe"
+        else -> "Description"
+    }
 
-
-    Dialog(onDismissRequest = onDismissRequest) {
+    Dialog(onDismissRequest = onDialogClose) {
         Surface(
             shape = RoundedCornerShape(10.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
@@ -111,7 +108,7 @@ fun TaskEdit(
                 EditableInfoItem(
                     dialogContent = {
                         OutlinedTextField(
-                            label = { Text("Description") },
+                            label = { Text(descriptionLabel) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
@@ -121,8 +118,8 @@ fun TaskEdit(
                             value = tempDescription ?: ""
                         )
                     },
-                    dialogTitle = { Text("Editing description") },
-                    label = "Description",
+                    dialogTitle = { Text("Editing $descriptionLabel") },
+                    label = descriptionLabel,
                     onConfirm = { description = tempDescription },
                     onDismiss = { tempDescription = description },
                     value = description ?: ""
@@ -141,10 +138,6 @@ fun TaskEdit(
                             duration = newDuration
                         }
                     )
-
-                    is MealTask -> TaskEditFieldsMeal(task) { newRecipe ->
-                        recipe = newRecipe
-                    }
 
                     else -> {}
                 }
@@ -168,7 +161,7 @@ fun TaskEdit(
                                     onValueChange = { newValue ->
                                         tempDuration = Duration.ofMinutes(newValue.toLong())
                                     },
-                                    valueRange = 1f..180f,
+                                    valueRange = 1f..180f, // TODO: take range from configuration
                                     steps = 180,
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -233,7 +226,7 @@ fun TaskEdit(
                     dialogContent = {
                         Column {
                             Text(
-                                text = "Reminder Time: ${editingReminderTime?.toMinutes()} minutes",
+                                text = "Reminder Time: ${editingReminderTime?.toMinutes() ?: 0} minutes",
                                 style = TextStyle(fontSize = 16.sp),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -263,7 +256,8 @@ fun TaskEdit(
                     label = "Reminder Time",
                     onConfirm = { reminderTime = editingReminderTime },
                     onDismiss = { editingReminderTime = reminderTime },
-                    value = "${reminderTime?.toMinutes()} minutes before task"
+                    value = if (reminderTime != null)
+                        "${reminderTime?.toMinutes()} ${if (reminderTime?.toMinutes()?.toInt() == 1) "minute" else "minutes"} before task" else ""
                 )
 
                 Row(
@@ -300,7 +294,7 @@ fun TaskEdit(
                         onConfirm = {
                             model.remove(task)
 
-                            onDismissRequest()
+                            onDialogClose()
                         },
                         shape = MaterialTheme.shapes.extraLarge
                     )
@@ -322,13 +316,16 @@ fun TaskEdit(
                                             task.distance = distance
                                         }
 
-                                        is MealTask -> task.recipe = recipe.toString()
+                                        is MealTask -> {
+                                            task.recipe = description ?: ""
+                                            task.description = ""
+                                        }
                                     }
                                 },
                                 task
                             )
 
-                            onDismissRequest()
+                            onDialogClose()
                         }
                     ) {
                         Text("Save")

@@ -118,16 +118,14 @@ fun TaskCreateDialog(
 
             Spacer(modifier = Modifier.padding(4.dp))
 
-            fun closeIfShould() {
-                if (shouldCloseOnSubmit) {
-                    onClose()
-                }
-            }
-
             TaskCreateForm(
                 targetClass = target,
                 date = date,
-                onCreate = ::closeIfShould
+                onCreate = {
+                    if (shouldCloseOnSubmit) {
+                        onClose()
+                    }
+                }
             )
         }
     }
@@ -143,25 +141,24 @@ fun TaskCreateForm(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(Duration.ofMinutes(0)) }
-    var reminderTime by remember { mutableStateOf(Duration.ofMinutes(0)) }
+    var reminderTime by remember { mutableStateOf<Duration?>(null) }
     var activity by remember { mutableStateOf(SportActivity.Walking) }
     var distance by remember { mutableDoubleStateOf(0.0) }
-    var recipe by remember { mutableStateOf("") }
     var dateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
     var editingTitle by remember { mutableStateOf("") }
     var editingDescription by remember { mutableStateOf("") }
     var editingDuration by remember { mutableStateOf(Duration.ofMinutes(0)) }
-    var editingReminderTime by remember { mutableStateOf(Duration.ofMinutes(0)) }
+    var editingReminderTime by remember { mutableStateOf(reminderTime) }
     val editingHour = rememberPickerState(dateTime.hour)
     val editingMinute = rememberPickerState(dateTime.minute)
+    val descriptionLabel = when (targetClass) {
+        MealTask::class -> "Recipe"
+        else -> "Description"
+    }
 
     val isFormValid by remember(targetClass) {
         derivedStateOf {
-            when (targetClass) {
-                MealTask::class -> title.isNotEmpty() && description.isNotEmpty()
-                SportTask::class -> title.isNotEmpty()
-                else -> title.isNotEmpty() && description.isNotEmpty()
-            }
+            title.isNotEmpty()
         }
     }
 
@@ -203,7 +200,7 @@ fun TaskCreateForm(
             EditableInfoItem(
                 dialogContent = {
                     OutlinedTextField(
-                        label = { Text("Description") },
+                        label = { Text(descriptionLabel) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
@@ -213,8 +210,8 @@ fun TaskCreateForm(
                         value = editingDescription
                     )
                 },
-                dialogTitle = { Text("Editing description") },
-                label = "Description",
+                dialogTitle = { Text("Editing $descriptionLabel") },
+                label = descriptionLabel,
                 onConfirm = { description = editingDescription },
                 onDismiss = { editingDescription = description },
                 value = description
@@ -235,14 +232,10 @@ fun TaskCreateForm(
                     }
                 )
 
-                MealTask::class -> TaskEditFieldsMeal { newRecipe ->
-                    recipe = newRecipe
-                }
-
                 else -> {}
             }
 
-            if (targetClass != MealTask::class) {
+            if (targetClass != SportTask::class) {
                 EditableInfoItem(
                     dialogContent = {
                         Column {
@@ -326,7 +319,7 @@ fun TaskCreateForm(
                 dialogContent = {
                     Column {
                         Text(
-                            text = "Reminder Time: ${editingReminderTime?.toMinutes()} minutes",
+                            text = "Reminder Time: ${editingReminderTime?.toMinutes() ?: 0} minutes",
                             style = TextStyle(fontSize = 16.sp),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -356,7 +349,8 @@ fun TaskCreateForm(
                 label = "Reminder Time",
                 onConfirm = { reminderTime = editingReminderTime },
                 onDismiss = { editingReminderTime = reminderTime },
-                value = "${reminderTime?.toMinutes()} minutes before task"
+                value = if (reminderTime != null)
+                    "${reminderTime?.toMinutes()} ${if (reminderTime?.toMinutes()?.toInt() == 1) "minute" else "minutes"} before task" else ""
             )
 
             Button(
@@ -375,10 +369,10 @@ fun TaskCreateForm(
 
                         MealTask::class -> model.create(
                             date = dateTime.toLocalDate(),
-                            description = description,
+                            description = "",
                             duration = duration,
                             reminderTime = reminderTime,
-                            recipe = recipe,
+                            recipe = description,
                             time = dateTime.toLocalTime(),
                             title = title
                         )

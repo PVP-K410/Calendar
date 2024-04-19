@@ -7,7 +7,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -23,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.ui.common.EditableInfoItem
@@ -41,7 +39,7 @@ fun TaskEditFieldsSport(
     onDistanceChange: (Double) -> Unit,
     onDurationChange: (Duration) -> Unit
 ) {
-    var activity by remember { mutableStateOf(task?.activity ?: SportActivity.Walking) }
+    var activity by remember { mutableStateOf(task?.activity) }
     var distance by remember { mutableDoubleStateOf(task?.distance ?: 0.0) }
     var duration by remember { mutableStateOf(task?.duration ?: Duration.ZERO) }
 
@@ -60,7 +58,7 @@ fun TaskEditFieldsSport(
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
-                    value = tempActivity.title,
+                    value = tempActivity?.title ?: "",
                     onValueChange = {},
                     readOnly = true,
                     trailingIcon = {
@@ -88,10 +86,10 @@ fun TaskEditFieldsSport(
         label = "Activity",
         onConfirm = { activity = tempActivity },
         onDismiss = { tempActivity = activity },
-        value = activity.title
+        value = activity?.title ?: ""
     )
 
-    if (activity.supportsDistanceMetrics) {
+    if (activity != null && activity!!.supportsDistanceMetrics) {
         val stateKilometers = PickerState.rememberPickerState(
             task?.distance
                 ?.toInt()
@@ -176,35 +174,4 @@ fun TaskEditFieldsSport(
     onDistanceChange(distance)
 
     duration?.let { onDurationChange(it) }
-}
-
-@Composable
-fun TaskEditFieldsMeal(
-    task: MealTask? = null,
-    onRecipeChange: (String) -> Unit
-) {
-    var recipe by remember { mutableStateOf(task?.recipe ?: "") }
-    var tempRecipe by remember { mutableStateOf(recipe) }
-
-    EditableInfoItem(
-        dialogContent = {
-            OutlinedTextField(
-                label = { Text("Recipe") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                onValueChange = { newText ->
-                    tempRecipe = newText
-                },
-                value = tempRecipe
-            )
-        },
-        dialogTitle = { Text("Editing recipe") },
-        label = "Recipe",
-        onConfirm = { recipe = tempRecipe },
-        onDismiss = { tempRecipe = recipe },
-        value = recipe
-    )
-
-    onRecipeChange(recipe)
 }
