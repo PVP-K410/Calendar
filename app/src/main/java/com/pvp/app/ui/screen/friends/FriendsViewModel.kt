@@ -69,7 +69,7 @@ class FriendsViewModel @Inject constructor(
                 flowOf(emptyList())
             } else {
                 friendObject.friends
-                    .map {friend ->
+                    .map { friend ->
                         val user = userService
                             .get(friend.email)
                             .filterNotNull()
@@ -85,16 +85,20 @@ class FriendsViewModel @Inject constructor(
             }
         }
         .flatMapLatest { pairs ->
-            pairs
-                .map { (user, avatar) ->
-                    flowOf(
-                        FriendEntry(
-                            avatar = avatar.first(),
-                            user = user.first()
+            if (pairs.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                pairs
+                    .map { (user, avatar) ->
+                        flowOf(
+                            FriendEntry(
+                                avatar = avatar.first(),
+                                user = user.first()
+                            )
                         )
-                    )
-                }
-                .flattenFlow()
+                    }
+                    .flattenFlow()
+            }
         }
         .stateIn(
             viewModelScope,
