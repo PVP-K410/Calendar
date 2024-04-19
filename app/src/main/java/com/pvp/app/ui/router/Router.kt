@@ -31,7 +31,6 @@ fun Router(
                 animationSpec = tween(500)
             )
         },
-        modifier = modifier,
         navController = controller,
         startDestination = destinationStart.path
     ) {
@@ -39,6 +38,7 @@ fun Router(
             composable(route = r.path) {
                 r.screen(
                     controller,
+                    modifier,
                     scope
                 )
             }

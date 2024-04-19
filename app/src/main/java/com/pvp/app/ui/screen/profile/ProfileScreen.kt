@@ -305,6 +305,7 @@ private fun BoxScope.Points(
 
 @Composable
 fun ProfileScreen(
+    modifier: Modifier,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -316,13 +317,13 @@ fun ProfileScreen(
     }
 
     Box(
-        modifier = Modifier.verticalScroll(rememberScrollState())
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .then(modifier)
     ) {
         Points(points = state.user.points)
 
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Initials(
                 onUsernameChange = {
                     viewModel.update { u -> u.username = it }

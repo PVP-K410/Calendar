@@ -12,11 +12,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -162,23 +164,29 @@ private fun toggleNavigationDrawer(
 @Composable
 private fun Content(
     controller: NavHostController,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
     scope: CoroutineScope,
     state: PagerState
 ) {
-    HorizontalPager(
-        modifier = modifier,
-        state = state
-    ) {
+    val modifier = remember(paddingValues) {
+        val padding = paddingValues.calculateTopPadding()
+
+        Modifier
+            .offset(y = padding)
+            .padding(bottom = padding)
+    }
+
+    HorizontalPager(state = state) {
         when (it) {
             0 -> Router(
                 controller = controller,
                 destinationStart = Route.Calendar,
+                modifier = modifier,
                 routes = Route.routesAuthenticated,
                 scope = scope
             )
 
-            1 -> ProfileScreen()
+            1 -> ProfileScreen(modifier = modifier)
         }
     }
 }
@@ -361,7 +369,7 @@ fun LayoutScreenAuthenticated(
         ) {
             Content(
                 controller = controller,
-                modifier = Modifier.padding(it),
+                paddingValues = it,
                 scope = scope,
                 state = statePager
             )

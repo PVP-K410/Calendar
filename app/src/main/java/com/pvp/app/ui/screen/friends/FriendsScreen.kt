@@ -61,7 +61,8 @@ private enum class SortingType {
 
 @Composable
 fun FriendsScreen(
-    model: FriendsViewModel = hiltViewModel()
+    model: FriendsViewModel = hiltViewModel(),
+    modifier: Modifier
 ) {
     val context = LocalContext.current
     val toastMessage by model.toastMessage
@@ -98,7 +99,7 @@ fun FriendsScreen(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(
                 start = 16.dp,
