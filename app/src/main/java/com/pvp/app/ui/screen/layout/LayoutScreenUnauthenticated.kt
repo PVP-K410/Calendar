@@ -18,9 +18,7 @@ fun LayoutScreenUnauthenticated(
     isAuthenticated: Boolean,
     scope: CoroutineScope
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Surface(modifier = Modifier.fillMaxSize()) {
         Router(
             controller = controller,
             destinationStart = if (isAuthenticated && areSurveysFilled == false) {

@@ -274,13 +274,15 @@ private fun SettingApplicationTheme(
 
 @Composable
 fun SettingsScreen(
-    model: SettingsViewModel = hiltViewModel()
+    model: SettingsViewModel = hiltViewModel(),
+    modifier: Modifier
 ) {
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .then(modifier)
             .fillMaxSize()
             .padding(horizontal = 24.dp)
-            .verticalScroll(rememberScrollState())
     ) {
         CategoryRow(
             icon = Icons.Outlined.Notifications,

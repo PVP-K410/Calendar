@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -96,15 +96,15 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun DecorationScreen() {
+fun DecorationScreen(modifier: Modifier) {
     var screen by remember { mutableIntStateOf(0) }
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
-            .fillMaxHeight()
-            .fillMaxWidth()
             .verticalScroll(rememberScrollState())
+            .then(modifier)
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Spacer(modifier = Modifier.size(16.dp))
 
