@@ -69,9 +69,9 @@ class FriendsViewModel @Inject constructor(
                 flowOf(emptyList())
             } else {
                 friendObject.friends
-                    .map {
+                    .map {friend ->
                         val user = userService
-                            .get(it.email)
+                            .get(friend.email)
                             .filterNotNull()
 
                         flowOf(

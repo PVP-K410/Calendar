@@ -65,7 +65,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.FriendObject
-import com.pvp.app.model.User
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.ButtonWithDialog
@@ -164,7 +163,7 @@ fun FriendsScreen(
                 },
                 confirmButtonContent = { Text("Add") },
                 onConfirm = {
-                    model.addFriend(friendEmail.value)
+                    model.addFriend(friendEmail.value.trim())
                     friendEmail.value = ""
                 },
                 onDismiss = { friendEmail.value = "" },
@@ -640,7 +639,7 @@ private fun FriendList(
                 shape = MaterialTheme.shapes.small,
                 confirmationTitle = { Text("Are you sure you want to delete this friend?") },
                 confirmationOnConfirm = { model.removeFriend(friend.user.email) },
-                confirmationDescription = { Text("If the friend is deleted, it cannot be recovered") },
+                confirmationDescription = { Text("If the friend is deleted, it cannot be recovered") }
             )
         }
     }
@@ -730,7 +729,7 @@ private fun CustomButtonWithDialog(
     shape: Shape = MaterialTheme.shapes.extraSmall,
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
     confirmationDescription: @Composable () -> Unit = { },
-    confirmationOnConfirm: () -> Unit,
+    confirmationOnConfirm: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
@@ -781,7 +780,7 @@ private fun CustomDialog(
     show: Boolean,
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
     confirmationDescription: @Composable () -> Unit = { },
-    confirmationOnConfirm: () -> Unit,
+    confirmationOnConfirm: () -> Unit
 ) {
     if (!show) {
         return
