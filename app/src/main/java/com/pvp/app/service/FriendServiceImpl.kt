@@ -94,7 +94,6 @@ class FriendServiceImpl @Inject constructor(
                         )
                     }
                 }
-
             }
     }
 

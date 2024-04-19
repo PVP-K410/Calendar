@@ -257,7 +257,9 @@ fun TaskEditDialog(
                     onConfirm = { reminderTime = editingReminderTime },
                     onDismiss = { editingReminderTime = reminderTime },
                     value = if (reminderTime != null)
-                        "${reminderTime?.toMinutes()} ${if (reminderTime?.toMinutes()?.toInt() == 1) "minute" else "minutes"} before task" else ""
+                        "${reminderTime?.toMinutes()} ${
+                            if (reminderTime?.toMinutes()?.toInt() == 1) "minute" else "minutes"
+                        } before task" else ""
                 )
 
                 Row(
