@@ -179,9 +179,7 @@ fun IconButtonWithDatePickerDialog(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = modifier
-    ) {
+    Box(modifier = modifier) {
         IconButton(
             colors = colors,
             onClick = { showDialog = true },

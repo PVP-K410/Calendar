@@ -81,7 +81,10 @@ class FriendServiceImpl @Inject constructor(
                     val updatedSentRequests = user.sentRequests - email
                     val updatedReceivedRequests = user.receivedRequests - email
 
-                    if (updatedFriends != user.friends || updatedSentRequests != user.sentRequests || updatedReceivedRequests != user.receivedRequests) {
+                    if (updatedFriends != user.friends ||
+                        updatedSentRequests != user.sentRequests ||
+                        updatedReceivedRequests != user.receivedRequests
+                    ) {
                         val updatedUser = FriendObject(
                             friends = updatedFriends,
                             sentRequests = updatedSentRequests,

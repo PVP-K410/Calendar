@@ -151,6 +151,7 @@ fun TaskCreateForm(
     var editingReminderTime by remember { mutableStateOf(reminderTime) }
     val editingHour = rememberPickerState(dateTime.hour)
     val editingMinute = rememberPickerState(dateTime.minute)
+
     val descriptionLabel = when (targetClass) {
         MealTask::class -> "Recipe"
         else -> "Description"
@@ -387,7 +388,6 @@ fun TaskCreateForm(
                             time = dateTime.toLocalTime(),
                             title = title
                         )
-
                     }
 
                     onCreate()

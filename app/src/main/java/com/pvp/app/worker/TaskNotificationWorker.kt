@@ -49,7 +49,6 @@ class TaskNotificationWorker @AssistedInject constructor(
                     }
             }
 
-
         return Result.success()
     }
 }

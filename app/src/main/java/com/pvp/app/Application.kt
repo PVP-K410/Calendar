@@ -69,6 +69,8 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
 
             createTaskPointsDeductionWorker()
 
+            createTaskNotificationWorker()
+
             createWeeklyActivitiesWorker()
 
             prefs
@@ -119,7 +121,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
     }
 
     private fun createDrinkReminderWorker() {
-        val drinkWorkerRequest = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
+        val request = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.DAYS
         )
@@ -128,7 +130,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         workManager.enqueueUniquePeriodicWork(
             DrinkReminderWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            drinkWorkerRequest
+            request
         )
     }
 
@@ -189,7 +191,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
     }
 
     private fun createTaskNotificationWorker() {
-        val requestPeriodic = PeriodicWorkRequestBuilder<TaskNotificationWorker>(
+        val request = PeriodicWorkRequestBuilder<TaskNotificationWorker>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.DAYS
         )
@@ -198,7 +200,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         workManager.enqueueUniquePeriodicWork(
             TaskNotificationWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            requestPeriodic
+            request
         )
     }
 

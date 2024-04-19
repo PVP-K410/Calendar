@@ -12,9 +12,7 @@ interface NotificationService {
      * Posts a notification to the android alarm manager.
      * Notification object must include dateTime at which the notification will be posted.
      */
-    fun post(
-        notification: Notification
-    )
+    fun post(notification: Notification)
 
     /**
      * Posts a notification to the android alarm manager with the specified delay.
@@ -44,30 +42,22 @@ interface NotificationService {
      * Cancels a scheduled notification.
      * @param notification The notification to cancel.
      */
-    fun cancel(
-        notification: Notification
-    )
+    fun cancel(notification: Notification)
 
     /**
      * Cancels a scheduled notification by its ID.
      * @param id The ID of the notification to cancel.
      */
-    fun cancel(
-        id: Int
-    )
+    fun cancel(id: Int)
 
     /**
      * Shows a notification to the user using the android notification manager.
      * The notification will be shown with the provided title.
      */
-    fun show(
-        notification: Notification
-    )
+    fun show(notification: Notification)
 
     /**
      * Converts task object to a notification object.
      */
-    suspend fun getNotificationForTask(
-        task: Task
-    ): Notification?
+    suspend fun getNotificationForTask(task: Task): Notification?
 }

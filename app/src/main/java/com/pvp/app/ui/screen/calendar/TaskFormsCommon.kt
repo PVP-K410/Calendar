@@ -42,7 +42,6 @@ fun TaskEditFieldsSport(
     var activity by remember { mutableStateOf(task?.activity) }
     var distance by remember { mutableDoubleStateOf(task?.distance ?: 0.0) }
     var duration by remember { mutableStateOf(task?.duration ?: Duration.ZERO) }
-
     var tempActivity by remember { mutableStateOf(activity) }
     var tempDuration by remember { mutableStateOf(duration) }
 

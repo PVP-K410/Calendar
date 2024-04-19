@@ -32,9 +32,7 @@ class NotificationServiceImpl @Inject constructor(
     private val settingService: SettingService,
 ) : NotificationService {
 
-    override fun post(
-        notification: Notification
-    ) {
+    override fun post(notification: Notification) {
         if (notification.dateTime == null) {
             error("Notification dateTime must not be null")
         }
@@ -136,9 +134,7 @@ class NotificationServiceImpl @Inject constructor(
         )
     }
 
-    override fun show(
-        notification: Notification
-    ) {
+    override fun show(notification: Notification) {
         if (
             ActivityCompat.checkSelfPermission(
                 context,
@@ -182,21 +178,15 @@ class NotificationServiceImpl @Inject constructor(
         )
     }
 
-    override fun cancel(
-        notification: Notification
-    ) {
+    override fun cancel(notification: Notification) {
         cancelNotification(id = notification.id)
     }
 
-    override fun cancel(
-        id: Int
-    ) {
+    override fun cancel(id: Int) {
         cancelNotification(id = id)
     }
 
-    private fun cancelNotification(
-        id: Int
-    ) {
+    private fun cancelNotification(id: Int) {
         val intent = Intent(
             context,
             NotificationReceiver::class.java
@@ -216,9 +206,7 @@ class NotificationServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getNotificationForTask(
-        task: Task
-    ): Notification? {
+    override suspend fun getNotificationForTask(task: Task): Notification? {
         if (task.time == null || task.isCompleted) {
             return null
         }
