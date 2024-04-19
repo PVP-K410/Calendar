@@ -2,8 +2,6 @@
 
 package com.pvp.app.ui.screen.profile
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -26,14 +24,11 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Stars
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,20 +37,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.EditableInfoItem
+import com.pvp.app.ui.common.Experience
 import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.showToast
@@ -149,64 +143,6 @@ private fun AccountDeleteButton(
                 }
             }
         )
-    }
-}
-
-@Composable
-private fun Experience(
-    experience: Int,
-    experienceRequired: Int,
-    level: Int
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                end = 30.dp,
-                start = 30.dp
-            ),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            text = "Level $level",
-            style = MaterialTheme.typography.labelLarge
-        )
-
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(top = 6.dp)
-        ) {
-            var target by remember { mutableFloatStateOf(0f) }
-
-            val progress by animateFloatAsState(
-                animationSpec = tween(durationMillis = 1000),
-                label = "ExperienceProgressAnimation",
-                targetValue = target,
-            )
-
-            LaunchedEffect(Unit) {
-                target = experience / experienceRequired.toFloat()
-            }
-
-            LinearProgressIndicator(
-                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(32.dp),
-                progress = { progress },
-                strokeCap = StrokeCap.Round,
-                trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
-            )
-
-            Text(
-                style = MaterialTheme.typography.bodyLarge,
-                text = "$experience / $experienceRequired Exp",
-                textAlign = TextAlign.Center
-            )
-        }
     }
 }
 
