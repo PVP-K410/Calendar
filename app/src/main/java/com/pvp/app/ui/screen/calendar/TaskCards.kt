@@ -47,11 +47,12 @@ fun TaskCard(
     var checked = task.isCompleted
     var showDialog by remember { mutableStateOf(false) }
 
-    if (showDialog && (task !is SportTask || !task.isDaily)) {
-        TaskEdit(
+    if (showDialog) {
+        TaskEditDialog(
             task,
-            onDismissRequest = { showDialog = false },
-            true
+            onDialogClose = {
+                showDialog = false
+            }
         )
     }
 
@@ -68,7 +69,9 @@ fun TaskCard(
                 ),
                 shape = RoundedCornerShape(10.dp)
             )
-            .clickable { showDialog = true }
+            .clickable(enabled = !(task is SportTask && task.isDaily)) {
+                showDialog = true
+            }
     ) {
         Column(
             modifier = Modifier.padding(

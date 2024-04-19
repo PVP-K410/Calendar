@@ -8,8 +8,6 @@ import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.MealTask
-import com.pvp.app.model.Notification
-import com.pvp.app.model.NotificationChannel
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -24,7 +22,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -43,7 +40,7 @@ class TaskViewModel @Inject constructor(
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
         .combine(userService.user) { minutes, user ->
             TaskState(
-                reminderMinutes = minutes,
+                reminderMinutesSetting = minutes,
                 user = user!!
             )
         }
@@ -63,8 +60,8 @@ class TaskViewModel @Inject constructor(
         date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
-        ingredients: String,
-        preparation: String,
+        reminderTime: Duration? = null,
+        recipe: String,
         time: LocalTime? = null,
         title: String
     ) {
@@ -72,22 +69,12 @@ class TaskViewModel @Inject constructor(
             state
                 .first()
                 .let { state ->
-                    val recipe = if (
-                        ingredients.isNotEmpty() &&
-                        preparation.isNotEmpty()
-                    ) {
-                        "$ingredients\n$preparation"
-                    } else if (ingredients.isNotEmpty() && preparation.isEmpty()) {
-                        ingredients
-                    } else {
-                        preparation
-                    }
-
                     taskService
                         .create(
                             date,
                             description,
                             duration,
+                            reminderTime,
                             recipe,
                             time,
                             title,
@@ -107,6 +94,7 @@ class TaskViewModel @Inject constructor(
         description: String? = null,
         distance: Double? = null,
         duration: Duration? = null,
+        reminderTime: Duration? = null,
         time: LocalTime? = null,
         title: String
     ) {
@@ -121,6 +109,7 @@ class TaskViewModel @Inject constructor(
                             description,
                             distance,
                             duration,
+                            reminderTime,
                             false,
                             time,
                             title,
@@ -138,6 +127,7 @@ class TaskViewModel @Inject constructor(
         date: LocalDate,
         description: String? = null,
         duration: Duration? = null,
+        reminderTime: Duration? = null,
         time: LocalTime? = null,
         title: String
     ) {
@@ -150,6 +140,7 @@ class TaskViewModel @Inject constructor(
                             date,
                             description,
                             duration,
+                            reminderTime,
                             time,
                             title,
                             state.user.email
@@ -157,34 +148,6 @@ class TaskViewModel @Inject constructor(
                         .postNotification()
                 }
         }
-    }
-
-    private suspend fun Task.postNotification() {
-        time ?: return
-
-        val reminderMinutes = state
-            .first().reminderMinutes
-            .toLong()
-
-        val reminderDateTime = date
-            .atTime(time!!)
-            .minusMinutes(reminderMinutes)
-
-        if (reminderDateTime.isBefore(LocalDateTime.now())) {
-            return
-        }
-
-        val notification = Notification(
-            channel = NotificationChannel.TaskReminder,
-            title = "Task Reminder",
-            text = "Task '${title}' is in $reminderMinutes minute" +
-                    "${if (reminderMinutes > 1) "s" else ""}..."
-        )
-
-        notificationService.post(
-            notification = notification,
-            dateTime = reminderDateTime
-        )
     }
 
     /**
@@ -251,6 +214,8 @@ class TaskViewModel @Inject constructor(
         task: T
     ) {
         viewModelScope.launch {
+            task.cancelNotification()
+
             val (taskModified, updatePoints) = resolve(
                 handle,
                 task
@@ -263,6 +228,8 @@ class TaskViewModel @Inject constructor(
                 updatePoints
             )
 
+            taskUpdated.postNotification()
+
             if (taskUpdated.isCompleted && taskUpdated.points.claimedAt == null) {
                 taskService.claim(taskUpdated)
             }
@@ -271,12 +238,30 @@ class TaskViewModel @Inject constructor(
 
     fun remove(task: Task) {
         viewModelScope.launch {
+            task.cancelNotification()
+
             taskService.remove(task)
         }
+    }
+
+    private suspend fun Task.postNotification() {
+        notificationService
+            .getNotificationForTask(this)
+            ?.let { notification ->
+                notificationService.post(notification = notification)
+            }
+    }
+
+    private suspend fun Task.cancelNotification() {
+        notificationService
+            .getNotificationForTask(this)
+            ?.let { notification ->
+                notificationService.cancel(notification)
+            }
     }
 }
 
 data class TaskState(
-    val reminderMinutes: Int = Setting.Notifications.ReminderBeforeTaskMinutes.defaultValue,
+    val reminderMinutesSetting: Int = Setting.Notifications.ReminderBeforeTaskMinutes.defaultValue,
     val user: User = User()
 )

@@ -21,6 +21,7 @@ import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.TaskAutocompleteWorker
+import com.pvp.app.worker.TaskNotificationWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
 import dagger.hilt.android.HiltAndroidApp
@@ -67,6 +68,8 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
             createNotificationChannels()
 
             createTaskPointsDeductionWorker()
+
+            createTaskNotificationWorker()
 
             createWeeklyActivitiesWorker()
 
@@ -118,7 +121,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
     }
 
     private fun createDrinkReminderWorker() {
-        val drinkWorkerRequest = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
+        val request = PeriodicWorkRequestBuilder<DrinkReminderWorker>(
             repeatInterval = 1,
             repeatIntervalTimeUnit = TimeUnit.DAYS
         )
@@ -127,7 +130,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         workManager.enqueueUniquePeriodicWork(
             DrinkReminderWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            drinkWorkerRequest
+            request
         )
     }
 
@@ -185,6 +188,20 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         workManager
             .beginWith(requestOneTime)
             .enqueue()
+    }
+
+    private fun createTaskNotificationWorker() {
+        val request = PeriodicWorkRequestBuilder<TaskNotificationWorker>(
+            repeatInterval = 1,
+            repeatIntervalTimeUnit = TimeUnit.DAYS
+        )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            TaskNotificationWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            request
+        )
     }
 
     private fun createWeeklyActivitiesWorker() {

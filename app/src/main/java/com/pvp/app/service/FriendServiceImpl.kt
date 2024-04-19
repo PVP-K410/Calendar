@@ -1,5 +1,6 @@
 package com.pvp.app.service
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.FriendService
@@ -67,27 +68,37 @@ class FriendServiceImpl @Inject constructor(
             .await()
             .documents
             .forEach { userDoc ->
-                val user = userDoc.toObject(FriendObject::class.java)
+                var user: FriendObject? = null
+
+                try {
+                    user = userDoc.toObject(FriendObject::class.java)
+                } catch (e: Exception) {
+                    Log.e("FriendServiceImpl", "Error parsing user document", e)
+                }
 
                 if (user != null) {
                     val updatedFriends = user.friends - email
                     val updatedSentRequests = user.sentRequests - email
                     val updatedReceivedRequests = user.receivedRequests - email
 
-                    val updatedUser = FriendObject(
-                        friends = updatedFriends,
-                        sentRequests = updatedSentRequests,
-                        receivedRequests = updatedReceivedRequests
-                    )
+                    if (updatedFriends != user.friends ||
+                        updatedSentRequests != user.sentRequests ||
+                        updatedReceivedRequests != user.receivedRequests
+                    ) {
+                        val updatedUser = FriendObject(
+                            friends = updatedFriends,
+                            sentRequests = updatedSentRequests,
+                            receivedRequests = updatedReceivedRequests
+                        )
 
-                    merge(
-                        updatedUser,
-                        userDoc.id
-                    )
+                        merge(
+                            updatedUser,
+                            userDoc.id
+                        )
+                    }
                 }
             }
     }
-
 
     override suspend fun addFriend(
         friendObject: FriendObject,

@@ -94,7 +94,7 @@ class ExerciseServiceImpl @Inject constructor(
     override suspend fun getExerciseInfo(record: ExerciseSessionRecord): ExerciseSessionInfo {
         return ExerciseSessionInfo(
             record = record,
-            distance = when (SportActivity.fromId(record.exerciseType)?.supportsDistanceMetrics) {
+            distance = when (SportActivity.fromId(record.exerciseType).supportsDistanceMetrics) {
                 true -> service.aggregateDistance(
                     record.startTime,
                     record.endTime
