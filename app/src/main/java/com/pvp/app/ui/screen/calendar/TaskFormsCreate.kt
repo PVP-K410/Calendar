@@ -158,7 +158,7 @@ fun TaskCreateForm(
     val isFormValid by remember(targetClass) {
         derivedStateOf {
             when (targetClass) {
-                MealTask::class -> title.isNotEmpty() && description.isNotEmpty() && !duration.isZero
+                MealTask::class -> title.isNotEmpty() && description.isNotEmpty()
                 SportTask::class -> title.isNotEmpty()
                 else -> title.isNotEmpty() && description.isNotEmpty()
             }
@@ -235,7 +235,7 @@ fun TaskCreateForm(
                     }
                 )
 
-                MealTask::class -> TaskEditFieldsMeal() { newRecipe ->
+                MealTask::class -> TaskEditFieldsMeal { newRecipe ->
                     recipe = newRecipe
                 }
 

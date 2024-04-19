@@ -41,7 +41,7 @@ class DrinkReminderWorker @AssistedInject constructor(
 
     companion object {
 
-        const val WORKER_NAME = "com.pvp.app.service.DrinkReminderWorker"
+        const val WORKER_NAME = "com.pvp.app.worker.DrinkReminderWorker"
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)

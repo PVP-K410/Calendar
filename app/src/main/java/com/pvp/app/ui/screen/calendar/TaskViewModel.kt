@@ -8,8 +8,6 @@ import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.MealTask
-import com.pvp.app.model.Notification
-import com.pvp.app.model.NotificationChannel
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -24,7 +22,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -153,34 +150,6 @@ class TaskViewModel @Inject constructor(
         }
     }
 
-    private suspend fun Task.postNotification() {
-        time ?: return
-
-        val reminderMinutes = state
-            .first().reminderMinutes
-            .toLong()
-
-        val reminderDateTime = date
-            .atTime(time!!)
-            .minusMinutes(reminderMinutes)
-
-        if (reminderDateTime.isBefore(LocalDateTime.now())) {
-            return
-        }
-
-        val notification = Notification(
-            channel = NotificationChannel.TaskReminder,
-            title = "Task Reminder",
-            text = "Task '${title}' is in $reminderMinutes minute" +
-                    "${if (reminderMinutes > 1) "s" else ""}..."
-        )
-
-        notificationService.post(
-            notification = notification,
-            dateTime = reminderDateTime
-        )
-    }
-
     /**
      * Handles the provided task with a provided function block
      *
@@ -245,6 +214,8 @@ class TaskViewModel @Inject constructor(
         task: T
     ) {
         viewModelScope.launch {
+            task.cancelNotification()
+
             val (taskModified, updatePoints) = resolve(
                 handle,
                 task
@@ -257,6 +228,8 @@ class TaskViewModel @Inject constructor(
                 updatePoints
             )
 
+            taskUpdated.postNotification()
+
             if (taskUpdated.isCompleted && taskUpdated.points.claimedAt == null) {
                 taskService.claim(taskUpdated)
             }
@@ -265,7 +238,32 @@ class TaskViewModel @Inject constructor(
 
     fun remove(task: Task) {
         viewModelScope.launch {
+            task.cancelNotification()
+
             taskService.remove(task)
+        }
+    }
+
+    private fun Task.postNotification() {
+        getNotification()?.let { notification ->
+            if (time == null || reminderTime == null) {
+                return
+            }
+
+            val reminderDateTime = date
+                .atTime(time)
+                .minusMinutes(reminderTime!!.toMinutes())
+
+            notificationService.post(
+                notification = notification,
+                dateTime = reminderDateTime
+            )
+        }
+    }
+
+    private fun Task.cancelNotification() {
+        getNotification()?.let { notification ->
+            notificationService.cancel(notification)
         }
     }
 }

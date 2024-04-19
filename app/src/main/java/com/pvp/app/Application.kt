@@ -20,6 +20,7 @@ import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.TaskAutocompleteWorker
+import com.pvp.app.worker.TaskNotificationWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
 import dagger.hilt.android.HiltAndroidApp
@@ -58,6 +59,8 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         createTaskAutocompleteWorker()
 
         createTaskPointsDeductionWorker()
+
+        createTaskNotificationWorker()
 
         createWeeklyActivitiesWorker()
     }
@@ -163,6 +166,20 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         workManager
             .beginWith(requestOneTime)
             .enqueue()
+    }
+
+    private fun createTaskNotificationWorker() {
+        val requestPeriodic = PeriodicWorkRequestBuilder<TaskNotificationWorker>(
+            repeatInterval = 1,
+            repeatIntervalTimeUnit = TimeUnit.DAYS
+        )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            TaskNotificationWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            requestPeriodic
+        )
     }
 
     private fun createWeeklyActivitiesWorker() {

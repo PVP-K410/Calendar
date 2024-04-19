@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -68,6 +69,7 @@ class NotificationServiceImpl @Inject constructor(
         notification: Notification,
         triggerAtMillis: Long
     ) {
+        Log.e("NotificationServiceImpl", "postNotification: $notification")
         if (triggerAtMillis <= System.currentTimeMillis()) {
             return
         }
@@ -163,6 +165,7 @@ class NotificationServiceImpl @Inject constructor(
     override fun cancel(
         notification: Notification
     ) {
+        Log.e("NotificationServiceImpl", "cancel: $notification")
         cancelNotification(id = notification.id)
     }
 
