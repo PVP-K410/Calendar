@@ -10,17 +10,24 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Dehaze
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -38,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,11 +59,16 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pvp.app.R
+import com.pvp.app.model.Decoration
+import com.pvp.app.model.Reward
+import com.pvp.app.ui.common.AsyncImage
+import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
@@ -151,14 +164,19 @@ private fun toggleNavigationDrawer(
 @Composable
 private fun Content(
     controller: NavHostController,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
     scope: CoroutineScope,
     state: PagerState
 ) {
-    HorizontalPager(
-        modifier = modifier,
-        state = state
-    ) {
+    val modifier = remember(paddingValues) {
+        val padding = paddingValues.calculateTopPadding()
+
+        Modifier
+            .offset(y = padding)
+            .padding(bottom = padding)
+    }
+
+    HorizontalPager(state = state) {
         when (it) {
             0 -> Router(
                 controller = controller,
@@ -167,7 +185,7 @@ private fun Content(
                 scope = scope
             )
 
-            1 -> ProfileScreen()
+            1 -> ProfileScreen(modifier = modifier)
         }
     }
 }
@@ -267,6 +285,25 @@ fun LayoutScreenAuthenticated(
         pageCount = { 2 }
     )
 
+    var isRewardDialogOpen by remember { mutableStateOf(false) }
+    val toggleRewardDialog = remember { { isRewardDialogOpen = !isRewardDialogOpen } }
+
+    if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward) {
+        LaunchedEffect(null) {
+            viewModel.giveReward()
+
+            isRewardDialogOpen = true
+        }
+    }
+
+    val reward = viewModel.reward.collectAsStateWithLifecycle().value
+
+    RewardDialog(
+        isOpen = isRewardDialogOpen,
+        onClose = toggleRewardDialog,
+        reward = reward
+    )
+
     ModalNavigationDrawer(
         drawerContent = {
             DrawerScreen(
@@ -285,9 +322,8 @@ fun LayoutScreenAuthenticated(
         },
         drawerState = stateDrawer
     ) {
-        var isOpen by remember { mutableStateOf(false) }
-
-        val toggleDialog = remember { { isOpen = !isOpen } }
+        var isTaskDialogOpen by remember { mutableStateOf(false) }
+        val toggleTaskDialog = remember { { isTaskDialogOpen = !isTaskDialogOpen } }
 
         Scaffold(
             floatingActionButton = {
@@ -297,7 +333,7 @@ fun LayoutScreenAuthenticated(
                         statePager
                     )
                 ) {
-                    FloatingActionButton(toggleDialog)
+                    FloatingActionButton(toggleTaskDialog)
                 }
             },
             floatingActionButtonPosition = FabPosition.End,
@@ -332,7 +368,7 @@ fun LayoutScreenAuthenticated(
         ) {
             Content(
                 controller = controller,
-                modifier = Modifier.padding(it),
+                paddingValues = it,
                 scope = scope,
                 state = statePager
             )
@@ -344,11 +380,102 @@ fun LayoutScreenAuthenticated(
                 )
             ) {
                 TaskCreateDialog(
-                    onClose = toggleDialog,
-                    isOpen = isOpen,
+                    onClose = toggleTaskDialog,
+                    isOpen = isTaskDialogOpen,
                     shouldCloseOnSubmit = true
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun RewardDialog(
+    isOpen: Boolean,
+    onClose: () -> Unit,
+    reward: Reward
+) {
+    if (!isOpen) {
+        return
+    }
+
+    Dialog(onDismissRequest = onClose) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    style = MaterialTheme.typography.headlineSmall,
+                    text = "You've earned a reward!"
+                )
+
+                IconButton(onClick = onClose) {
+                    Icon(
+                        contentDescription = "Reward dialog close button",
+                        imageVector = Icons.Filled.Close
+                    )
+                }
+            }
+
+            if (reward.points > 0) {
+                Text(
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    text = "${reward.points} points!"
+                )
+            }
+
+            if (reward.experience > 0) {
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    text = "${reward.experience} experience!"
+                )
+            }
+
+            reward.decoration?.let {
+                DecorationCard(decoration = it)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DecorationCard(decoration: Decoration) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            modifier = Modifier.padding(8.dp),
+            style = MaterialTheme.typography.titleMedium,
+            text = "${decoration.name} decoration!"
+        )
+
+        AsyncImage(
+            contentDescription = "Decoration ${decoration.name} image",
+            modifier = Modifier
+                .size(96.dp)
+                .clip(MaterialTheme.shapes.extraSmall)
+                .background(
+                    color = MaterialTheme.colorScheme.inverseOnSurface.lighten(),
+                    shape = MaterialTheme.shapes.extraSmall
+                ),
+            url = decoration.imageRepresentativeUrl
+        )
     }
 }

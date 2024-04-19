@@ -66,7 +66,7 @@ fun AsyncImage(
 
             else -> {
                 Icon(
-                    contentDescription = "Error indicator for image loading: $url",
+                    contentDescription = "Error indicator for failed image load",
                     imageVector = Icons.Outlined.ErrorOutline,
                     tint = MaterialTheme.colorScheme.error,
                 )
@@ -77,9 +77,9 @@ fun AsyncImage(
 
 @Composable
 fun Dialog(
-    content: @Composable () -> Unit,
     buttonContentConfirm: @Composable RowScope.() -> Unit,
     buttonContentDismiss: @Composable RowScope.() -> Unit,
+    content: @Composable () -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     show: Boolean,

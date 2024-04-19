@@ -14,6 +14,7 @@ data class User(
     var level: Int = 0,
     var mass: Int = 0,
     var points: Int = 0,
+    val streak: Streak = Streak(),
     val surveys: List<Survey> = emptyList(),
     var username: String = "",
     var weeklyActivities: List<SportActivity> = emptyList()

@@ -20,13 +20,13 @@ data class DecorationState(
         1
     ),
     val holders: List<DecorationHolder> = emptyList(),
-    val workState: WorkState = WorkState.NoOperation,
+    val state: DecorationScreenState = DecorationScreenState.NoOperation,
     val user: User = User()
 )
 
-sealed class WorkState {
+sealed class DecorationScreenState {
 
-    sealed class Error : WorkState() {
+    sealed class Error : DecorationScreenState() {
 
         data object AlreadyOwned : Error()
 
@@ -35,11 +35,11 @@ sealed class WorkState {
         companion object : Error()
     }
 
-    data object Loading : WorkState()
+    data object Loading : DecorationScreenState()
 
-    data object NoOperation : WorkState()
+    data object NoOperation : DecorationScreenState()
 
-    sealed class Success : WorkState() {
+    sealed class Success : DecorationScreenState() {
 
         data object Apply : Success()
 
@@ -53,9 +53,9 @@ sealed class WorkState {
     companion object {
 
         @Composable
-        fun WorkStateHandler(
+        fun ScreenStateHandler(
             resetState: () -> Unit,
-            state: WorkState
+            state: DecorationScreenState
         ) {
             val context = LocalContext.current
 

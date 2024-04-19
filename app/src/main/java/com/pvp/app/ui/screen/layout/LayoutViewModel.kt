@@ -5,7 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.DecorationService
+import com.pvp.app.api.RewardService
+import com.pvp.app.api.StreakService
 import com.pvp.app.api.UserService
+import com.pvp.app.model.Reward
 import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,11 +26,16 @@ import javax.inject.Inject
 class LayoutViewModel @Inject constructor(
     private val authenticationService: AuthenticationService,
     private val decorationService: DecorationService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val rewardService: RewardService,
+    private val streakService: StreakService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LayoutState())
     val state: StateFlow<LayoutState> = _state.asStateFlow()
+
+    private val _reward = MutableStateFlow(Reward())
+    val reward: StateFlow<Reward> = _reward.asStateFlow()
 
     init {
         _state.update { it.copy(isLoading = true) }
@@ -45,7 +53,8 @@ class LayoutViewModel @Inject constructor(
                     areSurveysFilled = userApp?.let { areSurveysFilled(it) },
                     isAuthenticated = userFirebase != null,
                     isLoading = false,
-                    user = userApp
+                    user = userApp,
+                    needsStreakReward = streakService.checkStreak()
                 )
             }
                 .collect { state ->
@@ -54,7 +63,8 @@ class LayoutViewModel @Inject constructor(
                             areSurveysFilled = state.areSurveysFilled,
                             isAuthenticated = state.isAuthenticated,
                             isLoading = state.isLoading,
-                            user = state.user
+                            user = state.user,
+                            needsStreakReward = state.needsStreakReward
                         )
                     }
                 }
@@ -70,6 +80,16 @@ class LayoutViewModel @Inject constructor(
     private fun areSurveysFilled(user: User): Boolean {
         return user.surveys.containsAll(Survey.entries)
     }
+
+    suspend fun giveReward() {
+        viewModelScope.launch {
+            _reward.value = rewardService.get()
+
+            rewardService.rewardUser(
+                _reward.value
+            )
+        }
+    }
 }
 
 data class LayoutState(
@@ -80,5 +100,6 @@ data class LayoutState(
     ),
     val isAuthenticated: Boolean = false,
     val isLoading: Boolean = false,
-    val user: User? = null
+    val user: User? = null,
+    val needsStreakReward: Boolean = false
 )
