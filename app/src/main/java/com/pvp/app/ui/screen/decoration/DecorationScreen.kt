@@ -41,16 +41,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.ui.common.Dialog
-import com.pvp.app.ui.screen.decoration.WorkState.Companion.WorkStateHandler
+import com.pvp.app.ui.screen.decoration.DecorationScreenState.Companion.ScreenStateHandler
 
 @Composable
 private fun Apply(model: DecorationViewModel = hiltViewModel()) {
     val state by model.state.collectAsStateWithLifecycle()
     val holdersOwned by remember(state.holders) { mutableStateOf(state.holders.filter { it.owned }) }
 
-    WorkStateHandler(
-        resetState = model::resetWorkState,
-        state = state.workState
+    ScreenStateHandler(
+        resetState = model::resetScreenState,
+        state = state.state
     )
 
     Column(
@@ -89,7 +89,7 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
             DecorationCards(
                 actionPurchase = false,
                 holders = state.holders.filter { h -> h in holdersOwned },
-                isClickable = state.workState is WorkState.NoOperation
+                isClickable = state.state is DecorationScreenState.NoOperation
             ) { model.apply(it.decoration) }
         }
     }
@@ -144,9 +144,9 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
         mutableStateOf(state.holders.filter { it.owned || it.decoration.price < 0 })
     }
 
-    WorkStateHandler(
-        resetState = model::resetWorkState,
-        state = state.workState
+    ScreenStateHandler(
+        resetState = model::resetScreenState,
+        state = state.state
     )
 
     Column(
@@ -162,7 +162,7 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
             DecorationCards(
                 actionPurchase = true,
                 holders = state.holders.filter { h -> h !in holders },
-                isClickable = state.workState is WorkState.NoOperation
+                isClickable = state.state is DecorationScreenState.NoOperation
             ) {
                 // Order of operations is important here, else NPE will occur
                 item = it

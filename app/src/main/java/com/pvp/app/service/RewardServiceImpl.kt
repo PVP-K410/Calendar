@@ -28,32 +28,25 @@ class RewardServiceImpl @Inject constructor(
     }
 
     override suspend fun get(): Reward {
-        var streak = 0
+        val user = userService.user.firstOrNull() ?: return Reward()
+        val streak = user.streak.value
 
-        val reward = userService.user
-            .firstOrNull()
-            ?.let { user ->
-                streak = user.streak.value
+        val reward = database
+            .collection(identifier)
+            .document(user.streak.value.toString())
+            .snapshots()
+            .map { it.toObject(Reward::class.java) }
+            .firstOrNull() ?: Reward()
 
-                val userReward = database
-                    .collection(identifier)
-                    .document(user.streak.value.toString())
-                    .snapshots()
-                    .map { it.toObject(Reward::class.java) }
-                    .firstOrNull() ?: Reward()
-
-
-                if (userReward.decorationId != null
-                    && !user.decorationsOwned.contains(userReward.decorationId)
-                    && !user.decorationsApplied.contains(userReward.decorationId)
-                ) {
-                    userReward.decoration = decorationService
-                        .get(userReward.decorationId)
-                        .firstOrNull()
-                }
-
-                userReward
-            } ?: Reward()
+        if (
+            reward.decorationId != null &&
+            !user.decorationsOwned.contains(reward.decorationId) &&
+            !user.decorationsApplied.contains(reward.decorationId)
+        ) {
+            reward.decoration = decorationService
+                .get(reward.decorationId)
+                .firstOrNull()
+        }
 
         reward.points += calculatePoints(streak)
         reward.experience += calculateExperience(streak)
@@ -62,25 +55,22 @@ class RewardServiceImpl @Inject constructor(
     }
 
     override suspend fun rewardUser(reward: Reward) {
-        userService.user
-            .firstOrNull()
-            ?.let { user ->
-                val experience = user.experience + reward.experience
+        val user = userService.user.firstOrNull() ?: return
+        val experience = user.experience + reward.experience
 
-                userService.merge(
-                    user.copy(
-                        experience = experience,
-                        level = experienceService.levelOf(experience),
-                        points = user.points + reward.points,
-                        decorationsOwned = if (reward.decorationId != null
-                            && reward.decoration != null
-                        ) {
-                            user.decorationsOwned + reward.decorationId
-                        } else {
-                            user.decorationsOwned
-                        }
-                    )
-                )
-            }
+        userService.merge(
+            user.copy(
+                decorationsOwned = if (reward.decorationId != null
+                    && reward.decoration != null
+                ) {
+                    user.decorationsOwned + reward.decorationId
+                } else {
+                    user.decorationsOwned
+                },
+                experience = experience,
+                level = experienceService.levelOf(experience),
+                points = user.points + reward.points
+            )
+        )
     }
 }

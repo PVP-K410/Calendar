@@ -279,7 +279,6 @@ fun LayoutScreenAuthenticated(
     )
 
     var isRewardDialogOpen by remember { mutableStateOf(false) }
-
     val toggleRewardDialog = remember { { isRewardDialogOpen = !isRewardDialogOpen } }
 
     if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward) {
@@ -293,9 +292,9 @@ fun LayoutScreenAuthenticated(
     val reward = viewModel.reward.collectAsStateWithLifecycle().value
 
     RewardDialog(
-        reward = reward,
         isOpen = isRewardDialogOpen,
-        onClose = toggleRewardDialog
+        onClose = toggleRewardDialog,
+        reward = reward
     )
 
     ModalNavigationDrawer(
@@ -317,7 +316,6 @@ fun LayoutScreenAuthenticated(
         drawerState = stateDrawer
     ) {
         var isTaskDialogOpen by remember { mutableStateOf(false) }
-
         val toggleTaskDialog = remember { { isTaskDialogOpen = !isTaskDialogOpen } }
 
         Scaffold(
@@ -386,58 +384,56 @@ fun LayoutScreenAuthenticated(
 
 @Composable
 private fun RewardDialog(
-    reward: Reward,
     isOpen: Boolean,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    reward: Reward
 ) {
     if (!isOpen) {
         return
     }
 
-    Dialog(
-        onDismissRequest = onClose
-    ) {
+    Dialog(onDismissRequest = onClose) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceContainer)
-                .padding(8.dp)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "You've earned a reward!",
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
+                    text = "You've earned a reward!"
                 )
 
                 IconButton(onClick = onClose) {
                     Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "Close button"
+                        contentDescription = "Reward dialog close button",
+                        imageVector = Icons.Filled.Close
                     )
                 }
             }
 
             if (reward.points > 0) {
                 Text(
-                    text = "${reward.points} points!",
+                    modifier = Modifier.padding(12.dp),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(12.dp)
+                    text = "${reward.points} points!"
                 )
             }
 
             if (reward.experience > 0) {
                 Text(
-                    text = "${reward.experience} experience!",
+                    modifier = Modifier.padding(8.dp),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(8.dp)
+                    text = "${reward.experience} experience!"
                 )
             }
 
@@ -449,20 +445,18 @@ private fun RewardDialog(
 }
 
 @Composable
-private fun DecorationCard(
-    decoration: Decoration
-) {
+private fun DecorationCard(decoration: Decoration) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "${decoration.name} decoration!",
+            modifier = Modifier.padding(8.dp),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(8.dp)
+            text = "${decoration.name} decoration!"
         )
 
         AsyncImage(

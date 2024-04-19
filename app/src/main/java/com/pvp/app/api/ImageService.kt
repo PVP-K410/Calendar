@@ -26,6 +26,9 @@ interface ImageService {
         }
     }
 
+    /**
+     * @return image from [url] or null if failed to resolve.
+     */
     suspend fun getOrNull(url: String): ImageBitmap? {
         return try {
             get(url)

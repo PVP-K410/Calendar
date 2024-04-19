@@ -15,53 +15,49 @@ class StreakServiceImpl @Inject constructor(
 
     override suspend fun checkStreak(): Boolean {
         var needsReward = false
+        val user = userService.user.firstOrNull() ?: return false
 
-        userService.user
-            .firstOrNull()
-            ?.let { user ->
+        val date = user.streak.incrementedAt
+            .toDate()
+            .toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
 
-                val date = user.streak.incrementedAt
-                    .toDate()
-                    .toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate()
+        var incrementedAt = user.streak.incrementedAt
+        var value = user.streak.value
 
-                var value = user.streak.value
-                var incrementedAt = user.streak.incrementedAt
-
-                when (date) {
-                    LocalDate.now() -> {
-                        if (value == 0) {
-                            value = 1
-                            needsReward = true
-                        }
-                    }
-
-                    LocalDate
-                        .now()
-                        .minusDays(1) -> {
-                        value += 1
-                        incrementedAt = Timestamp.now()
-                        needsReward = true
-                    }
-
-                    else -> {
-                        value = 1
-                        incrementedAt = Timestamp.now()
-                    }
-                }
-
-                if (value != user.streak.value || incrementedAt != user.streak.incrementedAt) {
-                    userService.merge(
-                        user.copy(
-                            streak = Streak(
-                                value = value,
-                                incrementedAt = incrementedAt
-                            )
-                        )
-                    )
+        when (date) {
+            LocalDate.now() -> {
+                if (value == 0) {
+                    needsReward = true
+                    value = 1
                 }
             }
+
+            LocalDate
+                .now()
+                .minusDays(1) -> {
+                incrementedAt = Timestamp.now()
+                needsReward = true
+                value += 1
+            }
+
+            else -> {
+                incrementedAt = Timestamp.now()
+                value = 1
+            }
+        }
+
+        if (value != user.streak.value || incrementedAt != user.streak.incrementedAt) {
+            userService.merge(
+                user.copy(
+                    streak = Streak(
+                        incrementedAt = incrementedAt,
+                        value = value
+                    )
+                )
+            )
+        }
 
         return needsReward
     }

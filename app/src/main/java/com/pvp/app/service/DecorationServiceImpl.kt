@@ -99,13 +99,11 @@ class DecorationServiceImpl @Inject constructor(
             .firstOr(emptyList())
             .toMutableList()
 
-        val current = decorations
-            .firstOrNull { it.type == decoration.type }
-            ?.let {
-                decorations.remove(it)
+        val current = decorations.firstOrNull { it.type == decoration.type }
 
-                it
-            }
+        if (current != null) {
+            decorations.remove(current)
+        }
 
         if (current == null || current.id != decoration.id) {
             decorations.add(decoration)
@@ -161,37 +159,6 @@ class DecorationServiceImpl @Inject constructor(
 
             avatar
         }
-    }
-
-    override suspend fun getAvatar(user: User): ImageBitmap {
-        var avatar = AVATAR
-
-        val decorations = user.decorationsApplied
-            .map { decoration -> get(decoration) }
-            .flattenFlow()
-            .firstOr(emptyList())
-
-        val defaults = defaults.firstOr(emptyList())
-
-        decorations
-            .plus(
-                defaults.filter { default ->
-                    default.type !in decorations.map { it.type }
-                }
-            )
-            .sorted()
-            .forEach {
-                avatar = apply(
-                    it,
-                    avatar
-                )
-            }
-
-        return avatar
-    }
-
-    override fun isDefault(decoration: Decoration): Boolean {
-        return decoration.id in configuration.defaultDecorationIds
     }
 
     override suspend fun merge(decoration: Decoration) {

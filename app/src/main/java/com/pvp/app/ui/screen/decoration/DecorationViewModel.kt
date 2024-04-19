@@ -29,7 +29,6 @@ class DecorationViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DecorationState())
-
     val state = _state.asStateFlow()
 
     init {
@@ -79,44 +78,42 @@ class DecorationViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _state.first()
 
-            _state.update { it.copy(workState = WorkState.Loading) }
+            _state.update { it.copy(state = DecorationScreenState.Loading) }
 
             try {
-                val user = state.user
-
                 decorationService.apply(
                     decoration,
-                    user = user
+                    user = state.user
                 )
 
-                val stateWork = if (decoration.id in user.decorationsApplied) {
-                    WorkState.Success.Unapply
+                val stateWork = if (decoration.id in state.user.decorationsApplied) {
+                    DecorationScreenState.Success.Unapply
                 } else {
-                    WorkState.Success.Apply
+                    DecorationScreenState.Success.Apply
                 }
 
-                _state.update { it.copy(workState = stateWork) }
+                _state.update { it.copy(state = stateWork) }
             } catch (e: Exception) {
-                _state.update { it.copy(workState = WorkState.Error) }
+                _state.update { it.copy(state = DecorationScreenState.Error) }
             }
         }
     }
 
     fun purchase(decoration: Decoration) {
-        _state.update { it.copy(workState = WorkState.Loading) }
+        _state.update { it.copy(state = DecorationScreenState.Loading) }
 
         viewModelScope.launch {
             val state = _state.first()
             val holder = state.holders.first { it.decoration == decoration }
 
             if (holder.owned) {
-                _state.update { it.copy(workState = WorkState.Error.AlreadyOwned) }
+                _state.update { it.copy(state = DecorationScreenState.Error.AlreadyOwned) }
 
                 return@launch
             }
 
             if (state.user.points < decoration.price) {
-                _state.update { it.copy(workState = WorkState.Error.InsufficientFunds) }
+                _state.update { it.copy(state = DecorationScreenState.Error.InsufficientFunds) }
 
                 return@launch
             }
@@ -127,16 +124,16 @@ class DecorationViewModel @Inject constructor(
                     state.user
                 )
 
-                _state.update { it.copy(workState = WorkState.Success.Purchase) }
+                _state.update { it.copy(state = DecorationScreenState.Success.Purchase) }
             } catch (e: Exception) {
-                _state.update { it.copy(workState = WorkState.Error) }
+                _state.update { it.copy(state = DecorationScreenState.Error) }
 
                 return@launch
             }
         }
     }
 
-    fun resetWorkState() {
-        _state.update { it.copy(workState = WorkState.NoOperation) }
+    fun resetScreenState() {
+        _state.update { it.copy(state = DecorationScreenState.NoOperation) }
     }
 }
