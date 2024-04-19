@@ -1,6 +1,7 @@
 package com.pvp.app.ui.screen.friends
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,9 +32,13 @@ import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.WorkspacePremium
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Tab
@@ -45,10 +51,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +66,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.FriendObject
 import com.pvp.app.model.User
+import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.ButtonWithDialog
 import com.pvp.app.ui.common.Experience
 import java.time.Instant
@@ -328,7 +338,7 @@ private fun FriendList(
         for ((index, friend) in friends.withIndex()) {
             val avatar = model.getFriendAvatar(friend.email)
 
-            ButtonWithDialog(
+            CustomButtonWithDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
@@ -636,8 +646,11 @@ private fun FriendList(
                     }
                 },
                 confirmButtonContent = { Text("Remove") },
-                onConfirm = { model.removeFriend(friend.email) },
-                shape = MaterialTheme.shapes.small
+                onConfirm = { },
+                shape = MaterialTheme.shapes.small,
+                confirmationTitle = { Text("Are you sure you want to delete this friend?") },
+                confirmationOnConfirm = { model.removeFriend(friend.email) },
+                confirmationDescription = { Text("If the friend is deleted, it cannot be recovered") },
             )
         }
     }
@@ -708,4 +721,114 @@ private fun RequestList(
             }
         }
     }
+}
+
+@Composable
+private fun CustomButtonWithDialog(
+    modifier: Modifier = Modifier,
+    border: BorderStroke? = null,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    content: @Composable RowScope.() -> Unit = { Text("Open Dialog") },
+    contentAlignment: Alignment = Alignment.TopStart,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
+    dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
+    dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
+    dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
+    onConfirm: () -> Unit = {},
+    onDismiss: () -> Unit = {},
+    shape: Shape = MaterialTheme.shapes.extraSmall,
+    confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
+    confirmationDescription: @Composable () -> Unit = { },
+    confirmationOnConfirm: () -> Unit,
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = contentAlignment,
+        modifier = modifier
+    ) {
+        Button(
+            border = border,
+            colors = colors,
+            content = content,
+            contentPadding = contentPadding,
+            onClick = { showDialog = true },
+            shape = shape
+        )
+    }
+
+    CustomDialog(
+        buttonContentConfirm = confirmButtonContent,
+        buttonContentDismiss = dismissButtonContent,
+        content = dialogContent,
+        onConfirm = {
+            onConfirm()
+
+            showDialog = false
+        },
+        onDismiss = {
+            onDismiss()
+
+            showDialog = false
+        },
+        show = showDialog,
+        title = dialogTitle,
+        confirmationDescription = confirmationDescription,
+        confirmationTitle = confirmationTitle,
+        confirmationOnConfirm = confirmationOnConfirm
+    )
+}
+
+@Composable
+private fun CustomDialog(
+    content: @Composable () -> Unit,
+    title: @Composable () -> Unit,
+    buttonContentConfirm: @Composable RowScope.() -> Unit,
+    buttonContentDismiss: @Composable RowScope.() -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    show: Boolean,
+    confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
+    confirmationDescription: @Composable () -> Unit = { },
+    confirmationOnConfirm: () -> Unit,
+) {
+    if (!show) {
+        return
+    }
+
+    AlertDialog(
+        confirmButton = {
+            Box(contentAlignment = Alignment.BottomEnd) {
+                ButtonConfirm(
+                    border = BorderStroke(
+                        1.dp,
+                        Color.Red
+                    ),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+                    content = buttonContentConfirm,
+                    confirmationButtonContent = buttonContentConfirm,
+                    confirmationDescription = confirmationDescription,
+                    confirmationTitle = confirmationTitle,
+                    onConfirm = confirmationOnConfirm
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        dismissButton = {
+            Box(contentAlignment = Alignment.BottomEnd) {
+                OutlinedButton(
+                    content = buttonContentDismiss,
+                    onClick = onDismiss,
+                    shape = MaterialTheme.shapes.extraLarge
+                )
+            }
+        },
+        onDismissRequest = onDismiss,
+        shape = MaterialTheme.shapes.extraSmall,
+        text = content,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        title = title,
+        titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
