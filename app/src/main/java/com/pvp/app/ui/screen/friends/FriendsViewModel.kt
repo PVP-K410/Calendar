@@ -37,6 +37,8 @@ class FriendsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val toastMessage = mutableStateOf<String?>(null)
+    val mutualFriends = MutableStateFlow<List<FriendEntry>>(emptyList())
+    val tasksCompleted = MutableStateFlow(0)
 
     val user = userService.user
         .filterNotNull()
@@ -193,8 +195,6 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    val mutualFriends = MutableStateFlow<List<FriendEntry>>(emptyList())
-
     fun getMutualFriends(friendEmail: String) {
         viewModelScope.launch {
             val friendObject = friendService
@@ -223,8 +223,6 @@ class FriendsViewModel @Inject constructor(
             }
         }
     }
-
-    val tasksCompleted = MutableStateFlow(0)
 
     fun tasksCompleted(friendEmail: String) {
         viewModelScope.launch {
