@@ -492,7 +492,7 @@ private fun DialogContent(
 }
 
 @Composable
-fun AvatarBox(friend: FriendEntry) {
+private fun AvatarBox(friend: FriendEntry) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -511,7 +511,7 @@ fun AvatarBox(friend: FriendEntry) {
 }
 
 @Composable
-fun ActivityInfo(tasksCompleted: Int) {
+private fun ActivityInfo(tasksCompleted: Int) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -562,7 +562,7 @@ fun ActivityInfo(tasksCompleted: Int) {
 }
 
 @Composable
-fun ActivityRow(
+private fun ActivityRow(
     icon: ImageVector,
     contentDescription: String,
     text: String
@@ -588,7 +588,7 @@ fun ActivityRow(
 }
 
 @Composable
-fun FriendInfo(
+private fun FriendInfo(
     formattedDate: String,
     mutualFriends: List<FriendEntry>
 ) {
@@ -653,7 +653,7 @@ fun FriendInfo(
 }
 
 @Composable
-fun InfoHeader(text: String) {
+private fun InfoHeader(text: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
