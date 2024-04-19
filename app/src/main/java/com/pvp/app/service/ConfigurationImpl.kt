@@ -7,6 +7,16 @@ import javax.inject.Inject
 class ConfigurationImpl @Inject constructor() : Configuration {
 
     override val dailyTaskCount: Int = 3
+
+    override val defaultDecorationIds: List<String> = listOf(
+        "default-body",
+        "default-face",
+        "default-hands",
+        "default-head",
+        "default-leggings",
+        "default-shoes"
+    )
+
     override val googleOAuthClientId: String = BuildConfig.GOOGLE_OAUTH_CLIENT_ID
     override val limitPointsDeduction: Int = 5
     override val limitPointsReclaimDays: Int = 2

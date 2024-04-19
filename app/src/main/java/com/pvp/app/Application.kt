@@ -11,6 +11,10 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.decode.SvgDecoder
+import coil.disk.DiskCache
 import com.pvp.app.common.DateUtil.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.DailyTaskWorker
@@ -20,6 +24,7 @@ import com.pvp.app.worker.TaskAutocompleteWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
 import dagger.hilt.android.HiltAndroidApp
+import okhttp3.OkHttpClient
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -27,7 +32,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
-class Application : Application(), Configuration.Provider {
+class Application : Application(), Configuration.Provider, ImageLoaderFactory {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -201,4 +206,32 @@ class Application : Application(), Configuration.Provider {
             requestPeriodic
         )
     }
+
+    override fun newImageLoader(): ImageLoader = ImageLoader
+        .Builder(this)
+        .components { add(SvgDecoder.Factory()) }
+        .diskCache {
+            DiskCache
+                .Builder()
+                .directory(applicationContext.cacheDir.resolve("images"))
+                .build()
+        }
+        .okHttpClient {
+            OkHttpClient
+                .Builder()
+                .addInterceptor { chain ->
+                    chain
+                        .proceed(chain.request())
+                        .newBuilder()
+                        .removeHeader("cache-control")
+                        .removeHeader("expires")
+                        .addHeader(
+                            "cache-control",
+                            "public, max-age=259200"
+                        )
+                        .build()
+                }
+                .build()
+        }
+        .build()
 }

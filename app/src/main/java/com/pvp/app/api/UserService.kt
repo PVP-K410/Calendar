@@ -1,6 +1,5 @@
 package com.pvp.app.api
 
-import androidx.compose.ui.graphics.ImageBitmap
 import com.pvp.app.model.User
 import kotlinx.coroutines.flow.Flow
 
@@ -28,13 +27,4 @@ interface UserService : DocumentsCollection {
      * Removes an user from the database with all associated children data.
      */
     suspend fun remove(email: String)
-
-    /**
-     * Resolves the avatar of the user by its email. User can have decorated avatar, which requires
-     * to be resolved by this method.
-     *
-     * @param email of the user
-     * @return the avatar of the user
-     */
-    suspend fun resolveAvatar(email: String): ImageBitmap
 }

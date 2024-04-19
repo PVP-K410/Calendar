@@ -1,8 +1,6 @@
 package com.pvp.app.di
 
 import com.google.firebase.Firebase
-import com.google.firebase.FirebaseApp
-import com.google.firebase.app
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.PersistentCacheSettings
 import com.google.firebase.firestore.firestore
@@ -24,16 +22,11 @@ object DatabaseModule {
             .apply {
                 firestoreSettings = firestoreSettings {
                     setLocalCacheSettings(
-                        PersistentCacheSettings.newBuilder()
+                        PersistentCacheSettings
+                            .newBuilder()
                             .build()
                     )
                 }
             }
-    }
-
-    @Provides
-    @Singleton
-    fun provideFirebaseApp(): FirebaseApp {
-        return Firebase.app
     }
 }

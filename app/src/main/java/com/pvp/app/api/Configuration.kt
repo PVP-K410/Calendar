@@ -8,6 +8,11 @@ interface Configuration {
     val dailyTaskCount: Int
 
     /**
+     * Default decorations that are applied to the user avatar when no decorations are owned.
+     */
+    val defaultDecorationIds: List<String>
+
+    /**
      * The Google OAuth client ID used for authentication.
      */
     val googleOAuthClientId: String

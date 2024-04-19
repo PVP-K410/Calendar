@@ -52,7 +52,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pvp.app.model.User
 import com.pvp.app.ui.common.ButtonWithDialog
 
 private enum class SortingType {
@@ -69,8 +68,8 @@ fun FriendsScreen(
     val friendObject by model.userFriendObject.collectAsStateWithLifecycle()
     val friendEmail = remember { mutableStateOf("") }
     val sortingType = remember { mutableStateOf(SortingType.EXPERIENCE) }
-    val sortedFriends = remember { mutableStateOf(emptyList<String>()) }
-    val friendsData by model.userFriends.collectAsState()
+    val friends by model.userFriends.collectAsState()
+    val friendsSorted = remember { mutableStateOf(friends) }
     val scrollState = rememberScrollState()
     val tempSortingType = remember { mutableStateOf(sortingType.value) }
 
@@ -90,12 +89,12 @@ fun FriendsScreen(
 
     LaunchedEffect(
         sortingType.value,
-        friendsData
+        friends
     ) {
-        sortedFriends.value = sortFriends(
-            friendsData,
-            sortingType.value
-        )
+        friendsSorted.value = when (sortingType.value) {
+            SortingType.EXPERIENCE -> friends.sortedByDescending { it.user.experience }
+            SortingType.POINTS -> friends.sortedByDescending { it.user.points }
+        }
     }
 
     Column(
@@ -275,7 +274,7 @@ fun FriendsScreen(
         }
 
         Text(
-            "All friends - ${friendsData.size}",
+            "All friends - ${friends.size}",
             modifier = Modifier.padding(
                 horizontal = 16.dp,
                 vertical = 8.dp
@@ -284,29 +283,15 @@ fun FriendsScreen(
         )
 
         FriendList(
-            friends = sortedFriends.value,
-            model = model,
+            friends = friendsSorted.value,
             scrollState = scrollState
         )
     }
 }
 
-private fun sortFriends(
-    friends: List<User>,
-    sortingType: SortingType
-): List<String> {
-    val sortedUsers = when (sortingType) {
-        SortingType.EXPERIENCE -> friends.sortedByDescending { it.experience }
-        SortingType.POINTS -> friends.sortedByDescending { it.points }
-    }
-
-    return sortedUsers.map { it.username }
-}
-
 @Composable
 private fun FriendList(
-    friends: List<String>,
-    model: FriendsViewModel,
+    friends: List<FriendEntry>,
     scrollState: ScrollState
 ) {
     Column(
@@ -316,8 +301,6 @@ private fun FriendList(
             .padding(bottom = 10.dp)
     ) {
         for ((index, friend) in friends.withIndex()) {
-            val avatar = model.getFriendAvatar(friend)
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -363,7 +346,7 @@ private fun FriendList(
                 }
 
                 Text(
-                    text = friend,
+                    text = friend.user.username,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .padding(start = 4.dp)
@@ -378,7 +361,7 @@ private fun FriendList(
                         .background(MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Image(
-                        bitmap = avatar,
+                        bitmap = friend.avatar,
                         contentDescription = "Friend avatar",
                         modifier = Modifier
                             .size(28.dp)
