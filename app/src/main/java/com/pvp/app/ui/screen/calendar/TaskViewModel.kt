@@ -245,7 +245,9 @@ class TaskViewModel @Inject constructor(
     }
 
     private fun Task.postNotification() {
-        getNotification()?.let { notification ->
+        notificationService
+            .getNotificationForTask(this)
+            ?.let { notification ->
             if (time == null || reminderTime == null) {
                 return
             }
@@ -262,7 +264,9 @@ class TaskViewModel @Inject constructor(
     }
 
     private fun Task.cancelNotification() {
-        getNotification()?.let { notification ->
+        notificationService
+            .getNotificationForTask(this)
+            ?.let { notification ->
             notificationService.cancel(notification)
         }
     }

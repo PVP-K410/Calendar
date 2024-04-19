@@ -14,6 +14,8 @@ import com.pvp.app.Activity
 import com.pvp.app.R
 import com.pvp.app.api.NotificationService
 import com.pvp.app.model.Notification
+import com.pvp.app.model.NotificationChannel
+import com.pvp.app.model.Task
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
 import java.time.LocalDate
@@ -195,5 +197,30 @@ class NotificationServiceImpl @Inject constructor(
             manager.cancel(it)
             it.cancel()
         }
+    }
+
+    override fun getNotificationForTask(
+        task: Task
+    ): Notification? {
+        if (task.reminderTime == null || task.time == null || task.isCompleted) {
+            return null
+        }
+
+        val reminderMinutes = task.reminderTime!!.toMinutes()
+
+        val reminderDateTime = task.date
+            .atTime(task.time)
+            .minusMinutes(reminderMinutes)
+
+        if (reminderDateTime.isBefore(LocalDateTime.now())) {
+            return null
+        }
+
+        return Notification(
+            channel = NotificationChannel.TaskReminder,
+            title = "Task Reminder",
+            text = "Task '${task.title}' is in $reminderMinutes minute" +
+                    "${if (reminderMinutes > 1) "s" else ""}..."
+        )
     }
 }

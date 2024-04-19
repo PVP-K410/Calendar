@@ -1,6 +1,7 @@
 package com.pvp.app.api
 
 import com.pvp.app.model.Notification
+import com.pvp.app.model.Task
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -54,4 +55,11 @@ interface NotificationService {
     fun show(
         notification: Notification
     )
+
+    /**
+     * Converts task object to a notification object.
+     */
+    fun getNotificationForTask(
+        task: Task
+    ): Notification?
 }

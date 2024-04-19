@@ -1,5 +1,6 @@
 package com.pvp.app.service
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.FriendService
@@ -67,30 +68,33 @@ class FriendServiceImpl @Inject constructor(
             .await()
             .documents
             .forEach { userDoc ->
+                var user: FriendObject? = null
+
                 try {
-                    val user = userDoc.toObject(FriendObject::class.java)
-
-                    if (user != null) {
-                        val updatedFriends = user.friends - email
-                        val updatedSentRequests = user.sentRequests - email
-                        val updatedReceivedRequests = user.receivedRequests - email
-
-                        if (updatedFriends != user.friends || updatedSentRequests != user.sentRequests || updatedReceivedRequests != user.receivedRequests) {
-                            val updatedUser = FriendObject(
-                                friends = updatedFriends,
-                                sentRequests = updatedSentRequests,
-                                receivedRequests = updatedReceivedRequests
-                            )
-
-                            merge(
-                                updatedUser,
-                                userDoc.id
-                            )
-                        }
-                    }
-                } catch (_: Exception) {
-
+                    user = userDoc.toObject(FriendObject::class.java)
+                } catch (e: Exception) {
+                    Log.e("FriendServiceImpl", "Error parsing user document", e)
                 }
+
+                if (user != null) {
+                    val updatedFriends = user.friends - email
+                    val updatedSentRequests = user.sentRequests - email
+                    val updatedReceivedRequests = user.receivedRequests - email
+
+                    if (updatedFriends != user.friends || updatedSentRequests != user.sentRequests || updatedReceivedRequests != user.receivedRequests) {
+                        val updatedUser = FriendObject(
+                            friends = updatedFriends,
+                            sentRequests = updatedSentRequests,
+                            receivedRequests = updatedReceivedRequests
+                        )
+
+                        merge(
+                            updatedUser,
+                            userDoc.id
+                        )
+                    }
+                }
+
             }
     }
 

@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 
 @Serializable
@@ -178,29 +177,6 @@ open class Task(
 
     override fun toString(): String {
         return "Task(date=$date, description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, points=$points, time=$time, title='$title', userEmail='$userEmail')"
-    }
-
-    fun getNotification(): Notification? {
-        if (reminderTime == null || time == null || isCompleted) {
-            return null
-        }
-
-        val reminderMinutes = reminderTime!!.toMinutes()
-
-        val reminderDateTime = date
-            .atTime(time)
-            .minusMinutes(reminderMinutes)
-
-        if (reminderDateTime.isBefore(LocalDateTime.now())) {
-            return null
-        }
-
-        return Notification(
-            channel = NotificationChannel.TaskReminder,
-            title = "Task Reminder",
-            text = "Task '$title' is in $reminderMinutes minute" +
-                    "${if (reminderMinutes > 1) "s" else ""}..."
-        )
     }
 
     companion object {

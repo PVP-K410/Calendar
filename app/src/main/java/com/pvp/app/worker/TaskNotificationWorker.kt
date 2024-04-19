@@ -35,7 +35,9 @@ class TaskNotificationWorker @AssistedInject constructor(
             .get(email)
             .first()
             .forEach { task ->
-                task.getNotification()?.let { notification ->
+                notificationService
+                    .getNotificationForTask(task)
+                    ?.let { notification ->
                     val reminderDateTime = task.date
                         .atTime(task.time)
                         .minusMinutes(task.reminderTime!!.toMinutes())
