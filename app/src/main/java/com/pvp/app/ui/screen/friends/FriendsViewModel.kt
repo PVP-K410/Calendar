@@ -203,12 +203,16 @@ class FriendsViewModel @Inject constructor(
 
             val mutualFriendsList =
                 friendObject?.friends?.map { it.email }
-                    ?.intersect(userFriends.value.map { it.user.email }
-                        .toSet())
+                    ?.intersect(userFriends.value
+                        .map { it.user.email }
+                        .toSet()
+                    )
 
             if (mutualFriendsList != null) {
                 val mutualFriendsUsers = mutualFriendsList.mapNotNull {
-                    val user = userService.get(it).firstOrNull()
+                    val user = userService
+                        .get(it)
+                        .firstOrNull()
 
                     user?.let {
                         FriendEntry(
@@ -226,9 +230,18 @@ class FriendsViewModel @Inject constructor(
 
     fun tasksCompleted(friendEmail: String) {
         viewModelScope.launch {
-            val tasks = taskService.get(friendEmail).firstOrNull() ?: emptyList()
+            val tasks = taskService
+                .get(friendEmail)
+                .firstOrNull()
+                ?: emptyList()
+
             tasksCompleted.value = tasks.count {
-                it.isCompleted && it.date in LocalDate.now().minusDays(7)..LocalDate.now()
+                it.isCompleted &&
+                it.date in
+                        LocalDate
+                            .now()
+                            .minusDays(7)..
+                        LocalDate.now()
             }
         }
     }
@@ -240,6 +253,7 @@ class FriendsViewModel @Inject constructor(
                 user.value.email,
                 friendEmail
             )
+
             toastMessage.value = "Friend removed successfully!"
         }
     }

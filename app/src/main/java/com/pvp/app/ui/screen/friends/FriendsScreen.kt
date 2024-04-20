@@ -355,7 +355,6 @@ private fun FriendList(
                     )
                 },
                 confirmButtonContent = { Text("Remove") },
-                onConfirm = { },
                 shape = MaterialTheme.shapes.small,
                 confirmationTitle = { Text("Are you sure you want to delete this friend?") },
                 confirmationOnConfirm = { model.removeFriend(friend.user.email) },
@@ -448,6 +447,7 @@ private fun DialogContent(
             Instant.ofEpochMilli(friendInfo.since),
             ZoneId.systemDefault()
         )
+
         val formattedDate = sinceDateTime.format(
             DateTimeFormatter.ofPattern(
                 "yyyy/MM/dd"
@@ -455,6 +455,7 @@ private fun DialogContent(
         )
 
         model.tasksCompleted(friend.user.email)
+
         model.getMutualFriends(friend.user.email)
 
         Column(
@@ -512,9 +513,7 @@ private fun AvatarBox(friend: FriendEntry) {
 
 @Composable
 private fun ActivityInfo(tasksCompleted: Int) {
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         InfoHeader(text = "7 days activity")
 
         Column(
@@ -599,7 +598,10 @@ private fun FriendInfo(
             .fillMaxSize()
             .clip(MaterialTheme.shapes.small)
             .background(MaterialTheme.colorScheme.surface)
-            .padding(vertical = 4.dp, horizontal = 14.dp)
+            .padding(
+                vertical = 4.dp,
+                horizontal = 14.dp
+            )
     ) {
         Text(
             text = "Friends since - $formattedDate",
@@ -752,7 +754,6 @@ private fun CustomButtonWithDialog(
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
-    onConfirm: () -> Unit = {},
     onDismiss: () -> Unit = {},
     shape: Shape = MaterialTheme.shapes.extraSmall,
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
@@ -779,11 +780,6 @@ private fun CustomButtonWithDialog(
         buttonContentConfirm = confirmButtonContent,
         buttonContentDismiss = dismissButtonContent,
         content = dialogContent,
-        onConfirm = {
-            onConfirm()
-
-            showDialog = false
-        },
         onDismiss = {
             onDismiss()
 
@@ -803,7 +799,6 @@ private fun CustomDialog(
     title: @Composable () -> Unit,
     buttonContentConfirm: @Composable RowScope.() -> Unit,
     buttonContentDismiss: @Composable RowScope.() -> Unit,
-    onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     show: Boolean,
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
