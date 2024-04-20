@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Default" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.InUse" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.StartUp" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/Theme.InUse</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_animated</item>
+        <item name="windowSplashScreenBackground">@color/white</item>
+    </style>
+
 </resources>

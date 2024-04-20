@@ -117,6 +117,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.core:core-ktx:1.13.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.datastore:datastore-preferences-core:1.0.0") // do not update to 1.1.0 (makes UI go crazy)
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
     implementation("androidx.hilt:hilt-common:1.2.0")
