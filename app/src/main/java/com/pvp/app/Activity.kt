@@ -1,6 +1,5 @@
 package com.pvp.app
 
-import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.Context
@@ -13,12 +12,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.animation.doOnEnd
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.splashscreen.SplashScreenViewProvider
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.common.SplashScreenUtil.useStyledExit
 import com.pvp.app.ui.screen.layout.LayoutScreenBootstrap
 import com.pvp.app.ui.theme.CalendarTheme
 import com.pvp.app.ui.theme.ThemeViewModel
@@ -31,12 +28,11 @@ class Activity : ComponentActivity() {
         super.onCreate(stateApp)
 
         installSplashScreen()
-            .onAppStartDo {
+            .useStyledExit {
                 if (!isNotificationEnabled(this)) {
                     showNotificationPermissionDialog(this)
                 }
             }
-
 
         setContent {
             val themeViewModel: ThemeViewModel = hiltViewModel()
@@ -95,65 +91,5 @@ class Activity : ComponentActivity() {
                 null
             )
             .show()
-    }
-
-    private fun SplashScreen.onAppStartDo(block: () -> Unit) {
-        fun rotate(
-            screen: SplashScreenViewProvider,
-            onEnd: () -> Unit
-        ) {
-            ObjectAnimator
-                .ofFloat(
-                    screen.iconView,
-                    "rotationY",
-                    0f,
-                    360f
-                )
-                .apply {
-                    duration = 1500
-
-                    start()
-
-                    doOnEnd { onEnd() }
-                }
-        }
-
-        fun scale(
-            property: String,
-            screen: SplashScreenViewProvider
-        ) {
-            ObjectAnimator
-                .ofFloat(
-                    screen.iconView,
-                    property,
-                    1f,
-                    0.2f,
-                    0.75f,
-                    0f
-                )
-                .apply {
-                    duration = 1500
-
-                    start()
-                }
-        }
-
-        setOnExitAnimationListener { screen ->
-            rotate(screen) {
-                screen.remove()
-
-                block()
-            }
-
-            scale(
-                "scaleX",
-                screen
-            )
-
-            scale(
-                "scaleY",
-                screen
-            )
-        }
     }
 }
