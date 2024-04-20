@@ -177,14 +177,19 @@ fun FriendsScreen(
                     35.dp
                 ),
                 content = {
-                    Text(
-                        "Requests",
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            "Requests",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 },
                 contentAlignment = Alignment.Center,
                 contentPadding = PaddingValues(
-                    horizontal = 45.dp,
+                    horizontal = 10.dp,
                     vertical = 2.dp
                 ),
                 dialogTitle = { Text("Friend requests") },
