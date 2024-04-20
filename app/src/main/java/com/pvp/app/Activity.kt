@@ -17,8 +17,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.common.SplashScreenUtil.useStyledExit
 import com.pvp.app.ui.screen.layout.LayoutScreenBootstrap
+import com.pvp.app.ui.screen.layout.LayoutViewModel
 import com.pvp.app.ui.theme.CalendarTheme
-import com.pvp.app.ui.theme.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,7 +27,7 @@ class Activity : ComponentActivity() {
     override fun onCreate(stateApp: Bundle?) {
         super.onCreate(stateApp)
 
-        installSplashScreen()
+        val screen = installSplashScreen()
             .useStyledExit {
                 if (!isNotificationEnabled(this)) {
                     showNotificationPermissionDialog(this)
@@ -35,9 +35,11 @@ class Activity : ComponentActivity() {
             }
 
         setContent {
-            val themeViewModel: ThemeViewModel = hiltViewModel()
+            val model: LayoutViewModel = hiltViewModel()
 
-            CalendarTheme(model = themeViewModel) {
+            screen.setKeepOnScreenCondition { model.state.value.isLoading }
+
+            CalendarTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     LayoutScreenBootstrap()
                 }

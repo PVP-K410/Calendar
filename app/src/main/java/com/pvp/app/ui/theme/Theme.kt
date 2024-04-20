@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
@@ -30,15 +31,17 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun CalendarTheme(
-    model: ThemeViewModel,
+    model: ThemeViewModel = hiltViewModel(),
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val themeValue = model.getGeneralThemeSetting().collectAsState(initial = 1).value
     val dynamicColor = model.getDynamicThemeSetting().collectAsState(initial = false).value
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
+
             if (themeValue == 0) {
                 dynamicDarkColorScheme(context)
             } else if (themeValue == 1) {
@@ -51,6 +54,7 @@ fun CalendarTheme(
 
         themeValue == 0 -> DarkColorScheme
         themeValue == 1 -> LightColorScheme
+
         else -> {
             if (darkTheme) DarkColorScheme
             else LightColorScheme

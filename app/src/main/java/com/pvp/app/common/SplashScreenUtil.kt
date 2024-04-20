@@ -8,12 +8,14 @@ import androidx.core.splashscreen.SplashScreenViewProvider
 object SplashScreenUtil {
 
     /**
-     * Use a styled exit animation for the splash screen, and execute a block of code when the
+     * Use a styled exit animation for the splash screen and execute a block of code when the
      * animation ends.
      *
      * @param block The block of code to execute when the animation ends.
+     *
+     * @return The splash screen for chaining.
      */
-    fun SplashScreen.useStyledExit(block: () -> Unit) {
+    fun SplashScreen.useStyledExit(block: () -> Unit): SplashScreen {
         fun rotate(
             screen: SplashScreenViewProvider,
             onEnd: () -> Unit
@@ -71,5 +73,7 @@ object SplashScreenUtil {
                 screen
             )
         }
+
+        return this
     }
 }
