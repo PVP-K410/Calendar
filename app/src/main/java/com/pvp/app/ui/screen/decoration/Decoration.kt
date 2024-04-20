@@ -33,9 +33,9 @@ import com.pvp.app.ui.common.lighten
 
 @Composable
 private fun DecorationCard(
-    actionPurchase: Boolean,
     holder: DecorationHolder,
     isClickable: Boolean = true,
+    isStore: Boolean,
     onClick: () -> Unit
 ) {
     Row(
@@ -84,22 +84,24 @@ private fun DecorationCard(
                 textAlign = TextAlign.Justify
             )
 
-            if (actionPurchase && !holder.owned) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        modifier = Modifier.padding(end = 4.dp),
-                        text = "${holder.decoration.price}"
-                    )
+            if (!isStore) {
+                return
+            }
 
-                    Icon(
-                        contentDescription = "Decoration ${holder.decoration.name} cost in points icon",
-                        imageVector = Icons.Outlined.Stars
-                    )
-                }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier.padding(end = 4.dp),
+                    text = "${holder.decoration.price}"
+                )
+
+                Icon(
+                    contentDescription = "Decoration ${holder.decoration.name} cost in points icon",
+                    imageVector = Icons.Outlined.Stars
+                )
             }
         }
     }
@@ -107,9 +109,9 @@ private fun DecorationCard(
 
 @Composable
 fun DecorationCards(
-    actionPurchase: Boolean,
     holders: List<DecorationHolder>,
     isClickable: Boolean,
+    isStore: Boolean,
     onClick: (DecorationHolder) -> Unit
 ) {
     val holdersGrouped = remember(holders) { holders.groupBy { it.decoration.type } }
@@ -124,9 +126,9 @@ fun DecorationCards(
                 ) {
                     holdersGrouped.forEach { holder ->
                         DecorationCard(
-                            actionPurchase = actionPurchase,
                             holder = holder,
                             isClickable = isClickable,
+                            isStore = isStore,
                             onClick = { onClick(holder) }
                         )
                     }
