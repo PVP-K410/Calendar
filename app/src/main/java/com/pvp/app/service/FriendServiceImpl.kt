@@ -114,7 +114,9 @@ class FriendServiceImpl @Inject constructor(
             friendObjectEmail
         )
 
-        val friendNew = get(friendEmail).first()
+        val friendNew = get(friendEmail)
+            .first()
+
         val friendFriendsNew = friendNew?.friends?.filter { it.email != friendObjectEmail }
 
         friendNew?.let {

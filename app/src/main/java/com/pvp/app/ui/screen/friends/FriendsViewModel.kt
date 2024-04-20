@@ -201,12 +201,13 @@ class FriendsViewModel @Inject constructor(
                 .get(friendEmail)
                 .firstOrNull()
 
-            val mutualFriendsList =
-                friendObject?.friends?.map { it.email }
-                    ?.intersect(userFriends.value
+            val mutualFriendsList = friendObject?.friends
+                ?.map { it.email }
+                ?.intersect(
+                    userFriends.value
                         .map { it.user.email }
                         .toSet()
-                    )
+                )
 
             if (mutualFriendsList != null) {
                 val mutualFriendsUsers = mutualFriendsList.mapNotNull {
@@ -221,6 +222,7 @@ class FriendsViewModel @Inject constructor(
                         )
                     }
                 }
+
                 mutualFriends.value = mutualFriendsUsers
             } else {
                 mutualFriends.value = emptyList()
