@@ -33,6 +33,8 @@ import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -165,88 +167,102 @@ fun FriendsScreen(
                 confirmButtonContent = { Text("Add") },
                 onConfirm = {
                     model.addFriend(friendEmail.value.trim())
+
                     friendEmail.value = ""
                 },
                 onDismiss = { friendEmail.value = "" },
                 shape = MaterialTheme.shapes.small
             )
 
-            ButtonWithDialog(
-                modifier = Modifier.size(
-                    160.dp,
-                    35.dp
-                ),
-                content = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            "Requests",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                },
-                contentAlignment = Alignment.Center,
-                contentPadding = PaddingValues(
-                    horizontal = 10.dp,
-                    vertical = 2.dp
-                ),
-                dialogTitle = { Text("Friend requests") },
-                dialogContent = {
-                    val selectedTab = remember { mutableIntStateOf(0) }
-
-                    Column {
-                        TabRow(selectedTabIndex = selectedTab.intValue) {
-                            Tab(
-                                selected = selectedTab.intValue == 0,
-                                onClick = { selectedTab.intValue = 0 }
-                            ) {
-                                Text(
-                                    "Received",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
-                                )
-                            }
-
-                            Tab(
-                                selected = selectedTab.intValue == 1,
-                                onClick = { selectedTab.intValue = 1 }
-                            ) {
-                                Text(
-                                    "Sent",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        when (selectedTab.intValue) {
-                            0 -> {
-                                RequestList(
-                                    requests = friendObject.receivedRequests,
-                                    requestTitle = "received",
-                                    acceptAction = { request -> model.acceptFriendRequest(request) },
-                                    denyAction = { request -> model.denyFriendRequest(request) }
-                                )
-                            }
-
-                            1 -> {
-                                RequestList(
-                                    requests = friendObject.sentRequests,
-                                    requestTitle = "sent",
-                                    acceptAction = { },
-                                    denyAction = { request -> model.cancelSentRequest(request) }
-                                )
-                            }
+            BadgedBox(
+                badge = {
+                    if (friendObject.receivedRequests.isNotEmpty()) {
+                        Badge(containerColor = MaterialTheme.colorScheme.errorContainer) {
+                            Text(
+                                style = MaterialTheme.typography.bodySmall,
+                                text = friendObject.receivedRequests.size.toString()
+                            )
                         }
                     }
-                },
-                shape = MaterialTheme.shapes.small,
-                showConfirmButton = false
-            )
+                }
+            ) {
+                ButtonWithDialog(
+                    modifier = Modifier.size(
+                        160.dp,
+                        35.dp
+                    ),
+                    content = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                "Requests",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                    },
+                    contentAlignment = Alignment.Center,
+                    contentPadding = PaddingValues(
+                        horizontal = 10.dp,
+                        vertical = 2.dp
+                    ),
+                    dialogTitle = { Text("Friend requests") },
+                    dialogContent = {
+                        val selectedTab = remember { mutableIntStateOf(0) }
+
+                        Column {
+                            TabRow(selectedTabIndex = selectedTab.intValue) {
+                                Tab(
+                                    selected = selectedTab.intValue == 0,
+                                    onClick = { selectedTab.intValue = 0 }
+                                ) {
+                                    Text(
+                                        "Received",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+
+                                Tab(
+                                    selected = selectedTab.intValue == 1,
+                                    onClick = { selectedTab.intValue = 1 }
+                                ) {
+                                    Text(
+                                        "Sent",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            when (selectedTab.intValue) {
+                                0 -> {
+                                    RequestList(
+                                        requests = friendObject.receivedRequests,
+                                        requestTitle = "received",
+                                        acceptAction = { request -> model.acceptFriendRequest(request) },
+                                        denyAction = { request -> model.denyFriendRequest(request) }
+                                    )
+                                }
+
+                                1 -> {
+                                    RequestList(
+                                        requests = friendObject.sentRequests,
+                                        requestTitle = "sent",
+                                        acceptAction = { },
+                                        denyAction = { request -> model.cancelSentRequest(request) }
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    shape = MaterialTheme.shapes.small,
+                    showConfirmButton = false
+                )
+            }
 
             ButtonWithDialog(
                 modifier = Modifier.size(
@@ -361,9 +377,9 @@ private fun FriendList(
                 },
                 confirmButtonContent = { Text("Remove") },
                 shape = MaterialTheme.shapes.small,
-                confirmationTitle = { Text("Are you sure you want to delete this friend?") },
+                confirmationTitle = { Text("Are you sure you want to remove this friend?") },
                 confirmationOnConfirm = { model.removeFriend(friend.user.email) },
-                confirmationDescription = { Text("If the friend is deleted, it cannot be recovered") }
+                confirmationDescription = { Text("If friend is removed, you will have to request for friendship again") }
             )
         }
     }
@@ -492,7 +508,10 @@ private fun DialogContent(
 
             ActivityInfo(tasksCompleted)
 
-            FriendInfo(formattedDate, mutualFriends)
+            FriendInfo(
+                formattedDate,
+                mutualFriends
+            )
         }
     }
 }
