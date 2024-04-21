@@ -27,6 +27,20 @@ interface FriendService : DocumentsCollection {
     suspend fun remove(email: String)
 
     /**
+     * Removes a friend from the friend list of the current user and vice versa.
+     *
+     * @param friendObject of the current user.
+     * @param friendObjectEmail of the current user.
+     * @param friendEmail of the friend to be removed.
+     * @return a string message indicating the result of the operation.
+     */
+    suspend fun removeFriend(
+        friendObject: FriendObject,
+        friendObjectEmail: String,
+        friendEmail: String
+    )
+
+    /**
      * IMPORTANT!!! This method returns a string that is strictly associated with how ViewModel works.
      * IMPORTANT!!! If any changes to the default implementation are made, changes in the ViewModel should also be made.
      *
