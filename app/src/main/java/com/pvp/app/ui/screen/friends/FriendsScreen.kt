@@ -32,9 +32,9 @@ import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.WorkspacePremium
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -377,9 +377,9 @@ private fun FriendList(
                 },
                 confirmButtonContent = { Text("Remove") },
                 shape = MaterialTheme.shapes.small,
-                confirmationTitle = { Text("Are you sure you want to delete this friend?") },
+                confirmationTitle = { Text("Are you sure you want to remove this friend?") },
                 confirmationOnConfirm = { model.removeFriend(friend.user.email) },
-                confirmationDescription = { Text("If the friend is deleted, it cannot be recovered") }
+                confirmationDescription = { Text("If friend is removed, you will have to request for friendship again") }
             )
         }
     }
