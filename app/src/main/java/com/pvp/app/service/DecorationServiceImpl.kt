@@ -161,6 +161,33 @@ class DecorationServiceImpl @Inject constructor(
         }
     }
 
+    override suspend fun getAvatar(user: User): ImageBitmap {
+        var avatar = AVATAR
+
+        val decorations = user.decorationsApplied
+            .map { decoration -> get(decoration) }
+            .flattenFlow()
+            .firstOr(emptyList())
+
+        val defaults = defaults.firstOr(emptyList())
+
+        decorations
+            .plus(
+                defaults.filter { default ->
+                    default.type !in decorations.map { it.type }
+                }
+            )
+            .sorted()
+            .forEach {
+                avatar = apply(
+                    it,
+                    avatar
+                )
+            }
+
+        return avatar
+    }
+
     override suspend fun merge(decoration: Decoration) {
         database
             .runTransaction { transaction ->

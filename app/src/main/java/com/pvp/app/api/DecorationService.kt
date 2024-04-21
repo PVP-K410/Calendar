@@ -60,6 +60,15 @@ interface DecorationService : DocumentsCollection {
     suspend fun getAvatar(user: Flow<User>): Flow<ImageBitmap>
 
     /**
+     * Gets decorated version of user's avatar.
+     *
+     * @param user The user to get the avatar for.
+     *
+     * @return Decorated avatar.
+     */
+    suspend fun getAvatar(user: User): ImageBitmap
+
+    /**
      * Add a new decoration to the database or update an existing one.
      *
      * @param decoration The decoration to add or update.

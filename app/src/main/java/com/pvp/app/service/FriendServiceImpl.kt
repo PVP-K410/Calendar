@@ -6,6 +6,7 @@ import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.FriendObject
+import com.pvp.app.model.Friends
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -77,7 +78,7 @@ class FriendServiceImpl @Inject constructor(
                 }
 
                 if (user != null) {
-                    val updatedFriends = user.friends - email
+                    val updatedFriends = user.friends.filter { it.email != email }
                     val updatedSentRequests = user.sentRequests - email
                     val updatedReceivedRequests = user.receivedRequests - email
 
@@ -100,6 +101,34 @@ class FriendServiceImpl @Inject constructor(
             }
     }
 
+    override suspend fun removeFriend(
+        friendObject: FriendObject,
+        friendObjectEmail: String,
+        friendEmail: String
+    ) {
+        val friendObjectFriendsNew = friendObject.friends.filter { it.email != friendEmail }
+        val friendObjectNew = friendObject.copy(friends = friendObjectFriendsNew)
+
+        merge(
+            friendObjectNew,
+            friendObjectEmail
+        )
+
+        val friendNew = get(friendEmail)
+            .first()
+
+        val friendFriendsNew = friendNew?.friends?.filter { it.email != friendObjectEmail }
+
+        friendNew?.let {
+            val updatedFriendUser = it.copy(friends = friendFriendsNew ?: emptyList())
+
+            merge(
+                updatedFriendUser,
+                friendEmail
+            )
+        }
+    }
+
     override suspend fun addFriend(
         friendObject: FriendObject,
         email: String,
@@ -112,7 +141,7 @@ class FriendServiceImpl @Inject constructor(
         val friend = get(friendEmail)
             .first()!!
 
-        if (friendEmail in friendObject.friends) {
+        if (friendObject.friends.any { it.email == friendEmail }) {
             return "$friendEmail is already your friend"
         }
 
@@ -162,7 +191,7 @@ class FriendServiceImpl @Inject constructor(
 
         val friendNew = friend.copy(
             sentRequests = friend.sentRequests - email,
-            friends = friend.friends + email
+            friends = friend.friends + Friends(email)
         )
 
         merge(
@@ -172,7 +201,7 @@ class FriendServiceImpl @Inject constructor(
 
         val friendObjectNew = friendObject.copy(
             receivedRequests = friendObject.receivedRequests - friendEmail,
-            friends = friendObject.friends + friendEmail
+            friends = friendObject.friends + Friends(friendEmail)
         )
 
         merge(
