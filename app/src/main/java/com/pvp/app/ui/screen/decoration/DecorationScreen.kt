@@ -87,7 +87,7 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
             )
         } else {
             DecorationCards(
-                actionPurchase = false,
+                isStore = false,
                 holders = state.holders.filter { h -> h in holdersOwned },
                 isClickable = state.state is DecorationScreenState.NoOperation
             ) { model.apply(it.decoration) }
@@ -135,7 +135,7 @@ fun DecorationScreen(modifier: Modifier) {
 }
 
 @Composable
-private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
+private fun Store(model: DecorationViewModel = hiltViewModel()) {
     var item by remember { mutableStateOf<DecorationHolder?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     val state by model.state.collectAsStateWithLifecycle()
@@ -160,7 +160,7 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
             )
         } else {
             DecorationCards(
-                actionPurchase = true,
+                isStore = true,
                 holders = state.holders.filter { h -> h !in holders },
                 isClickable = state.state is DecorationScreenState.NoOperation
             ) {
@@ -223,6 +223,6 @@ private fun Purchase(model: DecorationViewModel = hiltViewModel()) {
 
 @Composable
 private fun screens() = listOf<Pair<String, @Composable () -> Unit>>(
-    "Purchase" to { Purchase() },
+    "Store" to { Store() },
     "Owned" to { Apply() },
 )
