@@ -1,15 +1,23 @@
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package com.pvp.app.model
 
-import kotlinx.serialization.Contextual
+import com.pvp.app.common.DurationSerializer
+import com.pvp.app.common.LocalDateSerializer
+import com.pvp.app.common.LocalTimeSerializer
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import java.util.Date
+import kotlinx.serialization.json.JsonNames
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalTime
 
 @Serializable
 data class ActivityEntry(
-    @Contextual
-    val date: Date = Date(),
+    var calories: Double = 0.0,
+    @Serializable(LocalDateSerializer::class)
+    var date: LocalDate,
     val email: String = "",
     var id: String? = null,
-    var steps: Int = 0,
-    var calories: Long = 0
+    var steps: Long = 0
 )
