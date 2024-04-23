@@ -1,22 +1,27 @@
-`package com.pvp.app.service
+package com.pvp.app.service
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.ActivityService
+import com.pvp.app.common.JsonUtil.JSON
+import com.pvp.app.common.JsonUtil.toJsonElement
+import com.pvp.app.common.JsonUtil.toPrimitivesMap
 import com.pvp.app.model.ActivityEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import java.util.Date
+import kotlinx.serialization.json.encodeToJsonElement
+import java.time.LocalDate
 import javax.inject.Inject
 
 class ActivityServiceImpl @Inject constructor(
     private val database: FirebaseFirestore,
 ) : ActivityService {
+
     override suspend fun get(
-        date: Date,
+        date: LocalDate,
         email: String
-    ): Flow<ActivityEntry?> {
+    ): Flow<ActivityEntry> {
         return database
             .collection(identifier)
             .whereEqualTo(
@@ -25,14 +30,19 @@ class ActivityServiceImpl @Inject constructor(
             )
             .whereEqualTo(
                 ActivityEntry::date.name,
-                date
+                date.toString()
             )
             .limit(1)
             .snapshots()
             .map { qs ->
                 qs.documents.firstNotNullOfOrNull {
-                    it.toObject(ActivityEntry::class.java)
-                }
+                    it.data?.let {
+                        JSON.decodeFromJsonElement(
+                            ActivityEntry.serializer(),
+                            it.toJsonElement()
+                        )
+                    }
+                } ?: ActivityEntry(date = date)
             }
     }
 
@@ -54,7 +64,9 @@ class ActivityServiceImpl @Inject constructor(
         database.runTransaction { transaction ->
             transaction.set(
                 reference,
-                activity
+                JSON
+                    .encodeToJsonElement<ActivityEntry>(activity)
+                    .toPrimitivesMap()
             )
         }
             .await()
