@@ -1,10 +1,12 @@
 package com.pvp.app.common
 
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -26,6 +28,27 @@ object DateUtil {
 
             return daysOfWeek
         }
+
+    /**
+     * Returns an end Instant for a specified date.
+     * If date is today - returns Instant for the current time,
+     * else returns Instant that is the start of the next day.
+     */
+    fun getEndInstant(date: LocalDate): Instant {
+        return if (date.isEqual(LocalDate.now())) {
+            ZonedDateTime
+                .of(
+                    LocalDateTime.now(),
+                    ZoneId.systemDefault()
+                )
+                .toInstant()
+        } else {
+            date
+                .plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+        }
+    }
 
     /**
      * Returns days of the YearMonth
