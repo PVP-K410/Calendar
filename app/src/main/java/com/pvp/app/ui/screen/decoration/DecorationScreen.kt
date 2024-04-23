@@ -160,7 +160,7 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
             Text(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(end = 4.dp),
-                text = "${state.user.points}"
+                text = "Your points ${state.user.points}"
             )
 
             Icon(
