@@ -153,6 +153,27 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(end = 4.dp),
+                text = "Your points ${state.user.points}"
+            )
+
+            Icon(
+                contentDescription = "Points indicator icon",
+                imageVector = Icons.Outlined.Stars
+            )
+        }
+
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.padding(16.dp)
+        )
+
         if (holders.size == state.holders.size) {
             Text(
                 style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
