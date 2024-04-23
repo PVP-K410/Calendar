@@ -1,10 +1,10 @@
 package com.pvp.app.ui.screen.layout
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -14,22 +14,30 @@ import androidx.navigation.compose.rememberNavController
 import com.pvp.app.ui.common.LocalBackgroundColors
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.backgroundGradientVertical
+import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.theme.BackgroundGradientSunset
 
+/**
+ * This function initializes routes for the app, since they are singletons and
+ * are not initialized until the first time they are accessed.
+ */
+private fun initializeRouteSingleton() {
+    Route.routesAuthenticated
+    Route.routesUnauthenticated
+    Route.routesDrawer
+}
+
 @Composable
-@SuppressLint("StateFlowValueCalledInComposition")
-fun LayoutScreenBootstrap(
-    viewModel: LayoutViewModel = hiltViewModel()
-) {
-    CompositionLocalProvider(
-        LocalBackgroundColors provides BackgroundGradientSunset
-    ) {
+fun LayoutScreenBootstrap(model: LayoutViewModel = hiltViewModel()) {
+    LaunchedEffect(Unit) { initializeRouteSingleton() }
+
+    CompositionLocalProvider(LocalBackgroundColors provides BackgroundGradientSunset) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .backgroundGradientVertical(LocalBackgroundColors.current)
         ) {
-            val state by viewModel.state.collectAsStateWithLifecycle()
+            val state by model.state.collectAsStateWithLifecycle()
 
             when {
                 state.isLoading -> {

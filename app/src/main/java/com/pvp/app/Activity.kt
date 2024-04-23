@@ -13,11 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.ui.router.Route
+import com.pvp.app.common.SplashScreenUtil.useStyledExit
 import com.pvp.app.ui.screen.layout.LayoutScreenBootstrap
+import com.pvp.app.ui.screen.layout.LayoutViewModel
 import com.pvp.app.ui.theme.CalendarTheme
-import com.pvp.app.ui.theme.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -26,31 +27,23 @@ class Activity : ComponentActivity() {
     override fun onCreate(stateApp: Bundle?) {
         super.onCreate(stateApp)
 
-        if (!isNotificationEnabled(this)) {
-            showNotificationPermissionDialog(this)
-        }
-
-        prepareRoutes()
+        val screen = installSplashScreen()
+            .useStyledExit {
+                if (!isNotificationEnabled(this)) {
+                    showNotificationPermissionDialog(this)
+                }
+            }
 
         setContent {
-            val themeViewModel: ThemeViewModel = hiltViewModel()
+            val model: LayoutViewModel = hiltViewModel()
 
-            CalendarTheme(model = themeViewModel) {
+            screen.setKeepOnScreenCondition { model.state.value.isLoading }
+
+            CalendarTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     LayoutScreenBootstrap()
                 }
             }
-        }
-    }
-
-    /**
-     * Initialize route collections to avoid lazy initialization problems
-     */
-    private fun prepareRoutes() {
-        run {
-            Route.routesAuthenticated
-            Route.routesDrawer
-            Route.routesUnauthenticated
         }
     }
 
@@ -88,7 +81,8 @@ class Activity : ComponentActivity() {
     }
 
     private fun showNotificationPermissionDialog(context: Context) {
-        AlertDialog.Builder(context)
+        AlertDialog
+            .Builder(context)
             .setTitle("Enable Notifications")
             .setMessage("Enable notifications to get reminders for tasks!")
             .setPositiveButton("Go to Settings") { _, _ ->

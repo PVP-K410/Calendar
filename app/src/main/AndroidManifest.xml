@@ -27,9 +27,9 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="${applicationName}"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Default"
+        android:theme="@style/Theme.StartUp"
         tools:targetApi="31">
 
         <service
@@ -41,7 +41,7 @@
         <activity
             android:name=".Activity"
             android:exported="true"
-            android:theme="@style/Theme.Default">
+            android:theme="@style/Theme.StartUp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />

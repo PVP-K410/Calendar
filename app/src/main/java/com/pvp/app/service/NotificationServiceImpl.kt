@@ -164,7 +164,7 @@ class NotificationServiceImpl @Inject constructor(
         )
             .setContentTitle(notification.title)
             .setContentText(notification.text)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.logo)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

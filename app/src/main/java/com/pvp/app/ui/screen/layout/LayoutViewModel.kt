@@ -38,8 +38,6 @@ class LayoutViewModel @Inject constructor(
     val reward: StateFlow<Reward> = _reward.asStateFlow()
 
     init {
-        _state.update { it.copy(isLoading = true) }
-
         collectStateUpdates()
     }
 
@@ -99,7 +97,7 @@ data class LayoutState(
         1
     ),
     val isAuthenticated: Boolean = false,
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val user: User? = null,
     val needsStreakReward: Boolean = false
 )

@@ -15,6 +15,7 @@ fun Router(
     controller: NavHostController,
     destinationStart: Route,
     modifier: Modifier = Modifier,
+    routeModifier: Modifier = Modifier,
     routes: List<Route>,
     scope: CoroutineScope
 ) {
@@ -31,6 +32,7 @@ fun Router(
                 animationSpec = tween(500)
             )
         },
+        modifier = modifier,
         navController = controller,
         startDestination = destinationStart.path
     ) {
@@ -38,7 +40,7 @@ fun Router(
             composable(route = r.path) {
                 r.screen(
                     controller,
-                    modifier,
+                    routeModifier,
                     scope
                 )
             }
