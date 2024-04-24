@@ -101,9 +101,9 @@ fun DecorationScreen(modifier: Modifier) {
 
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .then(modifier)
-            .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         Spacer(modifier = Modifier.size(16.dp))
