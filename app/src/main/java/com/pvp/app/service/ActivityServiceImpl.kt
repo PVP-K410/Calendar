@@ -10,6 +10,7 @@ import com.pvp.app.model.ActivityEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import java.time.LocalDate
 import javax.inject.Inject
@@ -21,7 +22,7 @@ class ActivityServiceImpl @Inject constructor(
     override suspend fun get(
         date: LocalDate,
         email: String
-    ): Flow<ActivityEntry> {
+    ): Flow<ActivityEntry?> {
         return database
             .collection(identifier)
             .whereEqualTo(
@@ -35,40 +36,36 @@ class ActivityServiceImpl @Inject constructor(
             .limit(1)
             .snapshots()
             .map { qs ->
-                qs.documents.firstNotNullOfOrNull {
-                    it.data?.let {
-                        JSON.decodeFromJsonElement(
-                            ActivityEntry.serializer(),
-                            it.toJsonElement()
+                qs.documents
+                    .firstOrNull()
+                    ?.let {
+                        JSON.decodeFromJsonElement<ActivityEntry>(
+                            it.data.toJsonElement()
                         )
                     }
-                } ?: ActivityEntry(date = date)
             }
     }
 
     override suspend fun merge(activity: ActivityEntry) {
-        val reference = if (activity.id == null) {
-            val ref = database
-                .collection(identifier)
-                .document()
-
-            activity.id = ref.id
-
-            ref
-        } else {
-            database
-                .collection(identifier)
-                .document(activity.id!!)
-        }
-
-        database.runTransaction { transaction ->
-            transaction.set(
-                reference,
-                JSON
-                    .encodeToJsonElement<ActivityEntry>(activity)
-                    .toPrimitivesMap()
+        val reference = database
+            .collection(identifier)
+            .document(
+                activity.id
+                    ?: database
+                        .collection(identifier)
+                        .document()
+                        .also { activity.id = it.id }.id
             )
-        }
+
+        database
+            .runTransaction {
+                it.set(
+                    reference,
+                    JSON
+                        .encodeToJsonElement<ActivityEntry>(activity)
+                        .toPrimitivesMap()
+                )
+            }
             .await()
     }
 }
