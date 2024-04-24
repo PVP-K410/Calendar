@@ -1,5 +1,6 @@
 package com.pvp.app.common
 
+import com.google.firebase.Timestamp
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -8,6 +9,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.TextStyle
+import java.util.Date
 import java.util.Locale
 
 object DateUtil {
@@ -86,6 +88,18 @@ object DateUtil {
                 Locale.getDefault()
             )
         } $year"
+    }
+
+    /**
+     * Converts LocalDate to Timestamp
+     */
+    fun LocalDate.toTimestamp(): Timestamp {
+        return Timestamp(
+            Date.from(
+                atStartOfDay(ZoneId.systemDefault())
+                    .toInstant()
+            )
+        )
     }
 
     /**
