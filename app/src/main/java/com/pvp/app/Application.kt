@@ -62,8 +62,6 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
                 false
             )
         ) {
-            createActivityWorker()
-
             createDailyTaskWorker()
 
             createDrinkReminderWorker()
@@ -90,24 +88,37 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         createTaskAutocompleteWorker()
     }
 
-    private fun createActivityWorker() {
-        val requestPeriodic = PeriodicWorkRequestBuilder<ActivityWorker>(
-            repeatInterval = 2,
-            repeatIntervalTimeUnit = TimeUnit.HOURS
+    fun createActivityWorker() {
+        val prefs = getSharedPreferences(
+            "ActivityWorker",
+            Context.MODE_PRIVATE
         )
-            .setInitialDelay(
-                Duration.of(
-                    30,
-                    ChronoUnit.SECONDS
-                )
-            )
-            .build()
+        val lastExecutionTime = prefs.getLong(
+            "LastExecutionTime",
+            0
+        )
+        val currentTime = System.currentTimeMillis()
 
-        workManager.enqueueUniquePeriodicWork(
-            ActivityWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            requestPeriodic
-        )
+        if (currentTime - lastExecutionTime > TimeUnit.HOURS.toMillis(2)) {
+            val request = OneTimeWorkRequestBuilder<ActivityWorker>()
+                .setInitialDelay(
+                    Duration.of(
+                        30,
+                        ChronoUnit.SECONDS
+                    )
+                )
+                .build()
+
+            workManager.enqueue(request)
+
+            prefs
+                .edit()
+                .putLong(
+                    "LastExecutionTime",
+                    currentTime
+                )
+                .apply()
+        }
     }
 
     private fun createDailyTaskWorker() {

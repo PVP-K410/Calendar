@@ -47,6 +47,12 @@ class Activity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        (application as Application).createActivityWorker()
+    }
+
     private fun isNotificationEnabled(context: Context): Boolean {
         val enabled = NotificationManagerCompat
             .from(context)
