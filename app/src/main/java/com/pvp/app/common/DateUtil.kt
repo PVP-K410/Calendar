@@ -36,7 +36,7 @@ object DateUtil {
      * If date is today - returns Instant for the current time,
      * else returns Instant that is the start of the next day.
      */
-    fun getEndInstant(date: LocalDate): Instant {
+    fun toNowOrNextDay(date: LocalDate): Instant {
         return if (date.isEqual(LocalDate.now())) {
             ZonedDateTime
                 .of(

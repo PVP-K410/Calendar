@@ -93,10 +93,12 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
             "ActivityWorker",
             Context.MODE_PRIVATE
         )
+
         val lastExecutionTime = prefs.getLong(
             "LastExecutionTime",
             0
         )
+
         val currentTime = System.currentTimeMillis()
 
         if (currentTime - lastExecutionTime > TimeUnit.HOURS.toMillis(2)) {

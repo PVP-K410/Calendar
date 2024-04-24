@@ -113,7 +113,7 @@ class ActivityWorker @AssistedInject constructor(
     }
 
     private suspend fun getCalories(date: LocalDate): Double {
-        val end = DateUtil.getEndInstant(date)
+        val end = DateUtil.toNowOrNextDay(date)
 
         val start = date
             .atStartOfDay(ZoneId.systemDefault())

@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.common.DateUtil.getEndInstant
+import com.pvp.app.common.DateUtil.toNowOrNextDay
 import com.pvp.app.common.TaskUtil.sort
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
@@ -84,7 +84,7 @@ class CalendarWeeklyViewModel @Inject constructor(
     }
 
     suspend fun getDayCaloriesTotal(date: LocalDate): Double {
-        val end = getEndInstant(date)
+        val end = toNowOrNextDay(date)
 
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
@@ -97,7 +97,7 @@ class CalendarWeeklyViewModel @Inject constructor(
     }
 
     suspend fun getDayHeartRateAverage(date: LocalDate): Long {
-        val end = getEndInstant(date)
+        val end = toNowOrNextDay(date)
 
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
