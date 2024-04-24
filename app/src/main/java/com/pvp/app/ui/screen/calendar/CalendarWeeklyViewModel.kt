@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.DateUtil.toNowOrNextDay
 import com.pvp.app.common.TaskUtil.sort
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
@@ -27,11 +28,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Duration
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.temporal.IsoFields
 import javax.inject.Inject
 
@@ -85,7 +84,7 @@ class CalendarWeeklyViewModel @Inject constructor(
     }
 
     suspend fun getDayCaloriesTotal(date: LocalDate): Double {
-        val end = getEndInstant(date)
+        val end = toNowOrNextDay(date)
 
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
@@ -98,7 +97,7 @@ class CalendarWeeklyViewModel @Inject constructor(
     }
 
     suspend fun getDayHeartRateAverage(date: LocalDate): Long {
-        val end = getEndInstant(date)
+        val end = toNowOrNextDay(date)
 
         val start = date
             .atStartOfDay(ZoneId.systemDefault())
@@ -140,22 +139,6 @@ class CalendarWeeklyViewModel @Inject constructor(
             start,
             end
         )
-    }
-
-    private fun getEndInstant(date: LocalDate): Instant {
-        return if (date.isEqual(LocalDate.now())) {
-            ZonedDateTime
-                .of(
-                    LocalDateTime.now(),
-                    ZoneId.systemDefault()
-                )
-                .toInstant()
-        } else {
-            date
-                .plusDays(1)
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-        }
     }
 }
 

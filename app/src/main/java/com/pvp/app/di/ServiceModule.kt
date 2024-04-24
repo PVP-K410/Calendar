@@ -7,6 +7,7 @@ import coil.ImageLoader
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.app
+import com.pvp.app.api.ActivityService
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.DecorationService
@@ -22,6 +23,7 @@ import com.pvp.app.api.SettingService
 import com.pvp.app.api.StreakService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.service.ActivityServiceImpl
 import com.pvp.app.service.AuthenticationServiceImpl
 import com.pvp.app.service.ConfigurationImpl
 import com.pvp.app.service.DecorationServiceImpl
@@ -51,7 +53,7 @@ interface ServiceBindingsModule {
 
     @Binds
     @Singleton
-    fun bindActivityService(service: HealthConnectServiceImpl): HealthConnectService
+    fun bindActivityService(service: ActivityServiceImpl): ActivityService
 
     @Binds
     @Singleton
@@ -76,6 +78,10 @@ interface ServiceBindingsModule {
     @Binds
     @Singleton
     fun bindFriendService(service: FriendServiceImpl): FriendService
+
+    @Binds
+    @Singleton
+    fun bindHealthConnectService(service: HealthConnectServiceImpl): HealthConnectService
 
     @Binds
     @Singleton
@@ -122,7 +128,10 @@ object ServiceProvidersModule {
 
     @Provides
     @Singleton
-    fun provideImageLoader(@ApplicationContext context: Context): ImageLoader {
+    fun provideImageLoader(
+        @ApplicationContext
+        context: Context
+    ): ImageLoader {
         return Coil.imageLoader(context)
     }
 

@@ -17,6 +17,7 @@ import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import com.pvp.app.common.DateUtil.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
+import com.pvp.app.worker.ActivityWorker
 import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
@@ -85,6 +86,41 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         // Should be left out to ensure the TaskAutocompleteService is persisted
         // as a running foreground service
         createTaskAutocompleteWorker()
+    }
+
+    fun createActivityWorker() {
+        val prefs = getSharedPreferences(
+            "ActivityWorker",
+            Context.MODE_PRIVATE
+        )
+
+        val lastExecutionTime = prefs.getLong(
+            "LastExecutionTime",
+            0
+        )
+
+        val currentTime = System.currentTimeMillis()
+
+        if (currentTime - lastExecutionTime > TimeUnit.HOURS.toMillis(2)) {
+            val request = OneTimeWorkRequestBuilder<ActivityWorker>()
+                .setInitialDelay(
+                    Duration.of(
+                        30,
+                        ChronoUnit.SECONDS
+                    )
+                )
+                .build()
+
+            workManager.enqueue(request)
+
+            prefs
+                .edit()
+                .putLong(
+                    "LastExecutionTime",
+                    currentTime
+                )
+                .apply()
+        }
     }
 
     private fun createDailyTaskWorker() {

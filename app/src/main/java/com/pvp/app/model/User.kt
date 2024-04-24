@@ -1,5 +1,7 @@
 package com.pvp.app.model
 
+import com.google.firebase.Timestamp
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,6 +13,8 @@ data class User(
     var experience: Int = 0,
     var height: Int = 0,
     var ingredients: List<Ingredient> = emptyList(),
+    @Contextual
+    var lastActivitySync: Timestamp? = null,
     var level: Int = 0,
     var mass: Int = 0,
     var points: Int = 0,
