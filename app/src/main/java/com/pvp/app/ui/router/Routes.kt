@@ -4,32 +4,147 @@ import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.pvp.app.R
 import com.pvp.app.ui.screen.authentication.AuthenticationScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.decoration.DecorationScreen
+import com.pvp.app.ui.screen.friends.FriendScreen
 import com.pvp.app.ui.screen.friends.FriendsScreen
-import com.pvp.app.ui.screen.goals.GoalScreen
+import com.pvp.app.ui.screen.friends.FriendsViewModel
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
 import kotlinx.coroutines.CoroutineScope
 
 sealed class Route(
+    val builder: NavGraphBuilder.(
+        controller: NavHostController,
+        modifier: Modifier,
+        scope: CoroutineScope
+    ) -> Unit,
     val icon: ImageVector? = null,
     val iconDescription: String? = null,
     val path: String,
-    val resourceTitleId: Int,
-    val screen: @Composable (NavHostController, Modifier, CoroutineScope) -> Unit
+    val resourceTitleId: Int
 ) {
+
+    data object Authentication : Route(
+        builder = { _, _, _ ->
+            composable("authentication") {
+                AuthenticationScreen()
+            }
+        },
+        path = "authentication",
+        resourceTitleId = R.string.empty,
+    )
+
+    data object Calendar : Route(
+        builder = { _, m, _ ->
+            composable("calendar") {
+                CalendarScreen(modifier = m)
+            }
+        },
+        icon = Icons.Outlined.CalendarMonth,
+        iconDescription = "Calendar page button icon",
+        path = "calendar",
+        resourceTitleId = R.string.route_calendar
+    )
+
+    data object Decorations : Route(
+        builder = { _, m, _ ->
+            composable("decorations") {
+                DecorationScreen(modifier = m)
+            }
+        },
+        icon = Icons.Outlined.Storefront,
+        iconDescription = "Decorations page button icon",
+        path = "decorations",
+        resourceTitleId = R.string.route_decorations
+    )
+
+    data object Friends : Route(
+        builder = { controller, modifier, _ ->
+            navigation(
+                route = "friendsGraph",
+                startDestination = "friends"
+            ) {
+                composable("friends") {
+                    FriendsScreen(
+                        controller = controller,
+                        model = it.hiltViewModel<FriendsViewModel>(controller),
+                        modifier = modifier
+                    )
+                }
+
+                composable("friend") {
+                    FriendScreen(
+                        model = it.hiltViewModel<FriendsViewModel>(controller),
+                        modifier = modifier
+                    )
+                }
+            }
+        },
+        icon = Icons.Outlined.People,
+        iconDescription = "Friends page button icon",
+        path = "friendsGraph",
+        resourceTitleId = R.string.route_friends
+    )
+
+    data object None : Route(
+        builder = { _, _, _ -> composable("none") { } },
+        path = "none",
+        resourceTitleId = R.string.empty
+    )
+
+    data object Settings : Route(
+        builder = { _, m, _ ->
+            composable("settings") {
+                SettingsScreen(modifier = m)
+            }
+        },
+        icon = Icons.Outlined.Settings,
+        iconDescription = "Settings page button icon",
+        path = "settings",
+        resourceTitleId = R.string.route_settings
+    )
+
+    @SuppressLint("NewApi")
+    data object Steps : Route(
+        builder = { _, m, _ ->
+            composable("steps") {
+                StepScreen(modifier = m)
+            }
+        },
+        icon = Icons.AutoMirrored.Outlined.DirectionsWalk,
+        iconDescription = "Step counter page button icon",
+        path = "steps",
+        resourceTitleId = R.string.route_steps
+    )
+
+    data object Survey : Route(
+        builder = { _, _, _ ->
+            composable("survey") {
+                SurveyScreen()
+            }
+        },
+        path = "survey",
+        resourceTitleId = R.string.route_survey
+    )
 
     companion object {
 
@@ -43,7 +158,6 @@ sealed class Route(
             Calendar,
             Decorations,
             Friends,
-            Goals,
             None,
             Settings,
             Steps
@@ -61,7 +175,6 @@ sealed class Route(
             Calendar,
             Decorations,
             Friends,
-            Goals,
             Settings,
             Steps
         )
@@ -77,72 +190,22 @@ sealed class Route(
             None,
             Survey
         )
+
+        /**
+         * If there is any routes in the backstack that had specified viewModel, it will be
+         * returned. Otherwise, it will return the viewModel of the current route.
+         */
+        @Composable
+        private inline fun <reified T : ViewModel> NavBackStackEntry.hiltViewModel(
+            controller: NavController
+        ): T {
+            val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
+
+            val parentEntry = remember(this) {
+                controller.getBackStackEntry(navGraphRoute)
+            }
+
+            return hiltViewModel(parentEntry)
+        }
     }
-
-    data object Authentication : Route(
-        path = "authentication",
-        resourceTitleId = R.string.empty,
-        screen = { _, _, _ -> AuthenticationScreen() }
-    )
-
-    data object Calendar : Route(
-        icon = Icons.Outlined.CalendarMonth,
-        iconDescription = "Calendar page button icon",
-        path = "calendar",
-        resourceTitleId = R.string.route_calendar,
-        screen = { _, m, _ -> CalendarScreen(modifier = m) }
-    )
-
-    data object Decorations : Route(
-        icon = Icons.Outlined.Storefront,
-        iconDescription = "Decorations page button icon",
-        path = "decorations",
-        resourceTitleId = R.string.route_decorations,
-        screen = { _, m, _ -> DecorationScreen(modifier = m) }
-    )
-
-    data object Friends : Route(
-        icon = Icons.Outlined.People,
-        iconDescription = "Friends page button icon",
-        path = "friends",
-        resourceTitleId = R.string.route_friends,
-        screen = { _, m, _ -> FriendsScreen(modifier = m) }
-    )
-
-    data object Goals : Route(
-        icon = Icons.Outlined.EmojiEvents,
-        iconDescription = "Goals page button icon",
-        path = "goals",
-        resourceTitleId = R.string.route_goals,
-        screen = { _, m, _ -> GoalScreen(modifier = m) }
-    )
-
-    data object None : Route(
-        path = "none",
-        resourceTitleId = R.string.empty,
-        screen = { _, _, _ -> }
-    )
-
-    data object Settings : Route(
-        icon = Icons.Outlined.Settings,
-        iconDescription = "Settings page button icon",
-        path = "settings",
-        resourceTitleId = R.string.route_settings,
-        screen = { _, m, _ -> SettingsScreen(modifier = m) }
-    )
-
-    @SuppressLint("NewApi")
-    data object Steps : Route(
-        icon = Icons.AutoMirrored.Outlined.DirectionsWalk,
-        iconDescription = "Step counter page button icon",
-        path = "steps",
-        resourceTitleId = R.string.route_steps,
-        screen = { _, m, _ -> StepScreen(modifier = m) }
-    )
-
-    data object Survey : Route(
-        path = "survey",
-        resourceTitleId = R.string.route_survey,
-        screen = { _, _, _ -> SurveyScreen() }
-    )
 }

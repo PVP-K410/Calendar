@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -37,13 +36,12 @@ fun Router(
         startDestination = destinationStart.path
     ) {
         routes.forEach { r ->
-            composable(route = r.path) {
-                r.screen(
-                    controller,
-                    routeModifier,
-                    scope
-                )
-            }
+            r.builder(
+                this,
+                controller,
+                routeModifier,
+                scope
+            )
         }
     }
 }

@@ -27,6 +27,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Dehaze
@@ -62,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pvp.app.R
@@ -77,6 +79,24 @@ import com.pvp.app.ui.screen.drawer.DrawerScreen
 import com.pvp.app.ui.screen.profile.ProfileScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+/**
+ * @return Pair of [Route] object and [NavDestination] object.
+ */
+@Composable
+private fun rememberRoute(controller: NavHostController): Pair<Route, NavDestination?> {
+    val destination = controller.currentBackStackEntryAsState().value?.destination
+
+    return remember(destination) {
+        Pair(
+            Route.routesAuthenticated.find {
+                it.path == destination?.route ||
+                        it.path == destination?.parent?.route
+            } ?: Route.Calendar,
+            destination
+        )
+    }
+}
 
 @Composable
 private fun resolveTitle(
@@ -192,9 +212,7 @@ private fun Content(
 }
 
 @Composable
-fun FloatingActionButton(
-    onClick: () -> Unit,
-) {
+fun FloatingActionButton(onClick: () -> Unit) {
     FloatingActionButton(
         containerColor = MaterialTheme.colorScheme.primary,
         onClick = onClick,
@@ -209,6 +227,7 @@ fun FloatingActionButton(
 
 @Composable
 private fun Header(
+    avatar: ImageBitmap,
     colorAvatarBorder: Color = MaterialTheme.colorScheme.primaryContainer,
     colors: TopAppBarColors = TopAppBarColors(
         containerColor = MaterialTheme.colorScheme.primary,
@@ -219,8 +238,8 @@ private fun Header(
     ),
     onClickNavigation: () -> Unit,
     onClickProfile: () -> Unit,
-    title: String,
-    userAvatar: ImageBitmap
+    showBackNavigation: Boolean = false,
+    title: String
 ) {
     CenterAlignedTopAppBar(
         actions = {
@@ -235,7 +254,7 @@ private fun Header(
                             color = colorAvatarBorder,
                             shape = RoundedCornerShape(32.dp)
                         ),
-                    painter = BitmapPainter(userAvatar)
+                    painter = BitmapPainter(avatar)
                 )
             }
         },
@@ -246,10 +265,17 @@ private fun Header(
             .clip(shape = MaterialTheme.shapes.extraLarge),
         navigationIcon = {
             IconButton(onClick = onClickNavigation) {
-                Icon(
-                    contentDescription = "Navigation drawer icon",
-                    imageVector = Icons.Outlined.Dehaze
-                )
+                if (showBackNavigation) {
+                    Icon(
+                        contentDescription = "Navigate back icon",
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack
+                    )
+                } else {
+                    Icon(
+                        contentDescription = "Navigation drawer icon",
+                        imageVector = Icons.Outlined.Dehaze
+                    )
+                }
             }
         },
         title = {
@@ -273,13 +299,9 @@ fun LayoutScreenAuthenticated(
     scope: CoroutineScope,
     viewModel: LayoutViewModel = hiltViewModel()
 ) {
-    val destination = controller.currentBackStackEntryAsState().value?.destination
-
-    val route = Route.routesAuthenticated
-        .find { it.path == destination?.route }
-        ?: Route.Calendar
-
+    val route = rememberRoute(controller)
     val stateDrawer = rememberDrawerState(DrawerValue.Closed)
+    val stateLayout by viewModel.state.collectAsStateWithLifecycle()
 
     val statePager = rememberPagerState(
         initialPage = 0,
@@ -289,7 +311,7 @@ fun LayoutScreenAuthenticated(
     var isRewardDialogOpen by remember { mutableStateOf(false) }
     val toggleRewardDialog = remember { { isRewardDialogOpen = !isRewardDialogOpen } }
 
-    if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward) {
+    if (stateLayout.needsStreakReward) {
         LaunchedEffect(null) {
             viewModel.giveReward()
 
@@ -317,7 +339,7 @@ fun LayoutScreenAuthenticated(
                         statePager
                     )
                 },
-                if (statePager.currentPage == 1) Route.None else route,
+                if (statePager.currentPage == 1) Route.None else route.first,
                 Route.routesDrawer
             )
         },
@@ -330,7 +352,7 @@ fun LayoutScreenAuthenticated(
             floatingActionButton = {
                 if (
                     supportsTaskCreation(
-                        route,
+                        route.first,
                         statePager
                     )
                 ) {
@@ -339,14 +361,26 @@ fun LayoutScreenAuthenticated(
             },
             floatingActionButtonPosition = FabPosition.End,
             topBar = {
-                val stateLayout by viewModel.state.collectAsStateWithLifecycle()
+                val showBack = remember(
+                    route,
+                    statePager.currentPage
+                ) {
+                    statePager.currentPage == 0 &&
+                            route.second?.route !in Route.routesDrawer.map { it.path } &&
+                            route.second?.parent?.startDestinationRoute != route.second?.route
+                }
 
                 Header(
+                    avatar = stateLayout.avatar,
                     onClickNavigation = {
-                        toggleNavigationDrawer(
-                            scope,
-                            stateDrawer
-                        )
+                        if (showBack) {
+                            controller.popBackStack()
+                        } else {
+                            toggleNavigationDrawer(
+                                scope,
+                                stateDrawer
+                            )
+                        }
                     },
                     onClickProfile = {
                         if (statePager.currentPage == 1) {
@@ -359,11 +393,11 @@ fun LayoutScreenAuthenticated(
                             statePager
                         )
                     },
+                    showBackNavigation = showBack,
                     title = resolveTitle(
-                        route,
+                        route.first,
                         statePager
-                    ),
-                    userAvatar = stateLayout.avatar
+                    )
                 )
             }
         ) {
@@ -376,7 +410,7 @@ fun LayoutScreenAuthenticated(
 
             if (
                 supportsTaskCreation(
-                    route,
+                    route.first,
                     statePager
                 )
             ) {
