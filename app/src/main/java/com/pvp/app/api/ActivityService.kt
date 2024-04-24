@@ -13,7 +13,7 @@ interface ActivityService : DocumentsCollection {
 
     /**
      * Finds and returns an activity by the date and email from the database.
-     * If not found returns an empty activity containing only the current date
+     * If not found returns null.
      */
     suspend fun get(
         date: LocalDate,
