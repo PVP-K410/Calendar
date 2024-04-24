@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalSerializationApi::class)
-
 package com.pvp.app.model
 
 import com.pvp.app.common.LocalDateSerializer
