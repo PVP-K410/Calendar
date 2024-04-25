@@ -56,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.pvp.app.ui.common.ButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicator
+import com.pvp.app.ui.router.Routes
 
 private enum class SortingType {
     EXPERIENCE,
@@ -312,7 +313,9 @@ fun FriendsScreen(
             onSelect = { friend ->
                 model.select(friend.user.email)
 
-                controller.navigate("friend")
+                controller.navigate(Routes.Friend.path) {
+                    launchSingleTop = true
+                }
             },
             scrollState = scrollState
         )

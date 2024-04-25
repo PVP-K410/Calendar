@@ -11,6 +11,7 @@
     <string name="form_survey_toast_error">Submission was not successful</string>
     <string name="route_calendar">Calendar</string>
     <string name="route_decorations">Decorations</string>
+    <string name="route_friend">%1$s Profile</string>
     <string name="route_friends">Friends</string>
     <string name="route_goals">Goals</string>
     <string name="route_profile">Profile</string>

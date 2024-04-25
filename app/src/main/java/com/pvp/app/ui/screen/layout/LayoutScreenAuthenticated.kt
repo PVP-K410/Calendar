@@ -50,6 +50,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +60,6 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,10 +70,11 @@ import com.pvp.app.R
 import com.pvp.app.model.Decoration
 import com.pvp.app.model.Reward
 import com.pvp.app.ui.common.AsyncImage
+import com.pvp.app.ui.common.RouteUtil.RouteTitle
 import com.pvp.app.ui.common.lighten
-import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
+import com.pvp.app.ui.router.Routes
 import com.pvp.app.ui.screen.calendar.TaskCreateDialog
 import com.pvp.app.ui.screen.drawer.DrawerScreen
 import com.pvp.app.ui.screen.profile.ProfileScreen
@@ -89,23 +90,12 @@ private fun rememberRoute(controller: NavHostController): Pair<Route, NavDestina
 
     return remember(destination) {
         Pair(
-            Route.routesAuthenticated.find {
+            Routes.routesAuthenticated.find {
                 it.path == destination?.route ||
                         it.path == destination?.parent?.route
-            } ?: Route.Calendar,
+            } ?: Routes.Calendar,
             destination
         )
-    }
-}
-
-@Composable
-private fun resolveTitle(
-    route: Route,
-    statePager: PagerState
-): String {
-    return when (statePager.currentPage) {
-        1 -> stringResource(R.string.route_profile)
-        else -> stringResource(route.resourceTitleId)
     }
 }
 
@@ -116,7 +106,7 @@ private fun supportsTaskCreation(
     return when {
         state.currentPage == 1 -> false
         else -> when (route) {
-            Route.Calendar -> true
+            Routes.Calendar -> true
             else -> false
         }
     }
@@ -153,7 +143,9 @@ private fun switchScreen(
     stateDrawer: DrawerState,
     statePager: PagerState
 ) {
-    controller.navigateWithPopUp(path)
+    controller.navigate(path) {
+        launchSingleTop = true
+    }
 
     scope.launch {
         stateDrawer.close()
@@ -184,8 +176,8 @@ private fun toggleNavigationDrawer(
 @Composable
 private fun Content(
     controller: NavHostController,
+    onConsumeOptions: (Route.Options) -> Unit,
     paddingValues: PaddingValues,
-    scope: CoroutineScope,
     state: PagerState
 ) {
     val modifier = remember(paddingValues) {
@@ -200,10 +192,10 @@ private fun Content(
         when (it) {
             0 -> Router(
                 controller = controller,
-                destinationStart = Route.Calendar,
+                start = Routes.Calendar,
+                onConsumeOptions = onConsumeOptions,
                 routeModifier = modifier,
-                routes = Route.routesAuthenticated,
-                scope = scope
+                routes = Routes.routesAuthenticated
             )
 
             1 -> ProfileScreen(modifier = modifier)
@@ -239,7 +231,7 @@ private fun Header(
     onClickNavigation: () -> Unit,
     onClickProfile: () -> Unit,
     showBackNavigation: Boolean = false,
-    title: String
+    title: @Composable () -> Unit
 ) {
     CenterAlignedTopAppBar(
         actions = {
@@ -282,13 +274,7 @@ private fun Header(
             Row(
                 modifier = Modifier.fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    fontSize = 24.sp,
-                    style = MaterialTheme.typography.titleLarge,
-                    text = title,
-                )
-            }
+            ) { title() }
         }
     )
 }
@@ -296,10 +282,11 @@ private fun Header(
 @Composable
 fun LayoutScreenAuthenticated(
     controller: NavHostController,
-    scope: CoroutineScope,
     viewModel: LayoutViewModel = hiltViewModel()
 ) {
+    var options by remember { mutableStateOf<Route.Options>(Route.Options.None) }
     val route = rememberRoute(controller)
+    val scope = rememberCoroutineScope()
     val stateDrawer = rememberDrawerState(DrawerValue.Closed)
     val stateLayout by viewModel.state.collectAsStateWithLifecycle()
 
@@ -339,8 +326,8 @@ fun LayoutScreenAuthenticated(
                         statePager
                     )
                 },
-                if (statePager.currentPage == 1) Route.None else route.first,
-                Route.routesDrawer
+                if (statePager.currentPage == 1) Routes.None else route.first,
+                Routes.routesDrawer
             )
         },
         drawerState = stateDrawer
@@ -366,7 +353,7 @@ fun LayoutScreenAuthenticated(
                     statePager.currentPage
                 ) {
                     statePager.currentPage == 0 &&
-                            route.second?.route !in Route.routesDrawer.map { it.path } &&
+                            route.second?.route !in Routes.routesDrawer.map { it.path } &&
                             route.second?.parent?.startDestinationRoute != route.second?.route
                 }
 
@@ -394,17 +381,19 @@ fun LayoutScreenAuthenticated(
                         )
                     },
                     showBackNavigation = showBack,
-                    title = resolveTitle(
-                        route.first,
-                        statePager
-                    )
+                    title = {
+                        when (statePager.currentPage) {
+                            1 -> RouteTitle(stringResource(R.string.route_profile))
+                            else -> options.title?.invoke()
+                        }
+                    }
                 )
             }
         ) {
             Content(
                 controller = controller,
+                onConsumeOptions = { optionsNew -> options = optionsNew },
                 paddingValues = it,
-                scope = scope,
                 state = statePager
             )
 

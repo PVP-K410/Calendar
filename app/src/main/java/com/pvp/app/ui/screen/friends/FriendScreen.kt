@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.pvp.app.model.Friends
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Experience
@@ -47,8 +49,10 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun FriendScreen(
+    controller: NavHostController,
     model: FriendsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    resolveOptions: () -> Unit
 ) {
     val state by model.stateFriend.collectAsStateWithLifecycle()
 
@@ -56,6 +60,10 @@ fun FriendScreen(
         ProgressIndicator()
 
         return
+    }
+
+    LaunchedEffect(state.entry.user.username) {
+        resolveOptions()
     }
 
     val details = state.details
@@ -87,7 +95,11 @@ fun FriendScreen(
 
         Spacer(modifier = Modifier.size(8.dp))
 
-        Remove { model.remove(entry.user.email) }
+        Remove {
+            model.remove(entry.user.email)
+
+            controller.popBackStack()
+        }
     }
 }
 

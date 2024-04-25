@@ -7,30 +7,27 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import com.pvp.app.ui.common.LocalBackgroundColors
 import com.pvp.app.ui.common.backgroundGradientVertical
-import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
-import kotlinx.coroutines.CoroutineScope
+import com.pvp.app.ui.router.Routes
 
 @Composable
 fun LayoutScreenUnauthenticated(
     areSurveysFilled: Boolean?,
     controller: NavHostController,
-    isAuthenticated: Boolean,
-    scope: CoroutineScope
+    isAuthenticated: Boolean
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Router(
             controller = controller,
-            destinationStart = if (isAuthenticated && areSurveysFilled == false) {
-                Route.Survey
+            start = if (isAuthenticated && areSurveysFilled == false) {
+                Routes.Survey
             } else {
-                Route.Authentication
+                Routes.Authentication
             },
             modifier = Modifier
                 .fillMaxSize()
                 .backgroundGradientVertical(LocalBackgroundColors.current),
-            routes = Route.routesUnauthenticated,
-            scope = scope
+            routes = Routes.routesUnauthenticated,
         )
     }
 }
