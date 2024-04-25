@@ -360,14 +360,6 @@ fun TaskCreateForm(
                     } before task" else ""
             )
 
-            if (supportsDistanceMetrics) {
-                Text(
-                    text = "${activity.title} is likely to be autocompleted",
-                    style = TextStyle(fontSize = 14.sp),
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-            }
-
             Button(
                 onClick = {
                     when (targetClass) {
