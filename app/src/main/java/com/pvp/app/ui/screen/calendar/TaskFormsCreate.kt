@@ -143,6 +143,7 @@ fun TaskCreateForm(
     var duration by remember { mutableStateOf(Duration.ofMinutes(0)) }
     var reminderTime by remember { mutableStateOf<Duration?>(null) }
     var activity by remember { mutableStateOf(SportActivity.Walking) }
+    var supportsDistanceMetrics by remember { mutableStateOf(false) }
     var distance by remember { mutableDoubleStateOf(0.0) }
     var dateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
     var editingTitle by remember { mutableStateOf("") }
@@ -223,6 +224,7 @@ fun TaskCreateForm(
                     onActivityChange = { newActivity ->
                         if (newActivity != null) {
                             activity = newActivity
+                            supportsDistanceMetrics = activity.supportsDistanceMetrics
                         }
                     },
                     onDistanceChange = { newDistance ->
@@ -237,6 +239,8 @@ fun TaskCreateForm(
             }
 
             if (targetClass != SportTask::class) {
+                supportsDistanceMetrics = false
+
                 EditableInfoItem(
                     dialogContent = {
                         Column {
@@ -355,6 +359,14 @@ fun TaskCreateForm(
                         if (reminderTime?.toMinutes()?.toInt() == 1) "minute" else "minutes"
                     } before task" else ""
             )
+
+            if (supportsDistanceMetrics) {
+                Text(
+                    text = "${activity.title} is likely to be autocompleted",
+                    style = TextStyle(fontSize = 14.sp),
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
 
             Button(
                 onClick = {
