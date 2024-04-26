@@ -84,7 +84,10 @@ private fun NavGraphBuilder.composeRoute(
             controller
         )
 
-        LaunchedEffect(backstack.destination.route) {
+        LaunchedEffect(
+            backstack.destination,
+            options
+        ) {
             if (backstack.destination.route == route.path) {
                 onConsumeOptions(options)
             }

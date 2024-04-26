@@ -8,7 +8,6 @@ import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -152,19 +151,17 @@ object Routes {
         // Options [Route.Node.options] are not defined here, because we are not using static values
         // of this route anywhere
         resolveOptions = { backstack, controller ->
-            val state by backstack
+            val username = backstack
                 .hiltViewModel<FriendsViewModel>(controller).stateFriend
-                .collectAsStateWithLifecycle()
+                .collectAsStateWithLifecycle().value.entry.user.username
 
-            val title = with(state.entry.user.username) {
-                if (isNotBlank()) {
-                    stringResource(
-                        R.string.route_friend,
-                        this
-                    )
-                } else {
-                    ""
-                }
+            val title = if (username.isNotBlank()) {
+                stringResource(
+                    R.string.route_friend,
+                    username
+                )
+            } else {
+                stringResource(R.string.route_friends)
             }
 
             Options(title = { RouteTitle(title) })

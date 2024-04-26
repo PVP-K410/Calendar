@@ -82,6 +82,32 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
+ * Should execute logic for pressing left-corner's navigation button in the header
+ */
+private fun navigate(
+    controller: NavHostController,
+    scope: CoroutineScope,
+    showBack: Boolean,
+    state: DrawerState
+) {
+    if (showBack) {
+        controller.popBackStack()
+
+        return
+    }
+
+    scope.launch {
+        state.apply {
+            if (isOpen) {
+                close()
+            } else {
+                open()
+            }
+        }
+    }
+}
+
+/**
  * @return Pair of [Route] object and [NavDestination] object.
  */
 @Composable
@@ -99,24 +125,36 @@ private fun rememberRoute(controller: NavHostController): Pair<Route, NavDestina
     }
 }
 
+@Composable
+private fun showBackNavigation(
+    destination: NavDestination,
+    page: Int
+): Boolean {
+    return remember(
+        destination,
+        page
+    ) {
+        page == 0 &&
+                destination.route !in Routes.routesDrawer.map { it.path } &&
+                destination.parent?.startDestinationRoute != destination.route
+    }
+}
+
+/**
+ * Checks if the current route/page supports task creation.
+ */
 private fun supportsTaskCreation(
     route: Route,
     state: PagerState
 ): Boolean {
-    return when {
-        state.currentPage == 1 -> false
-        else -> when (route) {
-            Routes.Calendar -> true
-            else -> false
-        }
-    }
+    return state.currentPage != 1 && route == Routes.Calendar
 }
 
 /**
  * Switches the screen to the given page, where 0 is main content and 1 is profile content.
  * Edited animation: **tween(500)** for duration.
  */
-private fun switchScreen(
+private fun switchPage(
     page: Int,
     scope: CoroutineScope,
     state: PagerState
@@ -136,7 +174,7 @@ private fun switchScreen(
 /**
  * Switches the screen to the given path. Used by the drawer screen.
  */
-private fun switchScreen(
+private fun switchPage(
     controller: NavHostController,
     path: String,
     scope: CoroutineScope,
@@ -151,26 +189,11 @@ private fun switchScreen(
         stateDrawer.close()
     }
 
-    switchScreen(
+    switchPage(
         0,
         scope,
         statePager
     )
-}
-
-private fun toggleNavigationDrawer(
-    scope: CoroutineScope,
-    state: DrawerState
-) {
-    scope.launch {
-        state.apply {
-            if (isOpen) {
-                close()
-            } else {
-                open()
-            }
-        }
-    }
 }
 
 @Composable
@@ -218,6 +241,35 @@ fun FloatingActionButton(onClick: () -> Unit) {
 }
 
 @Composable
+private fun DecorationCard(decoration: Decoration) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            modifier = Modifier.padding(8.dp),
+            style = MaterialTheme.typography.titleMedium,
+            text = "${decoration.name} decoration!"
+        )
+
+        AsyncImage(
+            contentDescription = "Decoration ${decoration.name} image",
+            modifier = Modifier
+                .size(96.dp)
+                .clip(MaterialTheme.shapes.extraSmall)
+                .background(
+                    color = MaterialTheme.colorScheme.inverseOnSurface.lighten(),
+                    shape = MaterialTheme.shapes.extraSmall
+                ),
+            url = decoration.imageRepresentativeUrl
+        )
+    }
+}
+
+@Composable
 private fun Header(
     avatar: ImageBitmap,
     colorAvatarBorder: Color = MaterialTheme.colorScheme.primaryContainer,
@@ -230,7 +282,7 @@ private fun Header(
     ),
     onClickNavigation: () -> Unit,
     onClickProfile: () -> Unit,
-    showBackNavigation: Boolean = false,
+    showBackNavigation: Boolean,
     title: @Composable () -> Unit
 ) {
     CenterAlignedTopAppBar(
@@ -318,7 +370,7 @@ fun LayoutScreenAuthenticated(
         drawerContent = {
             DrawerScreen(
                 {
-                    switchScreen(
+                    switchPage(
                         controller,
                         path,
                         scope,
@@ -330,7 +382,8 @@ fun LayoutScreenAuthenticated(
                 Routes.routesDrawer
             )
         },
-        drawerState = stateDrawer
+        drawerState = stateDrawer,
+        gesturesEnabled = stateDrawer.isOpen
     ) {
         var isTaskDialogOpen by remember { mutableStateOf(false) }
         val toggleTaskDialog = remember { { isTaskDialogOpen = !isTaskDialogOpen } }
@@ -348,33 +401,27 @@ fun LayoutScreenAuthenticated(
             },
             floatingActionButtonPosition = FabPosition.End,
             topBar = {
-                val showBack = remember(
-                    route,
+                val showBack = route.second != null && showBackNavigation(
+                    route.second!!,
                     statePager.currentPage
-                ) {
-                    statePager.currentPage == 0 &&
-                            route.second?.route !in Routes.routesDrawer.map { it.path } &&
-                            route.second?.parent?.startDestinationRoute != route.second?.route
-                }
+                )
 
                 Header(
                     avatar = stateLayout.avatar,
                     onClickNavigation = {
-                        if (showBack) {
-                            controller.popBackStack()
-                        } else {
-                            toggleNavigationDrawer(
-                                scope,
-                                stateDrawer
-                            )
-                        }
+                        navigate(
+                            controller,
+                            scope,
+                            showBack,
+                            stateDrawer
+                        )
                     },
                     onClickProfile = {
                         if (statePager.currentPage == 1) {
                             return@Header
                         }
 
-                        switchScreen(
+                        switchPage(
                             1,
                             scope,
                             statePager
@@ -382,18 +429,18 @@ fun LayoutScreenAuthenticated(
                     },
                     showBackNavigation = showBack,
                     title = {
-                        when (statePager.currentPage) {
-                            1 -> RouteTitle(stringResource(R.string.route_profile))
-                            else -> options.title?.invoke()
-                        }
+                        Title(
+                            options,
+                            statePager
+                        )
                     }
                 )
             }
-        ) {
+        ) { padding ->
             Content(
                 controller = controller,
                 onConsumeOptions = { optionsNew -> options = optionsNew },
-                paddingValues = it,
+                paddingValues = padding,
                 state = statePager
             )
 
@@ -476,30 +523,12 @@ private fun RewardDialog(
 }
 
 @Composable
-private fun DecorationCard(decoration: Decoration) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.titleMedium,
-            text = "${decoration.name} decoration!"
-        )
-
-        AsyncImage(
-            contentDescription = "Decoration ${decoration.name} image",
-            modifier = Modifier
-                .size(96.dp)
-                .clip(MaterialTheme.shapes.extraSmall)
-                .background(
-                    color = MaterialTheme.colorScheme.inverseOnSurface.lighten(),
-                    shape = MaterialTheme.shapes.extraSmall
-                ),
-            url = decoration.imageRepresentativeUrl
-        )
+private fun Title(
+    options: Route.Options,
+    statePager: PagerState
+) {
+    when (statePager.currentPage) {
+        1 -> RouteTitle(stringResource(R.string.route_profile))
+        else -> options.title?.invoke()
     }
 }

@@ -107,8 +107,10 @@ fun FriendScreen(
 private fun Header(entry: FriendEntry) {
     AvatarBox(entry)
 
+    Spacer(modifier = Modifier.height(8.dp))
+
     Text(
-        style = MaterialTheme.typography.titleSmall,
+        style = MaterialTheme.typography.titleMedium,
         text = entry.user.username
     )
 
@@ -187,7 +189,7 @@ private fun AvatarBox(friend: FriendEntry) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(100.dp)
+            .size(150.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primaryContainer)
     ) {
@@ -195,7 +197,7 @@ private fun AvatarBox(friend: FriendEntry) {
             bitmap = friend.avatar,
             contentDescription = "Friend avatar",
             modifier = Modifier
-                .size(96.dp)
+                .size(150.dp)
                 .clip(CircleShape)
         )
     }
