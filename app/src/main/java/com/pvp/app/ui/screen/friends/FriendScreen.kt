@@ -41,7 +41,7 @@ import androidx.navigation.NavHostController
 import com.pvp.app.model.Friends
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Experience
-import com.pvp.app.ui.common.ProgressIndicator
+import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -56,12 +56,9 @@ fun FriendScreen(
 ) {
     val state by model.stateFriend.collectAsStateWithLifecycle()
 
-    if (state.loading) {
-        ProgressIndicator()
+    HandleState(state = state.state)
 
-        return
-    }
-
+    // TODO: Remove this when the issue is fixed
     LaunchedEffect(state.entry.user.username) {
         resolveOptions()
     }
@@ -365,4 +362,13 @@ private fun InfoHeader(text: String) {
     }
 
     Spacer(modifier = Modifier.height(3.dp))
+}
+
+@Composable
+fun HandleState(state: FriendScreenState) {
+    when (state) {
+        FriendScreenState.Loading -> ProgressIndicatorWithinDialog()
+
+        else -> {}
+    }
 }

@@ -53,9 +53,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pvp.app.ui.common.ButtonWithDialog
-import com.pvp.app.ui.common.ProgressIndicator
+import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.router.Routes
 
 private enum class SortingType {
@@ -65,16 +66,25 @@ private enum class SortingType {
 
 @Composable
 fun FriendsScreen(
-    controller: NavController,
+    controller: NavHostController,
     model: FriendsViewModel = hiltViewModel(),
-    modifier: Modifier
+    modifier: Modifier,
+    resolveOptions: () -> Unit
 ) {
+    val backstack by controller.currentBackStackEntryAsState()
     val state by model.stateFriends.collectAsStateWithLifecycle()
 
-    if (state.loading) {
-        ProgressIndicator()
+    HandleState(
+        controller,
+        { model.resetFriendsScreenState() },
+        state.state
+    )
 
-        return
+    // TODO: Remove this when the issue is fixed
+    LaunchedEffect(backstack?.destination?.route == Routes.Friends.path) {
+        if (backstack?.destination?.route == Routes.Friends.path) {
+            resolveOptions()
+        }
     }
 
     val context = LocalContext.current
@@ -310,13 +320,7 @@ fun FriendsScreen(
 
         FriendList(
             friends = friendsSorted.value,
-            onSelect = { friend ->
-                model.select(friend.user.email)
-
-                controller.navigate(Routes.Friend.path) {
-                    launchSingleTop = true
-                }
-            },
+            onSelect = { friend -> model.select(friend.user.email) },
             scrollState = scrollState
         )
     }
@@ -339,15 +343,13 @@ private fun FriendList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
-                    .clickable { onSelect(friend) }
                     .padding(
                         horizontal = 16.dp,
                         vertical = 2.dp
                     )
-                    .background(
-                        MaterialTheme.colorScheme.secondaryContainer,
-                        MaterialTheme.shapes.small
-                    ),
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .clickable { onSelect(friend) },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ListItemContent(
@@ -491,5 +493,26 @@ private fun RequestList(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun HandleState(
+    controller: NavHostController,
+    resetState: () -> Unit,
+    state: FriendsScreenState
+) {
+    when (state) {
+        is FriendsScreenState.Finished.SelectedFriend -> {
+            controller.navigate(Routes.Friend.path) {
+                launchSingleTop = true
+            }
+
+            resetState()
+        }
+
+        is FriendsScreenState.Loading -> ProgressIndicatorWithinDialog()
+
+        else -> {}
     }
 }

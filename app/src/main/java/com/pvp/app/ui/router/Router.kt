@@ -85,7 +85,7 @@ private fun NavGraphBuilder.composeRoute(
         )
 
         LaunchedEffect(
-            backstack.destination,
+            backstack.destination.route,
             options
         ) {
             if (backstack.destination.route == route.path) {

@@ -55,11 +55,11 @@ private fun Body(
                         },
                         shape = MaterialTheme.shapes.extraSmall
                     )
-                    .padding(8.dp)
                     .clickable(
                         enabled = route.path != it.path,
                         onClick = { onClick.invoke(it) }
-                    ),
+                    )
+                    .padding(8.dp),
                 route = it
             )
         }

@@ -170,11 +170,12 @@ object Routes {
     )
 
     data object Friends : Node(
-        compose = { backstack, controller, modifier, _ ->
+        compose = { backstack, controller, modifier, resolveOptions ->
             FriendsScreen(
                 controller = controller,
                 model = backstack.hiltViewModel<FriendsViewModel>(controller),
-                modifier = modifier
+                modifier = modifier,
+                resolveOptions = resolveOptions
             )
         },
         options = Options(

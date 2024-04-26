@@ -53,7 +53,7 @@ import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.Experience
 import com.pvp.app.ui.common.IconButtonWithDialog
-import com.pvp.app.ui.common.ProgressIndicator
+import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.showToast
 import kotlinx.coroutines.launch
 
@@ -247,9 +247,7 @@ fun ProfileScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {
-        ProgressIndicator()
-
-        return
+        ProgressIndicatorWithinDialog()
     }
 
     Box(
@@ -260,18 +258,22 @@ fun ProfileScreen(
         Points(points = state.user.points)
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            Initials(
-                onUsernameChange = {
-                    viewModel.update { u -> u.username = it }
-                },
-                state = state
-            )
+            if (!state.isLoading) {
+                Initials(
+                    onUsernameChange = {
+                        viewModel.update { u -> u.username = it }
+                    },
+                    state = state
+                )
 
-            Experience(
-                experience = state.user.experience,
-                experienceRequired = state.experienceRequired,
-                level = state.user.level
-            )
+                Experience(
+                    experience = state.user.experience,
+                    experienceRequired = state.experienceRequired,
+                    level = state.user.level
+                )
+            } else {
+                Spacer(modifier = Modifier.height(180.dp))
+            }
 
             Properties(
                 onUpdateActivities = { viewModel.update { u -> u.activities = it } },

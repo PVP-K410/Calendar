@@ -3,7 +3,6 @@
 package com.pvp.app.ui.screen.friends
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.DecorationService
@@ -12,10 +11,8 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.common.FlowUtil.firstOr
 import com.pvp.app.common.FlowUtil.flattenFlow
-import com.pvp.app.model.FriendObject
-import com.pvp.app.model.Friends
-import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +23,9 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -67,51 +66,60 @@ class FriendsViewModel @Inject constructor(
      * Listens to changes in the user and friend objects and updates the state accordingly.
      */
     private fun collectStateChanges() {
-        val user = userService.user.filterNotNull()
-
-        val friendObject = user
-            .filter { it.email.isNotBlank() }
-            .flatMapLatest { user ->
-                friendService
-                    .get(user.email)
-                    .filterNotNull()
-
-            }
-
-        val friends = user
-            .filter { it.email.isNotBlank() }
-            .flatMapLatest { friendService.get(it.email) }
+        val user = userService.user
             .filterNotNull()
-            .flatMapLatest { friendObject ->
-                friendObject.friends
-                    .map { friend ->
-                        val user = userService
-                            .get(friend.email)
-                            .filterNotNull()
+            .flowOn(Dispatchers.IO)
 
-                        flowOf(
-                            Pair(
-                                user,
-                                decorationService.getAvatar(user)
-                            )
-                        )
-                    }
-                    .flattenFlow()
-            }
-            .flatMapLatest { pairs ->
-                pairs
-                    .map { (user, avatar) ->
-                        flowOf(
-                            FriendEntry(
-                                avatar = avatar.first(),
-                                user = user.first()
-                            )
-                        )
-                    }
-                    .flattenFlow()
-            }
+        val friendObject = flow {
+            user
+                .filter { it.email.isNotBlank() }
+                .flatMapLatest { user ->
+                    friendService
+                        .get(user.email)
+                        .filterNotNull()
+                }
+                .collect { emit(it) }
+        }
+            .flowOn(Dispatchers.IO)
 
-        viewModelScope.launch {
+        val friends = flow {
+            user
+                .filter { it.email.isNotBlank() }
+                .flatMapLatest { friendService.get(it.email) }
+                .filterNotNull()
+                .flatMapLatest { friendObject ->
+                    friendObject.friends
+                        .map { friend ->
+                            val user = userService
+                                .get(friend.email)
+                                .filterNotNull()
+
+                            flowOf(
+                                Pair(
+                                    user,
+                                    decorationService.getAvatar(user)
+                                )
+                            )
+                        }
+                        .flattenFlow()
+                }
+                .flatMapLatest { pairs ->
+                    pairs
+                        .map { (user, avatar) ->
+                            flowOf(
+                                FriendEntry(
+                                    avatar = avatar.first(),
+                                    user = user.first()
+                                )
+                            )
+                        }
+                        .flattenFlow()
+                }
+                .collect { emit(it) }
+        }
+            .flowOn(Dispatchers.IO)
+
+        viewModelScope.launch(Dispatchers.IO) {
             combine(
                 friendObject,
                 friends,
@@ -120,7 +128,7 @@ class FriendsViewModel @Inject constructor(
                 FriendsState(
                     friendObject = friendObject,
                     friends = friends,
-                    loading = false,
+                    state = FriendsScreenState.NoOperation,
                     user = user
                 )
             }
@@ -230,7 +238,9 @@ class FriendsViewModel @Inject constructor(
      * Updates the [stateFriend] state with the selected friend's details.
      */
     fun select(friendEmail: String) {
-        _stateFriend.update { it.copy(loading = true) }
+        _stateFriend.update { it.copy(state = FriendScreenState.Loading) }
+
+        _stateFriends.update { it.copy(state = FriendsScreenState.Loading) }
 
         viewModelScope.launch {
             val `object` = friendService
@@ -284,9 +294,11 @@ class FriendsViewModel @Inject constructor(
                     .find { friend -> friend.user.email == friendEmail }
                     ?: FriendEntry(),
                 friendsMutual = friends,
-                loading = false,
+                state = FriendScreenState.Finished,
                 tasksCompleted = tasks
             )
+
+            _stateFriends.update { it.copy(state = FriendsScreenState.Finished.SelectedFriend) }
         }
     }
 
@@ -306,27 +318,11 @@ class FriendsViewModel @Inject constructor(
             toastMessage.value = "Friend removed successfully!"
         }
     }
+
+    /**
+     * Resets the [FriendsScreenState] of the [stateFriends] state to [FriendsScreenState.NoOperation].
+     */
+    fun resetFriendsScreenState() = _stateFriends.update {
+        it.copy(state = FriendsScreenState.NoOperation)
+    }
 }
-
-data class FriendEntry(
-    val avatar: ImageBitmap = ImageBitmap(
-        1,
-        1
-    ),
-    val user: User = User()
-)
-
-data class FriendState(
-    val details: Friends = Friends(),
-    val entry: FriendEntry = FriendEntry(),
-    val friendsMutual: List<FriendEntry> = emptyList(),
-    val loading: Boolean = true,
-    val tasksCompleted: Int = 0
-)
-
-data class FriendsState(
-    val friendObject: FriendObject = FriendObject(),
-    val friends: List<FriendEntry> = emptyList(),
-    val loading: Boolean = true,
-    val user: User = User()
-)

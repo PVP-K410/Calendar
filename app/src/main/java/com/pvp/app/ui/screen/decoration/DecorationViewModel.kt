@@ -67,6 +67,11 @@ class DecorationViewModel @Inject constructor(
                         it.copy(
                             avatar = state.avatar,
                             holders = state.holders,
+                            state = if (it.state == DecorationScreenState.Loading) {
+                                DecorationScreenState.NoOperation
+                            } else {
+                                it.state
+                            },
                             user = state.user
                         )
                     }
