@@ -28,6 +28,7 @@ class GoalServiceImpl @Inject constructor(
     private val pointService: PointService,
     private val userService: UserService
 ) : GoalService {
+
     override suspend fun create(
         activity: SportActivity,
         endDate: LocalDate,
