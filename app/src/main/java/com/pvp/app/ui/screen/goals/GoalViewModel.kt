@@ -1,9 +1,11 @@
 package com.pvp.app.ui.screen.goals
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.GoalService
+import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Goal
 import com.pvp.app.model.SportActivity
@@ -19,7 +21,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 
@@ -28,6 +32,7 @@ import javax.inject.Inject
 class GoalViewModel @Inject constructor(
     configuration: Configuration,
     private val goalService: GoalService,
+    private val healthConnectService: HealthConnectService,
     private val userService: UserService
 ) : ViewModel() {
 
@@ -67,6 +72,7 @@ class GoalViewModel @Inject constructor(
                         monthEndDate = now
                             .plusMonths(1)
                             .withDayOfMonth(1),
+                        monthSteps = getMonthSteps(),
                         monthly = false,
                         weekStartDate = weekStartDate,
                         weekEndDate = weekEndDate
@@ -158,6 +164,21 @@ class GoalViewModel @Inject constructor(
         }
     }
 
+    suspend fun getMonthSteps(): Long{
+        val end = Instant.now()
+
+        val start = LocalDate
+            .now()
+            .minusDays(30)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return healthConnectService.aggregateSteps(
+            start = start,
+            end = end
+        )
+    }
+
     fun next() {
         _state.update { currentState ->
             currentState.copy(
@@ -191,6 +212,7 @@ data class GoalState(
     var monthly: Boolean = false,
     var monthStartDate: LocalDate = LocalDate.now(),
     var monthEndDate: LocalDate = LocalDate.now(),
+    val monthSteps: Long = 0,
     val user: User? = null,
     var weekStartDate: LocalDate = LocalDate.now(),
     var weekEndDate: LocalDate = LocalDate.now()

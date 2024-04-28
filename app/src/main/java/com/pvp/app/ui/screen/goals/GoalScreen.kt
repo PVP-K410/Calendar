@@ -99,7 +99,10 @@ fun GoalScreen(
                             }
                         } else {
                             items(goals) { goal ->
-                                GoalCard(goal = goal)
+                                GoalCard(
+                                    goal = goal,
+                                    monthSteps = state.monthSteps
+                                )
                             }
                         }
                     }
@@ -119,7 +122,10 @@ fun GoalScreen(
 }
 
 @Composable
-fun GoalCard(goal: Goal) {
+fun GoalCard(
+    goal: Goal,
+    monthSteps: Long
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -143,7 +149,7 @@ fun GoalCard(goal: Goal) {
                 } + " goal"
             )
 
-            Spacer(modifier = Modifier.padding(top = 4.dp))
+            Spacer(modifier = Modifier.padding(2.dp))
 
             Text(
                 style = MaterialTheme.typography.labelSmall,
@@ -153,25 +159,20 @@ fun GoalCard(goal: Goal) {
                 text = goal.startDate.toString() + " - " + goal.endDate.toString()
             )
 
-            Spacer(modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.padding(8.dp))
 
             ProgressBar(goal = goal)
 
-            Spacer(modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.padding(4.dp))
 
             Row(
                 modifier = Modifier.padding(6.dp)
             ) {
-                Icon(
-                    imageVector = goal.activity.icon,
-                    contentDescription = "Activity icon",
-                )
-
                 Text(
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(
+                        end = 8.dp
+                    ),
                     textAlign = TextAlign.Left,
                     text = "Set goal: ${
                         when (goal.steps) {
@@ -179,6 +180,25 @@ fun GoalCard(goal: Goal) {
                             false -> "${goal.goal} km"
                         }
                     }"
+                )
+
+                Icon(
+                    imageVector = goal.activity.icon,
+                    contentDescription = "Activity icon",
+                )
+            }
+
+            if (goal.steps) {
+                Spacer(modifier = Modifier.padding(4.dp))
+
+                Text(
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 6.dp),
+                    textAlign = TextAlign.Left,
+                    text = "Your average " + when (goal.monthly) {
+                        true -> "monthly steps: $monthSteps"
+                        false -> "weekly steps: ${monthSteps / 30 * 7}"
+                    }
                 )
             }
         }
@@ -221,8 +241,7 @@ private fun GoalTypeSelector(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        contentAlignment = Alignment.Center,
+    Box(contentAlignment = Alignment.Center,
         modifier = modifier
             .clickable { onClick() }
             .background(
@@ -232,8 +251,7 @@ private fun GoalTypeSelector(
                     Color.Transparent
                 },
                 MaterialTheme.shapes.medium
-            )
-    ) {
+            )) {
         Text(text = filter.displayName)
     }
 }
