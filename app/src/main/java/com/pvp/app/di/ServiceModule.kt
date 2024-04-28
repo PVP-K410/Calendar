@@ -14,6 +14,7 @@ import com.pvp.app.api.DecorationService
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
 import com.pvp.app.api.FriendService
+import com.pvp.app.api.GoalService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.ImageService
 import com.pvp.app.api.NotificationService
@@ -30,6 +31,7 @@ import com.pvp.app.service.DecorationServiceImpl
 import com.pvp.app.service.ExerciseServiceImpl
 import com.pvp.app.service.ExperienceServiceImpl
 import com.pvp.app.service.FriendServiceImpl
+import com.pvp.app.service.GoalServiceImpl
 import com.pvp.app.service.HealthConnectServiceImpl
 import com.pvp.app.service.ImageServiceImpl
 import com.pvp.app.service.NotificationServiceImpl
@@ -78,6 +80,10 @@ interface ServiceBindingsModule {
     @Binds
     @Singleton
     fun bindFriendService(service: FriendServiceImpl): FriendService
+
+    @Binds
+    @Singleton
+    fun bindGoalService(service: GoalServiceImpl): GoalService
 
     @Binds
     @Singleton
