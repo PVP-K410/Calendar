@@ -170,9 +170,7 @@ fun GoalCard(
             ) {
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(
-                        end = 8.dp
-                    ),
+                    modifier = Modifier.padding(end = 8.dp),
                     textAlign = TextAlign.Left,
                     text = "Set goal: ${
                         when (goal.steps) {
@@ -189,7 +187,7 @@ fun GoalCard(
             }
 
             if (goal.steps) {
-                Spacer(modifier = Modifier.padding(4.dp))
+                Spacer(modifier = Modifier.padding(2.dp))
 
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
