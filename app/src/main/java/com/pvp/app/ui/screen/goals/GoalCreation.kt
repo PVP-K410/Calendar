@@ -238,7 +238,7 @@ fun GoalCreateForm(
                     steps = activity == SportActivity.Walking && goal == 0.0
                 },
                 onDismiss = { tempActivity = activity },
-                value = activity?.title ?: ""
+                value = activity.title ?: ""
             )
 
             Spacer(modifier = Modifier.padding(top = 8.dp))
