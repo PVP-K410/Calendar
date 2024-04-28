@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.goals
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
@@ -164,7 +163,7 @@ class GoalViewModel @Inject constructor(
         }
     }
 
-    suspend fun getMonthSteps(): Long{
+    private suspend fun getMonthSteps(): Long {
         val end = Instant.now()
 
         val start = LocalDate

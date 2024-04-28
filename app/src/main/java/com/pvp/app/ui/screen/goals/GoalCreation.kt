@@ -241,7 +241,7 @@ fun GoalCreateForm(
                 value = activity.title ?: ""
             )
 
-            Spacer(modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.padding(4.dp))
 
             if (activity == SportActivity.Walking) {
                 StepSelector(
@@ -250,7 +250,7 @@ fun GoalCreateForm(
                     steps = !steps
                 }
 
-                Spacer(modifier = Modifier.padding(top = 8.dp))
+                Spacer(modifier = Modifier.padding(4.dp))
             }
 
             when (steps) {
@@ -270,7 +270,7 @@ fun GoalCreateForm(
                 }
             }
 
-            Spacer(modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.padding(4.dp))
 
             Button(
                 onClick = {
