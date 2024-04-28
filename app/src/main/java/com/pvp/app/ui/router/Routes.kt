@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storefront
@@ -16,6 +17,7 @@ import com.pvp.app.ui.screen.authentication.AuthenticationScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.decoration.DecorationScreen
 import com.pvp.app.ui.screen.friends.FriendsScreen
+import com.pvp.app.ui.screen.goals.GoalScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
@@ -41,6 +43,7 @@ sealed class Route(
             Calendar,
             Decorations,
             Friends,
+            Goals,
             None,
             Settings,
             Steps
@@ -58,6 +61,7 @@ sealed class Route(
             Calendar,
             Decorations,
             Friends,
+            Goals,
             Settings,
             Steps
         )
@@ -103,6 +107,14 @@ sealed class Route(
         path = "friends",
         resourceTitleId = R.string.route_friends,
         screen = { _, m, _ -> FriendsScreen(modifier = m) }
+    )
+
+    data object Goals : Route(
+        icon = Icons.Outlined.EmojiEvents,
+        iconDescription = "Goals page button icon",
+        path = "goals",
+        resourceTitleId = R.string.route_goals,
+        screen = { _, m, _ -> GoalScreen(modifier = m) }
     )
 
     data object None : Route(
