@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.goals
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -17,13 +16,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,31 +46,41 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Goal
 import com.pvp.app.ui.screen.layout.FloatingActionButton
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun GoalScreen(
     model: GoalViewModel = hiltViewModel(),
     modifier: Modifier
 ) {
     val state by model.state.collectAsStateWithLifecycle()
-    var isGoalDialogOpen by remember { mutableStateOf(false) }
-    val toggleGoalDialog = remember { { isGoalDialogOpen = !isGoalDialogOpen } }
+    var isDialogOpen by remember { mutableStateOf(false) }
+    val toggleDialog = remember { { isDialogOpen = !isDialogOpen } }
 
     Scaffold(
-        content = {
+        content = { paddingValues ->
             Box(
                 modifier = modifier
                     .fillMaxSize()
+                    .padding(paddingValues)
                     .padding(16.dp)
             ) {
                 Column {
                     val goals = state.currentGoals
-                    var filter by remember { mutableStateOf(GoalFilter.Weekly) }
+
+                    val filter by remember {
+                        derivedStateOf {
+                            if (state.monthly) GoalFilter.Monthly else GoalFilter.Weekly
+                        }
+                    }
 
                     GoalTypeFilter(filter = filter) {
                         if (it != filter) model.changeMonthly()
-                        filter = it
                     }
+
+                    Spacer(modifier = Modifier.padding(8.dp))
+
+                    DateChanger()
+
+                    Spacer(modifier = Modifier.padding(8.dp))
 
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
                         if (!goals.any()) {
@@ -93,12 +107,12 @@ fun GoalScreen(
             }
 
             GoalCreateDialog(
-                onClose = toggleGoalDialog,
-                isOpen = isGoalDialogOpen,
+                onClose = toggleDialog,
+                isOpen = isDialogOpen,
             )
         },
         floatingActionButton = {
-            FloatingActionButton(toggleGoalDialog)
+            FloatingActionButton(toggleDialog)
         },
         floatingActionButtonPosition = FabPosition.End,
     )
@@ -155,13 +169,14 @@ fun GoalCard(goal: Goal) {
 
                 Text(
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(8.dp),
-                    textAlign = TextAlign.Justify,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp),
+                    textAlign = TextAlign.Left,
                     text = "Set goal: ${
-                        if (goal.steps) {
-                            "${goal.goal.toInt()} steps"
-                        } else {
-                            "${goal.goal} km"
+                        when (goal.steps) {
+                            true -> "${goal.goal.toInt()} steps"
+                            false -> "${goal.goal} km"
                         }
                     }"
                 )
@@ -224,11 +239,55 @@ private fun GoalTypeSelector(
 }
 
 @Composable
+private fun DateChanger(
+    model: GoalViewModel = hiltViewModel(),
+) {
+    val state by model.state.collectAsStateWithLifecycle()
+
+    Row {
+        IconButton(onClick = {
+            model.previous()
+        }) {
+            Icon(
+                contentDescription = "Back",
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft
+            )
+        }
+
+        Text(
+            modifier = Modifier
+                .weight(1f)
+                .align(Alignment.CenterVertically),
+            style = MaterialTheme.typography.bodyLarge,
+            text = when (state.monthly) {
+                true -> {
+                    "${state.monthStartDate} - ${state.monthEndDate}"
+                }
+
+                false -> {
+                    "${state.weekStartDate} - ${state.weekEndDate}"
+                }
+            },
+            textAlign = TextAlign.Center
+        )
+
+        IconButton(onClick = {
+            model.next()
+        }) {
+            Icon(
+                contentDescription = "Forward",
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight
+            )
+        }
+    }
+}
+
+@Composable
 fun ProgressBar(goal: Goal) {
     val progress by animateFloatAsState(
         animationSpec = tween(durationMillis = 1000),
         label = "ExperienceProgressAnimation",
-        targetValue = goal.progress.toFloat(),
+        targetValue = goal.progress.toFloat() / goal.goal.toFloat(),
     )
 
     Box(
@@ -248,7 +307,10 @@ fun ProgressBar(goal: Goal) {
         )
 
         Text(
-            text = "${goal.progress} / ${goal.goal}" + if (goal.steps) " steps" else " km",
+            text = when (goal.steps) {
+                true -> "${goal.progress.toInt()} / ${goal.goal.toInt()} steps"
+                false -> "${goal.progress} / ${goal.goal} km"
+            },
             style = MaterialTheme.typography.bodyMedium,
         )
     }

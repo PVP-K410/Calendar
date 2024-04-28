@@ -1,6 +1,5 @@
 package com.pvp.app.ui.screen.goals
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
@@ -24,14 +23,13 @@ import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class GoalViewModel @Inject constructor(
     configuration: Configuration,
     private val goalService: GoalService,
     private val userService: UserService
-) : ViewModel(
-) {
+) : ViewModel() {
 
     private val _state = MutableStateFlow(GoalState())
     val state = _state.asStateFlow()
@@ -51,9 +49,11 @@ class GoalViewModel @Inject constructor(
             flowUser
                 .combine(flowGoals) { user, goals ->
                     user ?: return@combine _state.value
+
                     val now = LocalDate.now()
                     val weekStartDate = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                     val weekEndDate = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+
                     GoalState(
                         allGoals = goals,
                         currentGoals = filterGoals(
@@ -84,11 +84,11 @@ class GoalViewModel @Inject constructor(
     ) {
         val startDate = LocalDate.now()
 
-        val endDate = if (monthly) {
-            startDate.plusMonths(1)
-        } else {
-            startDate.plusDays(7)
+        val endDate = when (monthly) {
+            true -> startDate.plusMonths(1)
+            false -> startDate.plusDays(7)
         }
+
         viewModelScope.launch {
             state
                 .first()
@@ -113,8 +113,6 @@ class GoalViewModel @Inject constructor(
             )
         }
 
-        Log.e("GoalViewModel", "changeMonthly value ${state.value.monthly}")
-
         filterGoals()
     }
 
@@ -124,10 +122,9 @@ class GoalViewModel @Inject constructor(
         end: LocalDate,
         monthly: Boolean
     ): List<Goal> {
-        Log.e("GoalViewModel", "filterGoals value start: $start end $end monthly $monthly")
-
         return goals.filter { goal ->
-            goal.startDate.isBefore(end.plusDays(1)) && goal.endDate.isAfter(start.minusDays(1))
+            goal.startDate.isBefore(end.plusDays(1))
+                    && goal.endDate.isAfter(start.minusDays(1))
                     && goal.monthly == monthly
         }
     }
@@ -148,8 +145,6 @@ class GoalViewModel @Inject constructor(
                 )
             }
         }
-        Log.e("GoalViewModel", "filterGoals value start: $start end $end")
-
 
         _state.update { currentState ->
             currentState.copy(
@@ -168,8 +163,8 @@ class GoalViewModel @Inject constructor(
             currentState.copy(
                 monthStartDate = currentState.monthStartDate.plusMonths(1),
                 monthEndDate = currentState.monthEndDate.plusMonths(1),
-                weekStartDate = currentState.weekStartDate.minusDays(7),
-                weekEndDate = currentState.weekEndDate.minusDays(7)
+                weekStartDate = currentState.weekStartDate.plusDays(7),
+                weekEndDate = currentState.weekEndDate.plusDays(7)
             )
         }
 
