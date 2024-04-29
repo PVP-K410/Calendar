@@ -1,6 +1,7 @@
 package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
@@ -16,6 +17,7 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +30,7 @@ import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.LabelFieldWrapper
 import com.pvp.app.ui.common.PickerPair
 import com.pvp.app.ui.common.PickerState
+import com.pvp.app.ui.common.InfoTooltip
 import java.time.Duration
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +88,18 @@ fun TaskEditFieldsSport(
         label = "Activity",
         onConfirm = { activity = tempActivity },
         onDismiss = { tempActivity = activity },
-        value = activity?.title ?: ""
+        value = {
+            Row (
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(activity?.title ?: "")
+
+                if (activity?.supportsDistanceMetrics == true) {
+                    InfoTooltip(tooltipText = "This task is likely to be autocompleted")
+                }
+            }
+        }
     )
 
     if (activity != null && activity!!.supportsDistanceMetrics) {

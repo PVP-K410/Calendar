@@ -37,6 +37,7 @@ import com.pvp.app.common.DurationUtil.asString
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
+import com.pvp.app.ui.common.InfoTooltip
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -198,19 +199,24 @@ private fun TaskCardContentSport(task: SportTask) {
         }
     }
 
-    Row(modifier = Modifier.padding(6.dp)) {
+    Row(
+        modifier = Modifier.padding(6.dp),
+        verticalAlignment = CenterVertically
+    ) {
         Icon(
             contentDescription = "Activity",
             imageVector = task.activity.icon
         )
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 8.dp),
+            modifier = Modifier.padding(start = 8.dp),
             text = task.activity.title,
             textAlign = TextAlign.Left
         )
+
+        if (task.activity.supportsDistanceMetrics) {
+            InfoTooltip(tooltipText = "This task is likely to be autocompleted")
+        }
     }
 }
 

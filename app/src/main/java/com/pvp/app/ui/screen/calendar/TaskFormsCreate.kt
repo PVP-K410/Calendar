@@ -223,6 +223,7 @@ fun TaskCreateForm(
                     onActivityChange = { newActivity ->
                         if (newActivity != null) {
                             activity = newActivity
+                            //supportsDistanceMetrics = activity.supportsDistanceMetrics
                         }
                     },
                     onDistanceChange = { newDistance ->

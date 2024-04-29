@@ -4,7 +4,11 @@ import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BasicTooltipBox
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,23 +20,30 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +63,7 @@ import coil.compose.SubcomposeAsyncImageContent
 import coil.size.Size
 import coil.transform.Transformation
 import com.pvp.app.ui.common.ImageUtil.requestImage
+import kotlinx.coroutines.launch
 
 @Composable
 fun AsyncImage(
@@ -257,6 +269,48 @@ fun Experience(
                 style = progressTextStyle,
                 text = "$experience / $experienceRequired Exp",
                 textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun InfoTooltip(
+    tooltipText: String
+) {
+    val tooltipState = rememberBasicTooltipState()
+    val scope = rememberCoroutineScope()
+
+    BasicTooltipBox(
+        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        tooltip = {
+            Text(
+                text = tooltipText,
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline
+                        ),
+                        shape = MaterialTheme.shapes.medium,
+                    )
+                    .height(40.dp)
+                    .padding(8.dp)
+                    .wrapContentSize(Alignment.Center),
+                color = Color.White
+            )
+        },
+        state = tooltipState
+    ) {
+        IconButton(
+            onClick = { scope.launch { tooltipState.show() } },
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = "Autocompletion of activity"
             )
         }
     }
