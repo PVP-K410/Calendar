@@ -97,14 +97,14 @@ class PointServiceImpl @Inject constructor(
         return when (goal.monthly) {
             false -> {
                 calculateDistancePoints(
-                    distance = goal.goal / 7.0,
+                    distance = goal.target / 7.0,
                     ratio = goal.activity.pointsRatioDistance
                 ) * 7
             }
 
             true -> {
                 calculateDistancePoints(
-                    distance = goal.goal / 30.0,
+                    distance = goal.target / 30.0,
                     ratio = goal.activity.pointsRatioDistance
                 ) * 30
             }

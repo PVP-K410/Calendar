@@ -10,13 +10,14 @@ import com.pvp.app.model.Goal
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -41,19 +42,15 @@ class GoalViewModel @Inject constructor(
     val rangeKilometers = configuration.rangeKilometers
 
     init {
-        viewModelScope.launch {
-            val flowUser = userService.user
+        viewModelScope.launch(Dispatchers.IO) {
+            val flowUser = userService.user.filterNotNull()
 
             val flowGoals = flowUser.flatMapLatest { user ->
-                user
-                    ?.let { goalService.get(user.email) }
-                    ?: flowOf(listOf())
+                user.let { goalService.get(user.email) }
             }
 
             flowUser
                 .combine(flowGoals) { user, goals ->
-                    user ?: return@combine _state.value
-
                     val now = LocalDate.now()
                     val weekStartDate = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                     val weekEndDate = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
@@ -94,7 +91,7 @@ class GoalViewModel @Inject constructor(
             false -> startDate.plusDays(7)
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state
                 .first()
                 .let { state ->
@@ -105,7 +102,7 @@ class GoalViewModel @Inject constructor(
                         endDate = endDate,
                         monthly = monthly,
                         steps = steps,
-                        email = state.user!!.email
+                        email = state.user.email
                     )
                 }
         }
@@ -212,7 +209,7 @@ data class GoalState(
     var monthStartDate: LocalDate = LocalDate.now(),
     var monthEndDate: LocalDate = LocalDate.now(),
     val monthSteps: Long = 0,
-    val user: User? = null,
+    val user: User = User(),
     var weekStartDate: LocalDate = LocalDate.now(),
     var weekEndDate: LocalDate = LocalDate.now()
 )

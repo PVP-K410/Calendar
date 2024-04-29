@@ -5,7 +5,7 @@ import com.pvp.app.model.SportActivity
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
-interface GoalService: DocumentsCollection {
+interface GoalService : DocumentsCollection {
 
     override val identifier: String
         get() = "goals"
@@ -23,9 +23,10 @@ interface GoalService: DocumentsCollection {
         steps: Boolean
     )
 
-    suspend fun claim(
-        goal: Goal
-    )
+    /**
+     * Claims the goal points for the user specified in [Goal.email] property.
+     */
+    suspend fun claim(goal: Goal)
 
     /**
      * Gets all goals for the specified email.

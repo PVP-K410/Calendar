@@ -8,7 +8,7 @@ interface PointService {
 
     /**
      * Calculate the points of a task. Points are determined by the task type and the attributes of
-     * the task. User status can also be taken into account, hence, [Task.userEmail] is required.
+     * the task.
      *
      * @param task task to calculate points for
      * @param increasePointYield Indicates whether the calculation should increase points for this task
@@ -35,7 +35,7 @@ interface PointService {
 
     /**
      * Calculate the points of a goal. Points are determined by the goal type and the attributes of
-     * the goal. User status can also be taken into account, hence, [Goal.email] is required.
+     * the goal.
      *
      * @param goal goal to calculate points for
      *
