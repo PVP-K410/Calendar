@@ -106,12 +106,14 @@ interface TaskService : DocumentsCollection {
      * Generates daily tasks for the given user by its email.
      *
      * @param count number of tasks to generate
+     * @param hasDisability flag to generate tasks for a user with a disability
      * @param userEmail email of the user to generate daily tasks for
      *
      * @return list of generated tasks
      */
     suspend fun generateDaily(
         count: Int = 3,
+        hasDisability: Boolean,
         userEmail: String
     ): List<SportTask>
 

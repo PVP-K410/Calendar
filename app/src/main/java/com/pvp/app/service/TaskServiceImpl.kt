@@ -259,13 +259,13 @@ class TaskServiceImpl @Inject constructor(
 
     override suspend fun generateDaily(
         count: Int,
+        hasDisability: Boolean,
         userEmail: String
     ): List<SportTask> {
-        return SportActivity.entries
-            .minus(SportActivity.Wheelchair)
-            .minus(SportActivity.Other)
-            .shuffled()
-            .take(count)
+        return getSportActivities(
+            count = count,
+            hasDisability = hasDisability
+        )
             .mapIndexed { index, activity ->
                 val task = create(
                     activity = activity,
@@ -480,6 +480,22 @@ class TaskServiceImpl @Inject constructor(
                     .random()
                     .toLong()
             )
+        }
+
+        private fun getSportActivities(
+            count: Int,
+            hasDisability: Boolean
+        ): List<SportActivity> {
+            return if (hasDisability) {
+                listOf(SportActivity.Wheelchair)
+            } else {
+                SportActivity.entries
+                    .minus(SportActivity.Wheelchair)
+                    .minus(SportActivity.Other)
+                    .shuffled()
+                    .take(count - 1)
+                    .plus(SportActivity.Walking)
+            }
         }
 
         private suspend fun isWeekly(

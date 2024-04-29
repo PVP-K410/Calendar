@@ -71,12 +71,14 @@ class ActivityWorker @AssistedInject constructor(
                     .toTimestamp()
         )
 
-        userService.merge(
-            user.copy(
-                hasDisability = hasDisability,
-                lastActivitySync = Timestamp.now()
+        if(hasDisability != user.hasDisability){
+            userService.merge(
+                user.copy(
+                    hasDisability = hasDisability,
+                    lastActivitySync = Timestamp.now()
+                )
             )
-        )
+        }
 
         return Result.success()
     }
