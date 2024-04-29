@@ -8,13 +8,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberBasicTooltipState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -108,9 +107,7 @@ fun TaskEditFieldsSport(
         onDismiss = { tempActivity = activity },
         value = {
             Row (
-                Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp),
+                Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val tooltipState = rememberBasicTooltipState()
@@ -119,45 +116,39 @@ fun TaskEditFieldsSport(
                 Text(activity?.title ?: "")
 
                 if (activity?.supportsDistanceMetrics == true) {
-                    BasicTooltipBox(
+                    InfoTooltip(tooltipText = "This task is likely to be autocompleted")
+                    /*BasicTooltipBox(
                         positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
                         tooltip = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "This task is likely to be autocompleted",
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(MaterialTheme.colorScheme.primary)
-                                        .size(
-                                            height = 40.dp,
-                                            width = 300.dp
-                                        )
-                                        .border(
-                                            border = BorderStroke(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.outline
-                                            ),
-                                            shape = RoundedCornerShape(10.dp)
-                                        )
-                                        .wrapContentSize(Alignment.Center),
-                                    color = Color.White
-                                )
-                            }
+                            Text(
+                                text = "This task is likely to be autocompleted",
+                                modifier = Modifier
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .border(
+                                        border = BorderStroke(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.outline
+                                        ),
+                                        shape = MaterialTheme.shapes.medium,
+                                    )
+                                    .height(40.dp)
+                                    .padding(8.dp)
+                                    .wrapContentSize(Alignment.Center),
+                                color = Color.White
+                            )
                         },
                         state = tooltipState
                     ) {
                         IconButton(
                             onClick = { scope.launch { tooltipState.show() } },
-                            modifier = Modifier.padding(0.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Info,
-                                contentDescription = ""
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = "Tooltip about autocompletion of activity"
                             )
                         }
-                    }
+                    }*/
                 }
             }
         }
@@ -248,4 +239,46 @@ fun TaskEditFieldsSport(
     onDistanceChange(distance)
 
     duration?.let { onDurationChange(it) }
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun InfoTooltip(
+    tooltipText: String
+) {
+    val tooltipState = rememberBasicTooltipState()
+    val scope = rememberCoroutineScope()
+
+    BasicTooltipBox(
+        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        tooltip = {
+            Text(
+                text = tooltipText,
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline
+                        ),
+                        shape = MaterialTheme.shapes.medium,
+                    )
+                    .height(40.dp)
+                    .padding(8.dp)
+                    .wrapContentSize(Alignment.Center),
+                color = Color.White
+            )
+        },
+        state = tooltipState
+    ) {
+        IconButton(
+            onClick = { scope.launch { tooltipState.show() } },
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = "Autocompletion of activity"
+            )
+        }
+    }
 }
