@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -34,18 +34,14 @@ class CalendarMonthlyViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val flowUser = userService.user
+            val flowUser = userService.user.filterNotNull()
 
             val flowTasks = flowUser.flatMapLatest { user ->
-                user
-                    ?.let { taskService.get(user.email) }
-                    ?: flowOf(listOf())
+                user.let { taskService.get(user.email) }
             }
 
             flowUser
                 .combine(flowTasks) { user, tasks ->
-                    user ?: return@combine _state.value
-
                     _state.value.copy(
                         tasks = tasks.sort(),
                         dates = getDates(

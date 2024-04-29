@@ -47,7 +47,7 @@ class GoalServiceImpl @Inject constructor(
             completed = false,
             endDate = endDate,
             email = email,
-            goal = goal,
+            target = goal,
             monthly = monthly,
             id = reference.id,
             points = Points(),
@@ -73,9 +73,7 @@ class GoalServiceImpl @Inject constructor(
             .await()
     }
 
-    override suspend fun claim(
-        goal: Goal
-    ) {
+    override suspend fun claim(goal: Goal) {
         if (goal.points.claimedAt != null) {
             error("Goal points are already claimed")
         }

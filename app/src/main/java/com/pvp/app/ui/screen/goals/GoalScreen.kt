@@ -93,7 +93,7 @@ fun GoalScreen(
                                         fontStyle = FontStyle.Italic,
                                         modifier = Modifier.padding(32.dp),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        text = "No goals have been set up yet."
+                                        text = "No goals have been set up yet"
                                     )
                                 }
                             }
@@ -142,11 +142,7 @@ fun GoalCard(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = goal.activity.title + if (goal.monthly) {
-                    " monthly"
-                } else {
-                    " weekly"
-                } + " goal"
+                text = goal.activity.title
             )
 
             Spacer(modifier = Modifier.padding(2.dp))
@@ -165,17 +161,15 @@ fun GoalCard(
 
             Spacer(modifier = Modifier.padding(4.dp))
 
-            Row(
-                modifier = Modifier.padding(6.dp)
-            ) {
+            Row(modifier = Modifier.padding(6.dp)) {
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(end = 8.dp),
                     textAlign = TextAlign.Left,
                     text = "Set goal: ${
                         when (goal.steps) {
-                            true -> "${goal.goal.toInt()} steps"
-                            false -> "${goal.goal} km"
+                            true -> "${goal.target.toInt()} steps"
+                            false -> "${goal.target} km"
                         }
                     }"
                 )
@@ -239,7 +233,8 @@ private fun GoalTypeSelector(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(contentAlignment = Alignment.Center,
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = modifier
             .clickable { onClick() }
             .background(
@@ -249,15 +244,14 @@ private fun GoalTypeSelector(
                     Color.Transparent
                 },
                 MaterialTheme.shapes.medium
-            )) {
+            )
+    ) {
         Text(text = filter.displayName)
     }
 }
 
 @Composable
-private fun DateChanger(
-    model: GoalViewModel = hiltViewModel(),
-) {
+private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
     val state by model.state.collectAsStateWithLifecycle()
 
     Row {
@@ -303,7 +297,7 @@ fun ProgressBar(goal: Goal) {
     val progress by animateFloatAsState(
         animationSpec = tween(durationMillis = 1000),
         label = "ExperienceProgressAnimation",
-        targetValue = goal.progress.toFloat() / goal.goal.toFloat(),
+        targetValue = goal.progress.toFloat() / goal.target.toFloat(),
     )
 
     Box(
@@ -324,8 +318,8 @@ fun ProgressBar(goal: Goal) {
 
         Text(
             text = when (goal.steps) {
-                true -> "${goal.progress.toInt()} / ${goal.goal.toInt()} steps"
-                false -> "${goal.progress} / ${goal.goal} km"
+                true -> "${goal.progress.toInt()} / ${goal.target.toInt()} steps"
+                false -> "${goal.progress} / ${goal.target} km"
             },
             style = MaterialTheme.typography.bodyMedium,
         )
