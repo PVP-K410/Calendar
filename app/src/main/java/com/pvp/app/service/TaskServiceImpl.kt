@@ -262,7 +262,7 @@ class TaskServiceImpl @Inject constructor(
         hasDisability: Boolean,
         userEmail: String
     ): List<SportTask> {
-        return getSportActivities(
+        return getDailySportActivities(
             count = count,
             hasDisability = hasDisability
         )
@@ -482,7 +482,7 @@ class TaskServiceImpl @Inject constructor(
             )
         }
 
-        private fun getSportActivities(
+        private fun getDailySportActivities(
             count: Int,
             hasDisability: Boolean
         ): List<SportActivity> {
