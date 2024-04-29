@@ -143,7 +143,6 @@ fun TaskCreateForm(
     var duration by remember { mutableStateOf(Duration.ofMinutes(0)) }
     var reminderTime by remember { mutableStateOf<Duration?>(null) }
     var activity by remember { mutableStateOf(SportActivity.Walking) }
-    //var supportsDistanceMetrics by remember { mutableStateOf(false) }
     var distance by remember { mutableDoubleStateOf(0.0) }
     var dateTime by remember { mutableStateOf(date ?: LocalDateTime.now()) }
     var editingTitle by remember { mutableStateOf("") }
@@ -239,8 +238,6 @@ fun TaskCreateForm(
             }
 
             if (targetClass != SportTask::class) {
-                //supportsDistanceMetrics = false
-
                 EditableInfoItem(
                     dialogContent = {
                         Column {
