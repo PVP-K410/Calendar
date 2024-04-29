@@ -10,7 +10,6 @@ import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.pvp.app.R
@@ -31,27 +30,25 @@ import com.pvp.app.ui.screen.survey.SurveyScreen
 
 sealed class Route(val path: String) {
 
-    open class Options(
+    data class Options(
         val icon: (@Composable () -> Unit)? = null,
         val title: (@Composable () -> Unit)? = null
     ) {
 
-        data object None : Options()
+        companion object {
+
+            val None = Options()
+        }
     }
 
     sealed class Node(
         val compose: @Composable (
             backstack: NavBackStackEntry,
             controller: NavHostController,
-            modifier: Modifier,
-            resolveOptions: () -> Unit
+            modifier: Modifier
         ) -> Unit,
         val options: Options = Options.None,
-        path: String,
-        val resolveOptions: @Composable (
-            NavBackStackEntry,
-            NavHostController
-        ) -> Options = { _, _ -> options }
+        path: String
     ) : Route(path)
 
     sealed class Root(
@@ -107,12 +104,12 @@ object Routes {
     )
 
     data object Authentication : Node(
-        compose = { _, _, _, _ -> AuthenticationScreen() },
+        compose = { _, _, _ -> AuthenticationScreen() },
         path = "authentication"
     )
 
     data object Calendar : Node(
-        compose = { _, _, m, _ -> CalendarScreen(modifier = m) },
+        compose = { _, _, m -> CalendarScreen(modifier = m) },
         options = Options(
             icon = {
                 RouteIcon(
@@ -126,7 +123,7 @@ object Routes {
     )
 
     data object Decorations : Node(
-        compose = { _, _, m, _ -> DecorationScreen(modifier = m) },
+        compose = { _, _, m -> DecorationScreen(modifier = m) },
         options = Options(
             icon = {
                 RouteIcon(
@@ -140,42 +137,25 @@ object Routes {
     )
 
     data object Friend : Node(
-        compose = { backstack, controller, modifier, resolveOptions ->
+        compose = { backstack, controller, modifier ->
             FriendScreen(
                 controller = controller,
                 model = backstack.hiltViewModel<FriendsViewModel>(controller),
-                modifier = modifier,
-                resolveOptions = resolveOptions
+                modifier = modifier
             )
         },
-        // Options [Route.Node.options] are not defined here, because we are not using static values
-        // of this route anywhere
-        resolveOptions = { backstack, controller ->
-            val username = backstack
-                .hiltViewModel<FriendsViewModel>(controller).stateFriend
-                .collectAsStateWithLifecycle().value.entry.user.username
-
-            val title = if (username.isNotBlank()) {
-                stringResource(
-                    R.string.route_friend,
-                    username
-                )
-            } else {
-                stringResource(R.string.route_friends)
-            }
-
-            Options(title = { RouteTitle(title) })
-        },
+        options = Options(
+            title = { RouteTitle(stringResource(R.string.route_friends)) }
+        ),
         path = "friend"
     )
 
     data object Friends : Node(
-        compose = { backstack, controller, modifier, resolveOptions ->
+        compose = { backstack, controller, modifier ->
             FriendsScreen(
                 controller = controller,
                 model = backstack.hiltViewModel<FriendsViewModel>(controller),
-                modifier = modifier,
-                resolveOptions = resolveOptions
+                modifier = modifier
             )
         },
         options = Options(
@@ -200,12 +180,12 @@ object Routes {
     )
 
     data object None : Node(
-        compose = { _, _, _, _ -> },
+        compose = { _, _, _ -> },
         path = "none"
     )
 
     data object Settings : Node(
-        compose = { _, _, m, _ -> SettingsScreen(modifier = m) },
+        compose = { _, _, m -> SettingsScreen(modifier = m) },
         options = Options(
             icon = {
                 RouteIcon(
@@ -220,7 +200,7 @@ object Routes {
 
     @SuppressLint("NewApi")
     data object Steps : Node(
-        compose = { _, _, m, _ -> StepScreen(modifier = m) },
+        compose = { _, _, m -> StepScreen(modifier = m) },
         options = Options(
             icon = {
                 RouteIcon(
@@ -234,7 +214,7 @@ object Routes {
     )
 
     data object Survey : Node(
-        compose = { _, _, _, _ -> SurveyScreen() },
+        compose = { _, _, _ -> SurveyScreen() },
         options = Options(
             title = { RouteTitle(stringResource(R.string.route_survey)) }
         ),

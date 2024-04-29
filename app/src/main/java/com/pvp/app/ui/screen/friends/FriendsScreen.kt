@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pvp.app.ui.common.ButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.router.Routes
@@ -68,10 +67,8 @@ private enum class SortingType {
 fun FriendsScreen(
     controller: NavHostController,
     model: FriendsViewModel = hiltViewModel(),
-    modifier: Modifier,
-    resolveOptions: () -> Unit
+    modifier: Modifier
 ) {
-    val backstack by controller.currentBackStackEntryAsState()
     val state by model.stateFriends.collectAsStateWithLifecycle()
 
     HandleState(
@@ -79,13 +76,6 @@ fun FriendsScreen(
         { model.resetFriendsScreenState() },
         state.state
     )
-
-    // TODO: Remove this when the issue is fixed
-    LaunchedEffect(backstack?.destination?.route == Routes.Friends.path) {
-        if (backstack?.destination?.route == Routes.Friends.path) {
-            resolveOptions()
-        }
-    }
 
     val context = LocalContext.current
     val friendEmail = remember { mutableStateOf("") }

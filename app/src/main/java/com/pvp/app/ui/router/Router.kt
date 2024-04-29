@@ -1,39 +1,33 @@
 package com.pvp.app.ui.router
 
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.pvp.app.ui.common.LocalRouteOptionsApplier
 
 @Composable
 fun Router(
     controller: NavHostController,
     modifier: Modifier = Modifier,
-    onConsumeOptions: (Route.Options) -> Unit = {},
     routeModifier: Modifier = Modifier,
     routes: List<Route>,
     start: Route
 ) {
     NavHost(
-        enterTransition = {
-            slideInHorizontally(
-                initialOffsetX = { -it },
-                animationSpec = tween(500)
-            )
-        },
-        exitTransition = {
-            slideOutHorizontally(
-                targetOffsetX = { it },
-                animationSpec = tween(500)
-            )
-        },
+        enterTransition = { fadeIn(tween(300)) },
+        exitTransition = { fadeOut(tween(300)) },
         modifier = modifier,
         navController = controller,
         startDestination = when (start) {
@@ -46,7 +40,6 @@ fun Router(
                 is Route.Node -> {
                     composeRoute(
                         controller,
-                        onConsumeOptions,
                         route,
                         routeModifier
                     )
@@ -60,7 +53,6 @@ fun Router(
                         route.nodes.forEach { node ->
                             composeRoute(
                                 controller,
-                                onConsumeOptions,
                                 node,
                                 routeModifier
                             )
@@ -74,29 +66,28 @@ fun Router(
 
 private fun NavGraphBuilder.composeRoute(
     controller: NavHostController,
-    onConsumeOptions: (Route.Options) -> Unit,
     route: Route.Node,
     routeModifier: Modifier
 ) {
     composable(route.path) { backstack ->
-        val options = route.resolveOptions(
-            backstack,
-            controller
-        )
+        var applierRequired by remember { mutableStateOf(false) }
 
-        LaunchedEffect(
-            backstack.destination.route,
-            options
-        ) {
-            if (backstack.destination.route == route.path) {
-                onConsumeOptions(options)
-            }
+        if (applierRequired) {
+            LocalRouteOptionsApplier.current { route.options }
+
+            applierRequired = false
         }
 
         route.compose(
             backstack,
             controller,
             routeModifier
-        ) { onConsumeOptions(options) }
+        )
+
+        LaunchedEffect(controller.currentDestination) {
+            if (controller.currentDestination?.route == route.path) {
+                applierRequired = true
+            }
+        }
     }
 }

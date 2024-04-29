@@ -46,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -58,7 +59,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,11 +66,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.pvp.app.R
 import com.pvp.app.model.Decoration
 import com.pvp.app.model.Reward
 import com.pvp.app.ui.common.AsyncImage
-import com.pvp.app.ui.common.RouteUtil.RouteTitle
+import com.pvp.app.ui.common.LocalRouteOptions
+import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
@@ -141,16 +141,6 @@ private fun showBackNavigation(
 }
 
 /**
- * Checks if the current route/page supports task creation.
- */
-private fun supportsTaskCreation(
-    route: Route,
-    state: PagerState
-): Boolean {
-    return state.currentPage != 1 && route == Routes.Calendar
-}
-
-/**
  * Switches the screen to the given page, where 0 is main content and 1 is profile content.
  * Edited animation: **tween(500)** for duration.
  */
@@ -182,12 +172,15 @@ private fun switchPage(
     statePager: PagerState
 ) {
     controller.navigate(path) {
+        popUpTo(controller.graph.startDestinationId) {
+            saveState = true
+        }
+
         launchSingleTop = true
+        restoreState = true
     }
 
-    scope.launch {
-        stateDrawer.close()
-    }
+    scope.launch { stateDrawer.close() }
 
     switchPage(
         0,
@@ -199,7 +192,6 @@ private fun switchPage(
 @Composable
 private fun Content(
     controller: NavHostController,
-    onConsumeOptions: (Route.Options) -> Unit,
     paddingValues: PaddingValues,
     state: PagerState
 ) {
@@ -216,7 +208,6 @@ private fun Content(
             0 -> Router(
                 controller = controller,
                 start = Routes.Calendar,
-                onConsumeOptions = onConsumeOptions,
                 routeModifier = modifier,
                 routes = Routes.routesAuthenticated
             )
@@ -227,7 +218,7 @@ private fun Content(
 }
 
 @Composable
-fun FloatingActionButton(onClick: () -> Unit) {
+private fun FloatingActionButton(onClick: () -> Unit) {
     FloatingActionButton(
         containerColor = MaterialTheme.colorScheme.primary,
         onClick = onClick,
@@ -336,7 +327,7 @@ fun LayoutScreenAuthenticated(
     controller: NavHostController,
     viewModel: LayoutViewModel = hiltViewModel()
 ) {
-    var options by remember { mutableStateOf<Route.Options>(Route.Options.None) }
+    var options by remember { mutableStateOf(Route.Options.None) }
     val route = rememberRoute(controller)
     val scope = rememberCoroutineScope()
     val stateDrawer = rememberDrawerState(DrawerValue.Closed)
@@ -390,12 +381,7 @@ fun LayoutScreenAuthenticated(
 
         Scaffold(
             floatingActionButton = {
-                if (
-                    supportsTaskCreation(
-                        route.first,
-                        statePager
-                    )
-                ) {
+                if (statePager.currentPage != 1 && route.first == Routes.Calendar) {
                     FloatingActionButton(toggleTaskDialog)
                 }
             },
@@ -428,28 +414,22 @@ fun LayoutScreenAuthenticated(
                         )
                     },
                     showBackNavigation = showBack,
-                    title = {
-                        Title(
-                            options,
-                            statePager
-                        )
-                    }
+                    title = { options.title?.invoke() }
                 )
             }
         ) { padding ->
-            Content(
-                controller = controller,
-                onConsumeOptions = { optionsNew -> options = optionsNew },
-                paddingValues = padding,
-                state = statePager
-            )
-
-            if (
-                supportsTaskCreation(
-                    route.first,
-                    statePager
-                )
+            CompositionLocalProvider(
+                LocalRouteOptions provides options,
+                LocalRouteOptionsApplier provides { options = it(options) }
             ) {
+                Content(
+                    controller = controller,
+                    paddingValues = padding,
+                    state = statePager
+                )
+            }
+
+            if (statePager.currentPage != 1 && route.first == Routes.Calendar) {
                 TaskCreateDialog(
                     onClose = toggleTaskDialog,
                     isOpen = isTaskDialogOpen,
@@ -519,16 +499,5 @@ private fun RewardDialog(
                 DecorationCard(decoration = it)
             }
         }
-    }
-}
-
-@Composable
-private fun Title(
-    options: Route.Options,
-    statePager: PagerState
-) {
-    when (statePager.currentPage) {
-        1 -> RouteTitle(stringResource(R.string.route_profile))
-        else -> options.title?.invoke()
     }
 }

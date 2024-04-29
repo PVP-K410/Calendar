@@ -41,20 +41,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.R
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.Experience
 import com.pvp.app.ui.common.IconButtonWithDialog
+import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.RouteUtil.RouteTitle
 import com.pvp.app.ui.common.showToast
+import com.pvp.app.ui.router.Route
 import kotlinx.coroutines.launch
 
 private val ACTIVITIES = SportActivity.entries.map { it.title }
@@ -249,6 +254,8 @@ fun ProfileScreen(
     if (state.isLoading) {
         ProgressIndicatorWithinDialog()
     }
+
+    RouteOptionsApplier()
 
     Box(
         modifier = Modifier
@@ -470,6 +477,21 @@ private fun Properties(
             selectedFilters = ingredientsSelected,
             title = "Ingredients that you can't take"
         )
+    }
+}
+
+@Composable
+private fun RouteOptionsApplier() {
+    var applierRequired by remember { mutableStateOf(true) }
+
+    if (applierRequired) {
+        LocalRouteOptionsApplier.current {
+            Route.Options(title = {
+                RouteTitle(stringResource(R.string.route_profile))
+            })
+        }
+
+        applierRequired = false
     }
 }
 

@@ -28,177 +28,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.pvp.app.R
 import com.pvp.app.model.Friends
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Experience
+import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.RouteUtil.RouteTitle
+import com.pvp.app.ui.router.Route
+import com.pvp.app.ui.router.Routes
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
-@Composable
-fun FriendScreen(
-    controller: NavHostController,
-    model: FriendsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier,
-    resolveOptions: () -> Unit
-) {
-    val state by model.stateFriend.collectAsStateWithLifecycle()
-
-    HandleState(state = state.state)
-
-    // TODO: Remove this when the issue is fixed
-    LaunchedEffect(state.entry.user.username) {
-        resolveOptions()
-    }
-
-    val details = state.details
-    val entry = state.entry
-    val friends = state.friendsMutual
-    val tasks = state.tasksCompleted
-    val stateScroll = rememberScrollState()
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(stateScroll)
-            .then(modifier)
-            .padding(8.dp)
-            .clip(MaterialTheme.shapes.small)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(8.dp)
-    ) {
-        Header(entry = entry)
-
-        Spacer(modifier = Modifier.size(8.dp))
-
-        Content(
-            details = details,
-            friends = friends,
-            tasks = tasks
-        )
-
-        Spacer(modifier = Modifier.size(8.dp))
-
-        Remove {
-            model.remove(entry.user.email)
-
-            controller.popBackStack()
-        }
-    }
-}
-
-@Composable
-private fun Header(entry: FriendEntry) {
-    AvatarBox(entry)
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    Text(
-        style = MaterialTheme.typography.titleMedium,
-        text = entry.user.username
-    )
-
-    Spacer(modifier = Modifier.height(6.dp))
-
-    Experience(
-        experience = entry.user.experience,
-        experienceRequired = (entry.user.level + 1) * (entry.user.level + 1) * 13,
-        level = entry.user.level,
-        paddingStart = 0.dp,
-        paddingEnd = 0.dp,
-        fontSize = 14,
-        fontWeight = FontWeight.Normal,
-        height = 26.dp,
-        textStyle = MaterialTheme.typography.titleSmall,
-        progressTextStyle = MaterialTheme.typography.bodySmall
-    )
-
-    Spacer(modifier = Modifier.height(6.dp))
-}
-
-@Composable
-private fun Remove(onRemove: () -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.End,
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ButtonConfirm(
-            confirmationDescription = { Text("If friend is removed, you will have to request for friendship again") },
-            confirmationTitle = { Text("Are you sure you want to remove this friend?") },
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
-            content = { Text("Remove Friend") },
-            modifier = Modifier
-                .height(38.dp)
-                .border(
-                    1.dp,
-                    Color.Red,
-                    MaterialTheme.shapes.extraLarge
-                ),
-            onConfirm = onRemove,
-            shape = MaterialTheme.shapes.extraLarge
-        )
-    }
-}
-
-@Composable
-fun Content(
-    details: Friends,
-    friends: List<FriendEntry>,
-    tasks: Int
-) {
-    val sinceDateTime = LocalDateTime.ofInstant(
-        Instant.ofEpochMilli(details.since),
-        ZoneId.systemDefault()
-    )
-
-    val formattedDate = sinceDateTime.format(
-        DateTimeFormatter.ofPattern(
-            "yyyy/MM/dd"
-        )
-    )
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        ActivityInfo(tasks)
-
-        FriendInfo(
-            formattedDate,
-            friends
-        )
-    }
-}
-
-@Composable
-private fun AvatarBox(friend: FriendEntry) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(150.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-    ) {
-        Image(
-            bitmap = friend.avatar,
-            contentDescription = "Friend avatar",
-            modifier = Modifier
-                .size(150.dp)
-                .clip(CircleShape)
-        )
-    }
-}
 
 @Composable
 private fun ActivityInfo(tasksCompleted: Int) {
@@ -276,6 +132,52 @@ private fun ActivityRow(
 }
 
 @Composable
+private fun AvatarBox(friend: FriendEntry) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(150.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Image(
+            bitmap = friend.avatar,
+            contentDescription = "Friend avatar",
+            modifier = Modifier
+                .size(150.dp)
+                .clip(CircleShape)
+        )
+    }
+}
+
+@Composable
+private fun Content(
+    details: Friends,
+    friends: List<FriendEntry>,
+    tasks: Int
+) {
+    val sinceDateTime = LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(details.since),
+        ZoneId.systemDefault()
+    )
+
+    val formattedDate = sinceDateTime.format(
+        DateTimeFormatter.ofPattern(
+            "yyyy/MM/dd"
+        )
+    )
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        ActivityInfo(tasks)
+
+        FriendInfo(
+            formattedDate,
+            friends
+        )
+    }
+}
+
+@Composable
 private fun FriendInfo(
     formattedDate: String,
     mutualFriends: List<FriendEntry>
@@ -344,6 +246,96 @@ private fun FriendInfo(
 }
 
 @Composable
+fun FriendScreen(
+    controller: NavHostController,
+    model: FriendsViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier
+) {
+    val state by model.stateFriend.collectAsStateWithLifecycle()
+
+    RouteOptionsApplier(
+        controller,
+        state.entry.user.username
+    )
+
+    HandleState(state.state)
+
+    val details = state.details
+    val entry = state.entry
+    val friends = state.friendsMutual
+    val tasks = state.tasksCompleted
+    val stateScroll = rememberScrollState()
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(stateScroll)
+            .then(modifier)
+            .padding(8.dp)
+            .clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(8.dp)
+    ) {
+        Header(entry = entry)
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        Content(
+            details = details,
+            friends = friends,
+            tasks = tasks
+        )
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        Remove {
+            model.remove(entry.user.email)
+
+            controller.popBackStack()
+        }
+    }
+}
+
+@Composable
+private fun HandleState(state: FriendScreenState) {
+    when (state) {
+        FriendScreenState.Loading -> ProgressIndicatorWithinDialog()
+
+        else -> {}
+    }
+}
+
+@Composable
+private fun Header(entry: FriendEntry) {
+    AvatarBox(entry)
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Text(
+        style = MaterialTheme.typography.titleMedium,
+        text = entry.user.username
+    )
+
+    Spacer(modifier = Modifier.height(6.dp))
+
+    Experience(
+        experience = entry.user.experience,
+        experienceRequired = (entry.user.level + 1) * (entry.user.level + 1) * 13,
+        level = entry.user.level,
+        paddingStart = 0.dp,
+        paddingEnd = 0.dp,
+        fontSize = 14,
+        fontWeight = FontWeight.Normal,
+        height = 26.dp,
+        textStyle = MaterialTheme.typography.titleSmall,
+        progressTextStyle = MaterialTheme.typography.bodySmall
+    )
+
+    Spacer(modifier = Modifier.height(6.dp))
+}
+
+@Composable
 private fun InfoHeader(text: String) {
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -365,10 +357,59 @@ private fun InfoHeader(text: String) {
 }
 
 @Composable
-fun HandleState(state: FriendScreenState) {
-    when (state) {
-        FriendScreenState.Loading -> ProgressIndicatorWithinDialog()
+private fun Remove(onRemove: () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.End,
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ButtonConfirm(
+            confirmationDescription = { Text("If friend is removed, you will have to request for friendship again") },
+            confirmationTitle = { Text("Are you sure you want to remove this friend?") },
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+            content = { Text("Remove Friend") },
+            modifier = Modifier
+                .height(38.dp)
+                .border(
+                    1.dp,
+                    Color.Red,
+                    MaterialTheme.shapes.extraLarge
+                ),
+            onConfirm = onRemove,
+            shape = MaterialTheme.shapes.extraLarge
+        )
+    }
+}
 
-        else -> {}
+@Composable
+private fun RouteOptionsApplier(
+    controller: NavHostController,
+    username: String
+) {
+    var applierRequired by remember { mutableStateOf(false) }
+
+    if (applierRequired) {
+        LocalRouteOptionsApplier.current {
+            if (username.isNotBlank()) {
+                Route.Options(title = {
+                    RouteTitle(
+                        stringResource(
+                            R.string.route_friend,
+                            username
+                        )
+                    )
+                })
+            } else {
+                it
+            }
+        }
+
+        applierRequired = false
+    }
+
+    LaunchedEffect(controller.currentDestination) {
+        if (controller.currentDestination?.route == Routes.Friend.path) {
+            applierRequired = true
+        }
     }
 }
