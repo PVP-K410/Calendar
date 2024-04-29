@@ -218,9 +218,7 @@ private fun Initials(
 }
 
 @Composable
-private fun BoxScope.Points(
-    points: Int
-) {
+private fun BoxScope.Points(points: Int) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -267,9 +265,7 @@ fun ProfileScreen(
         Column(modifier = Modifier.fillMaxWidth()) {
             if (!state.isLoading) {
                 Initials(
-                    onUsernameChange = {
-                        viewModel.update { u -> u.username = it }
-                    },
+                    onUsernameChange = { viewModel.update { u -> u.username = it } },
                     state = state
                 )
 
@@ -308,9 +304,9 @@ private fun Properties(
     }
 
     var activitiesSelectedEdit by remember { mutableStateOf(activitiesSelected) }
-    var activitiesUnselected by remember { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
+    var activitiesUnselected by remember(activitiesSelected) { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
     val context = LocalContext.current
-    var height by remember { mutableIntStateOf(state.user.height) }
+    var height by remember(state.user.height) { mutableIntStateOf(state.user.height) }
     var heightEdit by remember { mutableStateOf(height.toString()) }
 
     var ingredientsSelected = remember(state.user.ingredients) {
@@ -319,7 +315,7 @@ private fun Properties(
 
     var ingredientsSelectedEdit by remember { mutableStateOf(ingredientsSelected) }
     var ingredientsUnselectedEdit by remember { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
-    var mass by remember { mutableIntStateOf(state.user.mass) }
+    var mass by remember(state.user.mass) { mutableIntStateOf(state.user.mass) }
     var massEdit by remember { mutableStateOf(mass.toString()) }
 
     Column(
@@ -542,8 +538,8 @@ private fun Username(
 
 @Composable
 fun WeeklyActivitiesItem(
-    title: String,
-    activities: List<String>
+    activities: List<String>,
+    title: String
 ) {
     Box(
         modifier = Modifier
@@ -559,9 +555,9 @@ fun WeeklyActivitiesItem(
             verticalArrangement = Arrangement.Center
         ) {
             Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
                     horizontalAlignment = Alignment.Start,
@@ -574,7 +570,10 @@ fun WeeklyActivitiesItem(
                 }
             }
 
-            FiltersBox(filters = activities)
+            FiltersBox(
+                filters = activities,
+                title = "weekly activities"
+            )
         }
     }
 }

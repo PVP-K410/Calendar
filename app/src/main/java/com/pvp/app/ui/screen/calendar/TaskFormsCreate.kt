@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.background
@@ -12,13 +14,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -31,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
@@ -69,7 +73,7 @@ private fun TaskTypeSelector(
 }
 
 @Composable
-fun TaskCreateDialog(
+fun TaskCreateSheetContent(
     date: LocalDateTime? = null,
     onClose: () -> Unit,
     isOpen: Boolean,
@@ -79,7 +83,10 @@ fun TaskCreateDialog(
         return
     }
 
-    Dialog(onDismissRequest = onClose) {
+    ModalBottomSheet(
+        onDismissRequest = onClose,
+        sheetState = rememberModalBottomSheetState()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -353,7 +360,10 @@ fun TaskCreateForm(
                 onDismiss = { editingReminderTime = reminderTime },
                 value = if (reminderTime != null)
                     "${reminderTime?.toMinutes()} ${
-                        if (reminderTime?.toMinutes()?.toInt() == 1) "minute" else "minutes"
+                        if (reminderTime
+                                ?.toMinutes()
+                                ?.toInt() == 1
+                        ) "minute" else "minutes"
                     } before task" else ""
             )
 

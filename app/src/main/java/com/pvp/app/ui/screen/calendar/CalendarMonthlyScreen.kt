@@ -78,7 +78,7 @@ private fun Content(
             )
 
             if (showDialog) {
-                TaskCreateDialog(
+                TaskCreateSheetContent(
                     date,
                     onChangeShowDialog
                 )
@@ -86,7 +86,7 @@ private fun Content(
         }
 
         tasks.isEmpty() && !date.isBefore(LocalDate.now()) -> {
-            TaskCreateDialog(
+            TaskCreateSheetContent(
                 date,
                 onChangeExpand
             )
@@ -380,11 +380,11 @@ private fun Header(
 }
 
 @Composable
-private fun TaskCreateDialog(
+private fun TaskCreateSheetContent(
     selectedDate: LocalDate,
     onClose: (Boolean) -> Unit
 ) {
-    TaskCreateDialog(
+    TaskCreateSheetContent(
         date = LocalDateTime.of(
             selectedDate,
             LocalTime.now()

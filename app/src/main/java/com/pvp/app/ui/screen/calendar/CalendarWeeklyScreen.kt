@@ -45,7 +45,7 @@ fun Week(
     val today = LocalDate.now()
     val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }
-    var stateDialog by remember { mutableStateOf(false) }
+    var stateShowSheet by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     val statePager = rememberPagerState(
@@ -78,7 +78,7 @@ fun Week(
                         }
                     } else {
                         if (tasksFiltered.isEmpty()) {
-                            stateDialog = true
+                            stateShowSheet = true
                         } else {
                             stateShowCards = !stateShowCards
                         }
@@ -100,13 +100,13 @@ fun Week(
             TasksOfDay(tasksFiltered)
         }
 
-        TaskCreateDialog(
+        TaskCreateSheetContent(
             date = date.atTime(
                 0,
                 0
             ),
-            isOpen = stateDialog,
-            onClose = { stateDialog = false },
+            isOpen = stateShowSheet,
+            onClose = { stateShowSheet = false },
             shouldCloseOnSubmit = true
         )
     }

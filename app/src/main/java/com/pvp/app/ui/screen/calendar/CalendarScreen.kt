@@ -1,3 +1,8 @@
+@file:OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class
+)
+
 package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -8,6 +13,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -20,11 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarScreen(modifier: Modifier) {
-    var isDialogOpen by remember { mutableStateOf(false) }
-    val toggleDialog = remember { { isDialogOpen = !isDialogOpen } }
+    var isOpen by remember { mutableStateOf(false) }
+    val toggle = remember { { isOpen = !isOpen } }
 
     val state = rememberPagerState(
         pageCount = { 2 },
@@ -44,7 +49,7 @@ fun CalendarScreen(modifier: Modifier) {
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            onClick = toggleDialog,
+            onClick = toggle,
             shape = CircleShape
         ) {
             Icon(
@@ -53,9 +58,9 @@ fun CalendarScreen(modifier: Modifier) {
             )
         }
 
-        TaskCreateDialog(
-            onClose = toggleDialog,
-            isOpen = isDialogOpen,
+        TaskCreateSheetContent(
+            onClose = toggle,
+            isOpen = isOpen,
             shouldCloseOnSubmit = true
         )
     }
