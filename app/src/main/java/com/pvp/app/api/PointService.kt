@@ -1,5 +1,6 @@
 package com.pvp.app.api
 
+import com.pvp.app.model.Goal
 import com.pvp.app.model.Task
 import java.time.LocalDate
 
@@ -7,7 +8,7 @@ interface PointService {
 
     /**
      * Calculate the points of a task. Points are determined by the task type and the attributes of
-     * the task. User status can also be taken into account, hence, [Task.userEmail] is required.
+     * the task.
      *
      * @param task task to calculate points for
      * @param increasePointYield Indicates whether the calculation should increase points for this task
@@ -31,6 +32,16 @@ interface PointService {
     ): Int {
         return tasks.sumOf { calculate(it) }
     }
+
+    /**
+     * Calculate the points of a goal. Points are determined by the goal type and the attributes of
+     * the goal.
+     *
+     * @param goal goal to calculate points for
+     *
+     * @return points of the goal
+     */
+    suspend fun calculate(goal: Goal): Int
 
     /**
      * Deduct points from current user for not completing tasks.
