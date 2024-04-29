@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storefront
@@ -24,6 +25,7 @@ import com.pvp.app.ui.screen.decoration.DecorationScreen
 import com.pvp.app.ui.screen.friends.FriendScreen
 import com.pvp.app.ui.screen.friends.FriendsScreen
 import com.pvp.app.ui.screen.friends.FriendsViewModel
+import com.pvp.app.ui.screen.goals.GoalScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
@@ -70,6 +72,7 @@ object Routes {
         Calendar,
         Decorations,
         FriendsRoot,
+        Goals,
         None,
         Settings,
         Steps
@@ -87,6 +90,7 @@ object Routes {
         Calendar,
         Decorations,
         Friends,
+        Goals,
         Settings,
         Steps
     )
@@ -177,6 +181,20 @@ object Routes {
         ),
         path = "friends-root",
         start = Friends
+    )
+
+    data object Goals : Node(
+        compose = { _, _, m -> GoalScreen(modifier = m) },
+        options = Options(
+            icon = {
+                RouteIcon(
+                    imageVector = Icons.Outlined.EmojiEvents,
+                    resourceId = R.string.route_goals
+                )
+            },
+            title = { RouteTitle(stringResource(R.string.route_goals)) }
+        ),
+        path = "goals"
     )
 
     data object None : Node(
