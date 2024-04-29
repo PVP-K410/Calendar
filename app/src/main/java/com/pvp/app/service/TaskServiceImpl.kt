@@ -492,6 +492,7 @@ class TaskServiceImpl @Inject constructor(
                 SportActivity.entries
                     .minus(SportActivity.Wheelchair)
                     .minus(SportActivity.Other)
+                    .minus(SportActivity.Walking)
                     .shuffled()
                     .take(count - 1)
                     .plus(SportActivity.Walking)
