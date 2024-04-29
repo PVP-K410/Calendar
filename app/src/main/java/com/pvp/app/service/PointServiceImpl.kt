@@ -6,7 +6,6 @@ import com.pvp.app.api.Configuration
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.model.Goal
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -91,24 +90,6 @@ class PointServiceImpl @Inject constructor(
 
                 it
             }
-    }
-
-    override suspend fun calculate(goal: Goal): Int {
-        return when (goal.monthly) {
-            false -> {
-                calculateDistancePoints(
-                    distance = goal.goal / 7.0,
-                    ratio = goal.activity.pointsRatioDistance
-                ) * 7
-            }
-
-            true -> {
-                calculateDistancePoints(
-                    distance = goal.goal / 30.0,
-                    ratio = goal.activity.pointsRatioDistance
-                ) * 30
-            }
-        }
     }
 
     private fun calculateDistancePoints(
