@@ -1,5 +1,8 @@
 package com.pvp.app.ui.router
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -26,8 +29,34 @@ fun Router(
     start: Route
 ) {
     NavHost(
-        enterTransition = { fadeIn(tween(300)) },
-        exitTransition = { fadeOut(tween(300)) },
+        enterTransition = {
+            fadeIn(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = LinearEasing
+                )
+            ) + slideIntoContainer(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = EaseOut
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.End
+            )
+        },
+        exitTransition = {
+            fadeOut(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = LinearEasing
+                )
+            ) + slideOutOfContainer(
+                animationSpec = tween(
+                    durationMillis = 300,
+                    easing = EaseOut
+                ),
+                towards = AnimatedContentTransitionScope.SlideDirection.Start
+            )
+        },
         modifier = modifier,
         navController = controller,
         startDestination = when (start) {
