@@ -2,6 +2,7 @@
 
 package com.pvp.app.ui.screen.profile
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -488,6 +489,12 @@ private fun RouteOptionsApplier() {
         }
 
         applierRequired = false
+
+        // TODO: Delete in PR
+        Log.d(
+            "Applied options",
+            "-- @profile --"
+        )
     }
 }
 

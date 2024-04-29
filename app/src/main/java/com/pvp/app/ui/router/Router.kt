@@ -1,5 +1,6 @@
 package com.pvp.app.ui.router
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.LinearEasing
@@ -105,6 +106,12 @@ private fun NavGraphBuilder.composeRoute(
             LocalRouteOptionsApplier.current { route.options }
 
             applierRequired = false
+
+            // TODO: Delete in PR
+            Log.d(
+                "Applied options",
+                "-- ${route.path} --"
+            )
         }
 
         route.compose(

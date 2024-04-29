@@ -2,8 +2,10 @@ package com.pvp.app.ui.common
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.core.graphics.ColorUtils
 
 fun <T : Context> T.showToast(
@@ -57,3 +59,6 @@ fun Color.lighten(
         )
         .run { Color(this) }
 }
+
+@Composable
+fun Int.pixelsToDp() = with(LocalDensity.current) { toDp() }

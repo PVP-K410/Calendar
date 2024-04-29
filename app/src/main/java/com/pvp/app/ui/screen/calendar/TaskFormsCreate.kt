@@ -5,37 +5,35 @@ package com.pvp.app.ui.screen.calendar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
@@ -44,6 +42,7 @@ import com.pvp.app.model.Task
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.EditableDateItem
 import com.pvp.app.ui.common.EditableInfoItem
+import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.PickerTime
 import java.time.Duration
@@ -52,28 +51,43 @@ import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
 
 @Composable
-private fun TaskTypeSelector(
-    isSelected: Boolean,
-    onSelect: () -> Unit,
-    text: String
-) {
-    Button(onClick = onSelect) {
-        if (isSelected) {
-            Icon(
-                contentDescription = "Currently selected form",
-                imageVector = Icons.Outlined.Place
-            )
-        }
+private fun ColumnScope.TaskTypeSelector(onSelect: (KClass<out Task>) -> Unit) {
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
 
-        Text(
-            style = MaterialTheme.typography.labelLarge,
-            text = text
+    PrimaryTabRow(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .align(Alignment.CenterHorizontally)
+            .clip(MaterialTheme.shapes.medium),
+        selectedTabIndex = selectedTabIndex
+    ) {
+        mapOf(
+            Task::class to "General",
+            MealTask::class to "Meal",
+            SportTask::class to "Sport"
         )
+            .onEachIndexed { index, (taskClass, taskText) ->
+                Tab(
+                    modifier = Modifier.height(32.dp),
+                    onClick = {
+                        selectedTabIndex = index
+
+                        onSelect(taskClass)
+                    },
+                    selected = selectedTabIndex == index
+                ) {
+                    Text(
+                        style = MaterialTheme.typography.labelLarge,
+                        text = taskText
+                    )
+                }
+            }
     }
 }
 
 @Composable
-fun TaskCreateSheetContent(
+fun TaskCreateSheet(
     date: LocalDateTime? = null,
     onClose: () -> Unit,
     isOpen: Boolean,
@@ -85,45 +99,22 @@ fun TaskCreateSheetContent(
 
     ModalBottomSheet(
         onDismissRequest = onClose,
-        sheetState = rememberModalBottomSheetState()
+        sheetState = rememberModalBottomSheetState(true)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(8.dp)
         ) {
             var target by remember { mutableStateOf(Task::class as KClass<out Task>) }
 
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TaskTypeSelector(
-                    isSelected = target == Task::class,
-                    onSelect = { target = Task::class },
-                    text = "General"
-                )
+            TaskTypeSelector { targetNew -> target = targetNew }
 
-                TaskTypeSelector(
-                    isSelected = target == MealTask::class,
-                    onSelect = { target = MealTask::class },
-                    text = "Meal"
-                )
-
-                TaskTypeSelector(
-                    isSelected = target == SportTask::class,
-                    onSelect = { target = SportTask::class },
-                    text = "Sport"
-                )
-            }
-
-            Spacer(modifier = Modifier.padding(4.dp))
+            Spacer(modifier = Modifier.size(16.dp))
 
             HorizontalDivider()
 
-            Spacer(modifier = Modifier.padding(4.dp))
+            Spacer(modifier = Modifier.size(8.dp))
 
             TaskCreateForm(
                 targetClass = target,
@@ -170,244 +161,210 @@ fun TaskCreateForm(
         }
     }
 
-    Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(8.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    end = 15.dp,
-                    start = 15.dp,
-                    top = 15.dp
+        EditableInfoItem(
+            dialogContent = {
+                OutlinedTextField(
+                    label = { Text("Title") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    onValueChange = { newText ->
+                        editingTitle = newText
+                    },
+                    value = editingTitle
                 )
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            EditableInfoItem(
-                dialogContent = {
-                    OutlinedTextField(
-                        label = { Text("Title") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        onValueChange = { newText ->
-                            editingTitle = newText
-                        },
-                        value = editingTitle
-                    )
-                },
-                dialogTitle = { Text("Editing title") },
-                label = "Title",
-                onConfirm = { title = editingTitle },
-                onDismiss = { editingTitle = title },
-                value = title
-            )
+            },
+            dialogTitle = { Text("Editing title") },
+            label = "Title",
+            onConfirm = { title = editingTitle },
+            onDismiss = { editingTitle = title },
+            value = title
+        )
 
-            EditableInfoItem(
-                dialogContent = {
-                    OutlinedTextField(
-                        label = { Text(descriptionLabel) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        onValueChange = { newText ->
-                            editingDescription = newText
-                        },
-                        value = editingDescription
-                    )
-                },
-                dialogTitle = { Text("Editing $descriptionLabel") },
-                label = descriptionLabel,
-                onConfirm = { description = editingDescription },
-                onDismiss = { editingDescription = description },
-                value = description
-            )
+        EditableInfoItem(
+            dialogContent = {
+                OutlinedTextField(
+                    label = { Text(descriptionLabel) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    onValueChange = { newText ->
+                        editingDescription = newText
+                    },
+                    value = editingDescription
+                )
+            },
+            dialogTitle = { Text("Editing $descriptionLabel") },
+            label = descriptionLabel,
+            onConfirm = { description = editingDescription },
+            onDismiss = { editingDescription = description },
+            value = description
+        )
 
-            when (targetClass) {
-                SportTask::class -> TaskEditFieldsSport(
-                    onActivityChange = { newActivity ->
-                        if (newActivity != null) {
-                            activity = newActivity
-                            //supportsDistanceMetrics = activity.supportsDistanceMetrics
-                        }
-                    },
-                    onDistanceChange = { newDistance ->
-                        distance = newDistance
-                    },
-                    onDurationChange = { newDuration ->
-                        duration = newDuration
+        if (targetClass == SportTask::class) {
+            TaskEditFieldsSport(
+                onActivityChange = { newActivity ->
+                    if (newActivity != null) {
+                        activity = newActivity
                     }
-                )
-
-                else -> {}
-            }
-
-            if (targetClass != SportTask::class) {
-                EditableInfoItem(
-                    dialogContent = {
-                        Column {
-                            Text(
-                                text = "Duration: ${editingDuration?.toMinutes()} minutes",
-                                style = TextStyle(fontSize = 16.sp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 4.dp)
-                            )
-
-                            Slider(
-                                value = editingDuration
-                                    ?.toMinutes()
-                                    ?.toFloat() ?: 0f,
-                                onValueChange = { newValue ->
-                                    editingDuration = Duration.ofMinutes(newValue.toLong())
-                                },
-                                valueRange = 1f..180f,
-                                steps = 180,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        start = 8.dp,
-                                        end = 8.dp,
-                                        bottom = 8.dp
-                                    )
-                            )
-                        }
-                    },
-                    dialogTitle = { Text("Editing duration") },
-                    label = "Duration",
-                    onConfirm = { duration = editingDuration },
-                    onDismiss = { editingDuration = duration },
-                    value = "${duration?.toMinutes()} minutes"
-                )
-            }
-
-            EditableInfoItem(
-                dialogContent = {
-                    PickerTime(
-                        selectedHour = editingHour,
-                        selectedMinute = editingMinute,
-                        onChange = { hour, minute ->
-                            editingHour.value = hour
-                            editingMinute.value = minute
-                        }
-                    )
                 },
-                dialogTitle = { Text("Editing scheduled at") },
-                label = "Scheduled at",
-                onConfirm = {
-                    dateTime = dateTime
-                        .withHour(editingHour.value)
-                        .withMinute(editingMinute.value)
+                onDistanceChange = { newDistance ->
+                    distance = newDistance
                 },
-                onDismiss = {
-                    editingHour.value = dateTime.hour
-                    editingMinute.value = dateTime.minute
-                },
-                value = if (activity.supportsDistanceMetrics) {
-                    dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
-                } else {
-                    "${dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))} - " +
-                            (dateTime.plus(duration)).format(DateTimeFormatter.ofPattern("HH:mm"))
+                onDurationChange = { newDuration ->
+                    duration = newDuration
                 }
             )
-
-            EditableDateItem(
-                label = "Date",
-                value = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE")),
-                onDateSelected = { selectedDate ->
-                    dateTime = dateTime
-                        .withYear(selectedDate.year)
-                        .withMonth(selectedDate.monthValue)
-                        .withDayOfMonth(selectedDate.dayOfMonth)
-                }
-            )
-
+        } else {
             EditableInfoItem(
                 dialogContent = {
                     Column {
-                        Text(
-                            text = "Reminder Time: ${editingReminderTime?.toMinutes() ?: 0} minutes",
-                            style = TextStyle(fontSize = 16.sp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 4.dp)
-                        )
-
-                        Slider(
-                            value = editingReminderTime
+                        val initial = remember(editingDuration) {
+                            editingDuration
                                 ?.toMinutes()
-                                ?.toFloat() ?: 0f,
-                            onValueChange = { newValue ->
-                                editingReminderTime = Duration.ofMinutes(newValue.toLong())
-                            },
-                            valueRange = 1f..120f,
-                            steps = 120,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    start = 8.dp,
-                                    end = 8.dp,
-                                    bottom = 8.dp
-                                )
+                                ?.toFloat()
+                                ?: 0f
+                        }
+
+                        Picker(
+                            items = (0..300 step 5).toList(),
+                            label = { "$it minutes" },
+                            onChange = { editingDuration = Duration.ofMinutes(it.toLong()) },
+                            startIndex = initial.toInt() / 5,
+                            state = rememberPickerState(initialValue = initial)
                         )
                     }
                 },
-                dialogTitle = { Text("Editing reminder time") },
-                label = "Reminder Time",
-                onConfirm = { reminderTime = editingReminderTime },
-                onDismiss = { editingReminderTime = reminderTime },
-                value = if (reminderTime != null)
-                    "${reminderTime?.toMinutes()} ${
-                        if (reminderTime
-                                ?.toMinutes()
-                                ?.toInt() == 1
-                        ) "minute" else "minutes"
-                    } before task" else ""
+                dialogTitle = { Text("Editing duration") },
+                label = "Duration",
+                onConfirm = { duration = editingDuration },
+                onDismiss = { editingDuration = duration },
+                value = "${duration?.toMinutes()} minutes"
             )
+        }
 
-            Button(
-                onClick = {
-                    when (targetClass) {
-                        SportTask::class -> model.create(
-                            date = dateTime.toLocalDate(),
-                            activity = activity,
-                            description = description,
-                            distance = distance,
-                            duration = duration,
-                            reminderTime = reminderTime,
-                            time = dateTime.toLocalTime(),
-                            title = title
-                        )
+        EditableInfoItem(
+            dialogContent = {
+                PickerTime(
+                    selectedHour = editingHour,
+                    selectedMinute = editingMinute,
+                    onChange = { hour, minute ->
+                        editingHour.value = hour
+                        editingMinute.value = minute
+                    }
+                )
+            },
+            dialogTitle = { Text("Editing scheduled at") },
+            label = "Scheduled at",
+            onConfirm = {
+                dateTime = dateTime
+                    .withHour(editingHour.value)
+                    .withMinute(editingMinute.value)
+            },
+            onDismiss = {
+                editingHour.value = dateTime.hour
+                editingMinute.value = dateTime.minute
+            },
+            value = if (activity.supportsDistanceMetrics) {
+                dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+            } else {
+                "${dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))} - " +
+                        (dateTime.plus(duration)).format(DateTimeFormatter.ofPattern("HH:mm"))
+            }
+        )
 
-                        MealTask::class -> model.create(
-                            date = dateTime.toLocalDate(),
-                            description = "",
-                            duration = duration,
-                            reminderTime = reminderTime,
-                            recipe = description,
-                            time = dateTime.toLocalTime(),
-                            title = title
-                        )
+        EditableDateItem(
+            label = "Date",
+            value = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE")),
+            onDateSelected = { selectedDate ->
+                dateTime = dateTime
+                    .withYear(selectedDate.year)
+                    .withMonth(selectedDate.monthValue)
+                    .withDayOfMonth(selectedDate.dayOfMonth)
+            }
+        )
 
-                        else -> model.create(
-                            date = dateTime.toLocalDate(),
-                            description = description,
-                            duration = duration,
-                            reminderTime = reminderTime,
-                            time = dateTime.toLocalTime(),
-                            title = title
-                        )
+        EditableInfoItem(
+            dialogContent = {
+                Column {
+                    val initial = remember(editingReminderTime) {
+                        editingReminderTime
+                            ?.toMinutes()
+                            ?.toFloat()
+                            ?: 0f
                     }
 
-                    onCreate()
-                },
-                enabled = isFormValid,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text("Create")
-            }
+                    Picker(
+                        items = (0..120 step 5).toList(),
+                        label = { "$it minutes" },
+                        onChange = { editingReminderTime = Duration.ofMinutes(it.toLong()) },
+                        startIndex = initial.toInt() / 5,
+                        state = rememberPickerState(initialValue = initial)
+                    )
+                }
+            },
+            dialogTitle = { Text("Editing reminder time") },
+            label = "Reminder Time",
+            onConfirm = { reminderTime = editingReminderTime },
+            onDismiss = { editingReminderTime = reminderTime },
+            value = if (reminderTime != null)
+                "${reminderTime?.toMinutes()} ${
+                    if (reminderTime
+                            ?.toMinutes()
+                            ?.toInt() == 1
+                    ) "minute" else "minutes"
+                } before task" else ""
+        )
+
+        Button(
+            onClick = {
+                when (targetClass) {
+                    SportTask::class -> model.create(
+                        date = dateTime.toLocalDate(),
+                        activity = activity,
+                        description = description,
+                        distance = distance,
+                        duration = duration,
+                        reminderTime = reminderTime,
+                        time = dateTime.toLocalTime(),
+                        title = title
+                    )
+
+                    MealTask::class -> model.create(
+                        date = dateTime.toLocalDate(),
+                        description = "",
+                        duration = duration,
+                        reminderTime = reminderTime,
+                        recipe = description,
+                        time = dateTime.toLocalTime(),
+                        title = title
+                    )
+
+                    else -> model.create(
+                        date = dateTime.toLocalDate(),
+                        description = description,
+                        duration = duration,
+                        reminderTime = reminderTime,
+                        time = dateTime.toLocalTime(),
+                        title = title
+                    )
+                }
+
+                onCreate()
+            },
+            enabled = isFormValid,
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("Create")
         }
     }
 }
