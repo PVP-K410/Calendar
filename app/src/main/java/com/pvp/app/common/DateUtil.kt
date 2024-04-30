@@ -102,14 +102,11 @@ object DateUtil {
         )
     }
 
-    /**
-     * Resets time to 00h:00min:00s.000ns of the day
-     */
-    fun LocalDateTime.resetTime(): LocalDateTime {
-        return withHour(0)
-            .withMinute(0)
-            .withSecond(0)
-            .withNano(0)
+    fun Timestamp.toLocalDate(): LocalDate {
+        return LocalDate.ofInstant(
+            toDate().toInstant(),
+            ZoneId.systemDefault()
+        )
     }
 
     /**

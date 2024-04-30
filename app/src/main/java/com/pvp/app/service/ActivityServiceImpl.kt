@@ -3,6 +3,7 @@ package com.pvp.app.service
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.ActivityService
+import com.pvp.app.common.DateUtil.toTimestamp
 import com.pvp.app.common.JsonUtil.JSON
 import com.pvp.app.common.JsonUtil.toJsonElement
 import com.pvp.app.common.JsonUtil.toPrimitivesMap
@@ -43,6 +44,34 @@ class ActivityServiceImpl @Inject constructor(
                             it.data.toJsonElement()
                         )
                     }
+            }
+    }
+
+    override suspend fun get(
+        date: Pair<LocalDate, LocalDate>,
+        email: String
+    ): Flow<List<ActivityEntry>> {
+        return database
+            .collection(identifier)
+            .whereEqualTo(
+                ActivityEntry::email.name,
+                email
+            )
+            .whereGreaterThanOrEqualTo(
+                ActivityEntry::date.name,
+                date.first.toTimestamp()
+            )
+            .whereLessThanOrEqualTo(
+                ActivityEntry::date.name,
+                date.second.toTimestamp()
+            )
+            .snapshots()
+            .map { qs ->
+                qs.documents.map { ds ->
+                    JSON.decodeFromJsonElement<ActivityEntry>(
+                        ds.data.toJsonElement()
+                    )
+                }
             }
     }
 

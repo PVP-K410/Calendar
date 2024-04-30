@@ -112,7 +112,7 @@ object Routes {
     )
 
     data object Analysis : Node(
-        compose = { _, _, m -> AnalysisScreen(m) },
+        compose = { _, _, m -> AnalysisScreen(modifier = m) },
         options = Options(
             icon = {
                 RouteIcon(

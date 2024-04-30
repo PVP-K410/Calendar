@@ -131,7 +131,7 @@ class ActivityWorker @AssistedInject constructor(
             if (activity == null) {
                 activityService.merge(
                     ActivityEntry(
-                        date = date,
+                        date = date.toTimestamp(),
                         calories = calories,
                         steps = steps,
                         email = email
