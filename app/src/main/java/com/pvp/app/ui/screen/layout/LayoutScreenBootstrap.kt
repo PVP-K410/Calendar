@@ -11,7 +11,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.pvp.app.ui.common.LocalBackgroundColors
-import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.backgroundGradientVertical
 import com.pvp.app.ui.router.Routes
 import com.pvp.app.ui.theme.BackgroundGradientSunset
@@ -39,7 +39,9 @@ fun LayoutScreenBootstrap(model: LayoutViewModel = hiltViewModel()) {
             val state by model.state.collectAsStateWithLifecycle()
 
             when {
-                state.isLoading -> ProgressIndicatorWithinDialog()
+                state.isLoading -> {
+                    ProgressIndicator()
+                }
 
                 !state.isAuthenticated || state.areSurveysFilled == false -> {
                     LayoutScreenUnauthenticated(
@@ -49,7 +51,9 @@ fun LayoutScreenBootstrap(model: LayoutViewModel = hiltViewModel()) {
                     )
                 }
 
-                else -> LayoutScreenAuthenticated(controller = rememberNavController())
+                else -> {
+                    LayoutScreenAuthenticated(controller = rememberNavController())
+                }
             }
         }
     }
