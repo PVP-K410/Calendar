@@ -37,7 +37,7 @@ fun LayoutScreenUnauthenticated(
                 modifier = Modifier
                     .fillMaxSize()
                     .backgroundGradientVertical(LocalBackgroundColors.current),
-                routes = Routes.routesUnauthenticated,
+                routes = Routes.unauthenticated,
             )
         }
     }

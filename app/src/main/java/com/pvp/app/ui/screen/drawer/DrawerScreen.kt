@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.R
 import com.pvp.app.ui.common.ButtonConfirm
-import com.pvp.app.ui.common.RouteUtil.RouteTitle
+import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.router.Route
 

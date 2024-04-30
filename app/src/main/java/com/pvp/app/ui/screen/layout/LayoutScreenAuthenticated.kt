@@ -113,7 +113,7 @@ private fun rememberRoute(controller: NavHostController): Pair<Route, NavDestina
 
     return remember(destination) {
         Pair(
-            Routes.routesAuthenticated.find {
+            Routes.authenticated.find {
                 it.path == destination?.route ||
                         it.path == destination?.parent?.route
             } ?: Routes.Calendar,
@@ -132,7 +132,7 @@ private fun showBackNavigation(
         page
     ) {
         page == 0 &&
-                destination.route !in Routes.routesDrawer.map { it.path } &&
+                destination.route !in Routes.drawer.map { it.path } &&
                 destination.parent?.startDestinationRoute != destination.route
     }
 }
@@ -199,7 +199,7 @@ private fun Content(
                 controller = controller,
                 start = Routes.Calendar,
                 routeModifier = modifier,
-                routes = Routes.routesAuthenticated
+                routes = Routes.authenticated
             )
 
             1 -> ProfileScreen(modifier = modifier)
@@ -346,7 +346,7 @@ fun LayoutScreenAuthenticated(
                     )
                 },
                 if (statePager.currentPage == 1) Routes.None else route.first,
-                Routes.routesDrawer
+                Routes.drawer
             )
         },
         drawerState = stateDrawer,

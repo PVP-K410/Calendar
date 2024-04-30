@@ -21,9 +21,9 @@ import com.pvp.app.ui.theme.BackgroundGradientSunset
  * are not initialized until the first time they are accessed.
  */
 private fun initializeRouteSingleton() {
-    Routes.routesAuthenticated
-    Routes.routesUnauthenticated
-    Routes.routesDrawer
+    Routes.authenticated
+    Routes.unauthenticated
+    Routes.drawer
 }
 
 @Composable

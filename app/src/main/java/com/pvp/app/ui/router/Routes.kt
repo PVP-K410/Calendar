@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.pvp.app.R
-import com.pvp.app.ui.common.RouteUtil.RouteIcon
-import com.pvp.app.ui.common.RouteUtil.RouteTitle
+import com.pvp.app.ui.common.RouteIcon
+import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.common.RouteUtil.hiltViewModel
 import com.pvp.app.ui.router.Route.Node
 import com.pvp.app.ui.router.Route.Root
@@ -68,7 +68,7 @@ object Routes {
      *
      * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
      */
-    val routesAuthenticated = listOf(
+    val authenticated = listOf(
         Calendar,
         Decorations,
         FriendsRoot,
@@ -82,11 +82,11 @@ object Routes {
      * These routes are used for simple navigation drawer implementation. Routes that are
      * provided here, will be displayed in the navigation drawer. Navigation drawer is only
      * available for authenticated users, hence all routes that are under this list should
-     * also be under [routesAuthenticated] list.
+     * also be under [authenticated] list.
      *
      * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
      */
-    val routesDrawer = listOf(
+    val drawer = listOf(
         Calendar,
         Decorations,
         Friends,
@@ -101,7 +101,7 @@ object Routes {
      *
      * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenUnauthenticated] layout.
      */
-    val routesUnauthenticated = listOf(
+    val unauthenticated = listOf(
         Authentication,
         None,
         Survey

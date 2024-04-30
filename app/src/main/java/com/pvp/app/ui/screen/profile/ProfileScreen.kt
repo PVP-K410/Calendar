@@ -58,7 +58,7 @@ import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
-import com.pvp.app.ui.common.RouteUtil.RouteTitle
+import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.router.Route
 import kotlinx.coroutines.launch

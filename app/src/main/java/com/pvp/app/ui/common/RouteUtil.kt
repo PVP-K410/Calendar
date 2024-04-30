@@ -1,12 +1,7 @@
 package com.pvp.app.ui.common
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
@@ -29,24 +24,5 @@ object RouteUtil {
         }
 
         return hiltViewModel(parentEntry)
-    }
-
-    @Composable
-    fun RouteIcon(
-        imageVector: ImageVector,
-        resourceId: Int
-    ) {
-        androidx.compose.material3.Icon(
-            contentDescription = "${stringResource(resourceId)} route button icon",
-            imageVector = imageVector
-        )
-    }
-
-    @Composable
-    fun RouteTitle(title: String) {
-        Text(
-            style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp),
-            text = title
-        )
     }
 }

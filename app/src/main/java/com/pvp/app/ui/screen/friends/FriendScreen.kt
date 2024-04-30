@@ -49,7 +49,7 @@ import com.pvp.app.ui.common.Experience
 import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
-import com.pvp.app.ui.common.RouteUtil.RouteTitle
+import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Routes
 import java.time.Instant
