@@ -69,6 +69,7 @@ import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptions
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.lighten
+import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
 import com.pvp.app.ui.router.Routes
@@ -167,14 +168,7 @@ private fun switchPage(
     stateDrawer: DrawerState,
     statePager: PagerState
 ) {
-    controller.navigate(path) {
-        popUpTo(controller.graph.startDestinationId) {
-            saveState = true
-        }
-
-        launchSingleTop = true
-        restoreState = true
-    }
+    controller.navigateWithPopUp(path)
 
     scope.launch { stateDrawer.close() }
 
