@@ -275,6 +275,10 @@ class AutocompleteService : Service() {
     private suspend fun updateGoals(goals: List<Goal>) {
         goals.forEach { goal ->
             goalService.update(goal)
+
+            if (goal.completed && goal.points.claimedAt != null) {
+                goalService.claim(goal)
+            }
         }
     }
 
