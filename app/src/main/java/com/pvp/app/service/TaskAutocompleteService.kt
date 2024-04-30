@@ -257,9 +257,7 @@ class TaskAutocompleteService : Service() {
                     exercises
                 )
 
-                val completedGoals = checkGoalCompletion(
-                    goals
-                )
+                val completedGoals = checkGoalCompletion(goals)
 
                 updateGoals(completedGoals)
 
