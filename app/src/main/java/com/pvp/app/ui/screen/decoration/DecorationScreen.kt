@@ -26,6 +26,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -35,20 +36,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.ui.common.Dialog
-import com.pvp.app.ui.screen.decoration.DecorationScreenState.Companion.ScreenStateHandler
+import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.showToast
+
+@Composable
+private fun screens() = listOf<Pair<String, @Composable () -> Unit>>(
+    "Store" to { Store() },
+    "Owned" to { Apply() },
+)
 
 @Composable
 private fun Apply(model: DecorationViewModel = hiltViewModel()) {
     val state by model.state.collectAsStateWithLifecycle()
     val holdersOwned by remember(state.holders) { mutableStateOf(state.holders.filter { it.owned }) }
 
-    ScreenStateHandler(
+    StateHandler(
         resetState = model::resetScreenState,
         state = state.state
     )
@@ -101,9 +110,9 @@ fun DecorationScreen(modifier: Modifier) {
 
     Column(
         modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .then(modifier)
-            .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         Spacer(modifier = Modifier.size(16.dp))
@@ -135,6 +144,64 @@ fun DecorationScreen(modifier: Modifier) {
 }
 
 @Composable
+private fun StateHandler(
+    resetState: () -> Unit,
+    state: DecorationScreenState
+) {
+    val context = LocalContext.current
+
+    if (state is DecorationScreenState.Loading) {
+        ProgressIndicatorWithinDialog()
+
+        return
+    }
+
+    when (state) {
+        is DecorationScreenState.Success -> {
+            LaunchedEffect(state) {
+                when (state) {
+                    is DecorationScreenState.Success.Apply -> context.showToast(
+                        message = "Successfully applied decoration"
+                    )
+
+                    is DecorationScreenState.Success.Purchase -> context.showToast(
+                        message = "Successfully purchased decoration"
+                    )
+
+                    is DecorationScreenState.Success.Unapply -> context.showToast(
+                        message = "Successfully removed decoration"
+                    )
+
+                    else -> context.showToast(message = "Success")
+                }
+
+                resetState()
+            }
+        }
+
+        is DecorationScreenState.Error -> {
+            LaunchedEffect(state) {
+                when (state) {
+                    is DecorationScreenState.Error.AlreadyOwned -> context.showToast(
+                        message = "You already own this decoration"
+                    )
+
+                    is DecorationScreenState.Error.InsufficientFunds -> context.showToast(
+                        message = "Not enough points to purchase decoration"
+                    )
+
+                    else -> context.showToast(message = "Error has occurred")
+                }
+
+                resetState()
+            }
+        }
+
+        else -> {}
+    }
+}
+
+@Composable
 private fun Store(model: DecorationViewModel = hiltViewModel()) {
     var item by remember { mutableStateOf<DecorationHolder?>(null) }
     var showDialog by remember { mutableStateOf(false) }
@@ -144,7 +211,7 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
         mutableStateOf(state.holders.filter { it.owned || it.decoration.price < 0 })
     }
 
-    ScreenStateHandler(
+    StateHandler(
         resetState = model::resetScreenState,
         state = state.state
     )
@@ -241,9 +308,3 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
         title = { Text("Confirm purchase") }
     )
 }
-
-@Composable
-private fun screens() = listOf<Pair<String, @Composable () -> Unit>>(
-    "Store" to { Store() },
-    "Owned" to { Apply() },
-)

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.model.SignOutResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,7 +17,7 @@ class DrawerViewModel @Inject constructor(
     fun signOut(
         onSignOut: (SignOutResult) -> Unit
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             authenticationService.signOut(onSignOut)
         }
     }

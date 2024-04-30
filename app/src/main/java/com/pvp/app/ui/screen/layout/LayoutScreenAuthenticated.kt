@@ -24,18 +24,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Dehaze
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,10 +42,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,49 +55,85 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.pvp.app.R
 import com.pvp.app.model.Decoration
 import com.pvp.app.model.Reward
 import com.pvp.app.ui.common.AsyncImage
+import com.pvp.app.ui.common.LocalHorizontalPagerSettled
+import com.pvp.app.ui.common.LocalRouteOptions
+import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
-import com.pvp.app.ui.screen.calendar.TaskCreateDialog
+import com.pvp.app.ui.router.Routes
 import com.pvp.app.ui.screen.drawer.DrawerScreen
 import com.pvp.app.ui.screen.profile.ProfileScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Composable
-private fun resolveTitle(
-    route: Route,
-    statePager: PagerState
-): String {
-    return when (statePager.currentPage) {
-        1 -> stringResource(R.string.route_profile)
-        else -> stringResource(route.resourceTitleId)
+/**
+ * Should execute logic for pressing left-corner's navigation button in the header
+ */
+private fun navigate(
+    controller: NavHostController,
+    scope: CoroutineScope,
+    showBack: Boolean,
+    state: DrawerState
+) {
+    if (showBack) {
+        controller.popBackStack()
+
+        return
+    }
+
+    scope.launch {
+        state.apply {
+            if (isOpen) {
+                close()
+            } else {
+                open()
+            }
+        }
     }
 }
 
-private fun supportsTaskCreation(
-    route: Route,
-    state: PagerState
+/**
+ * @return Pair of [Route] object and [NavDestination] object.
+ */
+@Composable
+private fun rememberRoute(controller: NavHostController): Pair<Route, NavDestination?> {
+    val destination = controller.currentBackStackEntryAsState().value?.destination
+
+    return remember(destination) {
+        Pair(
+            Routes.authenticated.find {
+                it.path == destination?.route ||
+                        it.path == destination?.parent?.route
+            } ?: Routes.Calendar,
+            destination
+        )
+    }
+}
+
+@Composable
+private fun showBackNavigation(
+    destination: NavDestination,
+    page: Int
 ): Boolean {
-    return when {
-        state.currentPage == 1 -> false
-        else -> when (route) {
-            Route.Calendar -> true
-            else -> false
-        }
+    return remember(
+        destination,
+        page
+    ) {
+        page == 0 &&
+                destination.route !in Routes.drawer.map { it.path } &&
+                destination.parent?.startDestinationRoute != destination.route
     }
 }
 
@@ -106,7 +141,7 @@ private fun supportsTaskCreation(
  * Switches the screen to the given page, where 0 is main content and 1 is profile content.
  * Edited animation: **tween(500)** for duration.
  */
-private fun switchScreen(
+private fun switchPage(
     page: Int,
     scope: CoroutineScope,
     state: PagerState
@@ -126,7 +161,7 @@ private fun switchScreen(
 /**
  * Switches the screen to the given path. Used by the drawer screen.
  */
-private fun switchScreen(
+private fun switchPage(
     controller: NavHostController,
     path: String,
     scope: CoroutineScope,
@@ -135,37 +170,19 @@ private fun switchScreen(
 ) {
     controller.navigateWithPopUp(path)
 
-    scope.launch {
-        stateDrawer.close()
-    }
+    scope.launch { stateDrawer.close() }
 
-    switchScreen(
+    switchPage(
         0,
         scope,
         statePager
     )
 }
 
-private fun toggleNavigationDrawer(
-    scope: CoroutineScope,
-    state: DrawerState
-) {
-    scope.launch {
-        state.apply {
-            if (isOpen) {
-                close()
-            } else {
-                open()
-            }
-        }
-    }
-}
-
 @Composable
 private fun Content(
     controller: NavHostController,
     paddingValues: PaddingValues,
-    scope: CoroutineScope,
     state: PagerState
 ) {
     val modifier = remember(paddingValues) {
@@ -180,10 +197,9 @@ private fun Content(
         when (it) {
             0 -> Router(
                 controller = controller,
-                destinationStart = Route.Calendar,
+                start = Routes.Calendar,
                 routeModifier = modifier,
-                routes = Route.routesAuthenticated,
-                scope = scope
+                routes = Routes.authenticated
             )
 
             1 -> ProfileScreen(modifier = modifier)
@@ -192,23 +208,37 @@ private fun Content(
 }
 
 @Composable
-fun FloatingActionButton(
-    onClick: () -> Unit,
-) {
-    FloatingActionButton(
-        containerColor = MaterialTheme.colorScheme.primary,
-        onClick = onClick,
-        shape = CircleShape
+private fun DecorationCard(decoration: Decoration) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            contentDescription = "Add task",
-            imageVector = Icons.Outlined.Add
+        Text(
+            modifier = Modifier.padding(8.dp),
+            style = MaterialTheme.typography.titleMedium,
+            text = "${decoration.name} decoration!"
+        )
+
+        AsyncImage(
+            contentDescription = "Decoration ${decoration.name} image",
+            modifier = Modifier
+                .size(96.dp)
+                .clip(MaterialTheme.shapes.extraSmall)
+                .background(
+                    color = MaterialTheme.colorScheme.inverseOnSurface.lighten(),
+                    shape = MaterialTheme.shapes.extraSmall
+                ),
+            url = decoration.imageRepresentativeUrl
         )
     }
 }
 
 @Composable
 private fun Header(
+    avatar: ImageBitmap,
     colorAvatarBorder: Color = MaterialTheme.colorScheme.primaryContainer,
     colors: TopAppBarColors = TopAppBarColors(
         containerColor = MaterialTheme.colorScheme.primary,
@@ -219,8 +249,8 @@ private fun Header(
     ),
     onClickNavigation: () -> Unit,
     onClickProfile: () -> Unit,
-    title: String,
-    userAvatar: ImageBitmap
+    showBackNavigation: Boolean,
+    title: @Composable () -> Unit
 ) {
     CenterAlignedTopAppBar(
         actions = {
@@ -235,7 +265,7 @@ private fun Header(
                             color = colorAvatarBorder,
                             shape = RoundedCornerShape(32.dp)
                         ),
-                    painter = BitmapPainter(userAvatar)
+                    painter = BitmapPainter(avatar)
                 )
             }
         },
@@ -246,23 +276,24 @@ private fun Header(
             .clip(shape = MaterialTheme.shapes.extraLarge),
         navigationIcon = {
             IconButton(onClick = onClickNavigation) {
-                Icon(
-                    contentDescription = "Navigation drawer icon",
-                    imageVector = Icons.Outlined.Dehaze
-                )
+                if (showBackNavigation) {
+                    Icon(
+                        contentDescription = "Navigate back icon",
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack
+                    )
+                } else {
+                    Icon(
+                        contentDescription = "Navigation drawer icon",
+                        imageVector = Icons.Outlined.Dehaze
+                    )
+                }
             }
         },
         title = {
             Row(
                 modifier = Modifier.fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    fontSize = 24.sp,
-                    style = MaterialTheme.typography.titleLarge,
-                    text = title,
-                )
-            }
+            ) { title() }
         }
     )
 }
@@ -270,16 +301,13 @@ private fun Header(
 @Composable
 fun LayoutScreenAuthenticated(
     controller: NavHostController,
-    scope: CoroutineScope,
     viewModel: LayoutViewModel = hiltViewModel()
 ) {
-    val destination = controller.currentBackStackEntryAsState().value?.destination
-
-    val route = Route.routesAuthenticated
-        .find { it.path == destination?.route }
-        ?: Route.Calendar
-
+    var options by remember { mutableStateOf(Route.Options.None) }
+    val route = rememberRoute(controller)
+    val scope = rememberCoroutineScope()
     val stateDrawer = rememberDrawerState(DrawerValue.Closed)
+    val stateLayout by viewModel.state.collectAsStateWithLifecycle()
 
     val statePager = rememberPagerState(
         initialPage = 0,
@@ -289,7 +317,7 @@ fun LayoutScreenAuthenticated(
     var isRewardDialogOpen by remember { mutableStateOf(false) }
     val toggleRewardDialog = remember { { isRewardDialogOpen = !isRewardDialogOpen } }
 
-    if (viewModel.state.collectAsStateWithLifecycle().value.needsStreakReward) {
+    if (stateLayout.needsStreakReward) {
         LaunchedEffect(null) {
             viewModel.giveReward()
 
@@ -309,7 +337,7 @@ fun LayoutScreenAuthenticated(
         drawerContent = {
             DrawerScreen(
                 {
-                    switchScreen(
+                    switchPage(
                         controller,
                         path,
                         scope,
@@ -317,34 +345,27 @@ fun LayoutScreenAuthenticated(
                         statePager
                     )
                 },
-                if (statePager.currentPage == 1) Route.None else route,
-                Route.routesDrawer
+                if (statePager.currentPage == 1) Routes.None else route.first,
+                Routes.drawer
             )
         },
-        drawerState = stateDrawer
+        drawerState = stateDrawer,
+        gesturesEnabled = stateDrawer.isOpen
     ) {
-        var isTaskDialogOpen by remember { mutableStateOf(false) }
-        val toggleTaskDialog = remember { { isTaskDialogOpen = !isTaskDialogOpen } }
-
         Scaffold(
-            floatingActionButton = {
-                if (
-                    supportsTaskCreation(
-                        route,
-                        statePager
-                    )
-                ) {
-                    FloatingActionButton(toggleTaskDialog)
-                }
-            },
-            floatingActionButtonPosition = FabPosition.End,
             topBar = {
-                val stateLayout by viewModel.state.collectAsStateWithLifecycle()
+                val showBack = route.second != null && showBackNavigation(
+                    route.second!!,
+                    statePager.currentPage
+                )
 
                 Header(
+                    avatar = stateLayout.avatar,
                     onClickNavigation = {
-                        toggleNavigationDrawer(
+                        navigate(
+                            controller,
                             scope,
+                            showBack,
                             stateDrawer
                         )
                     },
@@ -353,37 +374,26 @@ fun LayoutScreenAuthenticated(
                             return@Header
                         }
 
-                        switchScreen(
+                        switchPage(
                             1,
                             scope,
                             statePager
                         )
                     },
-                    title = resolveTitle(
-                        route,
-                        statePager
-                    ),
-                    userAvatar = stateLayout.avatar
+                    showBackNavigation = showBack,
+                    title = { options.title?.invoke() }
                 )
             }
-        ) {
-            Content(
-                controller = controller,
-                paddingValues = it,
-                scope = scope,
-                state = statePager
-            )
-
-            if (
-                supportsTaskCreation(
-                    route,
-                    statePager
-                )
+        ) { padding ->
+            CompositionLocalProvider(
+                LocalHorizontalPagerSettled provides !statePager.isScrollInProgress,
+                LocalRouteOptions provides options,
+                LocalRouteOptionsApplier provides { options = it(options) }
             ) {
-                TaskCreateDialog(
-                    onClose = toggleTaskDialog,
-                    isOpen = isTaskDialogOpen,
-                    shouldCloseOnSubmit = true
+                Content(
+                    controller = controller,
+                    paddingValues = padding,
+                    state = statePager
                 )
             }
         }
@@ -449,34 +459,5 @@ private fun RewardDialog(
                 DecorationCard(decoration = it)
             }
         }
-    }
-}
-
-@Composable
-private fun DecorationCard(decoration: Decoration) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.titleMedium,
-            text = "${decoration.name} decoration!"
-        )
-
-        AsyncImage(
-            contentDescription = "Decoration ${decoration.name} image",
-            modifier = Modifier
-                .size(96.dp)
-                .clip(MaterialTheme.shapes.extraSmall)
-                .background(
-                    color = MaterialTheme.colorScheme.inverseOnSurface.lighten(),
-                    shape = MaterialTheme.shapes.extraSmall
-                ),
-            url = decoration.imageRepresentativeUrl
-        )
     }
 }

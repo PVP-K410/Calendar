@@ -60,7 +60,7 @@ fun TasksOfDay(tasks: List<Task>) {
         contentAlignment = Alignment.Center
     ) {
         Column(modifier = Modifier.fillMaxWidth(0.9f)) {
-            var filter by remember { mutableStateOf(TaskFilter.General) }
+            var filter by remember { mutableStateOf(TaskFilter.Daily) }
 
             Spacer(modifier = Modifier.padding(16.dp))
 
@@ -147,5 +147,5 @@ enum class TaskFilter(val displayName: String) {
     Daily("Daily"),
     General("General"),
     Meal("Meal"),
-    Sports("Sports")
+    Sports("Sport")
 }

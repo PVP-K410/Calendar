@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -14,7 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.pvp.app.ui.common.LocalBackgroundColors
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.backgroundGradientVertical
-import com.pvp.app.ui.router.Route
+import com.pvp.app.ui.router.Routes
 import com.pvp.app.ui.theme.BackgroundGradientSunset
 
 /**
@@ -22,9 +21,9 @@ import com.pvp.app.ui.theme.BackgroundGradientSunset
  * are not initialized until the first time they are accessed.
  */
 private fun initializeRouteSingleton() {
-    Route.routesAuthenticated
-    Route.routesUnauthenticated
-    Route.routesDrawer
+    Routes.authenticated
+    Routes.unauthenticated
+    Routes.drawer
 }
 
 @Composable
@@ -48,16 +47,12 @@ fun LayoutScreenBootstrap(model: LayoutViewModel = hiltViewModel()) {
                     LayoutScreenUnauthenticated(
                         areSurveysFilled = state.areSurveysFilled,
                         controller = rememberNavController(),
-                        isAuthenticated = state.isAuthenticated,
-                        scope = rememberCoroutineScope()
+                        isAuthenticated = state.isAuthenticated
                     )
                 }
 
                 else -> {
-                    LayoutScreenAuthenticated(
-                        controller = rememberNavController(),
-                        scope = rememberCoroutineScope()
-                    )
+                    LayoutScreenAuthenticated(controller = rememberNavController())
                 }
             }
         }

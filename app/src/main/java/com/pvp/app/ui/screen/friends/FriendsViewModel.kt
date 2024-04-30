@@ -3,27 +3,28 @@
 package com.pvp.app.ui.screen.friends
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.DecorationService
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.FlowUtil.firstOr
 import com.pvp.app.common.FlowUtil.flattenFlow
-import com.pvp.app.model.FriendObject
-import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -37,87 +38,104 @@ class FriendsViewModel @Inject constructor(
 ) : ViewModel() {
 
     val toastMessage = mutableStateOf<String?>(null)
-    val mutualFriends = MutableStateFlow<List<FriendEntry>>(emptyList())
-    val tasksCompleted = MutableStateFlow(0)
 
-    val user = userService.user
-        .filterNotNull()
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = User()
-        )
+    private val _stateFriend = MutableStateFlow(FriendState())
 
-    val userFriendObject = user
-        .filter { it.email.isNotBlank() }
-        .flatMapLatest { user ->
-            friendService
-                .get(user.email)
+    /**
+     * State of the selected current user's friend. This is used to load and store
+     * [FriendState.entry] details.
+     *
+     * It is only updated when a friend is selected via [select] method.
+     */
+    val stateFriend = _stateFriend.asStateFlow()
+
+    private val _stateFriends = MutableStateFlow(FriendsState())
+
+    /**
+     * State of the current user's friends
+     */
+    val stateFriends = _stateFriends.asStateFlow()
+
+    init {
+        collectStateChanges()
+    }
+
+    /**
+     * Listens to changes in the user and friend objects and updates the state accordingly.
+     */
+    private fun collectStateChanges() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val user = userService.user.filterNotNull()
+
+            val friendObject = user
+                .filter { it.email.isNotBlank() }
+                .flatMapLatest { user ->
+                    friendService
+                        .get(user.email)
+                        .filterNotNull()
+                }
+
+            val friends = user
+                .filter { it.email.isNotBlank() }
+                .flatMapLatest { friendService.get(it.email) }
                 .filterNotNull()
+                .flatMapLatest { friendObject ->
+                    friendObject.friends
+                        .map { friend ->
+                            val user = userService
+                                .get(friend.email)
+                                .filterNotNull()
 
-        }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = FriendObject()
-        )
-
-    val userFriends = user
-        .filter { it.email.isNotBlank() }
-        .flatMapLatest { friendService.get(it.email) }
-        .filterNotNull()
-        .flatMapLatest { friendObject ->
-            if (friendObject.friends.isEmpty()) {
-                flowOf(emptyList())
-            } else {
-                friendObject.friends
-                    .map { friend ->
-                        val user = userService
-                            .get(friend.email)
-                            .filterNotNull()
-
-                        flowOf(
-                            Pair(
-                                user,
-                                decorationService.getAvatar(user)
+                            flowOf(
+                                Pair(
+                                    user,
+                                    decorationService.getAvatar(user)
+                                )
                             )
-                        )
-                    }
-                    .flattenFlow()
-            }
-        }
-        .flatMapLatest { pairs ->
-            if (pairs.isEmpty()) {
-                flowOf(emptyList())
-            } else {
-                pairs
-                    .map { (user, avatar) ->
-                        flowOf(
-                            FriendEntry(
-                                avatar = avatar.first(),
-                                user = user.first()
+                        }
+                        .flattenFlow()
+                }
+                .flatMapLatest { pairs ->
+                    pairs
+                        .map { (user, avatar) ->
+                            flowOf(
+                                FriendEntry(
+                                    avatar = avatar.first(),
+                                    user = user.first()
+                                )
                             )
-                        )
-                    }
-                    .flattenFlow()
+                        }
+                        .flattenFlow()
+                }
+
+            combine(
+                friendObject,
+                friends,
+                user
+            ) { friendObject, friends, user ->
+                FriendsState(
+                    friendObject = friendObject,
+                    friends = friends,
+                    state = FriendsScreenState.NoOperation,
+                    user = user
+                )
             }
+                .collectLatest { state -> _stateFriends.update { state } }
         }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = emptyList()
-        )
+    }
 
-    fun addFriend(friendEmail: String) {
-        viewModelScope.launch {
-
+    /**
+     * Sends a friend request to a user.
+     */
+    fun add(friendEmail: String) {
+        viewModelScope.launch(Dispatchers.IO) {
             if (friendEmail.isEmpty()) {
                 toastMessage.value = "Please enter an email"
 
                 return@launch
             }
 
-            val email = user.value.email
+            val email = _stateFriends.first().user.email
 
             val friendObject = friendService
                 .get(email)
@@ -144,9 +162,12 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun acceptFriendRequest(friendEmail: String) {
-        viewModelScope.launch {
-            val email = user.value.email
+    /**
+     * Accepts a friend request from a user.
+     */
+    fun accept(friendEmail: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val email = _stateFriends.first().user.email
 
             val friendObject = friendService
                 .get(email)
@@ -161,9 +182,12 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun denyFriendRequest(friendEmail: String) {
-        viewModelScope.launch {
-            val email = user.value.email
+    /**
+     * Denies a friend request from a user.
+     */
+    fun deny(friendEmail: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val email = _stateFriends.first().user.email
 
             val friendObject = friendService
                 .get(email)
@@ -178,9 +202,12 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun cancelSentRequest(friendEmail: String) {
-        viewModelScope.launch {
-            val email = user.value.email
+    /**
+     * Cancels a friend request sent to a user.
+     */
+    fun cancel(friendEmail: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val email = _stateFriends.first().user.email
 
             val friendObject = friendService
                 .get(email)
@@ -195,76 +222,95 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
-    fun getMutualFriends(friendEmail: String) {
-        viewModelScope.launch {
-            val friendObject = friendService
+    /**
+     * Updates the [stateFriend] state with the selected friend's details.
+     */
+    fun select(friendEmail: String) {
+        _stateFriend.update { it.copy(state = FriendScreenState.Loading) }
+
+        _stateFriends.update { it.copy(state = FriendsScreenState.Loading) }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val `object` = friendService
                 .get(friendEmail)
                 .firstOrNull()
 
-            val mutualFriendsList = friendObject?.friends
-                ?.map { it.email }
-                ?.intersect(
-                    userFriends.value
+            if (`object` == null) {
+                _stateFriend.update { it.copy(friendsMutual = emptyList()) }
+
+                return@launch
+            }
+
+            val tasks = taskService
+                .get(friendEmail)
+                .firstOr(emptyList())
+                .count {
+                    it.isCompleted &&
+                            it.date in
+                            LocalDate
+                                .now()
+                                .minusDays(7)..
+                            LocalDate.now()
+                }
+
+            val state = _stateFriends.first()
+
+            val emails = `object`.friends
+                .map { it.email }
+                .intersect(
+                    state.friends
                         .map { it.user.email }
                         .toSet()
                 )
 
-            if (mutualFriendsList != null) {
-                val mutualFriendsUsers = mutualFriendsList.mapNotNull {
-                    val user = userService
-                        .get(it)
-                        .firstOrNull()
+            val friends = emails.mapNotNull {
+                val user = userService
+                    .get(it)
+                    .firstOrNull()
 
-                    user?.let {
-                        FriendEntry(
-                            avatar = decorationService.getAvatar(user),
-                            user = user
-                        )
-                    }
+                user?.let {
+                    FriendEntry(
+                        avatar = decorationService.getAvatar(user),
+                        user = user
+                    )
                 }
-
-                mutualFriends.value = mutualFriendsUsers
-            } else {
-                mutualFriends.value = emptyList()
             }
+
+            _stateFriend.value = FriendState(
+                details = state.friendObject.friends.first { friend -> friend.email == friendEmail },
+                entry = state.friends
+                    .find { friend -> friend.user.email == friendEmail }
+                    ?: FriendEntry(),
+                friendsMutual = friends,
+                state = FriendScreenState.Finished,
+                tasksCompleted = tasks
+            )
+
+            _stateFriends.update { it.copy(state = FriendsScreenState.Finished.SelectedFriend) }
         }
     }
 
-    fun tasksCompleted(friendEmail: String) {
-        viewModelScope.launch {
-            val tasks = taskService
-                .get(friendEmail)
-                .firstOrNull()
-                ?: emptyList()
+    /**
+     * Removes a friend from the current user's friend list.
+     */
+    fun remove(friendEmail: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val state = _stateFriends.first()
 
-            tasksCompleted.value = tasks.count {
-                it.isCompleted &&
-                it.date in
-                        LocalDate
-                            .now()
-                            .minusDays(7)..
-                        LocalDate.now()
-            }
-        }
-    }
-
-    fun removeFriend(friendEmail: String) {
-        viewModelScope.launch {
             friendService.removeFriend(
-                userFriendObject.value,
-                user.value.email,
+                state.friendObject,
+                state.user.email,
                 friendEmail
             )
 
             toastMessage.value = "Friend removed successfully!"
         }
     }
-}
 
-data class FriendEntry(
-    val avatar: ImageBitmap = ImageBitmap(
-        1,
-        1
-    ),
-    val user: User = User()
-)
+    /**
+     * Resets the [FriendsScreenState] of the [stateFriends] state to [FriendsScreenState.NoOperation].
+     */
+    fun resetFriendsScreenState() = _stateFriends.update {
+        it.copy(state = FriendsScreenState.NoOperation)
+    }
+}

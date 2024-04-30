@@ -210,6 +210,17 @@ fun ProgressIndicator(
 }
 
 @Composable
+fun ProgressIndicatorWithinDialog(
+    indicatorColor: Color = MaterialTheme.colorScheme.primary,
+    modifier: Modifier = Modifier.fillMaxSize()
+) = androidx.compose.ui.window.Dialog(onDismissRequest = {}) {
+    ProgressIndicator(
+        indicatorColor,
+        modifier
+    )
+}
+
+@Composable
 fun Experience(
     experience: Int,
     experienceRequired: Int,

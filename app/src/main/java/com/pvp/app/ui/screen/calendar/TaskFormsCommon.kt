@@ -27,10 +27,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.ui.common.EditableInfoItem
+import com.pvp.app.ui.common.InfoTooltip
 import com.pvp.app.ui.common.LabelFieldWrapper
 import com.pvp.app.ui.common.PickerPair
 import com.pvp.app.ui.common.PickerState
-import com.pvp.app.ui.common.InfoTooltip
 import java.time.Duration
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +42,7 @@ fun TaskEditFieldsSport(
     onDistanceChange: (Double) -> Unit,
     onDurationChange: (Duration) -> Unit
 ) {
-    var activity by remember { mutableStateOf(task?.activity) }
+    var activity by remember { mutableStateOf(task?.activity ?: SportActivity.Walking) }
     var distance by remember { mutableDoubleStateOf(task?.distance ?: 0.0) }
     var duration by remember { mutableStateOf(task?.duration ?: Duration.ZERO) }
     var tempActivity by remember { mutableStateOf(activity) }

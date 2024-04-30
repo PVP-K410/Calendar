@@ -41,20 +41,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.R
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.Experience
 import com.pvp.app.ui.common.IconButtonWithDialog
-import com.pvp.app.ui.common.ProgressIndicator
+import com.pvp.app.ui.common.LocalHorizontalPagerSettled
+import com.pvp.app.ui.common.LocalRouteOptionsApplier
+import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.common.showToast
+import com.pvp.app.ui.router.Route
 import kotlinx.coroutines.launch
 
 private val ACTIVITIES = SportActivity.entries.map { it.title }
@@ -213,9 +219,7 @@ private fun Initials(
 }
 
 @Composable
-private fun BoxScope.Points(
-    points: Int
-) {
+private fun BoxScope.Points(points: Int) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
@@ -247,10 +251,10 @@ fun ProfileScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {
-        ProgressIndicator()
-
-        return
+        ProgressIndicatorWithinDialog()
     }
+
+    RouteOptionsApplier()
 
     Box(
         modifier = Modifier
@@ -260,18 +264,20 @@ fun ProfileScreen(
         Points(points = state.user.points)
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            Initials(
-                onUsernameChange = {
-                    viewModel.update { u -> u.username = it }
-                },
-                state = state
-            )
+            if (!state.isLoading) {
+                Initials(
+                    onUsernameChange = { viewModel.update { u -> u.username = it } },
+                    state = state
+                )
 
-            Experience(
-                experience = state.user.experience,
-                experienceRequired = state.experienceRequired,
-                level = state.user.level
-            )
+                Experience(
+                    experience = state.user.experience,
+                    experienceRequired = state.experienceRequired,
+                    level = state.user.level
+                )
+            } else {
+                Spacer(modifier = Modifier.height(180.dp))
+            }
 
             Properties(
                 onUpdateActivities = { viewModel.update { u -> u.activities = it } },
@@ -299,9 +305,9 @@ private fun Properties(
     }
 
     var activitiesSelectedEdit by remember { mutableStateOf(activitiesSelected) }
-    var activitiesUnselected by remember { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
+    var activitiesUnselected by remember(activitiesSelected) { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
     val context = LocalContext.current
-    var height by remember { mutableIntStateOf(state.user.height) }
+    var height by remember(state.user.height) { mutableIntStateOf(state.user.height) }
     var heightEdit by remember { mutableStateOf(height.toString()) }
 
     var ingredientsSelected = remember(state.user.ingredients) {
@@ -310,7 +316,7 @@ private fun Properties(
 
     var ingredientsSelectedEdit by remember { mutableStateOf(ingredientsSelected) }
     var ingredientsUnselectedEdit by remember { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
-    var mass by remember { mutableIntStateOf(state.user.mass) }
+    var mass by remember(state.user.mass) { mutableIntStateOf(state.user.mass) }
     var massEdit by remember { mutableStateOf(mass.toString()) }
 
     Column(
@@ -472,6 +478,22 @@ private fun Properties(
 }
 
 @Composable
+private fun RouteOptionsApplier() {
+    val settled = LocalHorizontalPagerSettled.current
+    var applierRequired by remember(settled) { mutableStateOf(settled) }
+
+    if (applierRequired) {
+        LocalRouteOptionsApplier.current {
+            Route.Options(title = {
+                RouteTitle(stringResource(R.string.route_profile))
+            })
+        }
+
+        applierRequired = false
+    }
+}
+
+@Composable
 private fun Username(
     onChange: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -518,8 +540,8 @@ private fun Username(
 
 @Composable
 fun WeeklyActivitiesItem(
-    title: String,
-    activities: List<String>
+    activities: List<String>,
+    title: String
 ) {
     Box(
         modifier = Modifier
@@ -535,9 +557,9 @@ fun WeeklyActivitiesItem(
             verticalArrangement = Arrangement.Center
         ) {
             Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
                     horizontalAlignment = Alignment.Start,
@@ -550,7 +572,10 @@ fun WeeklyActivitiesItem(
                 }
             }
 
-            FiltersBox(filters = activities)
+            FiltersBox(
+                filters = activities,
+                title = "weekly activities"
+            )
         }
     }
 }

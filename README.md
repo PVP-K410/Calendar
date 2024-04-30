@@ -35,6 +35,8 @@
         │               │   └── ...
         │               ├── model             # Data Models
         │               │   └── ...
+        │               ├── service           # Services
+        │               │   └── ...
         │               ├── ui
         │               │   ├── common        # Common Use: Components, Handlers, Utilities, ...
         │               │   │   └── ...
@@ -48,7 +50,7 @@
         │               │   │   └── ...
         │               │   └── theme         # Theme Configurations
         │               │       └── ...
-        │               ├── worker            # Background Workers
+        │               ├── worker            # Service Workers
         │               │   └── ...
         │               ├── Activity.kt
         │               └── Application.kt
@@ -76,20 +78,25 @@
 - Each model is located in a grouped by its use file. i.e. `Task.kt` could hold `Task`
   and `TaskMeal` models.
 
+###### ◽ src/main/.../service
+- Service is a layer that controls most things within this application.
+- Services handle database calls and business logic.
+- UI > ViewModel > Service > Database
+
 ###### ◽ src/main/.../ui
 - `Composable` functions (later on: `Components`) are used to build the UI.
 - `Screen` is just a component that is used to build the UI out of other components.
 - Screen components are located in `ui.screen` package.
 - Each screen has its own `Screen` component and `ViewModel` if required.
-- Components specific to a screen are located in the same file as the screen component.
+- Components specific to a screen are located in the same package as the screen component.
 - Components that are not specific to a screen are located in `ui.common` package, grouped by their
   use. i.e. `Texts.kt`, `Buttons.kt`, etc.
 - `Router` is used to define routes to screens.
 
 ###### ◽ src/main/.../worker
-- Background workers are located in `worker` package.
+- Service workers are located in `worker` package.
 - Each worker is located in a separate file.
-- Workers are used to perform background tasks.
+- Workers are used to perform background/foreground one-time/periodic tasks.
 
 ###### ◽ src/main/res
 - Resources are located in `res` directory.
@@ -105,7 +112,7 @@
     - Groups of the same type of code can stay together without an empty line
     - Multi-line code blocks should be separated by an empty line, even if they are of the same type
   - Use `val` instead of `var` whenever possible
-  - Use `when` instead of `if` whenever possible
+  - Use `when` instead of `if` whenever possible, unless there are only 2 outcomes (use `if` in that case)
   - Use brackets for `if`, `for` and `while` blocks even if they are not required
     - Exception for `if`: conditionals that are in a single line
   - Use simple yet well defined names for variables, functions, classes, etc.

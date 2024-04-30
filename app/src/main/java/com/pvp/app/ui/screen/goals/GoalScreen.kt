@@ -15,11 +15,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -44,7 +47,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Goal
-import com.pvp.app.ui.screen.layout.FloatingActionButton
 
 @Composable
 fun GoalScreen(
@@ -115,7 +117,16 @@ fun GoalScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(toggleDialog)
+            FloatingActionButton(
+                containerColor = MaterialTheme.colorScheme.primary,
+                onClick = toggleDialog,
+                shape = CircleShape
+            ) {
+                Icon(
+                    contentDescription = "Create goal",
+                    imageVector = Icons.Outlined.Add
+                )
+            }
         },
         floatingActionButtonPosition = FabPosition.End,
     )

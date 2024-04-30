@@ -49,7 +49,7 @@ fun TaskCard(
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
-        TaskEditDialog(
+        TaskEditSheet(
             task,
             onDialogClose = {
                 showDialog = false

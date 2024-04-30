@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import com.pvp.app.common.CollectionUtil.indexOfOrNull
@@ -66,7 +65,7 @@ fun <T> Picker(
     val stateList = rememberLazyListState(initialFirstVisibleItemIndex = indexStart)
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = stateList)
     val itemHeightPixels = remember { mutableIntStateOf(0) }
-    val itemHeightDp = pixelsToDp(itemHeightPixels.intValue)
+    val itemHeightDp = itemHeightPixels.intValue.pixelsToDp()
 
     val fadingEdgeGradient = remember {
         Brush.verticalGradient(
@@ -202,6 +201,3 @@ fun PickerTime(
         visibleItemsCount = 3
     )
 }
-
-@Composable
-private fun pixelsToDp(pixels: Int) = with(LocalDensity.current) { pixels.toDp() }

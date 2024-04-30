@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.core.graphics.ColorUtils
 import androidx.navigation.NavHostController
 
@@ -18,9 +19,7 @@ import androidx.navigation.NavHostController
 fun @Composable NavHostController.navigateWithPopUp(route: String) {
     val graph = this.graph
 
-    navigate(
-        route
-    ) {
+    navigate(route) {
         popUpTo(graph.startDestinationId) {
             saveState = true
         }
@@ -81,3 +80,6 @@ fun Color.lighten(
         )
         .run { Color(this) }
 }
+
+@Composable
+fun Int.pixelsToDp() = with(LocalDensity.current) { toDp() }
