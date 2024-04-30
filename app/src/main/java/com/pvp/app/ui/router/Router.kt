@@ -1,6 +1,5 @@
 package com.pvp.app.ui.router
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.LinearEasing
@@ -19,6 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 
 @Composable
@@ -100,18 +100,13 @@ private fun NavGraphBuilder.composeRoute(
     routeModifier: Modifier
 ) {
     composable(route.path) { backstack ->
-        var applierRequired by remember { mutableStateOf(false) }
+        val settled = LocalHorizontalPagerSettled.current
+        var applierRequired by remember(settled) { mutableStateOf(settled) }
 
         if (applierRequired) {
             LocalRouteOptionsApplier.current { route.options }
 
             applierRequired = false
-
-            // TODO: Delete in PR
-            Log.d(
-                "Applied options",
-                "-- ${route.path} --"
-            )
         }
 
         route.compose(

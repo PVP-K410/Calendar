@@ -2,7 +2,6 @@
 
 package com.pvp.app.ui.screen.profile
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -56,6 +55,7 @@ import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.Experience
 import com.pvp.app.ui.common.IconButtonWithDialog
+import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.RouteUtil.RouteTitle
@@ -479,7 +479,8 @@ private fun Properties(
 
 @Composable
 private fun RouteOptionsApplier() {
-    var applierRequired by remember { mutableStateOf(true) }
+    val settled = LocalHorizontalPagerSettled.current
+    var applierRequired by remember(settled) { mutableStateOf(settled) }
 
     if (applierRequired) {
         LocalRouteOptionsApplier.current {
@@ -489,12 +490,6 @@ private fun RouteOptionsApplier() {
         }
 
         applierRequired = false
-
-        // TODO: Delete in PR
-        Log.d(
-            "Applied options",
-            "-- @profile --"
-        )
     }
 }
 

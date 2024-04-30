@@ -15,6 +15,15 @@ val LocalBackgroundColors = staticCompositionLocalOf<List<Color>> {
 }
 
 /**
+ * Composition local for horizontal pager page being settled. This should be used to
+ * execute some actions only when the page scroll has been completed and the page is
+ * settled.
+ */
+val LocalHorizontalPagerSettled = staticCompositionLocalOf<Boolean> {
+    notProvided("LocalHorizontalPagerSettled")
+}
+
+/**
  * Composition local for route options
  */
 val LocalRouteOptions = staticCompositionLocalOf<Route.Options> {

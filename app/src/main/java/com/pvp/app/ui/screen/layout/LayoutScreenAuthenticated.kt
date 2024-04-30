@@ -65,6 +65,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pvp.app.model.Decoration
 import com.pvp.app.model.Reward
 import com.pvp.app.ui.common.AsyncImage
+import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptions
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.lighten
@@ -391,6 +392,7 @@ fun LayoutScreenAuthenticated(
             }
         ) { padding ->
             CompositionLocalProvider(
+                LocalHorizontalPagerSettled provides !statePager.isScrollInProgress,
                 LocalRouteOptions provides options,
                 LocalRouteOptionsApplier provides { options = it(options) }
             ) {

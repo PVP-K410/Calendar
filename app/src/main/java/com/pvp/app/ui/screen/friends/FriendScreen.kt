@@ -46,6 +46,7 @@ import com.pvp.app.R
 import com.pvp.app.model.Friends
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Experience
+import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.RouteUtil.RouteTitle
@@ -386,7 +387,8 @@ private fun RouteOptionsApplier(
     controller: NavHostController,
     username: String
 ) {
-    var applierRequired by remember { mutableStateOf(false) }
+    val settled = LocalHorizontalPagerSettled.current
+    var applierRequired by remember(settled) { mutableStateOf(settled) }
 
     if (applierRequired) {
         LocalRouteOptionsApplier.current {
