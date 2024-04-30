@@ -279,9 +279,9 @@ fun SettingsScreen(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .then(modifier)
+            .fillMaxSize()
             .padding(horizontal = 24.dp)
     ) {
         CategoryRow(
