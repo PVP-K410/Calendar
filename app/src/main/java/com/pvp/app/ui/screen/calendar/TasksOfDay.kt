@@ -147,5 +147,5 @@ enum class TaskFilter(val displayName: String) {
     Daily("Daily"),
     General("General"),
     Meal("Meal"),
-    Sports("Sports")
+    Sports("Sport")
 }
