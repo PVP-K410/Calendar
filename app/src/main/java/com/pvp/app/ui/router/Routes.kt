@@ -3,6 +3,7 @@ package com.pvp.app.ui.router
 import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
+import androidx.compose.material.icons.outlined.AutoGraph
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.People
@@ -19,6 +20,7 @@ import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.common.RouteUtil.hiltViewModel
 import com.pvp.app.ui.router.Route.Node
 import com.pvp.app.ui.router.Route.Root
+import com.pvp.app.ui.screen.analysis.AnalysisScreen
 import com.pvp.app.ui.screen.authentication.AuthenticationScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.decoration.DecorationScreen
@@ -69,6 +71,7 @@ object Routes {
      * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
      */
     val authenticated = listOf(
+        Analysis,
         Calendar,
         Decorations,
         FriendsRoot,
@@ -87,6 +90,7 @@ object Routes {
      * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
      */
     val drawer = listOf(
+        Analysis,
         Calendar,
         Decorations,
         Friends,
@@ -105,6 +109,19 @@ object Routes {
         Authentication,
         None,
         Survey
+    )
+
+    data object Analysis : Node(
+        compose = { _, _, m -> AnalysisScreen(m) },
+        options = Options(
+            icon = {
+                RouteIcon(
+                    imageVector = Icons.Outlined.AutoGraph,
+                    resourceId = R.string.route_analysis
+                )
+            }
+        ),
+        path = "analysis"
     )
 
     data object Authentication : Node(
