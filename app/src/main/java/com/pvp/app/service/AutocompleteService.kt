@@ -138,9 +138,7 @@ class AutocompleteService : Service() {
                 }
             }
 
-            if (goal.progress >= goal.target) {
-                goal.completed = true
-            }
+            goal.completed = goal.progress >= goal.target
 
             return@map goal
         }

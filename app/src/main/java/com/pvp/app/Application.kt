@@ -124,7 +124,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
     }
 
     private fun createAutocompleteWorker() {
-        val requestPeriodic = PeriodicWorkRequestBuilder<AutocompleteWorker>(
+        val request = PeriodicWorkRequestBuilder<AutocompleteWorker>(
             repeatInterval = 15,
             repeatIntervalTimeUnit = TimeUnit.MINUTES
         )
@@ -133,7 +133,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         workManager.enqueueUniquePeriodicWork(
             AutocompleteWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            requestPeriodic
+            request
         )
     }
 
