@@ -68,6 +68,7 @@ class DailyTaskWorker @AssistedInject constructor(
 
                     taskService.generateDaily(
                         configuration.dailyTaskCount,
+                        user.hasDisability,
                         user.email
                     )
 

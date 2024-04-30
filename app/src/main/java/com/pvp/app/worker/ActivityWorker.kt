@@ -1,6 +1,7 @@
 package com.pvp.app.worker
 
 import android.content.Context
+import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -11,9 +12,11 @@ import com.pvp.app.api.UserService
 import com.pvp.app.common.DateUtil
 import com.pvp.app.common.DateUtil.toTimestamp
 import com.pvp.app.model.ActivityEntry
+import com.pvp.app.model.SportActivity
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.firstOrNull
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
@@ -60,13 +63,46 @@ class ActivityWorker @AssistedInject constructor(
                     .toTimestamp()
         )
 
-        userService.merge(
-            user.copy(
-                lastActivitySync = Timestamp.now()
-            )
+        val hasDisability = checkForDisability(
+            lastSync = user.lastActivitySync
+                ?: LocalDate
+                    .now()
+                    .minusDays(30)
+                    .toTimestamp()
         )
 
+        if (hasDisability != user.hasDisability) {
+            userService.merge(
+                user.copy(
+                    hasDisability = hasDisability,
+                    lastActivitySync = Timestamp.now()
+                )
+            )
+        }
+
         return Result.success()
+    }
+
+    private suspend fun checkForDisability(
+        lastSync: Timestamp
+    ): Boolean {
+        val start = lastSync
+            .toDate()
+            .toInstant()
+
+        val end = Instant.now()
+
+        val activities = healthConnectService
+            .readActivityData(
+                ExerciseSessionRecord::class,
+                start = start,
+                end = end
+            )
+            .map { record ->
+                SportActivity.fromId(record.exerciseType)
+            }
+
+        return activities.any { it == SportActivity.Wheelchair }
     }
 
     private suspend fun updateActivities(
