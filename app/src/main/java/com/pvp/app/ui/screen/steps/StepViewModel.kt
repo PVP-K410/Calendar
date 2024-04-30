@@ -12,6 +12,7 @@ import com.pvp.app.api.HealthConnectService
 import com.pvp.app.common.ActivityUtil.toSportActivities
 import com.pvp.app.model.SportActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -40,7 +41,7 @@ class StepViewModel @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun updateTodaysSteps() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val end = LocalDate
                 .now()
                 .plusDays(1)
@@ -60,7 +61,7 @@ class StepViewModel @Inject constructor(
     }
 
     fun getExercises() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val end = Instant.now()
 
             val start = LocalDate

@@ -80,7 +80,7 @@ class DecorationViewModel @Inject constructor(
     }
 
     fun apply(decoration: Decoration) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val state = _state.first()
 
             _state.update { it.copy(state = DecorationScreenState.Loading) }
@@ -107,7 +107,7 @@ class DecorationViewModel @Inject constructor(
     fun purchase(decoration: Decoration) {
         _state.update { it.copy(state = DecorationScreenState.Loading) }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val state = _state.first()
             val holder = state.holders.first { it.decoration == decoration }
 

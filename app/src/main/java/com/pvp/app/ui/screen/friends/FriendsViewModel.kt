@@ -23,9 +23,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -66,24 +64,18 @@ class FriendsViewModel @Inject constructor(
      * Listens to changes in the user and friend objects and updates the state accordingly.
      */
     private fun collectStateChanges() {
-        val user = userService.user
-            .filterNotNull()
-            .flowOn(Dispatchers.IO)
+        viewModelScope.launch(Dispatchers.IO) {
+            val user = userService.user.filterNotNull()
 
-        val friendObject = flow {
-            user
+            val friendObject = user
                 .filter { it.email.isNotBlank() }
                 .flatMapLatest { user ->
                     friendService
                         .get(user.email)
                         .filterNotNull()
                 }
-                .collect { emit(it) }
-        }
-            .flowOn(Dispatchers.IO)
 
-        val friends = flow {
-            user
+            val friends = user
                 .filter { it.email.isNotBlank() }
                 .flatMapLatest { friendService.get(it.email) }
                 .filterNotNull()
@@ -115,11 +107,7 @@ class FriendsViewModel @Inject constructor(
                         }
                         .flattenFlow()
                 }
-                .collect { emit(it) }
-        }
-            .flowOn(Dispatchers.IO)
 
-        viewModelScope.launch(Dispatchers.IO) {
             combine(
                 friendObject,
                 friends,
@@ -140,7 +128,7 @@ class FriendsViewModel @Inject constructor(
      * Sends a friend request to a user.
      */
     fun add(friendEmail: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if (friendEmail.isEmpty()) {
                 toastMessage.value = "Please enter an email"
 
@@ -178,7 +166,7 @@ class FriendsViewModel @Inject constructor(
      * Accepts a friend request from a user.
      */
     fun accept(friendEmail: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val email = _stateFriends.first().user.email
 
             val friendObject = friendService
@@ -198,7 +186,7 @@ class FriendsViewModel @Inject constructor(
      * Denies a friend request from a user.
      */
     fun deny(friendEmail: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val email = _stateFriends.first().user.email
 
             val friendObject = friendService
@@ -218,7 +206,7 @@ class FriendsViewModel @Inject constructor(
      * Cancels a friend request sent to a user.
      */
     fun cancel(friendEmail: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val email = _stateFriends.first().user.email
 
             val friendObject = friendService
@@ -242,7 +230,7 @@ class FriendsViewModel @Inject constructor(
 
         _stateFriends.update { it.copy(state = FriendsScreenState.Loading) }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val `object` = friendService
                 .get(friendEmail)
                 .firstOrNull()
@@ -306,7 +294,7 @@ class FriendsViewModel @Inject constructor(
      * Removes a friend from the current user's friend list.
      */
     fun remove(friendEmail: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val state = _stateFriends.first()
 
             friendService.removeFriend(

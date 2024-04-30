@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
@@ -55,7 +56,7 @@ class LayoutViewModel @Inject constructor(
                     needsStreakReward = streakService.checkStreak()
                 )
             }
-                .collect { state ->
+                .collectLatest { state ->
                     _state.update {
                         it.copy(
                             areSurveysFilled = state.areSurveysFilled,
@@ -68,10 +69,10 @@ class LayoutViewModel @Inject constructor(
                 }
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             decorationService
                 .getAvatar(userService.user.filterNotNull())
-                .collect { avatar -> _state.update { it.copy(avatar = avatar) } }
+                .collectLatest { avatar -> _state.update { it.copy(avatar = avatar) } }
         }
     }
 
@@ -80,7 +81,7 @@ class LayoutViewModel @Inject constructor(
     }
 
     suspend fun giveReward() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _reward.value = rewardService.get()
 
             rewardService.rewardUser(

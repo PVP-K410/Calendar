@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.AuthenticationService
 import com.pvp.app.model.AuthenticationResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -26,7 +27,7 @@ class AuthenticationViewModel @Inject constructor(
         isOneTap: Boolean,
         onAuthenticate: suspend (AuthenticationResult) -> Unit = {}
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _state.update { it.copy(isLoading = true) }
 
             authenticationService
@@ -44,7 +45,7 @@ class AuthenticationViewModel @Inject constructor(
         launcher: (Intent) -> Unit,
         launcherOneTap: (IntentSenderRequest) -> Unit
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 _state.update { it.copy(isLoading = true) }
 
@@ -72,7 +73,8 @@ class AuthenticationViewModel @Inject constructor(
     private suspend fun buildSignInRequestOneTap(): IntentSenderRequest? {
         val sender = authenticationService.beginSignInOneTap() ?: return null
 
-        return IntentSenderRequest.Builder(sender)
+        return IntentSenderRequest
+            .Builder(sender)
             .build()
     }
 }

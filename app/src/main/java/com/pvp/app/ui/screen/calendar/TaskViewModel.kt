@@ -14,6 +14,7 @@ import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
@@ -65,7 +66,7 @@ class TaskViewModel @Inject constructor(
         time: LocalTime? = null,
         title: String
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state
                 .first()
                 .let { state ->
@@ -98,7 +99,7 @@ class TaskViewModel @Inject constructor(
         time: LocalTime? = null,
         title: String
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state
                 .first()
                 .let { state ->
@@ -131,7 +132,7 @@ class TaskViewModel @Inject constructor(
         time: LocalTime? = null,
         title: String
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             state
                 .first()
                 .let { state ->
@@ -213,7 +214,7 @@ class TaskViewModel @Inject constructor(
         handle: (T) -> Unit,
         task: T
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             task.cancelNotification()
 
             val (taskModified, updatePoints) = resolve(
@@ -237,7 +238,7 @@ class TaskViewModel @Inject constructor(
     }
 
     fun remove(task: Task) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             task.cancelNotification()
 
             taskService.remove(task)

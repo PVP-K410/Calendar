@@ -116,7 +116,7 @@ fun AnalysisOfDay(
                 Text(
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    text = "Today's tasks"
+                    text = if (date == LocalDate.now()) "Today's tasks" else "Day's tasks"
                 )
 
                 HorizontalDivider(

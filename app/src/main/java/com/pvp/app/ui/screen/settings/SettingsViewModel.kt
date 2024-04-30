@@ -6,6 +6,7 @@ import com.pvp.app.api.Configuration
 import com.pvp.app.api.SettingService
 import com.pvp.app.model.Setting
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -19,7 +20,7 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     fun clear() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             settingService.clear()
         }
     }
@@ -38,7 +39,7 @@ class SettingsViewModel @Inject constructor(
         setting: Setting<T>,
         value: T
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             settingService.merge(setting, value)
         }
     }

@@ -10,10 +10,12 @@ import com.pvp.app.common.DateUtil.getDays
 import com.pvp.app.common.TaskUtil.sort
 import com.pvp.app.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -33,7 +35,7 @@ class CalendarMonthlyViewModel @Inject constructor(
     val state: StateFlow<CalendarUiState> = _state.asStateFlow()
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val flowUser = userService.user.filterNotNull()
 
             val flowTasks = flowUser.flatMapLatest { user ->
@@ -50,7 +52,7 @@ class CalendarMonthlyViewModel @Inject constructor(
                         )
                     )
                 }
-                .collect { state ->
+                .collectLatest { state ->
                     _state.update { stateOld ->
                         stateOld.copy(
                             tasks = state.tasks,

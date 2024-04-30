@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -54,7 +55,7 @@ class ProfileViewModel @Inject constructor(
                         user = user
                     )
                 }
-                .collect { state -> _state.update { state } }
+                .collectLatest { state -> _state.update { state } }
         }
     }
 
@@ -76,7 +77,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun update(function: (User) -> Unit) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val user = _state.first().user.copy()
 
             function(user)
