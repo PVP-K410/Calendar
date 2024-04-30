@@ -8,10 +8,12 @@ import androidx.core.app.NotificationCompat
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import com.pvp.app.api.ExerciseService
+import com.pvp.app.api.GoalService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.ExerciseSessionInfo
+import com.pvp.app.model.Goal
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,6 +34,9 @@ class TaskAutocompleteService : Service() {
 
     @Inject
     lateinit var exerciseService: ExerciseService
+
+    @Inject
+    lateinit var goalService: GoalService
 
     @Inject
     lateinit var healthConnectService: HealthConnectService
@@ -100,24 +105,109 @@ class TaskAutocompleteService : Service() {
         }
     }
 
+    private suspend fun checkGoalCompletion(
+        goals: List<Goal>
+    ): List<Goal> {
+        val exercises = healthConnectService
+            .readActivityData(
+                record = ExerciseSessionRecord::class,
+                start = LocalDate
+                    .now()
+                    .minusDays(30)
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant(),
+                end = Instant.now()
+            )
+            .map {
+                exerciseService.getExerciseInfo(it)
+            }
+
+        return goals.map { goal ->
+            if (goal.completed) return@map goal
+
+            when (goal.steps) {
+                true -> {
+                    goal.progress = getSteps(goal).toDouble()
+                }
+
+                false -> {
+                    goal.progress = getDistance(
+                        exercises,
+                        goal
+                    )
+                }
+            }
+
+            if (goal.progress >= goal.target) {
+                goal.completed = true
+            }
+
+            return@map goal
+        }
+    }
+
     private fun createNotification(): Notification {
-        return NotificationCompat.Builder(
-            this,
-            com.pvp.app.model.NotificationChannel.TaskAutocomplete.channelId
-        )
+        return NotificationCompat
+            .Builder(
+                this,
+                com.pvp.app.model.NotificationChannel.TaskAutocomplete.channelId
+            )
             .setContentTitle("Task Processing")
             .setContentText("Processing your tasks in the background")
             .build()
     }
 
-    private suspend fun getActivities(): List<ExerciseSessionRecord> {
+    private suspend fun getActivities(startDate: LocalDate): List<ExerciseSessionRecord> {
         return healthConnectService.readActivityData(
             record = ExerciseSessionRecord::class,
-            start = LocalDate
-                .now()
+            start = startDate
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant(),
             end = Instant.now()
+        )
+    }
+
+    private fun getDistance(
+        exercises: List<ExerciseSessionInfo>,
+        goal: Goal
+    ): Double {
+        val startInstant = goal.startDate
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return exercises.sumOf { exercise ->
+            if (
+                exercise.record.startTime.isAfter(startInstant)
+                && exercise.record.exerciseType == goal.activity.id
+            ) {
+                exercise.distance ?: 0.0
+            } else {
+                0.0
+            }
+        } / 1000
+    }
+
+    private suspend fun getGoals(): List<Goal> {
+        return userService.user
+            .firstOrNull()
+            ?.let { user ->
+                goalService
+                    .get(user.email)
+                    .firstOrNull()
+                    ?.filter {
+                        it.endDate.isAfter(LocalDate.now())
+                    }
+            } ?: emptyList()
+    }
+
+    private suspend fun getSteps(goal: Goal): Long {
+        return healthConnectService.aggregateSteps(
+            start = goal.startDate
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant(),
+            end = goal.endDate
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
         )
     }
 
@@ -155,7 +245,9 @@ class TaskAutocompleteService : Service() {
                 val tasks = getTasks()
                     .sortedBy { task -> task.time }
 
-                val exercises = getActivities()
+                val goals = getGoals()
+
+                val exercises = getActivities(LocalDate.now())
                     .map { exercise ->
                         exerciseService.getExerciseInfo(exercise)
                     }
@@ -164,6 +256,12 @@ class TaskAutocompleteService : Service() {
                     tasks,
                     exercises
                 )
+
+                val completedGoals = checkGoalCompletion(
+                    goals
+                )
+
+                updateGoals(completedGoals)
 
                 updateTasks(completedTasks)
             }
@@ -174,6 +272,12 @@ class TaskAutocompleteService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
+    }
+
+    private suspend fun updateGoals(goals: List<Goal>) {
+        goals.forEach { goal ->
+            goalService.update(goal)
+        }
     }
 
     private suspend fun updateTasks(tasks: List<Task>) {
