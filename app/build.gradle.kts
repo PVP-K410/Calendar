@@ -129,6 +129,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.paging:paging-common-android:3.3.0-beta01")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("com.github.jaikeerthick:Composable-Graphs:1.2.3")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("com.google.android.gms:play-services-auth:21.1.0")
     implementation("com.google.code.gson:gson:2.10.1")

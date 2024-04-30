@@ -119,7 +119,8 @@ object Routes {
                     imageVector = Icons.Outlined.AutoGraph,
                     resourceId = R.string.route_analysis
                 )
-            }
+            },
+            title = { RouteTitle(stringResource(R.string.route_analysis)) }
         ),
         path = "analysis"
     )
