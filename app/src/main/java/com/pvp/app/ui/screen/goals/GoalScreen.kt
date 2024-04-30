@@ -330,7 +330,7 @@ fun ProgressBar(goal: Goal) {
         Text(
             text = when (goal.steps) {
                 true -> "${goal.progress.toInt()} / ${goal.target.toInt()} steps"
-                false -> "${goal.progress} / ${goal.target} km"
+                false -> "${String.format("%.2f", goal.progress)} / ${goal.target} km"
             },
             style = MaterialTheme.typography.bodyMedium,
         )
