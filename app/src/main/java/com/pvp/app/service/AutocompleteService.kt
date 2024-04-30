@@ -30,7 +30,7 @@ import java.time.ZoneId
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TaskAutocompleteService : Service() {
+class AutocompleteService : Service() {
 
     @Inject
     lateinit var exerciseService: ExerciseService
