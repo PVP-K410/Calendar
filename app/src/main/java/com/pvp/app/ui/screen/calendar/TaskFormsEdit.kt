@@ -15,29 +15,18 @@ import com.pvp.app.model.Task
 @Composable
 fun TaskEditSheet(
     task: Task,
-    onDialogClose: () -> Unit
+    onClose: () -> Unit
 ) {
 
     ModalBottomSheet(
-        onDismissRequest = onDialogClose,
+        onDismissRequest = onClose,
         sheetState = rememberModalBottomSheetState(true)
     ) {
-        TaskEditForm(
+        TaskCommonForm(
             task = task,
-            onDialogClose = onDialogClose
+            onClose = onClose
         )
 
         Spacer(modifier = Modifier.size(16.dp))
     }
-}
-
-@Composable
-fun TaskEditForm(
-    task: Task,
-    onDialogClose: () -> Unit
-) {
-    TaskCommonForm(
-        task = task,
-        onDialogClose = onDialogClose
-    )
 }

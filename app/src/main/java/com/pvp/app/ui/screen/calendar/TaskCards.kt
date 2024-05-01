@@ -51,7 +51,7 @@ fun TaskCard(
     if (showDialog) {
         TaskEditSheet(
             task,
-            onDialogClose = {
+            onClose = {
                 showDialog = false
             }
         )

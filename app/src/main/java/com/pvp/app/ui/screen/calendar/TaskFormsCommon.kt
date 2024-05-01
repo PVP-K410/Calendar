@@ -47,7 +47,7 @@ fun TaskCommonForm(
     date: LocalDateTime? = null,
     task: Task? = null,
     targetClass: KClass<out Task>? = null,
-    onDialogClose: () -> Unit,
+    onClose: () -> Unit,
 ) {
     if (task == null && targetClass == null) {
         return
@@ -55,25 +55,30 @@ fun TaskCommonForm(
 
     val taskClass = targetClass ?: task!!::class
     val isCreateForm by remember { mutableStateOf(task == null) }
-
     var title by remember { mutableStateOf(task?.title ?: "") }
+    var duration by remember { mutableStateOf(task?.duration) }
+    var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
+    var reminderTime by remember { mutableStateOf(task?.reminderTime) }
+
     var description by remember {
         mutableStateOf(
             (task as? MealTask)?.recipe ?: task?.description ?: ""
         )
     }
+
     var activity by remember {
         mutableStateOf(
             (task as? SportTask)?.activity ?: SportActivity.Walking
         )
     }
-    var duration by remember { mutableStateOf(task?.duration) }
-    var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
-    var reminderTime by remember { mutableStateOf(task?.reminderTime) }
+
     var dateTime by remember {
         mutableStateOf(
             if (task?.date != null && task.time != null) {
-                LocalDateTime.of(task.date, task.time)
+                LocalDateTime.of(
+                    task.date,
+                    task.time
+                )
             } else date ?: LocalDateTime.now()
         )
     }
@@ -136,8 +141,10 @@ fun TaskCommonForm(
         EditableTimeItem(
             label = "Scheduled at",
             value = dateTime.toLocalTime(),
-            valueDisplay = if ((taskClass == SportTask::class && activity.supportsDistanceMetrics)
-                || duration == null
+            valueDisplay = if (
+                (taskClass == SportTask::class &&
+                        activity.supportsDistanceMetrics) ||
+                duration == null
             ) {
                 dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
             } else {
@@ -201,7 +208,7 @@ fun TaskCommonForm(
                     onConfirm = {
                         model.remove(task!!)
 
-                        onDialogClose()
+                        onClose()
                     },
                     shape = MaterialTheme.shapes.extraLarge
                 )
@@ -267,7 +274,7 @@ fun TaskCommonForm(
                         )
                     }
 
-                    onDialogClose()
+                    onClose()
                 },
                 enabled = isFormValid
             ) {

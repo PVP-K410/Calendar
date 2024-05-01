@@ -100,10 +100,10 @@ fun TaskCreateSheet(
 
             Spacer(modifier = Modifier.size(8.dp))
 
-            TaskCreateForm(
-                targetClass = target,
+            TaskCommonForm(
                 date = date,
-                onDialogClose = {
+                targetClass = target,
+                onClose = {
                     if (shouldCloseOnSubmit) {
                         onClose()
                     }
@@ -113,17 +113,4 @@ fun TaskCreateSheet(
 
         Spacer(modifier = Modifier.size(16.dp))
     }
-}
-
-@Composable
-fun TaskCreateForm(
-    date: LocalDateTime? = null,
-    targetClass: KClass<out Task>,
-    onDialogClose: () -> Unit
-) {
-    TaskCommonForm(
-        date = date,
-        targetClass = targetClass,
-        onDialogClose = onDialogClose
-    )
 }
