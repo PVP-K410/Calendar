@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class ActivityEntry(
     var calories: Double = 0.0,
     @Contextual
-    var date: Timestamp,
+    var date: Timestamp = Timestamp.now(),
     val email: String = "",
     var id: String? = null,
     var steps: Long = 0

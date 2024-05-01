@@ -3,16 +3,12 @@ package com.pvp.app.service
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.ActivityService
+import com.pvp.app.common.DateUtil.toLocalDate
 import com.pvp.app.common.DateUtil.toTimestamp
-import com.pvp.app.common.JsonUtil.JSON
-import com.pvp.app.common.JsonUtil.toJsonElement
-import com.pvp.app.common.JsonUtil.toPrimitivesMap
 import com.pvp.app.model.ActivityEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -32,18 +28,16 @@ class ActivityServiceImpl @Inject constructor(
             )
             .whereEqualTo(
                 ActivityEntry::date.name,
-                date.toString()
+                date
+                    .toTimestamp()
+                    .toString()
             )
             .limit(1)
             .snapshots()
             .map { qs ->
                 qs.documents
                     .firstOrNull()
-                    ?.let {
-                        JSON.decodeFromJsonElement<ActivityEntry>(
-                            it.data.toJsonElement()
-                        )
-                    }
+                    ?.toObject(ActivityEntry::class.java)
             }
     }
 
@@ -57,21 +51,29 @@ class ActivityServiceImpl @Inject constructor(
                 ActivityEntry::email.name,
                 email
             )
-            .whereGreaterThanOrEqualTo(
-                ActivityEntry::date.name,
-                date.first.toTimestamp()
-            )
-            .whereLessThanOrEqualTo(
-                ActivityEntry::date.name,
-                date.second.toTimestamp()
-            )
+//            .whereGreaterThanOrEqualTo(
+//                ActivityEntry::date.name,
+//                date.first
+//                    .toTimestamp()
+//                    .toString()
+//            )
+//            .whereLessThanOrEqualTo(
+//                ActivityEntry::date.name,
+//                date.second
+//                    .toTimestamp()
+//                    .toString()
+//            )
             .snapshots()
             .map { qs ->
-                qs.documents.map { ds ->
-                    JSON.decodeFromJsonElement<ActivityEntry>(
-                        ds.data.toJsonElement()
-                    )
-                }
+                qs.documents
+                    .mapNotNull { ds -> ds?.toObject(ActivityEntry::class.java) }
+                    .filter { activity ->
+                        activity.date
+                            .toLocalDate()
+                            .let { localDate ->
+                                localDate >= date.first && localDate <= date.second
+                            }
+                    }
             }
     }
 
@@ -90,9 +92,7 @@ class ActivityServiceImpl @Inject constructor(
             .runTransaction {
                 it.set(
                     reference,
-                    JSON
-                        .encodeToJsonElement<ActivityEntry>(activity)
-                        .toPrimitivesMap()
+                    activity
                 )
             }
             .await()
