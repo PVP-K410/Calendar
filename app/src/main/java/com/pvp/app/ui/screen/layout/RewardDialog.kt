@@ -73,10 +73,7 @@ fun RewardDialog(
     }
 
     Dialog(onDismissRequest = onClose) {
-        Surface(
-            color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(16.dp),
-        ) {
+        Surface(shape = RoundedCornerShape(16.dp)) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -149,9 +146,7 @@ fun RewardDialog(
                 }
 
 
-                Button(
-                    onClick = { onClose() }
-                ) {
+                Button(onClick = { onClose() }) {
                     Text("Claim")
                 }
             }
