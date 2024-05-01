@@ -319,11 +319,15 @@ private fun GraphsPast(
     values7d: List<ActivityEntry>,
     values30d: List<ActivityEntry>
 ) {
+    Spacer(modifier = Modifier.size(16.dp))
+
     GraphOfDays(
         labelOfSum = labelOfSum,
         title = "7 Days",
         values = values7d
     )
+
+    Spacer(modifier = Modifier.size(24.dp))
 
     GraphOfDays(
         labelAsDay = false,
