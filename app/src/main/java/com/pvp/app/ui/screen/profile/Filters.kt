@@ -47,7 +47,6 @@ fun FiltersItem(
     filtersType: String,
     title: String,
     selectedFilters: List<String>,
-    isSelected: Boolean? = null,
     dialogTitle: @Composable () -> Unit,
     dialogContent: @Composable () -> Unit,
     onConfirmClick: () -> Unit,
@@ -105,8 +104,8 @@ fun FiltersItem(
 
             FiltersBox(
                 filters = selectedFilters,
-                isSelected = isSelected,
-                title = filtersType
+                title = filtersType,
+                cardsClickable = false
             )
         }
     }
@@ -119,7 +118,9 @@ fun FiltersBox(
     filters: List<String>,
     isSelected: Boolean? = null,
     onClick: (String) -> Unit = {},
-    title: String? = null
+    title: String? = null,
+    emptyBoxText: String? = null,
+    cardsClickable: Boolean = true
 ) {
     Box(
         modifier = Modifier
@@ -139,7 +140,8 @@ fun FiltersBox(
 
             if (filters.isEmpty()) {
                 Text(
-                    text = if (isSelected == false) "No other $title" else "No $title selected",
+                    text = emptyBoxText
+                        ?: if (isSelected == false) "No other $title" else "No $title selected",
                     style = TextStyle(
                         fontSize = 15.sp,
                         fontStyle = FontStyle.Italic
@@ -162,8 +164,12 @@ fun FiltersBox(
                                 )
                         ) {
                             Card(
+                                enabled = cardsClickable,
                                 colors = CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                    disabledContainerColor = MaterialTheme.colorScheme.primary,
+                                    disabledContentColor = MaterialTheme.colorScheme.onPrimary
                                 ),
                                 elevation = CardDefaults.cardElevation(
                                     defaultElevation = 8.dp
@@ -174,7 +180,7 @@ fun FiltersBox(
                                 ),
                                 onClick = {
                                     onClick(filter)
-                                }
+                                },
                             ) {
                                 Text(
                                     modifier = Modifier

@@ -36,6 +36,9 @@ class TaskViewModel @Inject constructor(
 ) : ViewModel() {
 
     val rangeKilometers = configuration.rangeKilometers
+    val rangeMeters = configuration.rangeMeters
+    val rangeReminderTime = configuration.rangeReminderMinutes
+    val rangeDuration = configuration.rangeDuration
 
     private val state = settingService
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)

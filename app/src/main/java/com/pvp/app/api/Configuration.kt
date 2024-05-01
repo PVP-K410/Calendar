@@ -47,6 +47,11 @@ interface Configuration {
     val rangeKilometers: List<Int>
 
     /**
+     * Meters values for the user to select from.
+     */
+    val rangeMeters: List<Int>
+
+    /**
      * Mass values for the user to select from.
      */
     val rangeMass: List<Int>
@@ -55,6 +60,11 @@ interface Configuration {
      * Reminder minutes values for the user to select from.
      */
     val rangeReminderMinutes: List<Int>
+
+    /**
+     * Duration values for the user to select from.
+     */
+    val rangeDuration: List<Int>
 
     /**
      * The inclusive interval of hours during which water drinking reminders are being sent.
