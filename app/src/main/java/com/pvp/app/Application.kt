@@ -18,10 +18,10 @@ import coil.disk.DiskCache
 import com.pvp.app.common.DateUtil.toEpochSecondTimeZoned
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.worker.ActivityWorker
+import com.pvp.app.worker.AutocompleteWorker
 import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
-import com.pvp.app.worker.TaskAutocompleteWorker
 import com.pvp.app.worker.TaskNotificationWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
@@ -85,7 +85,7 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
 
         // Should be left out to ensure the TaskAutocompleteService is persisted
         // as a running foreground service
-        createTaskAutocompleteWorker()
+        createAutocompleteWorker()
     }
 
     fun createActivityWorker() {
@@ -121,6 +121,20 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
                 )
                 .apply()
         }
+    }
+
+    private fun createAutocompleteWorker() {
+        val request = PeriodicWorkRequestBuilder<AutocompleteWorker>(
+            repeatInterval = 15,
+            repeatIntervalTimeUnit = TimeUnit.MINUTES
+        )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            AutocompleteWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            request
+        )
     }
 
     private fun createDailyTaskWorker() {
@@ -184,20 +198,6 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
                 manager.createNotificationChannel(notificationChannel)
             }
         }
-    }
-
-    private fun createTaskAutocompleteWorker() {
-        val requestPeriodic = PeriodicWorkRequestBuilder<TaskAutocompleteWorker>(
-            repeatInterval = 15,
-            repeatIntervalTimeUnit = TimeUnit.MINUTES
-        )
-            .build()
-
-        workManager.enqueueUniquePeriodicWork(
-            TaskAutocompleteWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            requestPeriodic
-        )
     }
 
     private fun createTaskPointsDeductionWorker() {

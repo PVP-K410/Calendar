@@ -6,12 +6,12 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.pvp.app.service.TaskAutocompleteService
+import com.pvp.app.service.AutocompleteService
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
 @HiltWorker
-class TaskAutocompleteWorker @AssistedInject constructor(
+class AutocompleteWorker @AssistedInject constructor(
     @Assisted
     context: Context,
     @Assisted
@@ -22,13 +22,13 @@ class TaskAutocompleteWorker @AssistedInject constructor(
 ) {
     companion object {
 
-        const val WORKER_NAME = "TaskAutocompleteWorker"
+        const val WORKER_NAME = "AutocompleteWorker"
     }
 
     override suspend fun doWork(): Result {
         Intent(
             applicationContext,
-            TaskAutocompleteService::class.java
+            AutocompleteService::class.java
         )
             .also { intent ->
                 ContextCompat.startForegroundService(
