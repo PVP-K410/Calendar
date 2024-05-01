@@ -3,7 +3,6 @@ package com.pvp.app.service
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.ActivityService
-import com.pvp.app.common.DateUtil.toLocalDate
 import com.pvp.app.common.DateUtil.toTimestamp
 import com.pvp.app.model.ActivityEntry
 import kotlinx.coroutines.flow.Flow
@@ -28,9 +27,7 @@ class ActivityServiceImpl @Inject constructor(
             )
             .whereEqualTo(
                 ActivityEntry::date.name,
-                date
-                    .toTimestamp()
-                    .toString()
+                date.toTimestamp()
             )
             .limit(1)
             .snapshots()
@@ -51,29 +48,19 @@ class ActivityServiceImpl @Inject constructor(
                 ActivityEntry::email.name,
                 email
             )
-//            .whereGreaterThanOrEqualTo(
-//                ActivityEntry::date.name,
-//                date.first
-//                    .toTimestamp()
-//                    .toString()
-//            )
-//            .whereLessThanOrEqualTo(
-//                ActivityEntry::date.name,
-//                date.second
-//                    .toTimestamp()
-//                    .toString()
-//            )
+            .whereGreaterThanOrEqualTo(
+                ActivityEntry::date.name,
+                date.first.toTimestamp()
+            )
+            .whereLessThanOrEqualTo(
+                ActivityEntry::date.name,
+                date.second.toTimestamp()
+            )
             .snapshots()
             .map { qs ->
-                qs.documents
-                    .mapNotNull { ds -> ds?.toObject(ActivityEntry::class.java) }
-                    .filter { activity ->
-                        activity.date
-                            .toLocalDate()
-                            .let { localDate ->
-                                localDate >= date.first && localDate <= date.second
-                            }
-                    }
+                println(qs.documents)
+
+                qs.documents.mapNotNull { ds -> ds?.toObject(ActivityEntry::class.java) }
             }
     }
 

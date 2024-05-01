@@ -61,7 +61,7 @@ import com.patrykandpatrick.vico.core.common.shader.TopBottomShader
 import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.pvp.app.common.DateUtil.toLocalDate
 import com.pvp.app.model.ActivityEntry
-import com.pvp.app.ui.common.ProgressIndicator
+import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.underline
 import java.time.format.TextStyle
 import java.util.Locale
@@ -74,9 +74,7 @@ fun AnalysisScreen(
     val state by model.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {
-        ProgressIndicator()
-
-        return
+        ProgressIndicatorWithinDialog()
     }
 
     Column(
@@ -213,6 +211,7 @@ private fun GraphOfDays(
     title: String,
     values: List<ActivityEntry>
 ) {
+    val values = values.ifEmpty { listOf(ActivityEntry()) }
     var type by remember { mutableStateOf<GraphType.Chain>(GraphType.Chain.Steps) }
 
     val selector: (ActivityEntry) -> Int = remember(type) {
