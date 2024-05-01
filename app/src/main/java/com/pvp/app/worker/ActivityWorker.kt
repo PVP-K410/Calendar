@@ -71,14 +71,12 @@ class ActivityWorker @AssistedInject constructor(
                     .toTimestamp()
         )
 
-        if (hasDisability != user.hasDisability) {
-            userService.merge(
-                user.copy(
-                    hasDisability = hasDisability,
-                    lastActivitySync = Timestamp.now()
-                )
+        userService.merge(
+            user.copy(
+                hasDisability = hasDisability,
+                lastActivitySync = Timestamp.now()
             )
-        }
+        )
 
         return Result.success()
     }
@@ -131,7 +129,7 @@ class ActivityWorker @AssistedInject constructor(
             if (activity == null) {
                 activityService.merge(
                     ActivityEntry(
-                        date = date,
+                        date = date.toTimestamp(),
                         calories = calories,
                         steps = steps,
                         email = email

@@ -1,8 +1,7 @@
 package com.pvp.app.ui.router
 
-import android.annotation.SuppressLint
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
+import androidx.compose.material.icons.outlined.AutoGraph
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.People
@@ -27,7 +26,7 @@ import com.pvp.app.ui.screen.friends.FriendsScreen
 import com.pvp.app.ui.screen.friends.FriendsViewModel
 import com.pvp.app.ui.screen.goals.GoalScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
-import com.pvp.app.ui.screen.steps.StepScreen
+import com.pvp.app.ui.screen.statistics.StatisticsScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
 
 sealed class Route(val path: String) {
@@ -75,7 +74,7 @@ object Routes {
         Goals,
         None,
         Settings,
-        Steps
+        Statistics
     )
 
     /**
@@ -92,7 +91,7 @@ object Routes {
         Friends,
         Goals,
         Settings,
-        Steps
+        Statistics
     )
 
     /**
@@ -216,19 +215,18 @@ object Routes {
         path = "settings"
     )
 
-    @SuppressLint("NewApi")
-    data object Steps : Node(
-        compose = { _, _, m -> StepScreen(modifier = m) },
+    data object Statistics : Node(
+        compose = { _, _, m -> StatisticsScreen(modifier = m) },
         options = Options(
             icon = {
                 RouteIcon(
-                    imageVector = Icons.AutoMirrored.Outlined.DirectionsWalk,
-                    resourceId = R.string.route_steps
+                    imageVector = Icons.Outlined.AutoGraph,
+                    resourceId = R.string.route_statistics
                 )
             },
-            title = { RouteTitle(stringResource(R.string.route_steps)) }
+            title = { RouteTitle(stringResource(R.string.route_statistics)) }
         ),
-        path = "steps"
+        path = "statistics"
     )
 
     data object Survey : Node(

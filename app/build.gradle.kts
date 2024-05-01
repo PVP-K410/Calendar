@@ -138,6 +138,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.19")
+    implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.19")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("io.coil-kt:coil-svg:2.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")

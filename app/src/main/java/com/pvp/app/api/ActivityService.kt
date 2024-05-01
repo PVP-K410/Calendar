@@ -3,8 +3,6 @@ package com.pvp.app.api
 import com.pvp.app.model.ActivityEntry
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
-import java.util.Date
-
 
 interface ActivityService : DocumentsCollection {
 
@@ -19,6 +17,14 @@ interface ActivityService : DocumentsCollection {
         date: LocalDate,
         email: String
     ): Flow<ActivityEntry?>
+
+    /**
+     * @return list of activities by the date range and email from the database.
+     */
+    suspend fun get(
+        date: Pair<LocalDate, LocalDate>,
+        email: String
+    ): Flow<List<ActivityEntry>>
 
     /**
      * Creates or updates the specified activity in the database
