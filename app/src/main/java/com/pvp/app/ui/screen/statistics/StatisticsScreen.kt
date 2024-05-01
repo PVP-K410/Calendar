@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.pvp.app.ui.screen.analysis
+package com.pvp.app.ui.screen.statistics
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -67,8 +67,8 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-fun AnalysisScreen(
-    model: AnalysisViewModel = hiltViewModel(),
+fun StatisticsScreen(
+    model: StatisticsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     val state by model.state.collectAsStateWithLifecycle()

@@ -20,7 +20,6 @@ import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.common.RouteUtil.hiltViewModel
 import com.pvp.app.ui.router.Route.Node
 import com.pvp.app.ui.router.Route.Root
-import com.pvp.app.ui.screen.analysis.AnalysisScreen
 import com.pvp.app.ui.screen.authentication.AuthenticationScreen
 import com.pvp.app.ui.screen.calendar.CalendarScreen
 import com.pvp.app.ui.screen.decoration.DecorationScreen
@@ -29,6 +28,7 @@ import com.pvp.app.ui.screen.friends.FriendsScreen
 import com.pvp.app.ui.screen.friends.FriendsViewModel
 import com.pvp.app.ui.screen.goals.GoalScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
+import com.pvp.app.ui.screen.statistics.StatisticsScreen
 import com.pvp.app.ui.screen.steps.StepScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
 
@@ -71,13 +71,13 @@ object Routes {
      * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
      */
     val authenticated = listOf(
-        Analysis,
         Calendar,
         Decorations,
         FriendsRoot,
         Goals,
         None,
         Settings,
+        Statistics,
         Steps
     )
 
@@ -90,12 +90,12 @@ object Routes {
      * Routes are used within [com.pvp.app.ui.screen.layout.LayoutScreenAuthenticated] layout.
      */
     val drawer = listOf(
-        Analysis,
         Calendar,
         Decorations,
         Friends,
         Goals,
         Settings,
+        Statistics,
         Steps
     )
 
@@ -109,20 +109,6 @@ object Routes {
         Authentication,
         None,
         Survey
-    )
-
-    data object Analysis : Node(
-        compose = { _, _, m -> AnalysisScreen(modifier = m) },
-        options = Options(
-            icon = {
-                RouteIcon(
-                    imageVector = Icons.Outlined.AutoGraph,
-                    resourceId = R.string.route_analysis
-                )
-            },
-            title = { RouteTitle(stringResource(R.string.route_analysis)) }
-        ),
-        path = "analysis"
     )
 
     data object Authentication : Node(
@@ -232,6 +218,20 @@ object Routes {
             title = { RouteTitle(stringResource(R.string.route_settings)) }
         ),
         path = "settings"
+    )
+
+    data object Statistics : Node(
+        compose = { _, _, m -> StatisticsScreen(modifier = m) },
+        options = Options(
+            icon = {
+                RouteIcon(
+                    imageVector = Icons.Outlined.AutoGraph,
+                    resourceId = R.string.route_statistics
+                )
+            },
+            title = { RouteTitle(stringResource(R.string.route_statistics)) }
+        ),
+        path = "statistics"
     )
 
     @SuppressLint("NewApi")

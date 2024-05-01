@@ -104,7 +104,8 @@ object DateUtil {
 
     fun Timestamp.toLocalDate(): LocalDate {
         return LocalDate.ofInstant(
-            toDate().toInstant(),
+            toDate()
+                .toInstant(),
             ZoneId.systemDefault()
         )
     }

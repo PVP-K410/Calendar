@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.pvp.app.ui.screen.analysis
+package com.pvp.app.ui.screen.statistics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,12 +26,12 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class AnalysisViewModel @Inject constructor(
+class StatisticsViewModel @Inject constructor(
     private val activityService: ActivityService,
     private val userService: UserService
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(AnalysisState())
+    private val _state = MutableStateFlow(StatisticsState())
     val state = _state.asStateFlow()
 
     init {
@@ -118,7 +118,7 @@ class AnalysisViewModel @Inject constructor(
                 values7dFlow,
                 values30dFlow
             ) { valuesWeek, valuesMonth, values7d, values30d ->
-                AnalysisState(
+                StatisticsState(
                     isLoading = false,
                     valuesWeek = valuesWeek,
                     valuesMonth = valuesMonth,
@@ -131,7 +131,7 @@ class AnalysisViewModel @Inject constructor(
     }
 }
 
-data class AnalysisState(
+data class StatisticsState(
     val isLoading: Boolean = true,
     val valuesWeek: List<ActivityEntry> = listOf(),
     val valuesMonth: List<ActivityEntry> = listOf(),
