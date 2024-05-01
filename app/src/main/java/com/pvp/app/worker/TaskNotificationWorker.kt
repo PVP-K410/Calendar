@@ -38,14 +38,8 @@ class TaskNotificationWorker @AssistedInject constructor(
                 notificationService
                     .getNotificationForTask(task)
                     ?.let { notification ->
-                        val reminderDateTime = task.date
-                            .atTime(task.time)
-                            .minusMinutes(task.reminderTime!!.toMinutes())
-
-                        notificationService.post(
-                            notification = notification,
-                            dateTime = reminderDateTime
-                        )
+                        notificationService.cancel(notification)
+                        notificationService.post(notification)
                     }
             }
 

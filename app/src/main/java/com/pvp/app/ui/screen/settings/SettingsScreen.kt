@@ -85,7 +85,7 @@ private fun SettingNotificationReminderMinutes(
                     items = range,
                     label = { "$it minutes" },
                     modifier = Modifier.padding(top = 16.dp),
-                    startIndex = minutes - 1,
+                    startIndex = minutes / 5,
                     state = state
                 )
             }

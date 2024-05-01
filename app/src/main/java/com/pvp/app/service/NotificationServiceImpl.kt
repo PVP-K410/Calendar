@@ -211,13 +211,12 @@ class NotificationServiceImpl @Inject constructor(
             return null
         }
 
-        var reminderMinutes = settingService
-            .get(Setting.Notifications.ReminderBeforeTaskMinutes)
-            .first().toLong()
-
-        if (task.reminderTime != null) {
-            reminderMinutes = task.reminderTime?.toMinutes() ?: reminderMinutes
-        }
+        val reminderMinutes = task.reminderTime
+            ?.toMinutes()
+            ?: settingService
+                .get(Setting.Notifications.ReminderBeforeTaskMinutes)
+                .first()
+                .toLong()
 
         val reminderDateTime = task.date
             .atTime(task.time)

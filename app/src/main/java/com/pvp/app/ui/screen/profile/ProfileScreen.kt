@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
@@ -43,7 +42,6 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,7 +50,7 @@ import com.pvp.app.R
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.ButtonConfirm
-import com.pvp.app.ui.common.EditableInfoItem
+import com.pvp.app.ui.common.EditablePickerItem
 import com.pvp.app.ui.common.Experience
 import com.pvp.app.ui.common.IconButtonWithDialog
 import com.pvp.app.ui.common.LocalHorizontalPagerSettled
@@ -164,9 +162,8 @@ private fun Initials(
     val email by remember { mutableStateOf(state.user.email) }
     var userName by remember { mutableStateOf(state.user.username) }
     var userNameEdit by remember { mutableStateOf(userName) }
-    val usernameInterval = remember { model.fromConfiguration { it.intervalUsernameLength } }
-    val lengthMin = usernameInterval.first
-    val lengthMax = usernameInterval.second
+    val lengthMin = model.intervalUsernameLength.first
+    val lengthMax = model.intervalUsernameLength.second
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -294,6 +291,7 @@ fun ProfileScreen(
 
 @Composable
 private fun Properties(
+    model: ProfileViewModel = hiltViewModel(),
     onUpdateActivities: (List<SportActivity>) -> Unit,
     onUpdateHeight: (Int) -> Unit,
     onUpdateIngredients: (List<Ingredient>) -> Unit,
@@ -307,8 +305,7 @@ private fun Properties(
     var activitiesSelectedEdit by remember { mutableStateOf(activitiesSelected) }
     var activitiesUnselected by remember(activitiesSelected) { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
     val context = LocalContext.current
-    var height by remember(state.user.height) { mutableIntStateOf(state.user.height) }
-    var heightEdit by remember { mutableStateOf(height.toString()) }
+    val height by remember(state.user.height) { mutableIntStateOf(state.user.height) }
 
     var ingredientsSelected = remember(state.user.ingredients) {
         state.user.ingredients.map { it.title }
@@ -316,8 +313,7 @@ private fun Properties(
 
     var ingredientsSelectedEdit by remember { mutableStateOf(ingredientsSelected) }
     var ingredientsUnselectedEdit by remember { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
-    var mass by remember(state.user.mass) { mutableIntStateOf(state.user.mass) }
-    var massEdit by remember { mutableStateOf(mass.toString()) }
+    val mass by remember(state.user.mass) { mutableIntStateOf(state.user.mass) }
 
     Column(
         modifier = Modifier
@@ -329,81 +325,30 @@ private fun Properties(
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        EditableInfoItem(
-            dialogContent = {
-                OutlinedTextField(
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    label = { Text("Mass") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    onValueChange = {
-                        massEdit = it.replace(
-                            " ",
-                            ""
-                        )
-                    },
-                    value = massEdit
-                )
+        EditablePickerItem(
+            label = "Mass",
+            value = mass,
+            valueLabel = "kg",
+            items = model.rangeMass,
+            itemsLabels = "kg",
+            onValueChange = {
+                onUpdateMass(it)
+
+                context.showToast(message = "Your mass has been updated")
             },
-            dialogTitle = { Text("Editing mass") },
-            label = "Your mass",
-            onConfirm = {
-                val massNew = massEdit.toIntOrNull() ?: 0
-
-                if (massNew in 2..700) {
-                    mass = massNew
-
-                    onUpdateMass(massNew)
-
-                    context.showToast(message = "Your mass has been updated")
-                } else {
-                    massEdit = mass.toString()
-
-                    context.showToast(message = "Please enter a mass between 2 and 700 kg")
-                }
-            },
-            onDismiss = { massEdit = mass.toString() },
-            value = "$mass kg"
         )
 
-        EditableInfoItem(
-            dialogContent = {
-                OutlinedTextField(
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number
-                    ),
-                    label = { Text("Height") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    onValueChange = { heightEdit = it },
-                    value = heightEdit
-                )
+        EditablePickerItem(
+            label = "Height",
+            value = height,
+            valueLabel = "cm",
+            items = model.rangeHeight,
+            itemsLabels = "cm",
+            onValueChange = {
+                onUpdateHeight(it)
+
+                context.showToast(message = "Your height has been updated")
             },
-            dialogTitle = { Text("Editing height") },
-            label = "Your height",
-            onConfirm = {
-                val newHeight = heightEdit.toIntOrNull() ?: 0
-
-                if (newHeight in 40..300) {
-                    height = newHeight
-
-                    onUpdateHeight(newHeight)
-
-                    context.showToast(message = "Your height has been updated")
-                } else {
-                    massEdit = mass.toString()
-
-                    context.showToast(message = "Please enter a height between 40 and 300 cm")
-                }
-            },
-            onDismiss = {
-                heightEdit = height.toString()
-            },
-            value = "$height cm"
         )
 
         WeeklyActivitiesItem(
@@ -574,7 +519,7 @@ fun WeeklyActivitiesItem(
 
             FiltersBox(
                 filters = activities,
-                title = "weekly activities"
+                emptyBoxText = "No weekly activities have been assigned yet"
             )
         }
     }

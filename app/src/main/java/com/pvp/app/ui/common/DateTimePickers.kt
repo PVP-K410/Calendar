@@ -51,7 +51,7 @@ fun DatePickerDialog(
     onDismiss: () -> Unit,
     onDateSelected: (LocalDateTime) -> Unit
 ) {
-    val date = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+    val date = rememberDatePickerState(initialDisplayMode = DisplayMode.Picker)
 
     if (showPicker) {
         androidx.compose.material3.DatePickerDialog(

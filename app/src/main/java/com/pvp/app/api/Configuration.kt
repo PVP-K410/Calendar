@@ -34,6 +34,11 @@ interface Configuration {
     val rangeCupVolume: List<Int>
 
     /**
+     * Duration values for the user to select from.
+     */
+    val rangeDuration: List<Int>
+
+    /**
      * Height values for the user to select from.
      */
     val rangeHeight: List<Int>
@@ -41,10 +46,14 @@ interface Configuration {
     /**
      * Kilometers values for the user to select from.
      *
-     * It should be used together with meters in some picker component. User could select the range
-     * of kilometers provided in this list and also meters in range of 0-999.
+     * It should be used together with meters in some picker component.
      */
     val rangeKilometers: List<Int>
+
+    /**
+     * Meters values for the user to select from.
+     */
+    val rangeMeters: List<Int>
 
     /**
      * Mass values for the user to select from.

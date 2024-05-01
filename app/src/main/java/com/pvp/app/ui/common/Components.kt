@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.material.icons.Icons
@@ -288,7 +289,8 @@ fun Experience(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun InfoTooltip(
-    tooltipText: String
+    tooltipText: String,
+    iconSize: Dp = 24.dp
 ) {
     val tooltipState = rememberBasicTooltipState()
     val scope = rememberCoroutineScope()
@@ -317,9 +319,13 @@ fun InfoTooltip(
         state = tooltipState
     ) {
         IconButton(
+            modifier = Modifier.size(iconSize),
             onClick = { scope.launch { tooltipState.show() } },
         ) {
             Icon(
+                modifier = Modifier
+                    .size(iconSize)
+                    .padding(horizontal = 4.dp),
                 imageVector = Icons.Outlined.Info,
                 contentDescription = "Autocompletion of activity"
             )

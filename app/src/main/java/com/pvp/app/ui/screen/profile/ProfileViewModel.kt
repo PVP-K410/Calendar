@@ -37,6 +37,9 @@ class ProfileViewModel @Inject constructor(
 
     private val _state: MutableStateFlow<ProfileState> = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
+    val rangeMass = configuration.rangeMass
+    val rangeHeight = configuration.rangeHeight
+    val intervalUsernameLength = configuration.intervalUsernameLength
 
     init {
         collectStateChanges()
@@ -84,10 +87,6 @@ class ProfileViewModel @Inject constructor(
 
             userService.merge(user)
         }
-    }
-
-    fun <T> fromConfiguration(function: (Configuration) -> T): T {
-        return function(configuration)
     }
 }
 
