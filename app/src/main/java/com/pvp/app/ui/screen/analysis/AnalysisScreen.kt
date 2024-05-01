@@ -7,10 +7,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,6 +41,7 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineSpec
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
@@ -49,7 +53,9 @@ import com.patrykandpatrick.vico.core.cartesian.axis.AxisItemPlacer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModel
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.LineCartesianLayerModel
+import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.Dimensions
+import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shader.DynamicShader
 import com.patrykandpatrick.vico.core.common.shader.TopBottomShader
 import com.patrykandpatrick.vico.core.common.shape.Shape
@@ -76,21 +82,32 @@ fun AnalysisScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
+        val labelOfSum = remember<(GraphType) -> String> {
+            {
+                when (it) {
+                    is GraphType.Chain.Calories -> "kcal"
+                    is GraphType.Chain.Steps -> "steps"
+                    else -> ""
+                }
+            }
+        }
+
         var tab by remember { mutableIntStateOf(0) }
 
         val tabs = remember(state) {
             mapOf<String, @Composable () -> Unit>(
-                "On Going" to {
-                    GraphsOnGoing(
+                "Ongoing" to {
+                    GraphsOngoing(
+                        labelOfSum = labelOfSum,
                         valuesWeek = state.valuesWeek,
                         valuesMonth = state.valuesMonth
                     )
                 },
                 "Past" to {
                     GraphsPast(
+                        labelOfSum = labelOfSum,
                         values7d = state.values7d,
                         values30d = state.values30d
                     )
@@ -181,6 +198,10 @@ private fun Graph(
                 )
             )
         ),
+        marker = rememberDefaultCartesianMarker(
+            label = TextComponent.build(),
+            labelPosition = DefaultCartesianMarker.LabelPosition.AbovePoint
+        ),
         model = CartesianChartModel(LineCartesianLayerModel.build { series(values) })
     )
 }
@@ -188,15 +209,16 @@ private fun Graph(
 @Composable
 private fun GraphOfDays(
     labelAsDay: Boolean = true,
+    labelOfSum: (GraphType) -> String,
     title: String,
     values: List<ActivityEntry>
 ) {
     var type by remember { mutableStateOf<GraphType.Chain>(GraphType.Chain.Steps) }
 
-    val selector = remember(type) {
+    val selector: (ActivityEntry) -> Int = remember(type) {
         when (type) {
-            GraphType.Chain.Calories -> { entry: ActivityEntry -> entry.calories / 1000 }
-            GraphType.Chain.Steps -> ActivityEntry::steps
+            GraphType.Chain.Calories -> { entry -> (entry.calories / 1000).toInt() }
+            GraphType.Chain.Steps -> { entry -> entry.steps.toInt() }
         }
     }
 
@@ -236,6 +258,13 @@ private fun GraphOfDays(
             },
             values = values.map { selector(it) }
         )
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.labelMedium,
+            text = "${values.sumOf { selector(it) }} ${labelOfSum(type)}",
+            textAlign = TextAlign.End
+        )
     }
 }
 
@@ -261,35 +290,45 @@ private fun GraphTypeSelector(
 }
 
 @Composable
-private fun GraphsOnGoing(
+private fun GraphsOngoing(
+    labelOfSum: (GraphType) -> String,
     valuesWeek: List<ActivityEntry>,
     valuesMonth: List<ActivityEntry>
 ) {
+    Spacer(modifier = Modifier.size(16.dp))
+
     GraphOfDays(
-        title = "On Going Week",
+        labelOfSum = labelOfSum,
+        title = "Week",
         values = valuesWeek
     )
 
+    Spacer(modifier = Modifier.size(24.dp))
+
     GraphOfDays(
         labelAsDay = false,
-        title = "On Going Month",
+        labelOfSum = labelOfSum,
+        title = "Month",
         values = valuesMonth
     )
 }
 
 @Composable
 private fun GraphsPast(
+    labelOfSum: (GraphType) -> String,
     values7d: List<ActivityEntry>,
     values30d: List<ActivityEntry>
 ) {
     GraphOfDays(
-        title = "Past 7 Days",
+        labelOfSum = labelOfSum,
+        title = "7 Days",
         values = values7d
     )
 
     GraphOfDays(
         labelAsDay = false,
-        title = "Past 30 Days",
+        labelOfSum = labelOfSum,
+        title = "30 Days",
         values = values30d
     )
 }
