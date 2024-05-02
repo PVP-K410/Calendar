@@ -52,7 +52,7 @@ class GoalMotivationWorker @AssistedInject constructor(
                     .lowercase()
 
                 val target = if (goal.steps) {
-                    "${goal.target.toInt()}} steps"
+                    "${goal.target.toInt()} steps"
                 } else {
                     "${goal.target} km"
                 }
