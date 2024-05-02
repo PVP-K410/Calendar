@@ -51,9 +51,11 @@ class GoalMotivationWorker @AssistedInject constructor(
                     .toString()
                     .lowercase()
 
-                val target = if (goal.steps)
-                    "${goal.target.toInt()} steps" else
+                val target = if (goal.steps) {
+                    "${goal.target.toInt()}} steps"
+                } else {
                     "${goal.target} km"
+                }
 
                 val notification = Notification(
                     channel = NotificationChannel.GoalMotivation,
