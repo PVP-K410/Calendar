@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Stars
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -73,82 +71,81 @@ fun RewardDialog(
     }
 
     Dialog(onDismissRequest = onClose) {
-        Surface(shape = RoundedCornerShape(16.dp)) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontSize = 20.sp,
-                    text = "Your daily login streak increased!"
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                style = MaterialTheme.typography.headlineSmall,
+                fontSize = 20.sp,
+                text = "Your daily login streak increased!"
+            )
+
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Outlined.Star,
+                    contentDescription = "Star icon",
+                    modifier = Modifier.size(95.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
-
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Outlined.Star,
-                        contentDescription = "Star icon",
-                        modifier = Modifier.size(95.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-
-                    Text(
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 20.sp,
-                        text = streak.value.toString(),
-                        textAlign = TextAlign.Center
-                    )
-                }
 
                 Text(
                     style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 20.sp,
-                    text = "You received"
+                    text = streak.value.toString(),
+                    textAlign = TextAlign.Center
                 )
+            }
 
-                Spacer(modifier = Modifier.padding(6.dp))
+            Text(
+                style = MaterialTheme.typography.headlineSmall,
+                fontSize = 20.sp,
+                text = "You received"
+            )
 
-                if (reward.points > 0) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(3.dp),
-                            style = MaterialTheme.typography.titleMedium,
-                            text = "${reward.points}"
-                        )
+            Spacer(modifier = Modifier.padding(6.dp))
 
-                        Icon(
-                            contentDescription = "Points indicator icon",
-                            imageVector = Icons.Outlined.Stars
-                        )
-                    }
-                }
-
-                if (reward.experience > 0) {
+            if (reward.points > 0) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        modifier = Modifier.padding(bottom = 12.dp),
+                        modifier = Modifier.padding(3.dp),
                         style = MaterialTheme.typography.titleMedium,
-                        text = "${reward.experience} xp"
+                        text = "${reward.points}"
+                    )
+
+                    Icon(
+                        contentDescription = "Points indicator icon",
+                        imageVector = Icons.Outlined.Stars
                     )
                 }
+            }
 
-                reward.decoration?.let {
-                    DecorationCard(decoration = it)
+            if (reward.experience > 0) {
+                Text(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                    text = "${reward.experience} xp"
+                )
+            }
 
-                    Spacer(modifier = Modifier.padding(8.dp))
-                }
+            reward.decoration?.let {
+                DecorationCard(decoration = it)
+
+                Spacer(modifier = Modifier.padding(8.dp))
+            }
 
 
-                Button(onClick = { onClose() }) {
-                    Text("Claim")
-                }
+            Button(onClick = { onClose() }) {
+                Text("Claim")
             }
         }
     }
