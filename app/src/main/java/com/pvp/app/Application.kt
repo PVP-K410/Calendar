@@ -22,6 +22,7 @@ import com.pvp.app.worker.AutocompleteWorker
 import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
+import com.pvp.app.worker.GoalMotivationWorker
 import com.pvp.app.worker.TaskNotificationWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
 import com.pvp.app.worker.WeeklyActivityWorker
@@ -86,6 +87,8 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         // Should be left out to ensure the TaskAutocompleteService is persisted
         // as a running foreground service
         createAutocompleteWorker()
+
+        createGoalMotivationWorker()
     }
 
     fun createActivityWorker() {
@@ -179,6 +182,20 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
 
         workManager.enqueueUniquePeriodicWork(
             DrinkReminderWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            request
+        )
+    }
+
+    private fun createGoalMotivationWorker() {
+        val request = PeriodicWorkRequestBuilder<GoalMotivationWorker>(
+            repeatInterval = 1,
+            repeatIntervalTimeUnit = TimeUnit.DAYS
+        )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            GoalMotivationWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             request
         )
