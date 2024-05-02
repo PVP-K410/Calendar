@@ -52,18 +52,19 @@ class GoalMotivationWorker @AssistedInject constructor(
                     .lowercase()
 
                 val target = if (goal.steps)
-                    "(${goal.target.toInt()} steps)" else
-                    "(${goal.target} km)"
+                    "${goal.target.toInt()} steps" else
+                    "${goal.target} km"
 
                 val notification = Notification(
                     channel = NotificationChannel.GoalMotivation,
                     title = "🏆 One Step Closer to Success!",
-                    text = "You have a $goalType goal to achieve this $weekOrMonth $target. Keep going!"
+                    text = "You have a $goalType goal to achieve" +
+                            "this $weekOrMonth ($target). Keep going!"
                 )
 
                 notificationService.post(
                     notification = notification,
-                    delay = Duration.ofHours((index + 1) * 1L)
+                    delay = Duration.ofMinutes((index + 1) * 30L)
                 )
             }
 
@@ -100,7 +101,7 @@ class GoalMotivationWorker @AssistedInject constructor(
 
             notificationService.post(
                 notification = notification,
-                delay = Duration.ofMinutes(30L)
+                delay = Duration.ofMinutes(10L)
             )
         }
 
