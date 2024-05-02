@@ -81,20 +81,11 @@ fun AnalysisOfDay(
     model: CalendarWeeklyViewModel = hiltViewModel(),
     tasks: List<Task>
 ) {
-    var launcherTriggered by remember { mutableStateOf(false) }
-
-    // Required for checking whether user has permissions before entering the window,
-    // as users can revoke permissions at any time
     val launcher = rememberLauncherForActivityResult(
         PermissionController.createRequestPermissionResultContract()
-    ) {
-        launcherTriggered = !launcherTriggered
-    }
+    ) {}
 
-    LaunchedEffect(
-        date,
-        launcherTriggered
-    ) {
+    LaunchedEffect(Unit) {
         if (!model.permissionsGranted()) {
             launcher.launch(PERMISSIONS)
         }
