@@ -10,24 +10,19 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Dehaze
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerState
@@ -38,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -56,19 +50,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.pvp.app.model.Decoration
-import com.pvp.app.model.Reward
-import com.pvp.app.ui.common.AsyncImage
+import com.pvp.app.model.Streak
 import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptions
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
-import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
@@ -208,35 +198,6 @@ private fun Content(
 }
 
 @Composable
-private fun DecorationCard(decoration: Decoration) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.titleMedium,
-            text = "${decoration.name} decoration!"
-        )
-
-        AsyncImage(
-            contentDescription = "Decoration ${decoration.name} image",
-            modifier = Modifier
-                .size(96.dp)
-                .clip(MaterialTheme.shapes.extraSmall)
-                .background(
-                    color = MaterialTheme.colorScheme.inverseOnSurface.lighten(),
-                    shape = MaterialTheme.shapes.extraSmall
-                ),
-            url = decoration.imageRepresentativeUrl
-        )
-    }
-}
-
-@Composable
 private fun Header(
     avatar: ImageBitmap,
     colorAvatarBorder: Color = MaterialTheme.colorScheme.primaryContainer,
@@ -330,7 +291,8 @@ fun LayoutScreenAuthenticated(
     RewardDialog(
         isOpen = isRewardDialogOpen,
         onClose = toggleRewardDialog,
-        reward = reward
+        reward = reward,
+        streak = stateLayout.user?.streak ?: Streak()
     )
 
     ModalNavigationDrawer(
@@ -395,68 +357,6 @@ fun LayoutScreenAuthenticated(
                     paddingValues = padding,
                     state = statePager
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RewardDialog(
-    isOpen: Boolean,
-    onClose: () -> Unit,
-    reward: Reward
-) {
-    if (!isOpen) {
-        return
-    }
-
-    Dialog(onDismissRequest = onClose) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainer)
-                .padding(8.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    style = MaterialTheme.typography.headlineSmall,
-                    text = "You've earned a reward!"
-                )
-
-                IconButton(onClick = onClose) {
-                    Icon(
-                        contentDescription = "Reward dialog close button",
-                        imageVector = Icons.Filled.Close
-                    )
-                }
-            }
-
-            if (reward.points > 0) {
-                Text(
-                    modifier = Modifier.padding(12.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                    text = "${reward.points} points!"
-                )
-            }
-
-            if (reward.experience > 0) {
-                Text(
-                    modifier = Modifier.padding(8.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                    text = "${reward.experience} experience!"
-                )
-            }
-
-            reward.decoration?.let {
-                DecorationCard(decoration = it)
             }
         }
     }
