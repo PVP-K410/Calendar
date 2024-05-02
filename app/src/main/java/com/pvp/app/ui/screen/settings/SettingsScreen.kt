@@ -1,5 +1,9 @@
 package com.pvp.app.ui.screen.settings
 
+import android.content.Context
+import android.content.Intent
+import android.health.connect.HealthConnectManager
+import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.PermIdentity
 import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -37,13 +42,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat.startActivity
+import androidx.health.connect.client.HealthConnectClient
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Setting
+import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
@@ -273,6 +282,39 @@ private fun SettingApplicationTheme(
 }
 
 @Composable
+private fun SettingHealthConnectPermissions(context: Context) {
+    Button(
+        modifier = Modifier
+            .padding(
+                horizontal = 8.dp,
+                vertical = 4.dp
+            )
+            .fillMaxWidth(),
+        onClick = {
+            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                Intent(HealthConnectManager.ACTION_MANAGE_HEALTH_PERMISSIONS)
+                    .putExtra(
+                        Intent.EXTRA_PACKAGE_NAME,
+                        context.packageName
+                    )
+            } else {
+                Intent(
+                    HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS
+                )
+            }
+            startActivity(
+                context,
+                intent,
+                null
+            )
+        },
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Text("Enable/Disable Health Connect permissions")
+    }
+}
+
+@Composable
 fun SettingsScreen(
     model: SettingsViewModel = hiltViewModel(),
     modifier: Modifier
@@ -303,6 +345,13 @@ fun SettingsScreen(
         SettingApplicationTheme(model)
 
         SettingDynamicTheme(model)
+
+        CategoryRow(
+            icon = Icons.Outlined.PermIdentity,
+            title = "Permissions"
+        )
+
+        SettingHealthConnectPermissions(LocalContext.current)
 
         ResetToDefaultButton(model)
     }
