@@ -284,10 +284,12 @@ private fun SettingApplicationTheme(
 @Composable
 private fun SettingHealthConnectPermissions(context: Context) {
     Button(
-        modifier = Modifier.padding(
-            horizontal = 8.dp,
-            vertical = 4.dp
-        ),
+        modifier = Modifier
+            .padding(
+                horizontal = 8.dp,
+                vertical = 4.dp
+            )
+            .fillMaxWidth(),
         onClick = {
             val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 Intent(HealthConnectManager.ACTION_MANAGE_HEALTH_PERMISSIONS)
