@@ -14,6 +14,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
 import java.time.Duration
+import java.time.LocalDate
 
 @HiltWorker
 class GoalMotivationWorker @AssistedInject constructor(
@@ -30,7 +31,7 @@ class GoalMotivationWorker @AssistedInject constructor(
 
     companion object {
 
-        const val WORKER_NAME = "com.pvp.app.worker.TaskNotificationWorker"
+        const val WORKER_NAME = "com.pvp.app.worker.GoalMotivationWorker"
     }
 
     override suspend fun doWork(): Result {
@@ -40,23 +41,25 @@ class GoalMotivationWorker @AssistedInject constructor(
             .get(email)
             .first()
             .forEachIndexed { index, goal ->
+                if (goal.completed || goal.endDate.isBefore(LocalDate.now())) {
+                    return@forEachIndexed
+                }
+
                 val weekOrMonth = if (goal.monthly) "month" else "week"
-                val goalType = goal.activity.toString()
+
+                val goalType = goal.activity
+                    .toString()
                     .lowercase()
-                val isSteps = goal.steps
-                val target = if (isSteps)
+
+                val target = if (goal.steps)
                     "(${goal.target.toInt()} steps)" else
                     "(${goal.target} km)"
-                val text =
-                    "You have a $goalType goal to achieve this $weekOrMonth $target. Keep going!"
 
                 val notification = Notification(
                     channel = NotificationChannel.GoalMotivation,
                     title = "🏆 One Step Closer to Success!",
-                    text = text
+                    text = "You have a $goalType goal to achieve this $weekOrMonth $target. Keep going!"
                 )
-
-                notificationService.cancel(notification)
 
                 notificationService.post(
                     notification = notification,
@@ -64,35 +67,42 @@ class GoalMotivationWorker @AssistedInject constructor(
                 )
             }
 
-        friendService
-            .get(email)
-            .first()
-            ?.friends
-            ?.forEach { friend ->
-                var hasActiveFriends = false
+        var hasActiveFriends = false
 
-                goalService
-                    .get(friend.email)
-                    .first()
-                    .forEach { goal ->
-                        if (goal.completed) {
-                            hasActiveFriends = true
+        run friends@{
+            friendService
+                .get(email)
+                .first()
+                ?.friends
+                ?.forEach friendsForEach@{ friend ->
+                    goalService
+                        .get(friend.email)
+                        .first()
+                        .forEach goalsForEach@{ goal ->
+                            if (goal.endDate.isBefore(LocalDate.now())) {
+                                return@goalsForEach
+                            }
+
+                            if (goal.completed) {
+                                hasActiveFriends = true
+                                return@friends
+                            }
                         }
-                    }
-
-                if (hasActiveFriends) {
-                    val notification = Notification(
-                        channel = NotificationChannel.GoalMotivation,
-                        title = "🚀 Keep Up with Your Active Buddies!",
-                        text = "Participate in goals to keep up with your friends!"
-                    )
-
-                    notificationService.post(
-                        notification = notification,
-                        delay = Duration.ofMinutes(30L)
-                    )
                 }
-            }
+        }
+
+        if (hasActiveFriends) {
+            val notification = Notification(
+                channel = NotificationChannel.GoalMotivation,
+                title = "🚀 Keep Up with Your Active Buddies!",
+                text = "Participate in goals to keep up with your friends!"
+            )
+
+            notificationService.post(
+                notification = notification,
+                delay = Duration.ofMinutes(30L)
+            )
+        }
 
         return Result.success()
     }
