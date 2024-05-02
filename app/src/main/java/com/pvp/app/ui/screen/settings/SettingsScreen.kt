@@ -302,10 +302,15 @@ private fun SettingHealthConnectPermissions(context: Context) {
                     HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS
                 )
             }
-            startActivity(context, intent, null)
-        }
+            startActivity(
+                context,
+                intent,
+                null
+            )
+        },
+        shape = MaterialTheme.shapes.medium
     ) {
-        Text("Give Health Connect permissions")
+        Text("Enable/Disable Health Connect permissions")
     }
 }
 
