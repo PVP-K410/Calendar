@@ -31,7 +31,14 @@ sealed class DecorationScreenState {
         companion object : Error()
     }
 
-    data object Loading : DecorationScreenState()
+    sealed class Loading : DecorationScreenState() {
+
+        data object LoadingApply : DecorationScreenState()
+
+        data object LoadingPurchase : DecorationScreenState()
+
+        companion object : Loading()
+    }
 
     data object NoOperation : DecorationScreenState()
 

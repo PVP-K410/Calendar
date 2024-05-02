@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -166,6 +167,9 @@ private fun Graph(
             bottomAxis = rememberBottomAxis(
                 guideline = null,
                 itemPlacer = remember { AxisItemPlacer.Horizontal.default() },
+                label = TextComponent.build {
+                    color = MaterialTheme.colorScheme.onSurface.toArgb()
+                },
                 valueFormatter = valueFormatter
             ),
             startAxis = rememberStartAxis(

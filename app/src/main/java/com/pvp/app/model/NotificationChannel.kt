@@ -6,10 +6,12 @@ enum class NotificationChannel(
 
     DailyTaskReminder("Daily Task Reminder"),
     DrinkReminder("Water Drinking Reminder"),
+    GoalMotivation("Goal Motivation"),
     TaskAutocomplete("Task Autocomplete"),
     TaskReminder("Task Reminder"),
-    Unknown("Unknown"),
-    WeeklyActivityReminder("Weekly Activity Reminder");
+    WeeklyActivityReminder("Weekly Activity Reminder"),
+
+    Unknown("Unknown");
 
     companion object {
 
