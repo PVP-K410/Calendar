@@ -16,8 +16,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flattenMerge
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,48 +29,77 @@ class DecorationViewModel @Inject constructor(
     private val _state = MutableStateFlow(DecorationState())
     val state = _state.asStateFlow()
 
+    private val screenStateAwaited = MutableStateFlow<DecorationScreenState>(
+        DecorationScreenState.NoOperation
+    )
+
     init {
         collectStateChanges()
     }
 
     private fun collectStateChanges() {
+        val userFlow = userService.user.filterNotNull()
+
         viewModelScope.launch(Dispatchers.IO) {
-            userService.user
-                .filterNotNull()
-                .combine(decorationService.getAvatar(userService.user.filterNotNull())) { user, avatar ->
-                    decorationService
-                        .get()
-                        .mapLatest { decorations ->
-                            DecorationState(
-                                avatar = avatar,
-                                holders = decorations
-                                    .map { decoration ->
-                                        DecorationHolder(
-                                            applied = decoration.id in user.decorationsApplied,
-                                            decoration = decoration,
-                                            owned = decoration.id in user.decorationsOwned
-                                        )
-                                    }
-                                    .sortedWith(
-                                        compareBy<DecorationHolder> { it.decoration.type }
-                                            .thenBy { it.decoration.price }
-                                    ),
-                                user = user
-                            )
-                        }
+            userFlow
+                .combine(decorationService.get()) { user, decorations ->
+                    DecorationState(
+                        holders = decorations
+                            .map { decoration ->
+                                DecorationHolder(
+                                    applied = decoration.id in user.decorationsApplied,
+                                    decoration = decoration,
+                                    owned = decoration.id in user.decorationsOwned
+                                )
+                            }
+                            .sortedWith(
+                                compareBy<DecorationHolder> { it.decoration.type }
+                                    .thenBy { it.decoration.price }
+                            ),
+                        user = user
+                    )
                 }
-                .flattenMerge()
                 .collectLatest { state ->
                     _state.update {
                         it.copy(
-                            avatar = state.avatar,
                             holders = state.holders,
-                            state = if (it.state == DecorationScreenState.Loading) {
-                                DecorationScreenState.NoOperation
-                            } else {
-                                it.state
+                            state = when (it.state) {
+                                is DecorationScreenState.Loading.LoadingPurchase -> {
+                                    val stateNew = screenStateAwaited.value
+
+                                    screenStateAwaited.update { DecorationScreenState.NoOperation }
+
+                                    stateNew
+                                }
+
+                                is DecorationScreenState.Loading.Companion -> DecorationScreenState.NoOperation
+                                else -> it.state
                             },
                             user = state.user
+                        )
+                    }
+                }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            decorationService
+                .getAvatar(userFlow)
+                .collectLatest { avatar ->
+                    _state.update {
+                        it.copy(
+                            avatar = avatar,
+                            state = when (it.state) {
+                                is DecorationScreenState.Loading.LoadingApply -> {
+                                    val stateNew = screenStateAwaited.value
+
+                                    screenStateAwaited.update { DecorationScreenState.NoOperation }
+
+                                    stateNew
+                                }
+
+                                is DecorationScreenState.Loading.Companion -> DecorationScreenState.NoOperation
+                                else -> it.state
+                            }
                         )
                     }
                 }
@@ -80,24 +107,24 @@ class DecorationViewModel @Inject constructor(
     }
 
     fun apply(decoration: Decoration) {
+        _state.update { it.copy(state = DecorationScreenState.Loading.LoadingApply) }
+
         viewModelScope.launch(Dispatchers.IO) {
             val state = _state.first()
 
-            _state.update { it.copy(state = DecorationScreenState.Loading) }
-
             try {
-                decorationService.apply(
-                    decoration,
-                    user = state.user
-                )
-
                 val stateWork = if (decoration.id in state.user.decorationsApplied) {
                     DecorationScreenState.Success.Unapply
                 } else {
                     DecorationScreenState.Success.Apply
                 }
 
-                _state.update { it.copy(state = stateWork) }
+                screenStateAwaited.update { stateWork }
+
+                decorationService.apply(
+                    decoration,
+                    user = state.user
+                )
             } catch (e: Exception) {
                 _state.update { it.copy(state = DecorationScreenState.Error) }
             }
@@ -105,7 +132,7 @@ class DecorationViewModel @Inject constructor(
     }
 
     fun purchase(decoration: Decoration) {
-        _state.update { it.copy(state = DecorationScreenState.Loading) }
+        _state.update { it.copy(state = DecorationScreenState.Loading.LoadingPurchase) }
 
         viewModelScope.launch(Dispatchers.IO) {
             val state = _state.first()
@@ -124,12 +151,12 @@ class DecorationViewModel @Inject constructor(
             }
 
             try {
+                screenStateAwaited.update { DecorationScreenState.Success.Purchase }
+
                 decorationService.purchase(
                     decoration,
                     state.user
                 )
-
-                _state.update { it.copy(state = DecorationScreenState.Success.Purchase) }
             } catch (e: Exception) {
                 _state.update { it.copy(state = DecorationScreenState.Error) }
 
