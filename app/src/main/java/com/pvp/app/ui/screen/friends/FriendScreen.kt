@@ -318,6 +318,11 @@ private fun Header(entry: FriendEntry) {
         text = entry.user.username
     )
 
+    Text(
+        style = MaterialTheme.typography.titleSmall,
+        text = entry.user.email
+    )
+
     Spacer(modifier = Modifier.height(6.dp))
 
     Experience(
