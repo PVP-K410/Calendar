@@ -394,7 +394,7 @@ private fun ListItemContent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = friend.user.email,
+            text = friend.user.username,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(start = 4.dp)
         )
