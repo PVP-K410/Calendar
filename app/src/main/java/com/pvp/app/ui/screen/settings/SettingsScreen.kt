@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.health.connect.HealthConnectManager
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -291,22 +292,11 @@ private fun SettingHealthConnectPermissions(context: Context) {
             )
             .fillMaxWidth(),
         onClick = {
-            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                Intent(HealthConnectManager.ACTION_MANAGE_HEALTH_PERMISSIONS)
-                    .putExtra(
-                        Intent.EXTRA_PACKAGE_NAME,
-                        context.packageName
-                    )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                permissionsPostUpsideDownCake(context)
             } else {
-                Intent(
-                    HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS
-                )
+                permissionsPreUpsideDownCake(context)
             }
-            startActivity(
-                context,
-                intent,
-                null
-            )
         },
         shape = MaterialTheme.shapes.medium
     ) {
@@ -542,4 +532,31 @@ fun <T> SettingCard(
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+private fun permissionsPostUpsideDownCake(context: Context) {
+    // On some phones even on Android 14 (API Level 14)
+    // Intent of ACTION_MANAGE_HEALTH_PERMISSIONS causes an exception
+    try {
+        startActivity(
+            context,
+            Intent(HealthConnectManager.ACTION_MANAGE_HEALTH_PERMISSIONS)
+                .putExtra(
+                    Intent.EXTRA_PACKAGE_NAME,
+                    context.packageName
+                ),
+            null
+        )
+    } catch (e: Exception) {
+        permissionsPreUpsideDownCake(context)
+    }
+}
+
+private fun permissionsPreUpsideDownCake(context: Context) {
+    startActivity(
+        context,
+        Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS),
+        null
+    )
 }
