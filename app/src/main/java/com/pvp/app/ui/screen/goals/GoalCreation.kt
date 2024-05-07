@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -348,15 +349,15 @@ private fun StepSelector(
                 .weight(1f)
                 .fillMaxWidth()
                 .height(40.dp)
-                .clickable { onClick() }
+                .clip(MaterialTheme.shapes.medium)
                 .background(
                     if (isSelected) {
                         MaterialTheme.colorScheme.secondaryContainer
                     } else {
                         Color.Transparent
-                    },
-                    MaterialTheme.shapes.medium
+                    }
                 )
+                .clickable { onClick() }
         ) {
             Text(text = "Steps")
         }
@@ -367,15 +368,15 @@ private fun StepSelector(
                 .weight(1f)
                 .fillMaxWidth()
                 .height(40.dp)
-                .clickable { onClick() }
+                .clip(MaterialTheme.shapes.medium)
                 .background(
                     if (!isSelected) {
                         MaterialTheme.colorScheme.secondaryContainer
                     } else {
                         Color.Transparent
-                    },
-                    MaterialTheme.shapes.medium
+                    }
                 )
+                .clickable { onClick() }
         ) {
             Text(text = "Distance")
         }

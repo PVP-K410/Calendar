@@ -247,15 +247,15 @@ private fun GoalTypeSelector(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .clickable { onClick() }
+            .clip(MaterialTheme.shapes.medium)
             .background(
                 if (isSelected) {
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
-                },
-                MaterialTheme.shapes.medium
+                }
             )
+            .clickable { onClick() }
     ) {
         Text(text = filter.displayName)
     }

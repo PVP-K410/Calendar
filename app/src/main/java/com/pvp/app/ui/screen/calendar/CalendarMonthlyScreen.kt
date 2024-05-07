@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -260,13 +261,13 @@ private fun CalendarMonthlyContentItem(
 
     Box(
         modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
             .background(
                 color = if (entry.date.isEqual(LocalDate.now())) {
                     MaterialTheme.colorScheme.secondaryContainer
                 } else {
                     Color.Transparent
-                },
-                MaterialTheme.shapes.medium
+                }
             )
             .border(
                 width = 2.dp,
@@ -275,7 +276,7 @@ private fun CalendarMonthlyContentItem(
                 } else {
                     Color.Transparent
                 },
-                shape = MaterialTheme.shapes.medium
+                MaterialTheme.shapes.medium
             )
             .clickable(enabled = clickable) {
                 onClickListener(entry)
