@@ -33,12 +33,12 @@ fun Color.lighten(fraction: Float = 0.5f): Color {
 
 @Composable
 fun Color.orInDarkTheme(
-    darkThemeColor: Color,
+    color: Color,
     model: SettingsViewModel = hiltViewModel()
 ): Color {
     val themeValue by model
         .get(Setting.Appearance.ApplicationTheme)
         .collectAsStateWithLifecycle()
 
-    return if (themeValue == Theme.Dark.ordinal) darkThemeColor else this
+    return if (themeValue == Theme.Dark.ordinal) color else this
 }
