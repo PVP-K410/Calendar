@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Stars
@@ -44,6 +45,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.ui.common.Dialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.darken
+import com.pvp.app.ui.common.orInDarkTheme
 import com.pvp.app.ui.common.showToast
 
 @Composable
@@ -69,10 +72,12 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
-                .clip(MaterialTheme.shapes.extraSmall)
+                .clip(CircleShape)
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    shape = MaterialTheme.shapes.extraSmall
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                        .darken(0.1f)
+                        .orInDarkTheme(MaterialTheme.colorScheme.surfaceContainerHighest),
+                    shape = CircleShape
                 )
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
