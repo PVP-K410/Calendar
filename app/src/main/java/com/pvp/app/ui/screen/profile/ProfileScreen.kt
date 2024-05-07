@@ -59,6 +59,8 @@ import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.RouteTitle
+import com.pvp.app.ui.common.darken
+import com.pvp.app.ui.common.orInDarkTheme
 import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.router.Route
 import kotlinx.coroutines.launch
@@ -184,7 +186,9 @@ private fun Initials(
             modifier = Modifier
                 .clip(CircleShape)
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                        .darken(0.1f)
+                        .orInDarkTheme(MaterialTheme.colorScheme.surfaceContainerHighest),
                     shape = CircleShape
                 )
                 .padding(8.dp),

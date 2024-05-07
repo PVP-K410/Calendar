@@ -45,6 +45,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.ui.common.Dialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.darken
+import com.pvp.app.ui.common.orInDarkTheme
 import com.pvp.app.ui.common.showToast
 
 @Composable
@@ -72,7 +74,9 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
             modifier = Modifier
                 .clip(CircleShape)
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                        .darken(0.1f)
+                        .orInDarkTheme(MaterialTheme.colorScheme.surfaceContainerHighest),
                     shape = CircleShape
                 )
                 .padding(8.dp),
