@@ -11,9 +11,7 @@ import com.pvp.app.model.Setting
 import com.pvp.app.ui.screen.settings.SettingsViewModel
 import com.pvp.app.ui.screen.settings.Theme
 
-fun Color.darken(
-    fraction: Float = 0.5f
-): Color {
+fun Color.darken(fraction: Float = 0.5f): Color {
     return ColorUtils
         .blendARGB(
             toArgb(),
@@ -23,9 +21,7 @@ fun Color.darken(
         .run { Color(this) }
 }
 
-fun Color.lighten(
-    fraction: Float = 0.5f
-): Color {
+fun Color.lighten(fraction: Float = 0.5f): Color {
     return ColorUtils
         .blendARGB(
             toArgb(),
