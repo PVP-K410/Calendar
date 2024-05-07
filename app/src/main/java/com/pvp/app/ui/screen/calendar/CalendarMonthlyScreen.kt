@@ -278,9 +278,7 @@ private fun CalendarMonthlyContentItem(
                 },
                 MaterialTheme.shapes.medium
             )
-            .clickable(enabled = clickable) {
-                onClickListener(entry)
-            }
+            .clickable(enabled = clickable) { onClickListener(entry) }
     ) {
         Text(
             text = text,

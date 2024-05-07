@@ -134,11 +134,9 @@ private fun Authentication(
 
         Text(
             text = textBegin,
-            modifier = Modifier
-                .align(Alignment.Center),
+            modifier = Modifier.align(Alignment.Center),
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-            textDecoration = TextDecoration.Underline,
-            textAlign = TextAlign.Center
+            textDecoration = TextDecoration.Underline
         )
     }
 }
