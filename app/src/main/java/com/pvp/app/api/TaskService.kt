@@ -1,5 +1,8 @@
 package com.pvp.app.api
 
+import com.pvp.app.model.CustomMealTask
+import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.Meal
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -44,7 +47,7 @@ interface TaskService : DocumentsCollection {
         time: LocalTime? = null,
         title: String,
         userEmail: String
-    ): Task
+    ): GeneralTask
 
     /**
      * Creates a sport task in the database with the given parameters. Points are calculated
@@ -81,7 +84,6 @@ interface TaskService : DocumentsCollection {
      * automatically upon creation.
      *
      * @param date scheduled date
-     * @param description description
      * @param duration duration
      * @param reminderTime minutes before the task to send a reminder
      * @param recipe recipe of the meal
@@ -89,16 +91,39 @@ interface TaskService : DocumentsCollection {
      * @param title title
      * @param userEmail user email to create the task for
      *
-     * @return created meal task
+     * @return created custom meal task
      */
     suspend fun create(
         date: LocalDate,
-        description: String? = null,
         duration: Duration? = null,
         reminderTime: Duration? = null,
         recipe: String,
         time: LocalTime? = null,
         title: String,
+        userEmail: String
+    ): CustomMealTask
+
+    /**
+     * Creates a meal task in the database with the given parameters. Points are calculated
+     * automatically upon creation.
+     *
+     * @param date scheduled date
+     * @param duration duration
+     * @param meal meal
+     * @param reminderTime minutes before the task to send a reminder
+     * @param time scheduled time
+     * @param title title. If not provided, [Meal.name] should be used within implementation
+     * @param userEmail user email to create the task for
+     *
+     * @return created meal task
+     */
+    suspend fun create(
+        date: LocalDate,
+        duration: Duration? = null,
+        meal: Meal,
+        reminderTime: Duration? = null,
+        time: LocalTime? = null,
+        title: String? = null,
         userEmail: String
     ): MealTask
 

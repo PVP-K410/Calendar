@@ -28,10 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.model.MealTask
+import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import java.time.LocalDate
@@ -200,7 +196,7 @@ private fun TasksOfDayCounterContainer(tasks: List<Task>) {
         TasksOfDayCounter(
             Icons.Outlined.Restaurant,
             tasks,
-            MealTask::class
+            CustomMealTask::class
         )
 
         TasksOfDayCounter(
