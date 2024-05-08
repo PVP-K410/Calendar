@@ -1,5 +1,11 @@
 @file:OptIn(ExperimentalSerializationApi::class)
 
+@file:UseSerializers(
+    LocalDateSerializer::class,
+    LocalTimeSerializer::class,
+    DurationSerializer::class
+)
+
 package com.pvp.app.model
 
 import com.pvp.app.common.DurationSerializer
@@ -7,70 +13,79 @@ import com.pvp.app.common.LocalDateSerializer
 import com.pvp.app.common.LocalTimeSerializer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import kotlinx.serialization.json.JsonNames
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 
 @Serializable
-class MealTask : Task {
-
-    var recipe: String
-
-    constructor(
-        date: LocalDate,
-        description: String? = null,
-        duration: Duration? = null,
-        reminderTime: Duration? = null,
-        id: String? = null,
-        isCompleted: Boolean,
-        points: Points,
-        recipe: String,
-        time: LocalTime? = null,
-        title: String,
-        userEmail: String
-    ) : super(
-        date,
-        description,
-        duration,
-        reminderTime,
-        id,
-        isCompleted,
-        points,
-        time,
-        title,
-        userEmail
-    ) {
-        this.recipe = recipe
-    }
+class CustomMealTask(
+    override val date: LocalDate,
+    override val duration: Duration? = null,
+    override val id: String? = null,
+    override val isCompleted: Boolean,
+    override val points: Points,
+    val recipe: String? = null,
+    override val reminderTime: Duration? = null,
+    override val time: LocalTime? = null,
+    override val title: String,
+    override val userEmail: String
+) : Task() {
 
     override fun toString(): String {
-        return "MealTask(recipe='$recipe') && " + super.toString()
+        return "CustomMealTask(recipe=$recipe) && " + super.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+
+        if (javaClass != other?.javaClass) {
+            return false
+        }
+
+        if (!super.equals(other)) {
+            return false
+        }
+
+        other as CustomMealTask
+
+        return recipe == other.recipe
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+
+        result = 31 * result + (recipe?.hashCode() ?: 0)
+
+        return result
     }
 
     companion object {
 
         fun copy(
-            task: MealTask,
+            task: CustomMealTask,
             date: LocalDate = task.date,
-            description: String? = task.description,
             duration: Duration? = task.duration,
             id: String? = task.id,
             isCompleted: Boolean = task.isCompleted,
             points: Points = task.points,
-            recipe: String = task.recipe,
+            recipe: String? = task.recipe,
+            reminderTime: Duration? = task.reminderTime,
             time: LocalTime? = task.time,
             title: String = task.title,
             userEmail: String = task.userEmail
-        ): MealTask {
-            return MealTask(
+        ): CustomMealTask {
+            return CustomMealTask(
                 date = date,
-                description = description,
                 duration = duration,
                 id = id,
                 isCompleted = isCompleted,
                 points = points,
                 recipe = recipe,
+                reminderTime = reminderTime,
                 time = time,
                 title = title,
                 userEmail = userEmail
@@ -80,46 +95,96 @@ class MealTask : Task {
 }
 
 @Serializable
-class SportTask : Task {
-
-    var activity: SportActivity
-    var distance: Double? = null
-    var isDaily: Boolean = false
-
-    constructor(
-        activity: SportActivity = SportActivity.Other,
-        date: LocalDate,
-        description: String? = null,
-        distance: Double? = null,
-        duration: Duration? = null,
-        reminderTime: Duration? = null,
-        id: String? = null,
-        isCompleted: Boolean,
-        isDaily: Boolean,
-        points: Points,
-        time: LocalTime? = null,
-        title: String,
-        userEmail: String
-    ) : super(
-        date,
-        description,
-        duration,
-        reminderTime,
-        id,
-        isCompleted,
-        points,
-        time,
-        title,
-        userEmail
-    ) {
-        this.activity = activity
-        this.distance = distance
-        this.isDaily = isDaily
-    }
+class MealTask(
+    override val date: LocalDate,
+    override val duration: Duration? = null,
+    override val id: String? = null,
+    override val isCompleted: Boolean,
+    val mealId: String,
+    override val points: Points,
+    override val reminderTime: Duration? = null,
+    override val time: LocalTime? = null,
+    override val title: String,
+    override val userEmail: String
+) : Task() {
 
     override fun toString(): String {
-        return "SportTask(activity=$activity, distance=$distance, isDaily=$isDaily) && " + super.toString()
+        return "MealTask(mealId='$mealId') && " + super.toString()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+
+        if (javaClass != other?.javaClass) {
+            return false
+        }
+
+        if (!super.equals(other)) {
+            return false
+        }
+
+        other as MealTask
+
+        return mealId == other.mealId
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+
+        result = 31 * result + mealId.hashCode()
+
+        return result
+    }
+
+    companion object {
+
+        fun copy(
+            task: MealTask,
+            date: LocalDate = task.date,
+            duration: Duration? = task.duration,
+            id: String? = task.id,
+            isCompleted: Boolean = task.isCompleted,
+            mealId: String = task.mealId,
+            points: Points = task.points,
+            reminderTime: Duration? = task.reminderTime,
+            time: LocalTime? = task.time,
+            title: String = task.title,
+            userEmail: String = task.userEmail
+        ): MealTask {
+            return MealTask(
+                date = date,
+                duration = duration,
+                id = id,
+                isCompleted = isCompleted,
+                mealId = mealId,
+                points = points,
+                reminderTime = reminderTime,
+                time = time,
+                title = title,
+                userEmail = userEmail
+            )
+        }
+    }
+}
+
+@Serializable
+class SportTask(
+    val activity: SportActivity = SportActivity.Other,
+    override val date: LocalDate,
+    val description: String? = null,
+    val distance: Double? = null,
+    override val duration: Duration? = null,
+    override val id: String? = null,
+    override val isCompleted: Boolean,
+    val isDaily: Boolean = false,
+    override val points: Points,
+    override val reminderTime: Duration? = null,
+    override val time: LocalTime? = null,
+    override val title: String,
+    override val userEmail: String
+) : Task() {
 
     companion object {
 
@@ -134,6 +199,7 @@ class SportTask : Task {
             isCompleted: Boolean = task.isCompleted,
             isDaily: Boolean = task.isDaily,
             points: Points = task.points,
+            reminderTime: Duration? = task.reminderTime,
             time: LocalTime? = task.time,
             title: String = task.title,
             userEmail: String = task.userEmail
@@ -148,6 +214,7 @@ class SportTask : Task {
                 isCompleted = isCompleted,
                 isDaily = isDaily,
                 points = points,
+                reminderTime = reminderTime,
                 time = time,
                 title = title,
                 userEmail = userEmail
@@ -157,26 +224,134 @@ class SportTask : Task {
 }
 
 @Serializable
-open class Task(
-    @JsonNames("scheduledAt")
-    @Serializable(LocalDateSerializer::class)
-    var date: LocalDate,
-    var description: String? = null,
-    @Serializable(DurationSerializer::class)
-    var duration: Duration? = null,
-    @Serializable(DurationSerializer::class)
-    var reminderTime: Duration? = null,
-    val id: String? = null,
-    var isCompleted: Boolean,
-    var points: Points,
-    @Serializable(LocalTimeSerializer::class)
-    var time: LocalTime? = null,
-    var title: String,
-    val userEmail: String
-) {
+class GeneralTask(
+    override val date: LocalDate,
+    val description: String?,
+    override val duration: Duration? = null,
+    override val id: String? = null,
+    override val isCompleted: Boolean,
+    override val points: Points,
+    override val reminderTime: Duration? = null,
+    override val time: LocalTime? = null,
+    override val title: String,
+    override val userEmail: String
+) : Task() {
 
     override fun toString(): String {
-        return "Task(date=$date, description=$description, duration=$duration, id=$id, isCompleted=$isCompleted, points=$points, time=$time, title='$title', userEmail='$userEmail')"
+        return "GeneralTask(description=$description) && " + super.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+
+        if (javaClass != other?.javaClass) {
+            return false
+        }
+
+        if (!super.equals(other)) {
+            return false
+        }
+
+        other as GeneralTask
+
+        return description == other.description
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+
+        result = 31 * result + (description?.hashCode() ?: 0)
+
+        return result
+    }
+
+    companion object {
+
+        fun copy(
+            task: GeneralTask,
+            date: LocalDate = task.date,
+            description: String? = task.description,
+            duration: Duration? = task.duration,
+            id: String? = task.id,
+            isCompleted: Boolean = task.isCompleted,
+            points: Points = task.points,
+            reminderTime: Duration? = task.reminderTime,
+            time: LocalTime? = task.time,
+            title: String = task.title,
+            userEmail: String = task.userEmail
+        ): GeneralTask {
+            return GeneralTask(
+                date = date,
+                description = description,
+                duration = duration,
+                id = id,
+                isCompleted = isCompleted,
+                points = points,
+                reminderTime = reminderTime,
+                time = time,
+                title = title,
+                userEmail = userEmail
+            )
+        }
+    }
+}
+
+@Serializable
+abstract class Task {
+
+    @JsonNames("scheduledAt")
+    abstract val date: LocalDate
+
+    abstract val duration: Duration?
+    abstract val id: String?
+    abstract val isCompleted: Boolean
+    abstract val points: Points
+    abstract val reminderTime: Duration?
+    abstract val time: LocalTime?
+    abstract val title: String
+    abstract val userEmail: String
+
+    override fun toString(): String {
+        return "Task(date=$date, duration=$duration, id=$id, isCompleted=$isCompleted, points=$points, time=$time, title='$title', userEmail='$userEmail')"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+
+        if (javaClass != other?.javaClass) {
+            return false
+        }
+
+        other as Task
+
+        return date == other.date &&
+                duration == other.duration &&
+                id == other.id &&
+                isCompleted == other.isCompleted &&
+                points == other.points &&
+                reminderTime == other.reminderTime &&
+                time == other.time &&
+                title == other.title &&
+                userEmail == other.userEmail
+    }
+
+    override fun hashCode(): Int {
+        var result = date.hashCode()
+
+        result = 31 * result + (duration?.hashCode() ?: 0)
+        result = 31 * result + (id?.hashCode() ?: 0)
+        result = 31 * result + isCompleted.hashCode()
+        result = 31 * result + points.hashCode()
+        result = 31 * result + (reminderTime?.hashCode() ?: 0)
+        result = 31 * result + (time?.hashCode() ?: 0)
+        result = 31 * result + title.hashCode()
+        result = 31 * result + userEmail.hashCode()
+
+        return result
     }
 
     companion object {
@@ -184,28 +359,70 @@ open class Task(
         fun copy(
             task: Task,
             date: LocalDate = task.date,
-            description: String? = task.description,
             duration: Duration? = task.duration,
-            reminderTime: Duration? = task.reminderTime,
             id: String? = task.id,
             isCompleted: Boolean = task.isCompleted,
             points: Points = task.points,
+            reminderTime: Duration? = task.reminderTime,
             time: LocalTime? = task.time,
             title: String = task.title,
             userEmail: String = task.userEmail
         ): Task {
-            return Task(
-                date = date,
-                description = description,
-                duration = duration,
-                reminderTime = reminderTime,
-                id = id,
-                isCompleted = isCompleted,
-                points = points,
-                time = time,
-                title = title,
-                userEmail = userEmail
-            )
+            return when (task) {
+                is CustomMealTask -> CustomMealTask.copy(
+                    task,
+                    date = date,
+                    duration = duration,
+                    id = id,
+                    isCompleted = isCompleted,
+                    points = points,
+                    reminderTime = reminderTime,
+                    time = time,
+                    title = title,
+                    userEmail = userEmail
+                )
+
+                is MealTask -> MealTask.copy(
+                    task,
+                    date = date,
+                    duration = duration,
+                    id = id,
+                    isCompleted = isCompleted,
+                    points = points,
+                    reminderTime = reminderTime,
+                    time = time,
+                    title = title,
+                    userEmail = userEmail
+                )
+
+                is SportTask -> SportTask.copy(
+                    task,
+                    date = date,
+                    duration = duration,
+                    id = id,
+                    isCompleted = isCompleted,
+                    points = points,
+                    reminderTime = reminderTime,
+                    time = time,
+                    title = title,
+                    userEmail = userEmail
+                )
+
+                is GeneralTask -> GeneralTask.copy(
+                    task,
+                    date = date,
+                    duration = duration,
+                    id = id,
+                    isCompleted = isCompleted,
+                    points = points,
+                    reminderTime = reminderTime,
+                    time = time,
+                    title = title,
+                    userEmail = userEmail
+                )
+
+                else -> error("Unsupported task type for copy operation")
+            }
         }
     }
 }
