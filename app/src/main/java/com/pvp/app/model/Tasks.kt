@@ -186,6 +186,42 @@ class SportTask(
     override val userEmail: String
 ) : Task() {
 
+    override fun toString(): String {
+        return "SportTask(activity=$activity, description=$description, distance=$distance, isDaily=$isDaily) && " + super.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+
+        if (javaClass != other?.javaClass) {
+            return false
+        }
+
+        if (!super.equals(other)) {
+            return false
+        }
+
+        other as SportTask
+
+        return activity == other.activity &&
+                description == other.description &&
+                distance == other.distance &&
+                isDaily == other.isDaily
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+
+        result = 31 * result + activity.hashCode()
+        result = 31 * result + (description?.hashCode() ?: 0)
+        result = 31 * result + (distance?.hashCode() ?: 0)
+        result = 31 * result + isDaily.hashCode()
+
+        return result
+    }
+
     companion object {
 
         fun copy(
