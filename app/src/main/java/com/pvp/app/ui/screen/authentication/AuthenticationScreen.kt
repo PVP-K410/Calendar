@@ -134,6 +134,7 @@ private fun Authentication(
 
         Text(
             text = textBegin,
+            color = Color.Black,
             modifier = Modifier.align(Alignment.Center),
             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
             textDecoration = TextDecoration.Underline
