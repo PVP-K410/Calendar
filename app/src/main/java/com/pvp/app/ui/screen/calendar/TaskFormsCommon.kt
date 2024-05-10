@@ -44,6 +44,79 @@ import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
 
 @Composable
+private fun ButtonDelete(onDelete: () -> Unit) {
+    ButtonConfirm(
+        border = BorderStroke(
+            1.dp,
+            Color.Red
+        ),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+        content = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    contentDescription = "Delete task icon",
+                    imageVector = Icons.Outlined.Delete
+                )
+
+                Text(
+                    style = MaterialTheme.typography.titleSmall,
+                    text = "Delete"
+                )
+            }
+        },
+        confirmationButtonContent = { Text("Delete") },
+        confirmationDescription = { Text("If the task is deleted, it cannot be recovered") },
+        confirmationTitle = { Text("Are you sure you want to delete this task?") },
+        onConfirm = onDelete,
+        shape = MaterialTheme.shapes.extraLarge
+    )
+}
+
+@Composable
+fun ButtonMerge(
+    activity: SportActivity,
+    dateTime: LocalDateTime,
+    description: String,
+    distance: Double?,
+    duration: Duration?,
+    isCreateForm: Boolean,
+    isEnabled: Boolean,
+    model: TaskViewModel,
+    onClose: () -> Unit,
+    reminderTime: Duration?,
+    task: Task?,
+    taskClass: KClass<out Task>,
+    title: String
+) {
+    Button(
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = MaterialTheme.shapes.extraLarge,
+        onClick = {
+            mergeTask(
+                activity = activity,
+                dateTime = dateTime,
+                description = description,
+                distance = distance,
+                duration = duration,
+                isCreateForm = isCreateForm,
+                model = model,
+                onClose = onClose,
+                reminderTime = reminderTime,
+                targetClass = taskClass,
+                task = task,
+                title = title
+            )
+        },
+        enabled = isEnabled
+    ) {
+        Text(if (isCreateForm) "Create" else "Update")
+    }
+}
+
+@Composable
 fun TaskCommonForm(
     model: TaskViewModel = hiltViewModel(),
     date: LocalDateTime? = null,
@@ -61,13 +134,10 @@ fun TaskCommonForm(
     var duration by remember { mutableStateOf(task?.duration) }
     var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
     var reminderTime by remember { mutableStateOf(task?.reminderTime) }
+    val isFormValid by remember { derivedStateOf { title.isNotBlank() } }
 
     val isDescriptionSupported = remember(task) {
-        taskClass in listOf(
-            CustomMealTask::class,
-            GeneralTask::class,
-            SportTask::class
-        )
+        taskClass.isCustomMeal() || taskClass.isGeneral() || taskClass.isSport()
     }
 
     var description by remember(isDescriptionSupported) {
@@ -76,7 +146,7 @@ fun TaskCommonForm(
                 is CustomMealTask -> task.recipe
                 is GeneralTask -> task.description
                 is SportTask -> task.description
-                else -> ""
+                else -> null
             } ?: ""
         )
     }
@@ -94,14 +164,10 @@ fun TaskCommonForm(
                     task.date,
                     task.time
                 )
-            } else date ?: LocalDateTime.now()
+            } else {
+                date ?: LocalDateTime.now()
+            }
         )
-    }
-
-    val isFormValid by remember {
-        derivedStateOf {
-            title.isNotEmpty()
-        }
     }
 
     Column(
@@ -120,13 +186,13 @@ fun TaskCommonForm(
 
         if (isDescriptionSupported) {
             EditableTextItem(
-                label = if (taskClass == CustomMealTask::class) "Recipe" else "Description",
+                label = if (taskClass.isCustomMeal()) "Recipe" else "Description",
                 value = description,
                 onValueChange = { description = it }
             )
         }
 
-        if (targetClass == SportTask::class) {
+        if (targetClass.isSport()) {
             EditableSportActivityItem(
                 label = "Activity",
                 value = activity,
@@ -134,7 +200,7 @@ fun TaskCommonForm(
             )
         }
 
-        if (taskClass == SportTask::class && activity.supportsDistanceMetrics) {
+        if (taskClass.isSport() && activity.supportsDistanceMetrics) {
             EditableDistanceItem(
                 label = "Distance",
                 value = distance,
@@ -142,9 +208,7 @@ fun TaskCommonForm(
                 rangeMeters = model.rangeMeters,
                 onValueChange = { distance = it }
             )
-        }
-
-        if (taskClass != SportTask::class || !activity.supportsDistanceMetrics) {
+        } else {
             EditablePickerItem(
                 label = "Duration",
                 value = duration,
@@ -156,11 +220,10 @@ fun TaskCommonForm(
         }
 
         EditableTimeItem(
-            label = "Scheduled at",
+            label = "Scheduled At",
             value = dateTime.toLocalTime(),
             valueDisplay = if (
-                (taskClass == SportTask::class &&
-                        activity.supportsDistanceMetrics) ||
+                (taskClass.isSport() && activity.supportsDistanceMetrics) ||
                 duration == null
             ) {
                 dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
@@ -200,97 +263,28 @@ fun TaskCommonForm(
             horizontalArrangement = if (isCreateForm) Arrangement.Center else Arrangement.SpaceBetween
         ) {
             if (!isCreateForm) {
-                ButtonConfirm(
-                    border = BorderStroke(
-                        1.dp,
-                        Color.Red
-                    ),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
-                    content = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                contentDescription = "Delete task icon",
-                                imageVector = Icons.Outlined.Delete
-                            )
-
-                            Text(
-                                style = MaterialTheme.typography.titleSmall,
-                                text = "Delete"
-                            )
-                        }
-                    },
-                    confirmationButtonContent = { Text("Delete") },
-                    confirmationDescription = { Text("If the task is deleted, it cannot be recovered") },
-                    confirmationTitle = { Text("Are you sure you want to delete this task?") },
-                    onConfirm = {
-                        model.remove(task!!)
-
-                        onClose()
-                    },
-                    shape = MaterialTheme.shapes.extraLarge
-                )
-            }
-
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = MaterialTheme.shapes.extraLarge,
-                onClick = {
-                    if (isCreateForm) {
-                        when (targetClass) {
-                            SportTask::class -> model.create(
-                                date = dateTime.toLocalDate(),
-                                activity = activity,
-                                description = description,
-                                distance = distance,
-                                duration = duration,
-                                reminderTime = reminderTime,
-                                time = dateTime.toLocalTime(),
-                                title = title
-                            )
-
-                            CustomMealTask::class -> model.create(
-                                date = dateTime.toLocalDate(),
-                                duration = duration,
-                                reminderTime = reminderTime,
-                                recipe = description,
-                                time = dateTime.toLocalTime(),
-                                title = title
-                            )
-
-                            else -> model.create(
-                                date = dateTime.toLocalDate(),
-                                description = description,
-                                duration = duration,
-                                reminderTime = reminderTime,
-                                time = dateTime.toLocalTime(),
-                                title = title
-                            )
-                        }
-                    } else {
-                        model.update(
-                            { task ->
-                                updateTask(
-                                    dateTime = dateTime,
-                                    description = description,
-                                    duration = duration,
-                                    reminderTime = reminderTime,
-                                    task = task,
-                                    title = title
-                                )
-                            },
-                            task!!
-                        )
-                    }
+                ButtonDelete {
+                    model.remove(task!!)
 
                     onClose()
-                },
-                enabled = isFormValid
-            ) {
-                Text(if (isCreateForm) "Create" else "Update")
+                }
             }
+
+            ButtonMerge(
+                activity = activity,
+                dateTime = dateTime,
+                description = description,
+                distance = distance,
+                duration = duration,
+                isCreateForm = isCreateForm,
+                isEnabled = isFormValid,
+                model = model,
+                onClose = onClose,
+                reminderTime = reminderTime,
+                task = task,
+                taskClass = taskClass,
+                title = title
+            )
         }
     }
 }
