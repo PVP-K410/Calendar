@@ -60,9 +60,8 @@ fun CalendarScreen(modifier: Modifier) {
         }
 
         TaskCreateSheet(
-            onClose = toggle,
             isOpen = isOpen,
-            shouldCloseOnSubmit = true
+            onClose = toggle
         )
     }
 }

@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import java.time.Duration
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -246,8 +246,8 @@ fun EditableInfoItem(
 @Composable
 fun EditableDateItem(
     label: String,
-    value: LocalDateTime,
-    onValueChange: (LocalDateTime) -> Unit
+    value: LocalDate,
+    onValueChange: (LocalDate) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -276,7 +276,7 @@ fun EditableDateItem(
             icon = Icons.Outlined.Edit,
             iconDescription = "Edit info item icon button",
             iconSize = 30.dp,
-            onDateSelected = onValueChange
+            onDateSelected = { onValueChange(it.toLocalDate()) },
         )
     }
 }
@@ -435,7 +435,12 @@ fun EditableTimeItem(
             )
         },
         onConfirm = {
-            onValueChange(LocalTime.of(editingHour.value, editingMinute.value))
+            onValueChange(
+                LocalTime.of(
+                    editingHour.value,
+                    editingMinute.value
+                )
+            )
         },
         onDismiss = { },
         value = {

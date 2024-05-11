@@ -201,7 +201,7 @@ class TaskServiceImpl @Inject constructor(
         date: LocalDate,
         duration: Duration?,
         reminderTime: Duration?,
-        recipe: String,
+        recipe: String?,
         time: LocalTime?,
         title: String,
         userEmail: String
@@ -232,6 +232,46 @@ class TaskServiceImpl @Inject constructor(
         return merge(
             database,
             "Custom meal task creation failed",
+            identifier,
+            task
+        )
+    }
+
+    override suspend fun create(
+        date: LocalDate,
+        duration: Duration?,
+        mealId: String,
+        reminderTime: Duration?,
+        time: LocalTime?,
+        title: String,
+        userEmail: String
+    ): MealTask {
+        val task = run {
+            val task = MealTask(
+                date = date,
+                duration = duration,
+                id = null,
+                isCompleted = false,
+                mealId = mealId,
+                points = Points(),
+                reminderTime = reminderTime,
+                time = time?.cleanEnd(),
+                title = title,
+                userEmail = userEmail
+            )
+
+            MealTask.copy(
+                task,
+                points = task.points.copy(
+                    isExpired = task.date.isBefore(LocalDate.now()),
+                    value = pointService.calculate(task)
+                )
+            )
+        }
+
+        return merge(
+            database,
+            "Meal task creation failed",
             identifier,
             task
         )
@@ -271,7 +311,7 @@ class TaskServiceImpl @Inject constructor(
 
         return merge(
             database,
-            "Meal task creation failed",
+            "Custom meal task creation failed",
             identifier,
             task
         )

@@ -58,13 +58,13 @@ class TaskViewModel @Inject constructor(
         }
 
     /**
-     * Create a meal task for the user with the given parameters
+     * Create a custom meal task for the user with the given parameters
      */
     fun create(
         date: LocalDate,
         duration: Duration? = null,
         reminderTime: Duration? = null,
-        recipe: String,
+        recipe: String?,
         time: LocalTime? = null,
         title: String
     ) {
@@ -78,6 +78,36 @@ class TaskViewModel @Inject constructor(
                             duration,
                             reminderTime,
                             recipe,
+                            time,
+                            title,
+                            state.user.email
+                        )
+                        .postNotification()
+                }
+        }
+    }
+
+    /**
+     * Create a meal task for the user with the given parameters
+     */
+    fun create(
+        date: LocalDate,
+        duration: Duration? = null,
+        mealId: String,
+        reminderTime: Duration? = null,
+        time: LocalTime? = null,
+        title: String
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            state
+                .first()
+                .let { state ->
+                    taskService
+                        .create(
+                            date,
+                            duration,
+                            mealId,
+                            reminderTime,
                             time,
                             title,
                             state.user.email

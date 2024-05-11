@@ -113,13 +113,9 @@ fun Week(
         }
 
         TaskCreateSheet(
-            date = date.atTime(
-                0,
-                0
-            ),
+            date = date,
             isOpen = stateShowSheet,
-            onClose = { stateShowSheet = false },
-            shouldCloseOnSubmit = true
+            onClose = { stateShowSheet = false }
         )
     }
 }

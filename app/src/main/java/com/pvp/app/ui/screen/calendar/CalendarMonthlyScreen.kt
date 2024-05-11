@@ -37,8 +37,6 @@ import com.pvp.app.common.DateUtil
 import com.pvp.app.common.DateUtil.getDisplayName
 import com.pvp.app.model.Task
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.YearMonth
 
 @Composable
@@ -391,12 +389,8 @@ private fun TaskCreateSheet(
     onClose: (Boolean) -> Unit
 ) {
     TaskCreateSheet(
-        date = LocalDateTime.of(
-            selectedDate,
-            LocalTime.now()
-        ),
-        onClose = { onClose(false) },
+        date = selectedDate,
         isOpen = true,
-        shouldCloseOnSubmit = true
+        onClose = { onClose(false) }
     )
 }

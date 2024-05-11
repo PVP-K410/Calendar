@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.pvp.app.ui.common
 
 import android.content.Context
@@ -37,12 +39,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -297,7 +302,10 @@ fun Experience(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun InfoTooltip(
     tooltipText: String,
@@ -340,6 +348,38 @@ fun InfoTooltip(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = "Autocompletion of activity"
             )
+        }
+    }
+}
+
+@Composable
+fun TabSelector(
+    modifier: Modifier = Modifier,
+    onSelect: (Int) -> Unit,
+    tabs: List<String>
+) {
+    var tab by remember { mutableIntStateOf(0) }
+
+    PrimaryTabRow(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        modifier = modifier,
+        selectedTabIndex = tab
+    ) {
+        tabs.forEachIndexed { index, title ->
+            Tab(
+                modifier = Modifier.height(32.dp),
+                onClick = {
+                    tab = index
+
+                    onSelect(index)
+                },
+                selected = tab == index,
+            ) {
+                Text(
+                    style = MaterialTheme.typography.labelLarge,
+                    text = title
+                )
+            }
         }
     }
 }

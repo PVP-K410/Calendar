@@ -50,17 +50,13 @@ fun TaskCard(
 ) {
     var checked = task.isCompleted
     var showDialog by remember { mutableStateOf(false) }
-
     val isTodayDailyTask = task is SportTask && task.isDaily && task.date == LocalDate.now()
 
-    if (showDialog) {
-        TaskEditSheet(
-            task,
-            onClose = {
-                showDialog = false
-            }
-        )
-    }
+    TaskEditSheet(
+        isOpen = showDialog,
+        onClose = { showDialog = false },
+        task = task
+    )
 
     Box(
         modifier = Modifier
@@ -94,8 +90,8 @@ fun TaskCard(
                 if (task.date <= LocalDate.now()) {
                     Checkbox(
                         checked = checked,
-                        enabled = isTodayDailyTask || (task is SportTask && !task.isDaily),
                         colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface),
+                        enabled = isTodayDailyTask || (task is SportTask && !task.isDaily),
                         modifier = Modifier
                             .size(36.dp)
                             .align(CenterVertically),
