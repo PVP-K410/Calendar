@@ -5,12 +5,14 @@ package com.pvp.app.ui.screen.friends
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.api.ActivityService
 import com.pvp.app.api.DecorationService
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.common.FlowUtil.firstOr
 import com.pvp.app.common.FlowUtil.flattenFlow
+import com.pvp.app.model.ActivityEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,6 +33,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
+    private val activityService: ActivityService,
     private val decorationService: DecorationService,
     private val friendService: FriendService,
     private val userService: UserService,
@@ -222,6 +225,25 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
+    private suspend fun getWeeklyActivityEntry(email: String): ActivityEntry {
+        val activityEntries = activityService
+            .get(
+                Pair(
+                    LocalDate.now().minusDays(7),
+                    LocalDate.now()
+                ),
+                email
+            )
+            .firstOrNull()
+            ?: emptyList()
+
+        return ActivityEntry(
+            email = email,
+            calories = activityEntries.sumOf { it.calories },
+            steps = activityEntries.sumOf { it.steps }
+        )
+    }
+
     /**
      * Updates the [stateFriend] state with the selected friend's details.
      */
@@ -240,6 +262,8 @@ class FriendsViewModel @Inject constructor(
 
                 return@launch
             }
+
+            val activity = getWeeklyActivityEntry(friendEmail)
 
             val tasks = taskService
                 .get(friendEmail)
@@ -278,11 +302,13 @@ class FriendsViewModel @Inject constructor(
 
             _stateFriend.value = FriendState(
                 details = state.friendObject.friends.first { friend -> friend.email == friendEmail },
+                calories = activity.calories,
                 entry = state.friends
                     .find { friend -> friend.user.email == friendEmail }
                     ?: FriendEntry(),
                 friendsMutual = friends,
                 state = FriendScreenState.Finished,
+                steps = activity.steps,
                 tasksCompleted = tasks
             )
 
