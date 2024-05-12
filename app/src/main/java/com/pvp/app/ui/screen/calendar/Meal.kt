@@ -1,83 +1,232 @@
 package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pvp.app.model.Meal
 import com.pvp.app.ui.common.AsyncImage
+import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.InfoTooltip
 
 @Composable
-fun MealCard(meal: Meal) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        AsyncImage(
-            contentDescription = "${meal.name} representation image",
-            modifier = Modifier
-                .size(
-                    width = 300.dp,
-                    height = 200.dp
-                )
-                .background(Color.Black),
-            url = meal.image
-        )
+fun MealCard(
+    buttonContent: (@Composable RowScope.() -> Unit)? = null,
+    buttonEnabled: Boolean = true,
+    meal: Meal,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    val background = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.65f)
+    val onBackground = MaterialTheme.colorScheme.onTertiary
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .background(Color.Black.copy(alpha = 0.5f))
-                .padding(16.dp)
-        ) {
-            Column {
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(),
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                contentDescription = "${meal.name} representation image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                url = meal.image
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color.Black
+                            )
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
                 Text(
-                    text = meal.name,
+                    color = onBackground,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                    modifier = Modifier.width(120.dp),
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color.White
+                    text = meal.name
                 )
 
-                Text(
-                    text = "${meal.readyInMinutes} min",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White
-                )
-
-                Text(
-                    text = "${meal.servings} servings",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White
-                )
-            }
-
-            Column {
                 with(meal.nutrition.caloricBreakdown) {
                     Text(
-                        text = "Protein: $percentProtein",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White
+                        color = onBackground,
+                        text = "Carbs: $percentCarbs %"
                     )
 
                     Text(
-                        text = "Fat: $percentFat",
+                        color = onBackground,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White
+                        text = "Fat: $percentFat %"
                     )
 
                     Text(
-                        text = "Carbs: $percentCarbs",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White
+                        color = onBackground,
+                        text = "Protein: $percentProtein %"
                     )
                 }
             }
+
+            if (buttonContent != null) {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = background,
+                        contentColor = onBackground
+                    ),
+                    enabled = buttonEnabled,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.BottomEnd),
+                    onClick = onClick,
+                    shape = CircleShape
+                ) {
+                    buttonContent()
+                }
+            }
+
+            MealCardToolTip(
+                colorContainer = background,
+                colorContent = onBackground,
+                meal = meal
+            )
         }
     }
+}
+
+@Composable
+private fun BoxScope.MealCardToolTip(
+    colorContainer: Color,
+    colorContent: Color,
+    meal: Meal
+) {
+    Row(
+        horizontalArrangement = Arrangement.End,
+        modifier = Modifier.align(Alignment.TopEnd),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        InfoTooltip(
+            iconTint = colorContent,
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .background(colorContainer),
+            tooltip = {
+                Column(
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(colorContainer)
+                        .padding(8.dp)
+                ) {
+                    CompositionLocalProvider(LocalContentColor provides colorContent) {
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleSmall,
+                            text = meal.name
+                        )
+
+                        Spacer(modifier = Modifier.size(8.dp))
+
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleSmall,
+                            text = "Servings Breakdown"
+                        )
+
+                        TextBody("${meal.servings} servings")
+
+                        with(meal.nutrition.weightPerServing) {
+                            TextBody("$amount $unit per serving")
+                        }
+
+                        val calories = meal.nutrition.nutrients.firstOrNull {
+                            it.name.equals(
+                                "Calories",
+                                ignoreCase = true
+                            )
+                        }?.amount
+
+                        if (calories != null) {
+                            TextBody("$calories calories per serving")
+                        }
+
+                        Spacer(modifier = Modifier.size(8.dp))
+
+                        Text(
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleSmall,
+                            text = "Ingredients"
+                        )
+
+                        val ingredients = meal.recipe
+                            .first().steps
+                            .flatMap { it.ingredients }
+                            .distinct()
+                            .sorted()
+                            .map { it.capitalize(Locale.current) }
+
+                        if (ingredients.size < 5) {
+                            ingredients.forEach {
+                                TextBody(it)
+                            }
+                        } else {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ingredients
+                                    .chunked(5)
+                                    .forEach { column ->
+                                        Column {
+                                            column.forEach {
+                                                TextBody(it)
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
+            })
+    }
+}
+
+@Composable
+private fun TextBody(text: String) {
+    Text(
+        style = MaterialTheme.typography.bodySmall,
+        text = text
+    )
 }

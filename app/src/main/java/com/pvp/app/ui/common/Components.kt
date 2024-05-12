@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class
+)
 
 package com.pvp.app.ui.common
 
@@ -37,6 +40,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
@@ -57,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -75,6 +80,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AsyncImage(
     contentDescription: String? = null,
+    contentScale: ContentScale = ContentScale.Fit,
     context: Context = LocalContext.current,
     modifier: Modifier = Modifier,
     size: Size = Size.ORIGINAL,
@@ -83,6 +89,7 @@ fun AsyncImage(
 ) {
     SubcomposeAsyncImage(
         contentDescription = contentDescription,
+        contentScale = contentScale,
         model = requestImage(
             context = context,
             size = size,
@@ -155,19 +162,12 @@ fun Dialog(
 fun FoldableContent(
     content: @Composable ColumnScope.() -> Unit,
     header: @Composable RowScope.() -> Unit,
-    isFoldedInitially: Boolean = false
+    isFoldedInitially: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     var folded by remember { mutableStateOf(isFoldedInitially) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 8.dp)
-            .background(
-                MaterialTheme.colorScheme.surfaceContainer,
-                MaterialTheme.shapes.medium
-            )
-    ) {
+    Column(modifier) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
@@ -197,7 +197,8 @@ fun FoldableContent(
 fun FoldableContent(
     content: @Composable ColumnScope.() -> Unit,
     header: String,
-    isFoldedInitially: Boolean = false
+    isFoldedInitially: Boolean = false,
+    modifier: Modifier = Modifier
 ) = FoldableContent(
     content = content,
     header = {
@@ -206,7 +207,8 @@ fun FoldableContent(
             text = header
         )
     },
-    isFoldedInitially = isFoldedInitially
+    isFoldedInitially = isFoldedInitially,
+    modifier = modifier
 )
 
 @Composable
@@ -221,7 +223,7 @@ fun ProgressIndicator(
     ) {
         CircularProgressIndicator(
             color = indicatorColor,
-            modifier = Modifier.fillMaxWidth(0.5f)
+            modifier = Modifier.fillMaxSize(0.5f)
         )
     }
 }
@@ -302,39 +304,47 @@ fun Experience(
     }
 }
 
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalMaterial3Api::class
-)
 @Composable
 fun InfoTooltip(
     tooltipText: String,
     iconSize: Dp = 24.dp
+) = InfoTooltip(
+    iconSize = iconSize,
+    tooltip = {
+        Text(
+            text = tooltipText,
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.primary)
+                .border(
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline
+                    ),
+                    shape = MaterialTheme.shapes.medium,
+                )
+                .height(40.dp)
+                .padding(8.dp)
+                .wrapContentSize(Alignment.Center),
+            color = Color.White
+        )
+    }
+)
+
+@Composable
+fun InfoTooltip(
+    iconSize: Dp = 24.dp,
+    iconTint: Color = LocalContentColor.current,
+    modifier: Modifier = Modifier,
+    tooltip: @Composable () -> Unit
 ) {
     val tooltipState = rememberBasicTooltipState()
     val scope = rememberCoroutineScope()
 
     BasicTooltipBox(
+        modifier = modifier,
         positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
-        tooltip = {
-            Text(
-                text = tooltipText,
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .border(
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.outline
-                        ),
-                        shape = MaterialTheme.shapes.medium,
-                    )
-                    .height(40.dp)
-                    .padding(8.dp)
-                    .wrapContentSize(Alignment.Center),
-                color = Color.White
-            )
-        },
+        tooltip = tooltip,
         state = tooltipState
     ) {
         IconButton(
@@ -346,7 +356,8 @@ fun InfoTooltip(
                     .size(iconSize)
                     .padding(horizontal = 4.dp),
                 imageVector = Icons.Outlined.Info,
-                contentDescription = "Autocompletion of activity"
+                contentDescription = "Additional information",
+                tint = iconTint
             )
         }
     }

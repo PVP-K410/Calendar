@@ -11,14 +11,7 @@ interface MealService : DocumentsCollection {
     /**
      * @return a flow of all meals in the database.
      */
-    suspend fun get(): Flow<List<Meal>>
-
-    /**
-     * @param query Query to search for.
-     *
-     * @return a flow of meals that match the given [query] in their name or ingredients.
-     */
-    suspend fun get(query: String): Flow<List<Meal>>
+    fun get(): Flow<List<Meal>>
 
     /**
      * Merges the given [meal] into the database.

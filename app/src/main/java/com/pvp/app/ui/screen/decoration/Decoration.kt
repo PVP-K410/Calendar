@@ -140,7 +140,8 @@ fun DecorationCards(
                     }
                 }
             },
-            header = type.toString()
+            header = type.toString(),
+            modifier = Modifier.padding(8.dp)
         )
 
         if (index < holders.size - 1) {

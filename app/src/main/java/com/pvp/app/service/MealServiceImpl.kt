@@ -15,24 +15,9 @@ class MealServiceImpl @Inject constructor(
     private val database: FirebaseFirestore
 ) : MealService {
 
-    override suspend fun get(): Flow<List<Meal>> {
+    override fun get(): Flow<List<Meal>> {
         return database
             .collection(identifier)
-            .snapshots()
-            .mapLatest { snapshot ->
-                snapshot.documents.mapNotNull { document ->
-                    document.toObject(Meal::class.java)
-                }
-            }
-    }
-
-    override suspend fun get(query: String): Flow<List<Meal>> {
-        return database
-            .collection(identifier)
-            .whereEqualTo(
-                Meal::name.name,
-                query
-            )
             .snapshots()
             .mapLatest { snapshot ->
                 snapshot.documents.mapNotNull { document ->

@@ -262,7 +262,7 @@ class SportTask(
 @Serializable
 class GeneralTask(
     override val date: LocalDate,
-    val description: String?,
+    val description: String? = null,
     override val duration: Duration? = null,
     override val id: String? = null,
     override val isCompleted: Boolean,
