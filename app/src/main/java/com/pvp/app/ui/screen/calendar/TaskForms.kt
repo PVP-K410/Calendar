@@ -89,7 +89,7 @@ fun TaskCreateSheet(
                 tabs = listOf(
                     "General",
                     "Meal",
-                    "Our Meals",
+                    "Set Meals",
                     "Sport"
                 )
             )
