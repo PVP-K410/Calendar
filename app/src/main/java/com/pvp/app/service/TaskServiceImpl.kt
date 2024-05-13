@@ -5,6 +5,7 @@ import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
+import com.pvp.app.api.MealService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
@@ -40,6 +41,7 @@ class TaskServiceImpl @Inject constructor(
     private val database: FirebaseFirestore,
     private val exerciseService: ExerciseService,
     private val experienceService: ExperienceService,
+    private val mealService: MealService,
     private val pointService: PointService,
     private val userService: UserService
 ) : TaskService {
@@ -367,7 +369,20 @@ class TaskServiceImpl @Inject constructor(
             .map { qs ->
                 qs.documents
                     .filter { it.exists() }
-                    .mapNotNull { d -> d.data?.let { decodeByType(it) } }
+                    .mapNotNull { d ->
+                        val task = d.data?.let { decodeByType(it) }
+
+                        if (task is MealTask) {
+                            return@mapNotNull MealTask.copy(
+                                task,
+                                mael = mealService
+                                    .get(task.mealId)
+                                    .first()
+                            )
+                        }
+
+                        task
+                    }
             }
     }
 

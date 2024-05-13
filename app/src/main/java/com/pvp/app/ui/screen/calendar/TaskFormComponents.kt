@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
@@ -23,7 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +52,7 @@ import com.pvp.app.ui.common.EditableTextItem
 import com.pvp.app.ui.common.EditableTimeItem
 import com.pvp.app.ui.common.FoldableContent
 import com.pvp.app.ui.common.pixelsToDp
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 
 @Composable
@@ -261,7 +267,7 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
                 if (ingredients.size < 5) {
                     ingredients.forEach {
                         Text(
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodyMedium,
                             text = it
                         )
                     }
@@ -334,9 +340,14 @@ fun TaskFormFieldMealCards(
     query: String,
     state: TaskFormState.Meal
 ) {
+    var clickEnabled by remember(state) { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+    val stateRow = rememberLazyListState()
+
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        state = stateRow
     ) {
         if (meals.isEmpty()) {
             item {
@@ -349,40 +360,33 @@ fun TaskFormFieldMealCards(
             return@LazyRow
         }
 
-        items(meals) {
-            MealCard(
-                buttonContent = {
-                    if (state.meal != it) {
-                        Text(
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.labelLarge,
-                            text = "Select"
-                        )
-                    } else {
-                        Icon(
-                            contentDescription = "Meal selected icon",
-                            imageVector = Icons.Outlined.Check,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .shadow(
-                                    4.dp,
-                                    MaterialTheme.shapes.medium
-                                ),
-                            tint = MaterialTheme.colorScheme.onTertiary
-                        )
-                    }
-                },
-                buttonEnabled = state.meal != it,
+        if (state.meal != null) {
+            item {
+                TaskFormMealCard(
+                    buttonEnabled = false,
+                    meal = state.meal!!,
+                    state = state
+                )
+            }
+        }
+
+        items(meals.filter { it.id != state.meal?.id }) {
+            TaskFormMealCard(
+                buttonEnabled = clickEnabled,
                 meal = it,
-                modifier = Modifier.size(
-                    height = 200.dp,
-                    width = (LocalView.current.width / 3 * 2).pixelsToDp()
-                ),
                 onClick = {
+                    clickEnabled = false
+
                     state.meal = it
                     state.title = it.name
-                }
+
+                    scope.launch {
+                        stateRow.animateScrollToItem(0)
+
+                        clickEnabled = true
+                    }
+                },
+                state = state
             )
         }
     }
@@ -434,6 +438,58 @@ fun TaskFormFieldsTopShared(state: TaskFormState<*>) {
     TaskFormFieldTitle(state = state)
 
     TaskFormFieldDescription(state = state)
+}
+
+@Composable
+private fun TaskFormMealCard(
+    buttonEnabled: Boolean,
+    meal: Meal,
+    onClick: () -> Unit = { },
+    state: TaskFormState.Meal
+) {
+    MealCard(
+        buttonContent = {
+            if (state.meal != meal) {
+                Text(
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelLarge,
+                    text = "Select"
+                )
+            } else {
+                Icon(
+                    contentDescription = "Meal selected icon",
+                    imageVector = Icons.Outlined.Check,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = MaterialTheme.shapes.medium
+                        ),
+                    tint = MaterialTheme.colorScheme.onTertiary
+                )
+            }
+        },
+        buttonEnabled = buttonEnabled,
+        meal = meal,
+        modifier = Modifier
+            .size(
+                height = 200.dp,
+                width = (LocalView.current.width / 3 * 2).pixelsToDp()
+            )
+            .shadow(
+                elevation = 4.dp,
+                shape = MaterialTheme.shapes.medium
+            )
+            .then(
+                if (state.meal != meal) Modifier else Modifier.border(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    shape = MaterialTheme.shapes.medium,
+                    width = 3.dp
+                )
+            ),
+        onClick = onClick
+    )
 }
 
 @Composable

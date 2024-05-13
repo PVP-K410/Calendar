@@ -140,7 +140,7 @@ fun TaskEditSheet(
 
             else -> rememberGeneralFormState(
                 date = task.date,
-                task = task
+                task = task as GeneralTask
             )
         }
 

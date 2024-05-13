@@ -97,15 +97,15 @@ open class TaskFormState<T : Task>(
         @Composable
         fun rememberCustomMealFormState(
             date: LocalDate? = null,
-            task: Task? = null
+            task: CustomMealTask? = null
         ): CustomMeal {
             val state by remember {
                 mutableStateOf(
                     CustomMeal(
-                        recipe = (task as? CustomMealTask)?.recipe,
+                        recipe = task?.recipe,
                         stateParent = create(
                             date,
-                            task as? CustomMealTask
+                            task
                         )
                     )
                 )
@@ -117,15 +117,15 @@ open class TaskFormState<T : Task>(
         @Composable
         fun rememberGeneralFormState(
             date: LocalDate? = null,
-            task: Task? = null
+            task: GeneralTask? = null
         ): General {
             val state by remember {
                 mutableStateOf(
                     General(
-                        description = (task as? GeneralTask)?.description,
+                        description = task?.description,
                         stateParent = create(
                             date,
-                            task as? GeneralTask
+                            task
                         )
                     )
                 )
@@ -137,16 +137,15 @@ open class TaskFormState<T : Task>(
         @Composable
         fun rememberMealFormState(
             date: LocalDate? = null,
-            task: Task? = null
+            task: MealTask? = null
         ): Meal {
             val state by remember {
                 mutableStateOf(
                     Meal(
-                        // TODO: Implement meal fetching
-                        meal = null,
+                        meal = task?.meal,
                         stateParent = create(
                             date,
-                            task as? MealTask
+                            task
                         )
                     )
                 )
@@ -158,17 +157,17 @@ open class TaskFormState<T : Task>(
         @Composable
         fun rememberSportFormState(
             date: LocalDate? = null,
-            task: Task? = null
+            task: SportTask? = null
         ): Sport {
             val state by remember {
                 mutableStateOf(
                     Sport(
-                        activity = (task as? SportTask)?.activity ?: SportActivity.Walking,
-                        description = (task as? SportTask)?.description,
-                        distance = (task as? SportTask)?.distance,
+                        activity = task?.activity ?: SportActivity.Walking,
+                        description = task?.description,
+                        distance = task?.distance,
                         stateParent = create(
                             date,
-                            task as? SportTask
+                            task
                         )
                     )
                 )

@@ -8,6 +8,7 @@ import com.pvp.app.api.MealService
 import com.pvp.app.model.Meal
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapLatest
 import javax.inject.Inject
 
@@ -24,6 +25,15 @@ class MealServiceImpl @Inject constructor(
                     document.toObject(Meal::class.java)
                 }
             }
+    }
+
+    override fun get(id: String): Flow<Meal> {
+        return database
+            .collection(identifier)
+            .document(id)
+            .snapshots()
+            .mapLatest { snapshot -> snapshot.toObject(Meal::class.java) }
+            .filterNotNull()
     }
 
     override suspend fun merge(meal: Meal) {
