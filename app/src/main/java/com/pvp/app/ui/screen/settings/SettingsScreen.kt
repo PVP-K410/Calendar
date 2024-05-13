@@ -51,7 +51,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.startActivity
 import androidx.health.connect.client.HealthConnectClient
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Setting
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ButtonConfirm
@@ -63,11 +62,7 @@ private fun SettingNotificationReminderMinutes(
     model: SettingsViewModel = hiltViewModel()
 ) {
     val range = remember { model.fromConfiguration { it.rangeReminderMinutes } }
-
-    val minutes by model
-        .get(Setting.Notifications.ReminderBeforeTaskMinutes)
-        .collectAsStateWithLifecycle()
-
+    var minutes by model.rememberSetting(Setting.Notifications.ReminderBeforeTaskMinutes)
     val state = rememberPickerState(initialValue = minutes)
 
     SettingCard(
@@ -100,14 +95,7 @@ private fun SettingNotificationReminderMinutes(
                 )
             }
         },
-        onEdit = {
-            if (state.value != minutes) {
-                model.merge(
-                    Setting.Notifications.ReminderBeforeTaskMinutes,
-                    state.value
-                )
-            }
-        }
+        onEdit = { minutes = state.value }
     )
 }
 
@@ -116,15 +104,8 @@ private fun SettingCupVolumeMl(
     model: SettingsViewModel = hiltViewModel()
 ) {
     val range = remember { model.fromConfiguration { it.rangeCupVolume } }
-
-    val volume by model
-        .get(Setting.Notifications.CupVolumeMl)
-        .collectAsStateWithLifecycle()
-
-    val isEnabled by model
-        .get(Setting.Notifications.HydrationNotificationsEnabled)
-        .collectAsStateWithLifecycle()
-
+    var volume by model.rememberSetting(Setting.Notifications.CupVolumeMl)
+    val isEnabled by model.rememberSetting(Setting.Notifications.HydrationNotificationsEnabled)
     val state = rememberPickerState(initialValue = volume)
 
     SettingCard(
@@ -158,14 +139,7 @@ private fun SettingCupVolumeMl(
                 )
             }
         },
-        onEdit = {
-            if (state.value != volume) {
-                model.merge(
-                    Setting.Notifications.CupVolumeMl,
-                    state.value
-                )
-            }
-        }
+        onEdit = { volume = state.value }
     )
 }
 
@@ -173,20 +147,13 @@ private fun SettingCupVolumeMl(
 private fun SettingHydrationNotificationToggle(
     model: SettingsViewModel = hiltViewModel()
 ) {
-    val isEnabled by model
-        .get(Setting.Notifications.HydrationNotificationsEnabled)
-        .collectAsStateWithLifecycle()
+    var isEnabled by model.rememberSetting(Setting.Notifications.HydrationNotificationsEnabled)
 
     SettingCard(
         title = "Hydration Notifications",
         description = "Toggle water drinking reminder notifications",
         value = isEnabled,
-        onEdit = {
-            model.merge(
-                Setting.Notifications.HydrationNotificationsEnabled,
-                !isEnabled
-            )
-        }
+        onEdit = { isEnabled = !isEnabled }
     )
 }
 
@@ -200,20 +167,13 @@ enum class Theme {
 private fun SettingDynamicTheme(
     model: SettingsViewModel = hiltViewModel()
 ) {
-    val isEnabled by model
-        .get(Setting.Appearance.DynamicThemeEnabled)
-        .collectAsStateWithLifecycle()
+    var isEnabled by model.rememberSetting(Setting.Appearance.DynamicThemeEnabled)
 
     SettingCard(
         title = "Dynamic Theme",
         description = "Choose whether or not you want to use the dynamic theme",
         value = isEnabled,
-        onEdit = {
-            model.merge(
-                Setting.Appearance.DynamicThemeEnabled,
-                !isEnabled
-            )
-        }
+        onEdit = { isEnabled = !isEnabled }
     )
 }
 
@@ -221,11 +181,7 @@ private fun SettingDynamicTheme(
 private fun SettingApplicationTheme(
     model: SettingsViewModel = hiltViewModel()
 ) {
-    val themeValue by model
-        .get(Setting.Appearance.ApplicationTheme)
-        .collectAsStateWithLifecycle()
-
-    val state = rememberPickerState(initialValue = themeValue)
+    var themeValue by model.rememberSetting(Setting.Appearance.ApplicationTheme)
 
     SettingCard(
         description = "Choose the theme of the application",
@@ -256,15 +212,7 @@ private fun SettingApplicationTheme(
                     ) {
                         RadioButton(
                             selected = themeValue == it.ordinal,
-                            onClick = {
-                                state.value = it.ordinal
-                                if (state.value != themeValue) {
-                                    model.merge(
-                                        Setting.Appearance.ApplicationTheme,
-                                        state.value
-                                    )
-                                }
-                            }
+                            onClick = { themeValue = it.ordinal }
                         )
 
                         Text(
@@ -306,7 +254,6 @@ private fun SettingHealthConnectPermissions(context: Context) {
 
 @Composable
 fun SettingsScreen(
-    model: SettingsViewModel = hiltViewModel(),
     modifier: Modifier
 ) {
     Column(
@@ -321,20 +268,20 @@ fun SettingsScreen(
             title = "Notifications"
         )
 
-        SettingNotificationReminderMinutes(model)
+        SettingNotificationReminderMinutes()
 
-        SettingHydrationNotificationToggle(model)
+        SettingHydrationNotificationToggle()
 
-        SettingCupVolumeMl(model)
+        SettingCupVolumeMl()
 
         CategoryRow(
             icon = Icons.Outlined.Style,
             title = "Appearance"
         )
 
-        SettingApplicationTheme(model)
+        SettingApplicationTheme()
 
-        SettingDynamicTheme(model)
+        SettingDynamicTheme()
 
         CategoryRow(
             icon = Icons.Outlined.PermIdentity,
@@ -343,7 +290,7 @@ fun SettingsScreen(
 
         SettingHealthConnectPermissions(LocalContext.current)
 
-        ResetToDefaultButton(model)
+        ResetToDefaultButton()
     }
 }
 
