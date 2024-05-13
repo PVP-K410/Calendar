@@ -2,7 +2,6 @@
 
 package com.pvp.app.ui.screen.calendar
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
@@ -90,32 +89,6 @@ class TaskViewModel @Inject constructor(
     val rangeKilometers = configuration.rangeKilometers
     val rangeMeters = configuration.rangeMeters
     val rangeReminderTime = configuration.rangeReminderMinutes
-
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            mealService
-                .get()
-                .first()
-                .let {
-                    it
-                        .filter { meal ->
-                            if (meal.recipe.isEmpty()) {
-                                Log.d(
-                                    "TaskViewModel",
-                                    "Meal ${meal.name} has no recipe. Deleting."
-                                )
-
-                                true
-                            } else {
-                                false
-                            }
-                        }
-                        .forEach { meal ->
-                            mealService.remove(meal)
-                        }
-                }
-        }
-    }
 
     private val state = settingService
         .get(Setting.Notifications.ReminderBeforeTaskMinutes)
