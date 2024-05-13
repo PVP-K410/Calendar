@@ -51,7 +51,7 @@ class TaskViewModel @Inject constructor(
     private val _mealsQuery = MutableStateFlow("")
     val mealsQuery = _mealsQuery.asStateFlow()
 
-    private val _mealsQuerying = MutableStateFlow(false)
+    private val _mealsQuerying = MutableStateFlow(true)
     val mealsQuerying = _mealsQuerying.asStateFlow()
 
     val meals = mealService

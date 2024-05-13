@@ -18,8 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,8 +33,6 @@ import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
-import com.pvp.app.ui.common.EditableDistanceItem
-import com.pvp.app.ui.common.EditableSportActivityItem
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.screen.calendar.TaskFormState.Companion.rememberCustomMealFormState
@@ -45,161 +41,6 @@ import com.pvp.app.ui.screen.calendar.TaskFormState.Companion.rememberMealFormSt
 import com.pvp.app.ui.screen.calendar.TaskFormState.Companion.rememberSportFormState
 import java.time.LocalDate
 import kotlin.reflect.KClass
-
-@Composable
-private fun TaskCustomMealForm(
-    onClose: () -> Unit,
-    state: TaskFormState.CustomMeal
-) {
-    TaskFormStateGeneralValidator(state = state)
-
-    Column(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clip(MaterialTheme.shapes.medium)
-            .padding(8.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        TaskFormFieldsTopShared(state = state)
-
-        TaskFormFieldDuration(state = state)
-
-        TaskFormFieldsBottomShared(state = state)
-
-        TaskFormButtonsRow(
-            onClose = onClose,
-            state = state
-        )
-    }
-}
-
-@Composable
-private fun TaskGeneralForm(
-    onClose: () -> Unit,
-    state: TaskFormState.General
-) {
-    TaskFormStateGeneralValidator(state = state)
-
-    Column(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clip(MaterialTheme.shapes.medium)
-            .padding(8.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        TaskFormFieldsTopShared(state = state)
-
-        TaskFormFieldDuration(state = state)
-
-        TaskFormFieldsBottomShared(state = state)
-
-        TaskFormButtonsRow(
-            onClose = onClose,
-            state = state
-        )
-    }
-}
-
-@Composable
-private fun TaskMealForm(
-    model: TaskViewModel = hiltViewModel(),
-    onClose: () -> Unit,
-    state: TaskFormState.Meal
-) {
-    val query by model.mealsQuery.collectAsStateWithLifecycle()
-    val querying by model.mealsQuerying.collectAsStateWithLifecycle()
-    val meals by model.meals.collectAsStateWithLifecycle()
-
-    val isValid by remember {
-        derivedStateOf {
-            state.meal != null
-        }
-    }
-
-    LaunchedEffect(isValid) {
-        state.isFormValid = isValid
-    }
-
-    Column(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clip(MaterialTheme.shapes.medium)
-            .padding(8.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        if (querying) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) { ProgressIndicator(modifier = Modifier.size(200.dp)) }
-        } else {
-            TaskFormFieldMealCards(
-                meals = meals,
-                onChangeQuery = model::onMealsQueryChange,
-                query = query,
-                state = state
-            )
-        }
-
-        TaskFormFieldsMealBreakdown(state.meal)
-
-        TaskFormFieldsBottomShared(state = state)
-
-        TaskFormButtonsRow(
-            onClose = onClose,
-            state = state
-        )
-    }
-}
-
-@Composable
-private fun TaskSportForm(
-    model: TaskViewModel = hiltViewModel(),
-    onClose: () -> Unit,
-    state: TaskFormState.Sport
-) {
-    TaskFormStateGeneralValidator(state = state)
-
-    Column(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clip(MaterialTheme.shapes.medium)
-            .padding(8.dp)
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        TaskFormFieldsTopShared(state = state)
-
-        EditableSportActivityItem(
-            label = "Activity",
-            value = state.activity,
-            onValueChange = { state.activity = it }
-        )
-
-        if (state.activity.supportsDistanceMetrics) {
-            EditableDistanceItem(
-                label = "Distance",
-                value = state.distance,
-                rangeKilometers = model.rangeKilometers,
-                rangeMeters = model.rangeMeters,
-                onValueChange = { state.distance = it }
-            )
-        } else {
-            TaskFormFieldDuration(state = state)
-        }
-
-        TaskFormFieldsBottomShared(state = state)
-
-        TaskFormButtonsRow(
-            onClose = onClose,
-            state = state
-        )
-    }
-}
 
 @Composable
 fun TaskCreateSheet(
@@ -227,6 +68,15 @@ fun TaskCreateSheet(
             val stateSport = rememberSportFormState(date = date)
             var tab by remember { mutableStateOf(GeneralTask::class as KClass<out Task>) }
 
+            val tabState = remember(tab) {
+                when (tab) {
+                    CustomMealTask::class -> stateCustomMeal
+                    MealTask::class -> stateMeal
+                    SportTask::class -> stateSport
+                    else -> stateGeneral
+                }
+            }
+
             TabSelector(
                 onSelect = {
                     tab = when (it) {
@@ -250,30 +100,11 @@ fun TaskCreateSheet(
 
             Spacer(modifier = Modifier.size(8.dp))
 
-            when (tab) {
-                CustomMealTask::class -> TaskCustomMealForm(
-                    onClose = onClose,
-                    state = stateCustomMeal
-                )
-
-                GeneralTask::class -> TaskGeneralForm(
-                    onClose = onClose,
-                    state = stateGeneral
-                )
-
-                MealTask::class -> TaskMealForm(
-                    onClose = onClose,
-                    state = stateMeal
-                )
-
-                SportTask::class -> TaskSportForm(
-                    onClose = onClose,
-                    state = stateSport
-                )
-            }
+            TaskForm(
+                onClose = onClose,
+                state = tabState
+            )
         }
-
-        Spacer(modifier = Modifier.size(16.dp))
     }
 }
 
@@ -319,27 +150,79 @@ fun TaskEditSheet(
                 .padding(8.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            when (task) {
-                is CustomMealTask -> TaskCustomMealForm(
-                    onClose = onClose,
-                    state = state as TaskFormState.CustomMeal
-                )
+            TaskForm(
+                onClose = onClose,
+                state = state
+            )
+        }
+    }
+}
 
-                is GeneralTask -> TaskGeneralForm(
-                    onClose = onClose,
-                    state = state as TaskFormState.General
-                )
+@Composable
+private fun TaskForm(
+    model: TaskViewModel = hiltViewModel(),
+    onClose: () -> Unit,
+    state: TaskFormState<*>
+) {
+    if (state is TaskFormState.Meal) {
+        TaskFormStateMealValidator(state = state)
+    } else {
+        TaskFormStateGeneralValidator(state = state)
+    }
 
-                is MealTask -> TaskMealForm(
-                    onClose = onClose,
-                    state = state as TaskFormState.Meal
-                )
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .clip(MaterialTheme.shapes.medium)
+            .padding(
+                bottom = 24.dp,
+                end = 8.dp,
+                start = 8.dp,
+                top = 8.dp
+            )
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        if (state !is TaskFormState.Meal) {
+            TaskFormFieldsTopShared(state = state)
 
-                is SportTask -> TaskSportForm(
-                    onClose = onClose,
-                    state = state as TaskFormState.Sport
+            if (state is TaskFormState.Sport) {
+                TaskFormFieldActivity(state = state)
+            }
+
+            if (state is TaskFormState.Sport && state.activity.supportsDistanceMetrics) {
+                TaskFormFieldDistance(state = state)
+            } else {
+                TaskFormFieldDuration(state = state)
+            }
+        } else {
+            val query by model.mealsQuery.collectAsStateWithLifecycle()
+            val querying by model.mealsQuerying.collectAsStateWithLifecycle()
+            val meals by model.meals.collectAsStateWithLifecycle()
+
+            if (querying) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) { ProgressIndicator(modifier = Modifier.size(200.dp)) }
+            } else {
+                TaskFormFieldMealCards(
+                    meals = meals,
+                    onChangeQuery = model::onMealsQueryChange,
+                    query = query,
+                    state = state
                 )
             }
+
+            TaskFormFieldsMealBreakdown(state.meal)
         }
+
+        TaskFormFieldsBottomShared(state = state)
+
+        TaskFormButtonsRow(
+            onClose = onClose,
+            state = state
+        )
     }
 }

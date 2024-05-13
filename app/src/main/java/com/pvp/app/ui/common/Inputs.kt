@@ -276,7 +276,7 @@ fun EditableDateItem(
             icon = Icons.Outlined.Edit,
             iconDescription = "Edit info item icon button",
             iconSize = 30.dp,
-            onDateSelected = { onValueChange(it.toLocalDate()) },
+            onDateSelected = { onValueChange(it.toLocalDate()) }
         )
     }
 }

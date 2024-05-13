@@ -21,7 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -35,19 +34,19 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.common.TimeUtil.asString
 import com.pvp.app.model.Meal
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.EditableDateItem
+import com.pvp.app.ui.common.EditableDistanceItem
 import com.pvp.app.ui.common.EditablePickerItem
+import com.pvp.app.ui.common.EditableSportActivityItem
 import com.pvp.app.ui.common.EditableTextItem
 import com.pvp.app.ui.common.EditableTimeItem
 import com.pvp.app.ui.common.FoldableContent
 import com.pvp.app.ui.common.pixelsToDp
-import com.pvp.app.ui.common.underline
 import java.time.LocalTime
 
 @Composable
@@ -109,12 +108,12 @@ fun TaskFormButtonsRow(
 }
 
 @Composable
-fun TaskFormFieldsBottomShared(state: TaskFormState<*>) {
-    TaskFormFieldScheduledAt(state = state)
-
-    TaskFormFieldDate(state = state)
-
-    TaskFormFieldReminderTime(state = state)
+fun TaskFormFieldActivity(state: TaskFormState.Sport) {
+    EditableSportActivityItem(
+        label = "Activity",
+        value = state.activity,
+        onValueChange = { state.activity = it }
+    )
 }
 
 @Composable
@@ -156,6 +155,20 @@ fun TaskFormFieldDescription(state: TaskFormState<*>) {
         label = if (isRecipe) "Recipe" else "Description",
         value = description,
         onValueChange = { onChange(it) }
+    )
+}
+
+@Composable
+fun TaskFormFieldDistance(
+    model: TaskViewModel = hiltViewModel(),
+    state: TaskFormState.Sport
+) {
+    EditableDistanceItem(
+        label = "Distance",
+        value = state.distance,
+        rangeKilometers = model.rangeKilometers,
+        rangeMeters = model.rangeMeters,
+        onValueChange = { state.distance = it }
     )
 }
 
@@ -362,21 +375,10 @@ fun TaskFormFieldMealCards(
                 },
                 buttonEnabled = state.meal != it,
                 meal = it,
-                modifier = Modifier
-                    .size(
-                        height = 200.dp,
-                        width = (LocalView.current.width / 3 * 2).pixelsToDp()
-                    )
-                    .then(
-                        if (state.meal == it) {
-                            Modifier.underline(
-                                offset = 4.sp,
-                                width = 2.dp
-                            )
-                        } else {
-                            Modifier
-                        }
-                    ),
+                modifier = Modifier.size(
+                    height = 200.dp,
+                    width = (LocalView.current.width / 3 * 2).pixelsToDp()
+                ),
                 onClick = {
                     state.meal = it
                     state.title = it.name
@@ -419,6 +421,15 @@ fun TaskFormFieldTitle(state: TaskFormState<*>) {
 }
 
 @Composable
+fun TaskFormFieldsBottomShared(state: TaskFormState<*>) {
+    TaskFormFieldScheduledAt(state = state)
+
+    TaskFormFieldDate(state = state)
+
+    TaskFormFieldReminderTime(state = state)
+}
+
+@Composable
 fun TaskFormFieldsTopShared(state: TaskFormState<*>) {
     TaskFormFieldTitle(state = state)
 
@@ -431,7 +442,14 @@ fun TaskFormStateGeneralValidator(state: TaskFormState<*>) {
         derivedStateOf { state.title?.isNotBlank() ?: false }
     }
 
-    LaunchedEffect(isValid) {
-        state.isFormValid = isValid
+    state.isFormValid = isValid
+}
+
+@Composable
+fun TaskFormStateMealValidator(state: TaskFormState.Meal) {
+    val isValid by remember {
+        derivedStateOf { state.meal != null }
     }
+
+    state.isFormValid = isValid
 }
