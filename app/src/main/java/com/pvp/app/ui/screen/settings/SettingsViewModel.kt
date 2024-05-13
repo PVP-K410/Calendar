@@ -2,6 +2,9 @@ package com.pvp.app.ui.screen.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
@@ -25,10 +28,31 @@ class SettingsViewModel @Inject constructor(
     }
 
     @Composable
-    fun <T> rememberSetting(
-        setting: Setting<T>
-    ): MutableState<T> {
-        return settingService.remember(setting)
+    fun <T> rememberSetting(setting: Setting<T>): MutableState<T> {
+        val coroutineScope = rememberCoroutineScope()
+
+        val state = remember {
+            settingService.get(setting)
+        }
+            .collectAsState(initial = setting.defaultValue)
+
+        return remember {
+            object : MutableState<T> {
+                override var value: T
+                    get() = state.value
+                    set(value) {
+                        coroutineScope.launch {
+                            settingService.merge(
+                                setting,
+                                value
+                            )
+                        }
+                    }
+
+                override fun component1() = value
+                override fun component2(): (T) -> Unit = { value = it }
+            }
+        }
     }
 
     fun <T> fromConfiguration(function: (Configuration) -> T): T {
