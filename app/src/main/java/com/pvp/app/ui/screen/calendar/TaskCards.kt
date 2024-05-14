@@ -40,6 +40,7 @@ import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.InfoTooltip
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -87,25 +88,27 @@ fun TaskCard(
                     .padding(4.dp)
                     .fillMaxWidth()
             ) {
-                Checkbox(
-                    checked = checked,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .align(CenterVertically),
-                    onCheckedChange = {
-                        model.update(
-                            { task ->
-                                Task.copy(
-                                    task,
-                                    isCompleted = it
-                                )
-                            },
-                            task
-                        )
+                if (task.date.dayOfWeek == LocalDate.now().dayOfWeek) {
+                    Checkbox(
+                        checked = checked,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .align(CenterVertically),
+                        onCheckedChange = {
+                            model.update(
+                                { task ->
+                                    Task.copy(
+                                        task,
+                                        isCompleted = it
+                                    )
+                                },
+                                task
+                            )
 
-                        checked = it
-                    }
-                )
+                            checked = it
+                        }
+                    )
+                }
 
                 Text(
                     fontSize = 20.sp,
