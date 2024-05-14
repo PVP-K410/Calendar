@@ -48,45 +48,6 @@ class DailyTaskWorker @AssistedInject constructor(
                         .now()
                         .plusDays(1)
 
-                    taskService.create(
-                        activity = SportActivity.Cycling,
-                        date = today.minusDays(1),
-                        description = "desc",
-                        distance = null,
-                        duration = null,
-                        reminderTime = null,
-                        isDaily = true,
-                        time = LocalTime.now(),
-                        title = "good1",
-                        userEmail = user.email
-                    )
-
-                    taskService.create(
-                        activity = SportActivity.Cycling,
-                        date = today.minusDays(1),
-                        description = "desc",
-                        distance = null,
-                        duration = null,
-                        reminderTime = null,
-                        isDaily = true,
-                        time = LocalTime.now(),
-                        title = "good2",
-                        userEmail = user.email
-                    )
-
-                    taskService.create(
-                        activity = SportActivity.Cycling,
-                        date = today.minusDays(2),
-                        description = "desc",
-                        distance = null,
-                        duration = null,
-                        reminderTime = null,
-                        isDaily = true,
-                        time = LocalTime.now(),
-                        title = "good3",
-                        userEmail = user.email
-                    )
-
                     val tasks = taskService
                         .get(userEmail = user.email)
                         .map { tasks ->
@@ -99,7 +60,7 @@ class DailyTaskWorker @AssistedInject constructor(
                         .first()
 
                     tasks.filter { it.date.isBefore(today) && !it.isCompleted }.forEach { task ->
-                        //taskService.remove(task)
+                        taskService.remove(task)
                     }
 
                     if (tasks.filter { it.date == today }.size >= configuration.dailyTaskCount) {
