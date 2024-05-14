@@ -271,6 +271,7 @@ class DecorationServiceImpl @Inject constructor(
                     .thenBy { it.type == Type.AVATAR_BODY }
                     .thenBy { it.type == Type.AVATAR_LEGGINGS }
                     .thenBy { it.type == Type.AVATAR_HANDS }
+                    .thenBy { it.type == Type.AVATAR_ACCESSORY }
             )
         }
     }
