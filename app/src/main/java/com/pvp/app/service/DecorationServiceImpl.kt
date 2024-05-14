@@ -120,7 +120,11 @@ class DecorationServiceImpl @Inject constructor(
             .snapshots()
             .mapLatest { snapshot ->
                 snapshot.documents.mapNotNull { document ->
-                    document.toObject(Decoration::class.java)
+                    try {
+                        document.toObject(Decoration::class.java)
+                    } catch (e: Exception) {
+                        null
+                    }
                 }
             }
     }
@@ -130,7 +134,13 @@ class DecorationServiceImpl @Inject constructor(
             .collection(identifier)
             .document(id)
             .snapshots()
-            .mapLatest { snapshot -> snapshot.toObject(Decoration::class.java) }
+            .mapLatest { snapshot ->
+                try {
+                    snapshot.toObject(Decoration::class.java)
+                } catch (e: Exception) {
+                    null
+                }
+            }
             .filterNotNull()
     }
 
