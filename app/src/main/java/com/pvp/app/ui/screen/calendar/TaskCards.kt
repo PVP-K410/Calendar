@@ -28,11 +28,13 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.common.DurationUtil.asString
-import com.pvp.app.model.MealTask
+import com.pvp.app.model.CustomMealTask
+import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.InfoTooltip
@@ -94,7 +96,12 @@ fun TaskCard(
                         .align(CenterVertically),
                     onCheckedChange = {
                         model.update(
-                            { task -> task.isCompleted = it },
+                            { task ->
+                                Task.copy(
+                                    task,
+                                    isCompleted = it
+                                )
+                            },
                             task
                         )
 
@@ -122,7 +129,7 @@ fun TaskCard(
 
                     when (task) {
                         is SportTask -> TaskCardContentSport(task)
-                        is MealTask -> TaskCardContentMeal(task)
+                        is CustomMealTask -> TaskCardContentMeal(task)
                         else -> TaskCardContent(task)
                     }
                 }
@@ -140,7 +147,7 @@ fun TaskCard(
 }
 
 @Composable
-private fun TaskCardContentMeal(task: MealTask) {
+private fun TaskCardContentMeal(task: CustomMealTask) {
     task.duration?.let { duration ->
         Row(modifier = Modifier.padding(6.dp)) {
             Icon(
@@ -159,9 +166,11 @@ private fun TaskCardContentMeal(task: MealTask) {
     }
 
     Text(
+        maxLines = 2,
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 8.dp),
+        overflow = TextOverflow.Ellipsis,
         text = "Recipe: " + task.recipe,
         textAlign = TextAlign.Left
     )
@@ -169,7 +178,7 @@ private fun TaskCardContentMeal(task: MealTask) {
 
 @Composable
 private fun TaskCardContentSport(task: SportTask) {
-    if (task.distance != null && task.distance!! > 0) {
+    if (task.distance != null && task.distance > 0) {
         Row(modifier = Modifier.padding(6.dp)) {
             Icon(
                 contentDescription = "Distance",
@@ -195,7 +204,7 @@ private fun TaskCardContentSport(task: SportTask) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 8.dp),
-                text = task.duration!!.asString(),
+                text = task.duration.asString(),
                 textAlign = TextAlign.Left
             )
         }
@@ -224,6 +233,22 @@ private fun TaskCardContentSport(task: SportTask) {
 
 @Composable
 private fun TaskCardContent(task: Task) {
+    val description = remember(task) {
+        when (task) {
+            is SportTask -> {
+                task.description
+            }
+
+            is GeneralTask -> {
+                task.description
+            }
+
+            else -> {
+                null
+            }
+        }
+    }
+
     task.duration?.let { duration ->
         Row(modifier = Modifier.padding(6.dp)) {
             Icon(
@@ -241,7 +266,7 @@ private fun TaskCardContent(task: Task) {
         }
     }
 
-    task.description?.let { description ->
+    if (description != null) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()

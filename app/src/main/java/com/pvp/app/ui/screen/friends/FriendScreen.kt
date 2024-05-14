@@ -60,7 +60,11 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
-private fun ActivityInfo(tasksCompleted: Int) {
+private fun ActivityInfo(
+    calories: Double,
+    tasksCompleted: Int,
+    steps: Long
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -82,7 +86,7 @@ private fun ActivityInfo(tasksCompleted: Int) {
             ActivityRow(
                 icon = ImageVector.vectorResource(R.drawable.steps_icon),
                 contentDescription = "steps",
-                text = "63819 steps made"
+                text = "$steps steps made"
             )
 
             HorizontalDivider(
@@ -94,7 +98,7 @@ private fun ActivityInfo(tasksCompleted: Int) {
             ActivityRow(
                 icon = Icons.Outlined.LocalFireDepartment,
                 contentDescription = "calories",
-                text = "6571 calories burned"
+                text = "%.2f calories burned".format(calories / 1000)
             )
 
             HorizontalDivider(
@@ -161,8 +165,10 @@ private fun AvatarBox(friend: FriendEntry) {
 
 @Composable
 private fun Content(
+    calories: Double,
     details: Friends,
     friends: List<FriendEntry>,
+    steps: Long,
     tasks: Int
 ) {
     val sinceDateTime = LocalDateTime.ofInstant(
@@ -177,7 +183,11 @@ private fun Content(
     )
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        ActivityInfo(tasks)
+        ActivityInfo(
+            calories,
+            tasks,
+            steps
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -269,9 +279,11 @@ fun FriendScreen(
 
     HandleState(state.state)
 
+    val calories: Double = state.calories
     val details = state.details
     val entry = state.entry
     val friends = state.friendsMutual
+    val steps = state.steps
     val tasks = state.tasksCompleted
     val stateScroll = rememberScrollState()
 
@@ -289,8 +301,10 @@ fun FriendScreen(
         Spacer(modifier = Modifier.size(8.dp))
 
         Content(
+            calories = calories,
             details = details,
             friends = friends,
+            steps = steps,
             tasks = tasks
         )
 

@@ -1,6 +1,6 @@
 package com.pvp.app.common
 
-import com.pvp.app.model.MealTask
+import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import kotlinx.serialization.json.Json
@@ -11,34 +11,14 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
 
 object JsonUtil {
 
     /**
-     * JSON serializer with polymorphic support for [Task] subclasses [MealTask] and [SportTask]
+     * JSON serializer with polymorphic support for [Task] subclasses [CustomMealTask] and [SportTask]
      * and support for unknown keys by ignoring them
      */
-    val JSON = Json {
-        ignoreUnknownKeys = true
-
-        serializersModule = SerializersModule {
-            polymorphic(
-                Task::class,
-                Task.serializer()
-            ) {
-                subclass(
-                    MealTask::class,
-                    MealTask.serializer()
-                )
-                subclass(
-                    SportTask::class,
-                    SportTask.serializer()
-                )
-            }
-        }
-    }
+    val JSON = Json { ignoreUnknownKeys = true }
 
     /**
      * Converts any object to [JsonElement]

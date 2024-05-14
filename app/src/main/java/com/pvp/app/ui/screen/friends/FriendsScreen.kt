@@ -93,7 +93,7 @@ fun FriendsScreen(
 
     val friendsSorted = remember(
         friends,
-        sortingType
+        sortingType.value
     ) {
         mutableStateOf(
             when (sortingType.value) {

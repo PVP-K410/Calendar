@@ -27,7 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.pvp.app.model.MealTask
+import com.pvp.app.model.CustomMealTask
+import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import java.time.LocalDateTime
@@ -46,8 +47,8 @@ private fun ColumnScope.TaskTypeSelector(onSelect: (KClass<out Task>) -> Unit) {
         selectedTabIndex = selectedTabIndex
     ) {
         mapOf(
-            Task::class to "General",
-            MealTask::class to "Meal",
+            GeneralTask::class to "General",
+            CustomMealTask::class to "Meal",
             SportTask::class to "Sport"
         )
             .onEachIndexed { index, (taskClass, taskText) ->
@@ -91,7 +92,7 @@ fun TaskCreateSheet(
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(8.dp)
         ) {
-            var target by remember { mutableStateOf(Task::class as KClass<out Task>) }
+            var target by remember { mutableStateOf(GeneralTask::class as KClass<out Task>) }
 
             TaskTypeSelector { targetNew -> target = targetNew }
 

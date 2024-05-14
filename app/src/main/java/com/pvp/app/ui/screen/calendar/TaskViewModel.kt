@@ -7,7 +7,7 @@ import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.model.MealTask
+import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -62,7 +62,6 @@ class TaskViewModel @Inject constructor(
      */
     fun create(
         date: LocalDate,
-        description: String? = null,
         duration: Duration? = null,
         reminderTime: Duration? = null,
         recipe: String,
@@ -76,7 +75,6 @@ class TaskViewModel @Inject constructor(
                     taskService
                         .create(
                             date,
-                            description,
                             duration,
                             reminderTime,
                             recipe,
@@ -165,7 +163,7 @@ class TaskViewModel @Inject constructor(
      */
     @Suppress("UNCHECKED_CAST")
     private fun <T : Task> resolve(
-        handle: (T) -> Unit,
+        handle: (T) -> T,
         task: T
     ): Pair<T, Boolean> {
         val taskNew: T
@@ -173,9 +171,7 @@ class TaskViewModel @Inject constructor(
 
         when (task) {
             is SportTask -> {
-                taskNew = SportTask.copy(task) as T
-
-                handle(taskNew)
+                taskNew = handle(task)
 
                 with(taskNew as SportTask) {
                     update = activity != task.activity ||
@@ -184,18 +180,14 @@ class TaskViewModel @Inject constructor(
                 }
             }
 
-            is MealTask -> {
-                taskNew = MealTask.copy(task) as T
-
-                handle(taskNew)
+            is CustomMealTask -> {
+                taskNew = handle(task)
 
                 update = taskNew.duration != task.duration
             }
 
             else -> {
-                taskNew = Task.copy(task) as T
-
-                handle(taskNew)
+                taskNew = handle(task)
 
                 update = false
             }
@@ -214,7 +206,7 @@ class TaskViewModel @Inject constructor(
      * @param task Task to update
      */
     fun <T : Task> update(
-        handle: (T) -> Unit,
+        handle: (T) -> T,
         task: T
     ) {
         viewModelScope.launch(Dispatchers.IO) {

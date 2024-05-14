@@ -53,42 +53,21 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
 
-        val prefs = getSharedPreferences(
-            "FirstInstall",
-            Context.MODE_PRIVATE
-        )
-
-        if (!prefs.getBoolean(
-                "SetupComplete",
-                false
-            )
-        ) {
-            createDailyTaskWorker()
-
-            createDrinkReminderWorker()
-
-            createNotificationChannels()
-
-            createTaskPointsDeductionWorker()
-
-            createTaskNotificationWorker()
-
-            createWeeklyActivitiesWorker()
-
-            prefs
-                .edit()
-                .putBoolean(
-                    "SetupComplete",
-                    true
-                )
-                .apply()
-        }
-
-        // Should be left out to ensure the TaskAutocompleteService is persisted
-        // as a running foreground service
         createAutocompleteWorker()
 
+        createDailyTaskWorker()
+
+        createDrinkReminderWorker()
+
         createGoalMotivationWorker()
+
+        createNotificationChannels()
+
+        createTaskNotificationWorker()
+
+        createTaskPointsDeductionWorker()
+
+        createWeeklyActivitiesWorker()
     }
 
     fun createActivityWorker() {
