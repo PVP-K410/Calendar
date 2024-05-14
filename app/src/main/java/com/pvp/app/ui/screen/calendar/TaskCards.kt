@@ -1,8 +1,6 @@
 package com.pvp.app.ui.screen.calendar
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,11 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material.icons.outlined.Timelapse
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +36,8 @@ import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.InfoTooltip
+import com.pvp.app.ui.common.darken
+import com.pvp.app.ui.common.orInDarkTheme
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -60,15 +60,16 @@ fun TaskCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(
-                border = BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.outlineVariant
-                ),
-                shape = RoundedCornerShape(10.dp)
+            .padding(
+                start = 10.dp,
+                end = 10.dp,
+                bottom = 10.dp
+            )
+            .clip(MaterialTheme.shapes.medium)
+            .background(
+                MaterialTheme.colorScheme.surfaceContainerHigh.orInDarkTheme(
+                    MaterialTheme.colorScheme.surfaceContainer.darken(0.2f)
+                )
             )
             .clickable(enabled = !(task is SportTask && task.isDaily)) {
                 showDialog = true
@@ -87,6 +88,7 @@ fun TaskCard(
             ) {
                 Checkbox(
                     checked = checked,
+                    colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface),
                     modifier = Modifier
                         .size(36.dp)
                         .align(CenterVertically),

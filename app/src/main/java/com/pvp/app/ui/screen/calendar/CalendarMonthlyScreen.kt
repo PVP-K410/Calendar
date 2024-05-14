@@ -128,7 +128,11 @@ private fun ContentSwitch(
                     date
                 )
             } else {
-                TasksOfDay(tasks = tasks)
+                Column(
+                    modifier = Modifier.padding(top = 4.dp)
+                ) {
+                    TasksOfDay(tasks = tasks)
+                }
             }
         }
 
@@ -166,7 +170,7 @@ private fun CalendarMonthly(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(8.dp)
     ) {
         Row {
             repeat(days.size) {
@@ -207,7 +211,7 @@ private fun CalendarMonthlyContent(
     selectedDate: LocalDate,
     onClickListener: (CalendarUiState.DateEntry) -> Unit,
 ) {
-    Column {
+    Column(modifier = Modifier.padding(8.dp)) {
         var index = 0
 
         repeat(6) {

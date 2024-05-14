@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -57,9 +58,7 @@ fun Week(
     var stateShowCards by remember { mutableStateOf(false) }
     val tasksFiltered = tasks.filter { it.date == date }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         HorizontalPager(
             contentPadding = PaddingValues(
                 90.dp,
@@ -91,13 +90,17 @@ fun Week(
 
         if (!stateShowCards || tasksFiltered.isEmpty()) {
             if (!date.isEqual(LocalDate.MIN) && !date.isAfter(LocalDate.now())) {
-                AnalysisOfDay(
-                    date = date,
-                    tasks = tasksFiltered
-                )
+                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                    AnalysisOfDay(
+                        date = date,
+                        tasks = tasksFiltered
+                    )
+                }
             }
         } else {
-            TasksOfDay(tasksFiltered)
+            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                TasksOfDay(tasksFiltered)
+            }
         }
 
         TaskCreateSheet(

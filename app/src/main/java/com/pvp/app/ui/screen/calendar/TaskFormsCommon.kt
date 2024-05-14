@@ -91,8 +91,8 @@ fun TaskCommonForm(
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
             .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(8.dp)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -215,6 +215,11 @@ fun TaskCommonForm(
             }
 
             Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.surface
+                ),
+                shape = MaterialTheme.shapes.extraLarge,
                 onClick = {
                     if (isCreateForm) {
                         when (targetClass) {

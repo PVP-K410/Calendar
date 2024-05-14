@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FactCheck
-import androidx.compose.material.icons.outlined.DoNotStep
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -37,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -50,6 +50,8 @@ import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.RouteTitle
+import com.pvp.app.ui.common.darken
+import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Routes
 import java.time.Instant
@@ -59,7 +61,14 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 private fun ActivityInfo(tasksCompleted: Int) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
+            )
+    ) {
         InfoHeader(text = "7 days activity")
 
         Column(
@@ -67,12 +76,11 @@ private fun ActivityInfo(tasksCompleted: Int) {
                 .fillMaxSize()
                 .height(90.dp)
                 .clip(MaterialTheme.shapes.small)
-                .background(MaterialTheme.colorScheme.surface)
                 .padding(vertical = 4.dp),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             ActivityRow(
-                icon = Icons.Outlined.DoNotStep,
+                icon = ImageVector.vectorResource(R.drawable.steps_icon),
                 contentDescription = "steps",
                 text = "63819 steps made"
             )
@@ -139,7 +147,7 @@ private fun AvatarBox(friend: FriendEntry) {
         modifier = Modifier
             .size(150.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
     ) {
         Image(
             bitmap = friend.avatar,
@@ -171,75 +179,75 @@ private fun Content(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         ActivityInfo(tasks)
 
-        FriendInfo(
-            formattedDate,
-            friends
-        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        FriendInfo(friends)
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OtherInfo(formattedDate)
     }
 }
 
 @Composable
-private fun FriendInfo(
-    formattedDate: String,
-    mutualFriends: List<FriendEntry>
-) {
-    InfoHeader(text = "Other information")
-
+private fun FriendInfo(mutualFriends: List<FriendEntry>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .clip(MaterialTheme.shapes.small)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(
-                horizontal = 14.dp,
-                vertical = 4.dp
+            .background(
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
             )
     ) {
-        Text(
-            style = MaterialTheme.typography.titleSmall,
-            text = "Friends since - $formattedDate"
-        )
+        InfoHeader(text = "Mutual friends")
 
-        Spacer(modifier = Modifier.height(4.dp))
-
-        if (mutualFriends.isEmpty()) {
-            Text(
-                style = MaterialTheme.typography.titleSmall,
-                text = "No mutual friends"
-            )
-        } else {
-            Text(
-                style = MaterialTheme.typography.titleSmall,
-                text = "Mutual friends"
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            for (mutualFriend in mutualFriends) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        style = MaterialTheme.typography.titleSmall,
-                        text = mutualFriend.user.username
-                    )
-
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    horizontal = 14.dp,
+                    vertical = 4.dp
+                )
+        ) {
+            if (mutualFriends.isEmpty()) {
+                Text(
+                    style = MaterialTheme.typography.titleSmall,
+                    text = "No mutual friends"
+                )
+            } else {
+                for (mutualFriend in mutualFriends) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Image(
-                            bitmap = mutualFriend.avatar,
-                            contentDescription = "Friend avatar",
-                            modifier = Modifier
-                                .size(18.dp)
-                                .clip(CircleShape)
+                        Text(
+                            style = MaterialTheme.typography.titleSmall,
+                            text = mutualFriend.user.username
                         )
+
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceContainerHighest.lighten(
+                                        0.08f
+                                    )
+                                )
+                        ) {
+                            Image(
+                                bitmap = mutualFriend.avatar,
+                                contentDescription = "Friend avatar",
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
             }
         }
@@ -273,10 +281,8 @@ fun FriendScreen(
             .fillMaxSize()
             .verticalScroll(stateScroll)
             .then(modifier)
-            .padding(8.dp)
+            .padding(16.dp)
             .clip(MaterialTheme.shapes.small)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(8.dp)
     ) {
         Header(entry = entry)
 
@@ -288,7 +294,7 @@ fun FriendScreen(
             tasks = tasks
         )
 
-        Spacer(modifier = Modifier.size(8.dp))
+        Spacer(modifier = Modifier.size(12.dp))
 
         Remove {
             model.remove(entry.user.email)
@@ -314,7 +320,8 @@ private fun Header(entry: FriendEntry) {
     Spacer(modifier = Modifier.height(8.dp))
 
     Text(
-        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.titleLarge,
         text = entry.user.username
     )
 
@@ -323,7 +330,7 @@ private fun Header(entry: FriendEntry) {
         text = entry.user.email
     )
 
-    Spacer(modifier = Modifier.height(6.dp))
+    Spacer(modifier = Modifier.height(10.dp))
 
     Experience(
         experience = entry.user.experience,
@@ -331,9 +338,9 @@ private fun Header(entry: FriendEntry) {
         level = entry.user.level,
         paddingStart = 0.dp,
         paddingEnd = 0.dp,
-        fontSize = 14,
-        fontWeight = FontWeight.Normal,
-        height = 26.dp,
+        fontSize = 17,
+        fontWeight = FontWeight.Bold,
+        height = 30.dp,
         textStyle = MaterialTheme.typography.titleSmall,
         progressTextStyle = MaterialTheme.typography.bodySmall
     )
@@ -348,18 +355,49 @@ private fun InfoHeader(text: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = MaterialTheme.shapes.small
+                color = MaterialTheme.colorScheme.surfaceContainer.darken(0.2f),
+                shape = MaterialTheme.shapes.medium
             )
             .padding(vertical = 4.dp)
     ) {
         Text(
-            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
             text = text
         )
     }
 
     Spacer(modifier = Modifier.height(3.dp))
+}
+
+@Composable
+private fun OtherInfo(formattedDate: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
+            )
+    ) {
+        InfoHeader(text = "Other information")
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    horizontal = 14.dp,
+                    vertical = 4.dp
+                )
+        ) {
+            Text(
+                style = MaterialTheme.typography.titleSmall,
+                text = "Friends since - $formattedDate"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+    }
 }
 
 @Composable

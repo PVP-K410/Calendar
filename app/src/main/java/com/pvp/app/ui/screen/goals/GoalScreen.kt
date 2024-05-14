@@ -1,10 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.pvp.app.ui.screen.goals
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,13 +21,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -38,9 +41,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,7 +127,8 @@ fun GoalScreen(
             ) {
                 Icon(
                     contentDescription = "Create goal",
-                    imageVector = Icons.Outlined.Add
+                    imageVector = Icons.Outlined.Add,
+                    tint = MaterialTheme.colorScheme.surface
                 )
             }
         },
@@ -140,7 +144,7 @@ fun GoalCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp)
+            .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
@@ -213,51 +217,33 @@ fun GoalTypeFilter(
     filter: GoalFilter,
     onClick: (GoalFilter) -> Unit
 ) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
+    val selectedTabIndex = when (filter) {
+        GoalFilter.Weekly -> 0
+        GoalFilter.Monthly -> 1
+    }
+
+    PrimaryTabRow(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        divider = {},
         modifier = Modifier
-            .background(
-                MaterialTheme.colorScheme.surfaceContainer,
-                MaterialTheme.shapes.medium
-            )
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .clip(MaterialTheme.shapes.medium),
+        selectedTabIndex = selectedTabIndex
     ) {
         GoalFilter.entries.forEach { filterNew ->
-            GoalTypeSelector(
-                filter = filterNew,
-                isSelected = filter == filterNew,
-                onClick = { onClick(filterNew) },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .height(40.dp)
-            )
+            Tab(
+                modifier = Modifier.height(32.dp),
+                selected = filter == filterNew,
+                onClick = { onClick(filterNew) }
+            ) {
+                Text(
+                    text = filterNew.displayName,
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = if (filterNew == filter) FontWeight.Bold else FontWeight.Normal
+                )
+            }
         }
-    }
-}
-
-@Composable
-private fun GoalTypeSelector(
-    filter: GoalFilter,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .clickable { onClick() }
-            .background(
-                if (isSelected) {
-                    MaterialTheme.colorScheme.secondaryContainer
-                } else {
-                    Color.Transparent
-                },
-                MaterialTheme.shapes.medium
-            )
-    ) {
-        Text(text = filter.displayName)
     }
 }
 

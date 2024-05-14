@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.time.LocalDateTime
@@ -60,7 +61,7 @@ fun Button(
 @Composable
 fun ButtonConfirm(
     border: BorderStroke? = null,
-    confirmationButtonContent: @Composable RowScope.() -> Unit = { Text("Proceed") },
+    confirmationButtonContent: @Composable RowScope.() -> Unit = { Text("Proceed", fontWeight = FontWeight.Bold) },
     confirmationDescription: @Composable () -> Unit = { },
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
     colors: ButtonColors = ButtonDefaults.buttonColors(),
@@ -95,7 +96,7 @@ fun ButtonWithDialog(
     content: @Composable RowScope.() -> Unit = { Text("Open Dialog") },
     contentAlignment: Alignment = Alignment.TopStart,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
-    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
+    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm", fontWeight = FontWeight.Bold) },
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
@@ -187,7 +188,8 @@ fun IconButtonWithDatePickerDialog(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = iconDescription
+                contentDescription = iconDescription,
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
     }
@@ -231,7 +233,8 @@ fun IconButtonWithDialog(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = iconDescription
+                contentDescription = iconDescription,
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
     }
@@ -275,8 +278,10 @@ private fun Dialog(
             if (showConfirmButton) {
                 Box(contentAlignment = Alignment.BottomEnd) {
                     Button(
+                        colors = ButtonDefaults.buttonColors(contentColor = MaterialTheme.colorScheme.surface),
                         content = buttonContentConfirm,
-                        onClick = onConfirm
+                        onClick = onConfirm,
+                        shape = MaterialTheme.shapes.extraLarge,
                     )
                 }
             }
@@ -285,6 +290,7 @@ private fun Dialog(
         dismissButton = {
             Box(contentAlignment = Alignment.BottomEnd) {
                 OutlinedButton(
+                    border = null,
                     content = buttonContentDismiss,
                     onClick = onDismiss,
                     shape = MaterialTheme.shapes.extraLarge
