@@ -86,7 +86,10 @@ fun FiltersItem(
                         icon = Icons.Outlined.Edit,
                         iconDescription = "Edit Icon Button",
                         confirmButtonContent = {
-                            Text("Save")
+                            Text(
+                                "Save",
+                                fontWeight = FontWeight.Bold
+                            )
                         },
                         dismissButtonContent = {
                             Text("Cancel")
