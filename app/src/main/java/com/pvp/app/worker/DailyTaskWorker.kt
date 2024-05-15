@@ -10,6 +10,7 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Notification
 import com.pvp.app.model.NotificationChannel
+import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
+import java.time.LocalTime
 
 @HiltWorker
 class DailyTaskWorker @AssistedInject constructor(
@@ -41,6 +43,7 @@ class DailyTaskWorker @AssistedInject constructor(
             .firstOrNull()
             ?.let { user ->
                 try {
+                    val today = LocalDate.now()
                     val tomorrow = LocalDate
                         .now()
                         .plusDays(1)
@@ -56,14 +59,14 @@ class DailyTaskWorker @AssistedInject constructor(
                         }
                         .first()
 
-                    val today = LocalDate.now()
+                    tasks
+                        .filter { it.date.isBefore(today) && !it.isCompleted }
+                        .forEach { task ->
+                            taskService.remove(task)
+                        }
 
                     if (tasks.filter { it.date == today }.size >= configuration.dailyTaskCount) {
                         return Result.success()
-                    }
-
-                    tasks.forEach { task ->
-                        taskService.remove(task)
                     }
 
                     taskService.generateDaily(

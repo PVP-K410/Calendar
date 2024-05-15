@@ -40,6 +40,7 @@ import com.pvp.app.model.Task
 import com.pvp.app.ui.common.InfoTooltip
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -49,6 +50,8 @@ fun TaskCard(
 ) {
     var checked = task.isCompleted
     var showDialog by remember { mutableStateOf(false) }
+
+    val isTodayDailyTask = task is SportTask && task.isDaily && task.date == LocalDate.now()
 
     if (showDialog) {
         TaskEditSheet(
@@ -88,26 +91,29 @@ fun TaskCard(
                     .padding(4.dp)
                     .fillMaxWidth()
             ) {
-                Checkbox(
-                    checked = checked,
-                    colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface),
-                    modifier = Modifier
-                        .size(36.dp)
-                        .align(CenterVertically),
-                    onCheckedChange = {
-                        model.update(
-                            { task ->
-                                Task.copy(
-                                    task,
-                                    isCompleted = it
+                if (task.date <= LocalDate.now()) {
+                    Checkbox(
+                        checked = checked,
+                        enabled = isTodayDailyTask || (task is SportTask && !task.isDaily),
+                        colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface),
+                        modifier = Modifier
+                            .size(36.dp)
+                            .align(CenterVertically),
+                        onCheckedChange = {
+                            if (isTodayDailyTask) {
+                                model.update(
+                                    { task ->
+                                        Task.copy(
+                                            task,
+                                            isCompleted = it
+                                        )
+                                    },
+                                    task
                                 )
-                            },
-                            task
-                        )
-
-                        checked = it
-                    }
-                )
+                            }
+                        }
+                    )
+                }
 
                 Text(
                     fontSize = 20.sp,
