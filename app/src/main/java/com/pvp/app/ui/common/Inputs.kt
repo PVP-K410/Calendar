@@ -292,44 +292,51 @@ fun EditableTextItem(
 ) {
     var editingText by remember(value) { mutableStateOf(value) }
 
-    EditableInfoItem(
-        confirmButtonEnabled = validate(editingText),
-        dialogContent = {
-            Column {
-                OutlinedTextField(
-                    label = { Text(label) },
-                    modifier = Modifier.fillMaxWidth(),
-                    onValueChange = { editingText = it },
-                    value = editingText
-                )
+    Column {
+        EditableInfoItem(
+            confirmButtonEnabled = validate(editingText),
+            dialogContent = {
+                Column {
+                    OutlinedTextField(
+                        label = { Text(label) },
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = { editingText = it },
+                        value = editingText
+                    )
 
-                TextError(
-                    enabled = !validate(editingText),
-                    text = errorMessage
+                    TextError(
+                        enabled = !validate(editingText),
+                        text = errorMessage
+                    )
+                }
+            },
+            dialogTitle = { Text("Editing $label") },
+            label = {
+                Text(
+                    fontWeight = FontWeight.Bold,
+                    text = label
                 )
+            },
+            onConfirm = {
+                if (validate(editingText)) {
+                    onValueChange(editingText)
+                }
+            },
+            onDismiss = {
+                editingText = value
+            },
+            value = {
+                if (value.isNotEmpty()) {
+                    Text(value)
+                }
             }
-        },
-        dialogTitle = { Text("Editing $label") },
-        label = {
-            Text(
-                fontWeight = FontWeight.Bold,
-                text = label
-            )
-        },
-        onConfirm = {
-            if (validate(editingText)) {
-                onValueChange(editingText)
-            }
-        },
-        onDismiss = {
-            editingText = value
-        },
-        value = {
-            if (value.isNotEmpty()) {
-                Text(value)
-            }
-        }
-    )
+        )
+
+        TextError(
+            enabled = !validate(value),
+            text = errorMessage
+        )
+    }
 }
 
 @Composable

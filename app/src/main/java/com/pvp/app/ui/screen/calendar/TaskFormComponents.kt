@@ -52,6 +52,7 @@ import com.pvp.app.ui.common.EditableSportActivityItem
 import com.pvp.app.ui.common.EditableTextItem
 import com.pvp.app.ui.common.EditableTimeItem
 import com.pvp.app.ui.common.FoldableContent
+import com.pvp.app.ui.common.TextError
 import com.pvp.app.ui.common.pixelsToDp
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -408,29 +409,36 @@ fun TaskFormFieldMealCards(
         )
     }
 
-    BasicTextField(
-        decorationBox = { innerTextField ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    contentDescription = null,
-                    imageVector = Icons.Outlined.Search,
-                )
+    Column {
+        BasicTextField(
+            decorationBox = { innerTextField ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        contentDescription = null,
+                        imageVector = Icons.Outlined.Search,
+                    )
 
-                Spacer(modifier = Modifier.size(8.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
 
-                innerTextField()
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(8.dp),
-        onValueChange = onChangeQuery,
-        singleLine = true,
-        textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
-        value = query
-    )
+                    innerTextField()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .padding(8.dp),
+            onValueChange = onChangeQuery,
+            singleLine = true,
+            textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
+            value = query
+        )
+
+        TextError(
+            enabled = state.meal == null,
+            text = "Please select a meal"
+        )
+    }
 }
 
 @Composable
