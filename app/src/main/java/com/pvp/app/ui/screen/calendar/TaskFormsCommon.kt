@@ -25,8 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.model.CustomMealTask
-import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -38,7 +37,6 @@ import com.pvp.app.ui.common.EditablePickerItem
 import com.pvp.app.ui.common.EditableSportActivityItem
 import com.pvp.app.ui.common.EditableTextItem
 import com.pvp.app.ui.common.EditableTimeItem
-import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.reflect.KClass
@@ -62,22 +60,9 @@ fun TaskCommonForm(
     var distance by remember { mutableStateOf((task as? SportTask)?.distance) }
     var reminderTime by remember { mutableStateOf(task?.reminderTime) }
 
-    val isDescriptionSupported = remember(task) {
-        taskClass in listOf(
-            CustomMealTask::class,
-            GeneralTask::class,
-            SportTask::class
-        )
-    }
-
-    var description by remember(isDescriptionSupported) {
+    var description by remember {
         mutableStateOf(
-            when (task) {
-                is CustomMealTask -> task.recipe
-                is GeneralTask -> task.description
-                is SportTask -> task.description
-                else -> ""
-            } ?: ""
+            (task as? MealTask)?.recipe ?: task?.description ?: ""
         )
     }
 
@@ -118,13 +103,11 @@ fun TaskCommonForm(
             onValueChange = { title = it }
         )
 
-        if (isDescriptionSupported) {
-            EditableTextItem(
-                label = if (taskClass == CustomMealTask::class) "Recipe" else "Description",
-                value = description,
-                onValueChange = { description = it }
-            )
-        }
+        EditableTextItem(
+            label = if (taskClass == MealTask::class) "Recipe" else "Description",
+            value = description,
+            onValueChange = { description = it }
+        )
 
         if (targetClass == SportTask::class) {
             EditableSportActivityItem(
@@ -251,8 +234,9 @@ fun TaskCommonForm(
                                 title = title
                             )
 
-                            CustomMealTask::class -> model.create(
+                            MealTask::class -> model.create(
                                 date = dateTime.toLocalDate(),
+                                description = "",
                                 duration = duration,
                                 reminderTime = reminderTime,
                                 recipe = description,
@@ -272,14 +256,24 @@ fun TaskCommonForm(
                     } else {
                         model.update(
                             { task ->
-                                updateTask(
-                                    dateTime = dateTime,
-                                    description = description,
-                                    duration = duration,
-                                    reminderTime = reminderTime,
-                                    task = task,
-                                    title = title
-                                )
+                                task.title = title
+                                task.description = description
+                                task.duration = duration
+                                task.reminderTime = reminderTime
+                                task.date = dateTime.toLocalDate()
+                                task.time = dateTime.toLocalTime()
+
+                                when (task) {
+                                    is SportTask -> {
+                                        task.activity = activity
+                                        task.distance = distance
+                                    }
+
+                                    is MealTask -> {
+                                        task.recipe = description
+                                        task.description = ""
+                                    }
+                                }
                             },
                             task!!
                         )
@@ -292,61 +286,5 @@ fun TaskCommonForm(
                 Text(if (isCreateForm) "Create" else "Update")
             }
         }
-    }
-}
-
-private fun updateTask(
-    dateTime: LocalDateTime,
-    description: String,
-    duration: Duration?,
-    reminderTime: Duration?,
-    task: Task,
-    title: String
-): Task {
-    return when (task) {
-        is SportTask -> {
-            SportTask.copy(
-                task,
-                date = dateTime.toLocalDate(),
-                description = description,
-                duration = duration,
-                reminderTime = reminderTime,
-                time = dateTime.toLocalTime(),
-                title = title
-            )
-        }
-
-        is CustomMealTask -> {
-            CustomMealTask.copy(
-                task,
-                date = dateTime.toLocalDate(),
-                duration = duration,
-                recipe = description,
-                reminderTime = reminderTime,
-                time = dateTime.toLocalTime(),
-                title = title
-            )
-        }
-
-        is GeneralTask -> {
-            GeneralTask.copy(
-                task,
-                date = dateTime.toLocalDate(),
-                description = description,
-                duration = duration,
-                reminderTime = reminderTime,
-                time = dateTime.toLocalTime(),
-                title = title
-            )
-        }
-
-        else -> Task.copy(
-            task,
-            date = dateTime.toLocalDate(),
-            duration = duration,
-            reminderTime = reminderTime,
-            time = dateTime.toLocalTime(),
-            title = title
-        )
     }
 }

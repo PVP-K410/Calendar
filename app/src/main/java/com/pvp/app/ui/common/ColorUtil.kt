@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Setting
 import com.pvp.app.ui.screen.settings.SettingsViewModel
 import com.pvp.app.ui.screen.settings.Theme
@@ -35,7 +36,9 @@ fun Color.orInDarkTheme(
     color: Color,
     model: SettingsViewModel = hiltViewModel()
 ): Color {
-    val themeValue by model.rememberSetting(Setting.Appearance.ApplicationTheme)
+    val themeValue by model
+        .get(Setting.Appearance.ApplicationTheme)
+        .collectAsStateWithLifecycle()
 
     return if (themeValue == Theme.Dark.ordinal) color else this
 }

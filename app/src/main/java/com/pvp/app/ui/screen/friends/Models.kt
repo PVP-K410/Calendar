@@ -14,12 +14,10 @@ data class FriendEntry(
 )
 
 data class FriendState(
-    val calories: Double = 0.0,
     val details: Friends = Friends(),
     val entry: FriendEntry = FriendEntry(),
     val friendsMutual: List<FriendEntry> = emptyList(),
     val state: FriendScreenState = FriendScreenState.Loading,
-    val steps: Long = 0L,
     val tasksCompleted: Int = 0
 )
 

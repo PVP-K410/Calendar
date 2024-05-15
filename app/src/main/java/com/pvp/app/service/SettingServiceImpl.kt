@@ -23,7 +23,9 @@ class SettingServiceImpl @Inject constructor(
         context.dataStoreSettings.edit { it.clear() }
     }
 
-    override fun <T> get(setting: Setting<T>): Flow<T> {
+    override fun <T> get(
+        setting: Setting<T>
+    ): Flow<T> {
         return context.dataStoreSettings.data.map { it[setting.key] ?: setting.defaultValue }
     }
 

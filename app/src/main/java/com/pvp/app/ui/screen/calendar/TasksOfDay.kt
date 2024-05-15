@@ -29,7 +29,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.pvp.app.model.CustomMealTask
+import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import java.util.Locale
@@ -143,8 +143,8 @@ private fun filterTasks(
     return when (filter) {
         TaskFilter.Daily -> tasks.filter { it is SportTask && it.isDaily }
         TaskFilter.Sports -> tasks.filter { it is SportTask && !it.isDaily }
-        TaskFilter.Meal -> tasks.filterIsInstance<CustomMealTask>()
-        TaskFilter.General -> tasks.filter { task -> task !is SportTask && task !is CustomMealTask }
+        TaskFilter.Meal -> tasks.filterIsInstance<MealTask>()
+        TaskFilter.General -> tasks.filter { task -> task !is SportTask && task !is MealTask }
     }
 }
 

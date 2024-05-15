@@ -94,10 +94,9 @@ class AutocompleteService : Service() {
                     }
 
                     false -> {
-                        return@mapNotNull SportTask.copy(
-                            task,
-                            isCompleted = true
-                        )
+                        task.isCompleted = true
+
+                        return@mapNotNull task
                     }
                 }
             }

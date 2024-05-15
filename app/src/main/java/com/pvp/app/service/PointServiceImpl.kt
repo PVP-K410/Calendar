@@ -6,7 +6,6 @@ import com.pvp.app.api.Configuration
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.Goal
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
@@ -41,7 +40,7 @@ class PointServiceImpl @Inject constructor(
                 add(if (Random.nextFloat() <= 0.1) 2 else 1)
 
                 when (task) {
-                    is CustomMealTask, is MealTask -> {
+                    is MealTask -> {
                         task.duration
                             ?.toMinutes()
                             ?.let {
@@ -191,8 +190,8 @@ class PointServiceImpl @Inject constructor(
 
     private fun Task.markExpired(): Task {
         return when (this) {
-            is CustomMealTask -> {
-                CustomMealTask.copy(
+            is MealTask -> {
+                MealTask.copy(
                     points = this.points.copy(
                         isExpired = true
                     ),

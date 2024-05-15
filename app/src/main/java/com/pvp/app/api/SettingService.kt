@@ -14,7 +14,9 @@ interface SettingService {
      * Get the value of the setting. If the setting is not present in the local storage, the default
      * value is returned.
      */
-    fun <T> get(setting: Setting<T>): Flow<T>
+    fun <T> get(
+        setting: Setting<T>
+    ): Flow<T>
 
     /**
      * Merge the value of the setting into the local storage. If the value is `null`, the setting is

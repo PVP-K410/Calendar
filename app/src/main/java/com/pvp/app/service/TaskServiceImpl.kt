@@ -11,9 +11,6 @@ import com.pvp.app.api.UserService
 import com.pvp.app.common.JsonUtil.JSON
 import com.pvp.app.common.JsonUtil.toJsonElement
 import com.pvp.app.common.JsonUtil.toPrimitivesMap
-import com.pvp.app.model.CustomMealTask
-import com.pvp.app.model.GeneralTask
-import com.pvp.app.model.Meal
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.Points
 import com.pvp.app.model.SportActivity
@@ -77,16 +74,13 @@ class TaskServiceImpl @Inject constructor(
             return
         }
 
-        val taskNew = Task.copy(
-            task,
-            points = task.points.copy(claimedAt = now)
-        )
+        task.points = task.points.copy(claimedAt = now)
 
         userService
-            .get(taskNew.userEmail)
+            .get(task.userEmail)
             .firstOrNull()
             ?.let { user ->
-                val points = taskNew.points.value + (if (taskNew.points.isExpired) 1 else 0)
+                val points = task.points.value + (if (task.points.isExpired) 1 else 0)
                 val experience = user.experience + points
 
                 userService.merge(
@@ -100,7 +94,7 @@ class TaskServiceImpl @Inject constructor(
             ?: error("User not found while claiming task points")
 
         update(
-            taskNew,
+            task,
             false
         )
     }
@@ -113,36 +107,44 @@ class TaskServiceImpl @Inject constructor(
         time: LocalTime?,
         title: String,
         userEmail: String
-    ): GeneralTask {
-        val task = run {
-            val task = GeneralTask(
-                date = date,
-                description = description,
-                duration = duration,
-                id = null,
-                isCompleted = false,
-                points = Points(),
-                reminderTime = reminderTime,
-                time = time?.cleanEnd(),
-                title = title,
-                userEmail = userEmail
-            )
-
-            GeneralTask.copy(
-                task,
-                points = task.points.copy(
-                    isExpired = task.date.isBefore(LocalDate.now()),
-                    value = pointService.calculate(task)
-                )
-            )
-        }
-
-        return merge(
-            database,
-            "General task creation failed",
-            identifier,
-            task
+    ): Task {
+        val task = Task(
+            date = date,
+            description = description,
+            duration = duration,
+            reminderTime = reminderTime,
+            id = null,
+            isCompleted = false,
+            points = Points(),
+            time = time?.cleanEnd(),
+            title = title,
+            userEmail = userEmail
         )
+
+        task.points = task.points.copy(
+            isExpired = task.date.isBefore(LocalDate.now()),
+            value = pointService.calculate(task)
+        )
+
+        val reference = database
+            .collection(identifier)
+            .add(encodeByType(task))
+            .await()
+
+        reference
+            .update(
+                Task::id.name,
+                reference.id
+            )
+            .await()
+
+        val snapshot = reference
+            .get()
+            .await()
+
+        return snapshot.data
+            ?.let { decodeByType(it) }
+            ?: error("General task creation failed")
     }
 
     override suspend fun create(
@@ -157,124 +159,102 @@ class TaskServiceImpl @Inject constructor(
         title: String,
         userEmail: String
     ): SportTask {
-        val task = run {
-            val task = SportTask(
-                activity = activity,
-                date = date,
-                description = description,
-                distance = distance,
-                duration = duration,
-                id = null,
-                isCompleted = false,
-                isDaily = isDaily,
-                points = Points(),
-                reminderTime = reminderTime,
-                time = time?.cleanEnd(),
-                title = title,
-                userEmail = userEmail
-            )
+        val task = SportTask(
+            activity = activity,
+            date = date,
+            description = description,
+            distance = distance,
+            duration = duration,
+            reminderTime = reminderTime,
+            id = null,
+            isCompleted = false,
+            isDaily = isDaily,
+            points = Points(),
+            time = time?.cleanEnd(),
+            title = title,
+            userEmail = userEmail
+        )
 
-            SportTask.copy(
-                task,
-                points = task.points.copy(
-                    isExpired = task.date.isBefore(LocalDate.now()),
-                    value = pointService.calculate(
-                        task = task,
-                        increasePointYield = isWeekly(
-                            activity,
-                            userService
-                        )
-                    )
+        task.points = task.points.copy(
+            isExpired = task.date.isBefore(LocalDate.now()),
+            value = pointService.calculate(
+                task = task,
+                increasePointYield = isWeekly(
+                    activity,
+                    userService
                 )
             )
-        }
-
-        return merge(
-            database,
-            "Sport task creation failed",
-            identifier,
-            task
         )
+
+        val reference = database
+            .collection(identifier)
+            .add(encodeByType(task))
+            .await()
+
+        reference
+            .update(
+                Task::id.name,
+                reference.id
+            )
+            .await()
+
+        val snapshot = reference
+            .get()
+            .await()
+
+        return snapshot.data
+            ?.let { decodeByType(it) } as? SportTask
+            ?: error("Sport task creation failed")
     }
 
     override suspend fun create(
         date: LocalDate,
+        description: String?,
         duration: Duration?,
         reminderTime: Duration?,
         recipe: String,
         time: LocalTime?,
         title: String,
         userEmail: String
-    ): CustomMealTask {
-        val task = run {
-            val task = CustomMealTask(
-                date = date,
-                duration = duration,
-                id = null,
-                isCompleted = false,
-                points = Points(),
-                recipe = recipe,
-                reminderTime = reminderTime,
-                time = time?.cleanEnd(),
-                title = title,
-                userEmail = userEmail
-            )
-
-            CustomMealTask.copy(
-                task,
-                points = task.points.copy(
-                    isExpired = task.date.isBefore(LocalDate.now()),
-                    value = pointService.calculate(task)
-                )
-            )
-        }
-
-        return merge(
-            database,
-            "Custom meal task creation failed",
-            identifier,
-            task
-        )
-    }
-
-    override suspend fun create(
-        date: LocalDate,
-        duration: Duration?,
-        meal: Meal,
-        reminderTime: Duration?,
-        time: LocalTime?,
-        title: String?,
-        userEmail: String
     ): MealTask {
-        val task = run {
-            val task = MealTask(
-                date = date,
-                duration = duration,
-                id = null,
-                isCompleted = false,
-                mealId = meal.id,
-                points = Points(),
-                reminderTime = reminderTime,
-                time = time?.cleanEnd(),
-                title = title ?: meal.name,
-                userEmail = userEmail
-            )
-
-            MealTask.copy(
-                task,
-                points = task.points.copy(
-                    isExpired = task.date.isBefore(LocalDate.now()),
-                    value = pointService.calculate(task)
-                )
-            )
-        }
-
-        return merge(
-            database,
-            "Meal task creation failed",
-            identifier,
-            task
+        val task = MealTask(
+            date = date,
+            description = description,
+            duration = duration,
+            reminderTime = reminderTime,
+            id = null,
+            isCompleted = false,
+            points = Points(),
+            recipe = recipe,
+            time = time?.cleanEnd(),
+            title = title,
+            userEmail = userEmail
         )
+
+        task.points = task.points.copy(
+            isExpired = task.date.isBefore(LocalDate.now()),
+            value = pointService.calculate(task)
+        )
+
+        val reference = database
+            .collection(identifier)
+            .add(encodeByType(task))
+            .await()
+
+        reference
+            .update(
+                Task::id.name,
+                reference.id
+            )
+            .await()
+
+        val snapshot = reference
+            .get()
+            .await()
+
+        return snapshot.data
+            ?.let { decodeByType(it) } as? MealTask
+            ?: error("Meal task creation failed")
     }
 
     override suspend fun generateDaily(
@@ -338,7 +318,7 @@ class TaskServiceImpl @Inject constructor(
 
         database
             .collection(identifier)
-            .document(task.id!!)
+            .document(task.id)
             .delete()
             .await()
     }
@@ -366,29 +346,25 @@ class TaskServiceImpl @Inject constructor(
             error("Task id is required to update it.")
         }
 
-        val timeNew = task.time?.cleanEnd()
+        task.time = task.time?.cleanEnd()
 
-        val points = if (updatePoints && task.points.claimedAt == null) {
-            task.points.copy(
+        if (updatePoints && task.points.claimedAt == null) {
+            task.points = task.points.copy(
                 value = pointService.calculate(task)
             )
-        } else {
-            task.points
         }
-
-        val taskNew = Task.copy(
-            task,
-            points = points,
-            time = timeNew
-        )
 
         database
             .collection(identifier)
-            .document(taskNew.id!!)
-            .set(encodeByType(taskNew))
+            .document(task.id)
+            .set(encodeByType(task))
             .await()
 
-        return taskNew
+        return when (task) {
+            is MealTask -> MealTask.copy(task)
+            is SportTask -> SportTask.copy(task)
+            else -> Task.copy(task)
+        }
     }
 
     companion object {
@@ -405,31 +381,19 @@ class TaskServiceImpl @Inject constructor(
                 error("Task data is not a JSON object")
             }
 
-            return when {
-                element.containsKey(CustomMealTask::recipe.name) -> {
-                    JSON.decodeFromJsonElement<CustomMealTask>(element)
-                }
-
-                element.containsKey(MealTask::mealId.name) -> {
-                    JSON.decodeFromJsonElement<MealTask>(element)
-                }
-
-                element.containsKey(SportTask::activity.name) -> {
-                    JSON.decodeFromJsonElement<SportTask>(element)
-                }
-
-                else -> {
-                    JSON.decodeFromJsonElement<GeneralTask>(element)
-                }
+            if (element.containsKey(MealTask::recipe.name)) {
+                return JSON.decodeFromJsonElement<MealTask>(element)
             }
+
+            if (element.containsKey(SportTask::activity.name)) {
+                return JSON.decodeFromJsonElement<SportTask>(element)
+            }
+
+            return JSON.decodeFromJsonElement<Task>(element)
         }
 
         private fun encodeByType(task: Task): Map<String, Any?> {
             return when (task) {
-                is CustomMealTask -> JSON
-                    .encodeToJsonElement<CustomMealTask>(task)
-                    .toPrimitivesMap()
-
                 is MealTask -> JSON
                     .encodeToJsonElement<MealTask>(task)
                     .toPrimitivesMap()
@@ -439,7 +403,7 @@ class TaskServiceImpl @Inject constructor(
                     .toPrimitivesMap()
 
                 else -> JSON
-                    .encodeToJsonElement<GeneralTask>(task as GeneralTask)
+                    .encodeToJsonElement<Task>(task)
                     .toPrimitivesMap()
             }
         }
@@ -455,8 +419,11 @@ class TaskServiceImpl @Inject constructor(
         ): Double {
             val unit = baseDistance * 1000 / (1 / SportActivity.Walking.pointsRatioDistance)
 
-            val multiplier = "%.2f"
-                .format(exerciseService.calculateActivityLevel())
+            val multiplier = String
+                .format(
+                    "%.2f",
+                    exerciseService.calculateActivityLevel()
+                )
                 .toDouble()
 
             val upperBound = (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10)
@@ -486,8 +453,11 @@ class TaskServiceImpl @Inject constructor(
         ): Duration {
             val unit = baseDuration.seconds / (1 / SportActivity.Basketball.pointsRatioDuration)
 
-            val multiplier = "%.2f"
-                .format(exerciseService.calculateActivityLevel())
+            val multiplier = String
+                .format(
+                    "%.2f",
+                    exerciseService.calculateActivityLevel()
+                )
                 .toDouble()
 
             // Division and multiplication by 300 are there to ensure upper and lower bounds
@@ -537,42 +507,6 @@ class TaskServiceImpl @Inject constructor(
                 .firstOrNull()?.weeklyActivities
                 ?.contains(activity)
                 ?: false
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        private suspend fun <T : Task> merge(
-            database: FirebaseFirestore,
-            errorMessage: String,
-            identifier: String,
-            task: T
-        ): T {
-            val reference = database
-                .collection(identifier)
-                .add(encodeByType(task))
-                .await()
-
-            reference
-                .update(
-                    Task::id.name,
-                    reference.id
-                )
-                .await()
-
-            val snapshot = reference
-                .get()
-                .await()
-
-            return snapshot.data
-                ?.let {
-                    when (task) {
-                        is CustomMealTask -> decodeByType(it)
-                        is GeneralTask -> decodeByType(it)
-                        is MealTask -> decodeByType(it)
-                        is SportTask -> decodeByType(it)
-                        else -> decodeByType(it)
-                    }
-                } as? T
-                ?: error(errorMessage)
         }
     }
 }
