@@ -25,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -91,7 +90,7 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
 
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(vertical = 16.dp)
         )
 
         if (holdersOwned.isEmpty()) {
@@ -118,16 +117,13 @@ fun DecorationScreen(modifier: Modifier) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .then(modifier)
-            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
     ) {
-        Spacer(modifier = Modifier.size(16.dp))
-
         PrimaryTabRow(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            divider = { VerticalDivider() },
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            divider = {},
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .fillMaxWidth(0.9f)
+                .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium),
             selectedTabIndex = screen
         ) {
@@ -137,7 +133,14 @@ fun DecorationScreen(modifier: Modifier) {
                         modifier = Modifier.height(32.dp),
                         onClick = { screen = index },
                         selected = screen == index,
-                    ) { Text(title) }
+                    ) {
+                        Text(
+                            text = title,
+                            color = MaterialTheme.colorScheme.inverseSurface,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = if (screen == index) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
                 }
         }
 
@@ -243,7 +246,7 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
 
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(vertical = 16.dp)
         )
 
         if (holders.size == state.holders.size) {

@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -119,7 +120,9 @@ fun Dialog(
             Box(contentAlignment = Alignment.BottomEnd) {
                 Button(
                     content = buttonContentConfirm,
-                    onClick = onConfirm
+                    onClick = onConfirm,
+                    shape = MaterialTheme.shapes.extraLarge,
+                    colors = ButtonDefaults.buttonColors(contentColor = MaterialTheme.colorScheme.surface)
                 )
             }
         },
@@ -129,7 +132,8 @@ fun Dialog(
                 OutlinedButton(
                     content = buttonContentDismiss,
                     onClick = onDismiss,
-                    shape = MaterialTheme.shapes.extraLarge
+                    shape = MaterialTheme.shapes.extraLarge,
+                    border = null
                 )
             }
         },
@@ -150,15 +154,22 @@ fun FoldableContent(
 ) {
     var folded by remember { mutableStateOf(isFoldedInitially) }
 
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 8.dp)
+            .background(
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
+            )
+    ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
                 .clip(MaterialTheme.shapes.medium)
                 .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = MaterialTheme.colorScheme.surfaceContainer.darken(0.2f),
                     shape = MaterialTheme.shapes.medium
                 )
                 .clickable { folded = !folded }

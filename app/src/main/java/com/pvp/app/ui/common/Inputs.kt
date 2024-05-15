@@ -208,7 +208,7 @@ fun EditableInfoItem(
     Box(
         modifier = Modifier
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(8.dp)
@@ -225,7 +225,12 @@ fun EditableInfoItem(
         }
 
         IconButtonConfirm(
-            confirmationButtonContent = { Text("Save") },
+            confirmationButtonContent = {
+                Text(
+                    "Save",
+                    fontWeight = FontWeight.Bold
+                )
+            },
             confirmationDescription = dialogContent,
             confirmationTitle = dialogTitle,
             icon = Icons.Outlined.Edit,
@@ -247,7 +252,7 @@ fun EditableDateItem(
     Box(
         modifier = Modifier
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(8.dp)

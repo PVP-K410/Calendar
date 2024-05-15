@@ -3,6 +3,7 @@
 package com.pvp.app.ui.screen.decoration
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,12 +45,17 @@ private fun DecorationCard(
             .padding(8.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(
-                color = if (holder.applied) {
-                    MaterialTheme.colorScheme.surfaceContainer.darken(0.15f)
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainer
-                },
+                color = MaterialTheme.colorScheme.surfaceContainer.darken(0.2f),
                 shape = MaterialTheme.shapes.medium
+            )
+            .then(
+                if (holder.applied)
+                    Modifier.border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = MaterialTheme.shapes.medium
+                    )
+                else Modifier
             )
             .clickable(isClickable) { onClick() }
     ) {
