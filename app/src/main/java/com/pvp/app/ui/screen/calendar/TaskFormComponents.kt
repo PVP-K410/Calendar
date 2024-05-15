@@ -447,7 +447,7 @@ fun TaskFormFieldTitle(state: TaskFormState<*>) {
         label = "Title",
         value = state.title ?: "",
         onValueChange = { state.title = it },
-        validate = { it.isNotEmpty() },
+        validate = { it.isNotBlank() },
         errorMessage = "Title cannot be empty"
     )
 }
