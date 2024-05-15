@@ -166,7 +166,15 @@ fun TaskFormFieldDescription(state: TaskFormState<*>) {
     EditableTextItem(
         label = if (isRecipe) "Recipe" else "Description",
         value = description,
-        onValueChange = { onChange(it) }
+        onValueChange = { onChange(it) },
+        validate = {
+            if (isRecipe) {
+                it.isNotBlank()
+            } else {
+                true
+            }
+        },
+        errorMessage = if (isRecipe) "Recipe cannot be empty" else ""
     )
 }
 
@@ -430,7 +438,9 @@ fun TaskFormFieldTitle(state: TaskFormState<*>) {
     EditableTextItem(
         label = "Title",
         value = state.title ?: "",
-        onValueChange = { state.title = it }
+        onValueChange = { state.title = it },
+        validate = { it.isNotEmpty() },
+        errorMessage = "Title cannot be empty"
     )
 }
 

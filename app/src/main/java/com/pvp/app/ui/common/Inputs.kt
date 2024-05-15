@@ -30,8 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -310,10 +308,12 @@ fun EditableTextItem(
                 if (!validate(editingText)) {
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = errorMessage,
-                        style = TextStyle(color = Color.Red)
-                    )
+                    if (editingText.isNotEmpty()) {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         },
