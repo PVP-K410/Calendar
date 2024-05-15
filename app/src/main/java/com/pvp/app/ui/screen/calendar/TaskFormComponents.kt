@@ -104,12 +104,17 @@ fun TaskFormButtonsRow(
         }
 
         Button(
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.surface
+            ),
             enabled = state.isFormValid,
             onClick = {
                 model.mergeTaskFromState(state = state)
 
                 onClose()
-            }
+            },
+            shape = MaterialTheme.shapes.extraLarge
         ) { Text(if (state.task == null) "Create" else "Update") }
     }
 }
