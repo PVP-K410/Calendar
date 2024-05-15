@@ -115,7 +115,9 @@ fun TaskCommonForm(
         EditableTextItem(
             label = "Title",
             value = title,
-            onValueChange = { title = it }
+            onValueChange = { title = it },
+            validate = { it.isNotEmpty() },
+            errorMessage = "Title cannot be empty"
         )
 
         if (isDescriptionSupported) {

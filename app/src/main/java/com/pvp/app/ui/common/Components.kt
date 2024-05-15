@@ -104,6 +104,7 @@ fun AsyncImage(
 fun Dialog(
     buttonContentConfirm: @Composable RowScope.() -> Unit,
     buttonContentDismiss: @Composable RowScope.() -> Unit,
+    buttonEnabledConfirm: Boolean = true,
     content: @Composable () -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
@@ -119,7 +120,8 @@ fun Dialog(
             Box(contentAlignment = Alignment.BottomEnd) {
                 Button(
                     content = buttonContentConfirm,
-                    onClick = onConfirm
+                    onClick = onConfirm,
+                    enabled = buttonEnabledConfirm
                 )
             }
         },
@@ -286,7 +288,10 @@ fun Experience(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun InfoTooltip(
     tooltipText: String,

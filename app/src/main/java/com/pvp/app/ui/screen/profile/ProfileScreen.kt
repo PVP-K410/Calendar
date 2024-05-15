@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -70,10 +71,11 @@ private val INGREDIENTS = Ingredient.entries.map { it.title }
 
 @Composable
 private fun AccountDeleteButton(
-    viewModel: ProfileViewModel
+    viewModel: ProfileViewModel = hiltViewModel(),
+    state: ProfileState
 ) {
     val context = LocalContext.current
-    val username by remember { mutableStateOf(viewModel.state.value.user.username) }
+    val username = state.user.username
     var input by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
@@ -162,10 +164,8 @@ private fun Initials(
     model: ProfileViewModel = hiltViewModel(),
     state: ProfileState
 ) {
-    val context = LocalContext.current
     val email by remember { mutableStateOf(state.user.email) }
     var userName by remember { mutableStateOf(state.user.username) }
-    var userNameEdit by remember { mutableStateOf(userName) }
     val lengthMin = model.intervalUsernameLength.first
     val lengthMax = model.intervalUsernameLength.second
 
@@ -206,25 +206,14 @@ private fun Initials(
         }
 
         Username(
-            onChange = { userNameEdit = it },
-            onDismiss = { userNameEdit = userName },
             onSave = {
-                userNameEdit = userNameEdit.trim()
+                userName = it
 
-                if (userNameEdit.length in lengthMin..lengthMax) {
-                    userName = userNameEdit
-
-                    onUsernameChange(userNameEdit)
-
-                    context.showToast(message = "Your username has been updated")
-                } else {
-                    userNameEdit = userName
-
-                    context.showToast(message = "Username must be between $lengthMin and $lengthMax characters long")
-                }
+                onUsernameChange(it.trim())
             },
             username = userName,
-            usernameEdit = userNameEdit
+            validate = { it.length in lengthMin..lengthMax },
+            errorMessage = "Username must be between $lengthMin and $lengthMax characters long"
         )
 
         Text(
@@ -303,7 +292,7 @@ fun ProfileScreen(
                 state = state
             )
 
-            AccountDeleteButton(viewModel)
+            AccountDeleteButton(state = state)
         }
     }
 }
@@ -459,12 +448,13 @@ private fun RouteOptionsApplier() {
 
 @Composable
 private fun Username(
-    onChange: (String) -> Unit,
-    onDismiss: () -> Unit,
-    onSave: () -> Unit,
+    onSave: (String) -> Unit,
     username: String,
-    usernameEdit: String
+    validate: (String) -> Boolean = { false },
+    errorMessage: String = "Invalid input"
 ) {
+    var usernameEdit by remember { mutableStateOf(username) }
+
     Row(
         modifier = Modifier.padding(top = 15.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -477,16 +467,26 @@ private fun Username(
 
         IconButtonWithDialog(
             confirmButtonContent = { Text("Save") },
+            confirmButtonEnabled = validate(usernameEdit),
             dismissButtonContent = { Text("Cancel") },
             dialogContent = {
-                OutlinedTextField(
-                    label = { Text("Username") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    onValueChange = onChange,
-                    value = usernameEdit
-                )
+                Column {
+                    OutlinedTextField(
+                        label = { Text("Username") },
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = { usernameEdit = it },
+                        value = usernameEdit
+                    )
+
+                    if (!validate(usernameEdit)) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = errorMessage,
+                            style = TextStyle(color = Color.Red)
+                        )
+                    }
+                }
             },
             dialogTitle = { Text("Editing username") },
             icon = Icons.Outlined.Edit,
@@ -496,8 +496,14 @@ private fun Username(
                 start = 5.dp,
                 top = 4.dp
             ),
-            onConfirm = onSave,
-            onDismiss = onDismiss
+            onConfirm = {
+                if (validate(usernameEdit)) {
+                    onSave(usernameEdit)
+                }
+            },
+            onDismiss = {
+                usernameEdit = username
+            }
         )
     }
 }
