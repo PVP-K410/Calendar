@@ -295,7 +295,7 @@ private fun SettingHealthConnectPermissions(context: Context) {
                 permissionsPreUpsideDownCake(context)
             }
         },
-        icon = Icons.Outlined.Settings,
+        icon = Icons.Outlined.Settings
     )
 }
 
