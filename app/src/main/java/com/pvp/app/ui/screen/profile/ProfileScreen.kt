@@ -43,7 +43,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -60,6 +59,7 @@ import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.RouteTitle
+import com.pvp.app.ui.common.TextError
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
 import com.pvp.app.ui.common.showToast
@@ -481,14 +481,10 @@ private fun Username(
                         value = usernameEdit
                     )
 
-                    if (!validate(usernameEdit)) {
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = errorMessage,
-                            style = TextStyle(color = Color.Red)
-                        )
-                    }
+                    TextError(
+                        enabled = !validate(usernameEdit),
+                        text = errorMessage
+                    )
                 }
             },
             dialogTitle = { Text("Editing username") },
