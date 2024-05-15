@@ -33,7 +33,12 @@ fun Day(
     onClick: () -> Unit = {}
 ) {
     Column(
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .padding(8.dp)
+            .shadow(
+                elevation = 16.dp,
+                shape = MaterialTheme.shapes.medium
+            )
     ) {
         Box(
             modifier = Modifier
@@ -104,12 +109,8 @@ fun DayCard(
                 alpha = if (pageIndex == page) 1f else 0.5f,
                 scaleX = scale,
                 scaleY = scale
-            )
-            .shadow(
-                elevation = 16.dp,
-                shape = MaterialTheme.shapes.medium
             ),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.Center
     ) {
         Day(
             date = date,

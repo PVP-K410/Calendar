@@ -73,7 +73,8 @@ private fun AccountDeleteButton(
     viewModel: ProfileViewModel
 ) {
     val context = LocalContext.current
-    val username by remember { mutableStateOf(viewModel.state.value.user.username) }
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val username by remember(state.user.username) { mutableStateOf(state.user.username) }
     var input by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 

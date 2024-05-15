@@ -19,17 +19,27 @@ enum class Ingredient(
     Carrots("Carrots"),
     Cheese("Cheese"),
     Chicken("Chicken"),
+    Corn("Corn"),
+    Eggs("Eggs"),
     Fish("Fish"),
     Garlic("Garlic"),
+    Lamb("Lamb"),
     Milk("Milk"),
     Mushrooms("Mushrooms"),
+    Nuts("Nuts"),
     Onions("Onions"),
+    Peanuts("Peanuts"),
     Pork("Pork"),
     Potatoes("Potatoes"),
     Rice("Rice"),
+    Shellfish("Shellfish"),
     Shrimp("Shrimp"),
+    Soybeans("Soybeans"),
     Spinach("Spinach"),
-    Tomatoes("Tomatoes");
+    Tofu("Tofu"),
+    Tomatoes("Tomatoes"),
+    Turkey("Turkey"),
+    Wheat("Wheat");
 
     companion object {
 

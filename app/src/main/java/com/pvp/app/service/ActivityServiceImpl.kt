@@ -58,8 +58,6 @@ class ActivityServiceImpl @Inject constructor(
             )
             .snapshots()
             .map { qs ->
-                println(qs.documents)
-
                 qs.documents.mapNotNull { ds -> ds?.toObject(ActivityEntry::class.java) }
             }
     }

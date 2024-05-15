@@ -35,7 +35,7 @@ import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
-import com.pvp.app.common.DurationUtil.asString
+import com.pvp.app.common.TimeUtil.asString
 import java.time.Duration
 import java.time.LocalDate
 import kotlin.math.min

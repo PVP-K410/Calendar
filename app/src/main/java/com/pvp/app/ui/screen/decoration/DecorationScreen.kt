@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -22,8 +21,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.ui.common.Dialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
 import com.pvp.app.ui.common.showToast
@@ -119,30 +117,10 @@ fun DecorationScreen(modifier: Modifier) {
             .then(modifier)
             .padding(16.dp)
     ) {
-        PrimaryTabRow(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            divider = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(MaterialTheme.shapes.medium),
-            selectedTabIndex = screen
-        ) {
-            screens()
-                .forEachIndexed { index, (title, _) ->
-                    Tab(
-                        modifier = Modifier.height(32.dp),
-                        onClick = { screen = index },
-                        selected = screen == index,
-                    ) {
-                        Text(
-                            text = title,
-                            color = MaterialTheme.colorScheme.inverseSurface,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = if (screen == index) FontWeight.Bold else FontWeight.Normal
-                        )
-                    }
-                }
-        }
+        TabSelector(
+            onSelect = { screen = it },
+            tabs = screens().map { it.first },
+        )
 
         Spacer(modifier = Modifier.size(16.dp))
 

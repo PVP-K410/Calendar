@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
@@ -36,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import java.time.Duration
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -209,7 +208,7 @@ fun EditableInfoItem(
         modifier = Modifier
             .background(
                 color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(8.dp)
+                shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
             .fillMaxWidth()
@@ -246,14 +245,14 @@ fun EditableInfoItem(
 @Composable
 fun EditableDateItem(
     label: String,
-    value: LocalDateTime,
-    onValueChange: (LocalDateTime) -> Unit
+    value: LocalDate,
+    onValueChange: (LocalDate) -> Unit
 ) {
     Box(
         modifier = Modifier
             .background(
                 color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(8.dp)
+                shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
             .fillMaxWidth()
@@ -276,7 +275,7 @@ fun EditableDateItem(
             icon = Icons.Outlined.Edit,
             iconDescription = "Edit info item icon button",
             iconSize = 30.dp,
-            onDateSelected = onValueChange
+            onDateSelected = { onValueChange(it.toLocalDate()) }
         )
     }
 }
@@ -287,7 +286,7 @@ fun EditableTextItem(
     value: String,
     onValueChange: (String) -> Unit,
 ) {
-    var editingText by remember { mutableStateOf(value) }
+    var editingText by remember(value) { mutableStateOf(value) }
 
     EditableInfoItem(
         dialogContent = {
@@ -328,7 +327,7 @@ fun EditablePickerItem(
     itemsLabels: String,
     onValueChange: (Duration) -> Unit,
 ) {
-    var editingDuration by remember { mutableStateOf(value ?: Duration.ZERO) }
+    var editingDuration by remember(value) { mutableStateOf(value ?: Duration.ZERO) }
 
     EditableInfoItem(
         dialogContent = {
@@ -377,7 +376,7 @@ fun EditablePickerItem(
     itemsLabels: String,
     onValueChange: (Int) -> Unit,
 ) {
-    var editingValue by remember { mutableIntStateOf(value) }
+    var editingValue by remember(value) { mutableIntStateOf(value) }
 
     EditableInfoItem(
         dialogContent = {
@@ -435,7 +434,12 @@ fun EditableTimeItem(
             )
         },
         onConfirm = {
-            onValueChange(LocalTime.of(editingHour.value, editingMinute.value))
+            onValueChange(
+                LocalTime.of(
+                    editingHour.value,
+                    editingMinute.value
+                )
+            )
         },
         onDismiss = { },
         value = {
@@ -516,7 +520,7 @@ fun EditableSportActivityItem(
     value: SportActivity,
     onValueChange: (SportActivity) -> Unit,
 ) {
-    var editingActivity by remember { mutableStateOf(value) }
+    var editingActivity by remember(value) { mutableStateOf(value) }
 
     EditableInfoItem(
         dialogContent = {

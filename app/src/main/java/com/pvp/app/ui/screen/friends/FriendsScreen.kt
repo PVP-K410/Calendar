@@ -35,9 +35,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.pvp.app.ui.common.ButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.router.Routes
@@ -200,45 +200,21 @@ fun FriendsScreen(
                     ),
                     dialogTitle = { Text("Friend requests") },
                     dialogContent = {
-                        val selectedTab = remember { mutableIntStateOf(0) }
+                        var tab by remember { mutableIntStateOf(0) }
 
                         Column {
-                            PrimaryTabRow(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                divider = {},
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(MaterialTheme.shapes.medium),
-                                selectedTabIndex = selectedTab.intValue
-                            ) {
-                                Tab(
-                                    selected = selectedTab.intValue == 0,
-                                    onClick = { selectedTab.intValue = 0 }
-                                ) {
-                                    Text(
-                                        "Received",
-                                        color = MaterialTheme.colorScheme.inverseSurface,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                }
-
-                                Tab(
-                                    selected = selectedTab.intValue == 1,
-                                    onClick = { selectedTab.intValue = 1 }
-                                ) {
-                                    Text(
-                                        "Sent",
-                                        color = MaterialTheme.colorScheme.inverseSurface,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                }
-                            }
+                            TabSelector(
+                                onSelect = { tab = it },
+                                tabs = listOf(
+                                    "Received",
+                                    "Sent"
+                                ),
+                                withShadow = false
+                            )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            when (selectedTab.intValue) {
+                            when (tab) {
                                 0 -> {
                                     RequestList(
                                         requests = friendObject.receivedRequests,

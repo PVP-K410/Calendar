@@ -13,6 +13,7 @@ import com.pvp.app.common.LocalDateSerializer
 import com.pvp.app.common.LocalTimeSerializer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 import kotlinx.serialization.json.JsonNames
 import java.time.Duration
@@ -26,7 +27,7 @@ class CustomMealTask(
     override val id: String? = null,
     override val isCompleted: Boolean,
     override val points: Points,
-    val recipe: String? = null,
+    val recipe: String,
     override val reminderTime: Duration? = null,
     override val time: LocalTime? = null,
     override val title: String,
@@ -72,7 +73,7 @@ class CustomMealTask(
             id: String? = task.id,
             isCompleted: Boolean = task.isCompleted,
             points: Points = task.points,
-            recipe: String? = task.recipe,
+            recipe: String = task.recipe,
             reminderTime: Duration? = task.reminderTime,
             time: LocalTime? = task.time,
             title: String = task.title,
@@ -100,6 +101,7 @@ class MealTask(
     override val duration: Duration? = null,
     override val id: String? = null,
     override val isCompleted: Boolean,
+    @Transient val meal: Meal = Meal(),
     val mealId: String,
     override val points: Points,
     override val reminderTime: Duration? = null,
@@ -146,6 +148,7 @@ class MealTask(
             duration: Duration? = task.duration,
             id: String? = task.id,
             isCompleted: Boolean = task.isCompleted,
+            mael: Meal = task.meal,
             mealId: String = task.mealId,
             points: Points = task.points,
             reminderTime: Duration? = task.reminderTime,
@@ -158,6 +161,7 @@ class MealTask(
                 duration = duration,
                 id = id,
                 isCompleted = isCompleted,
+                meal = mael,
                 mealId = mealId,
                 points = points,
                 reminderTime = reminderTime,
@@ -262,7 +266,7 @@ class SportTask(
 @Serializable
 class GeneralTask(
     override val date: LocalDate,
-    val description: String?,
+    val description: String? = null,
     override val duration: Duration? = null,
     override val id: String? = null,
     override val isCompleted: Boolean,

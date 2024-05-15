@@ -80,7 +80,7 @@ interface TaskService : DocumentsCollection {
     ): SportTask
 
     /**
-     * Creates a meal task in the database with the given parameters. Points are calculated
+     * Creates a custom meal task in the database with the given parameters. Points are calculated
      * automatically upon creation.
      *
      * @param date scheduled date
@@ -102,6 +102,30 @@ interface TaskService : DocumentsCollection {
         title: String,
         userEmail: String
     ): CustomMealTask
+
+    /**
+     * Creates a meal task in the database with the given parameters. Points are calculated
+     * automatically upon creation.
+     *
+     * @param date scheduled date
+     * @param duration duration
+     * @param mealId meal ID
+     * @param reminderTime minutes before the task to send a reminder
+     * @param time scheduled time
+     * @param title title
+     * @param userEmail user email to create the task for
+     *
+     * @return created custom meal task
+     */
+    suspend fun create(
+        date: LocalDate,
+        duration: Duration? = null,
+        mealId: String,
+        reminderTime: Duration? = null,
+        time: LocalTime? = null,
+        title: String,
+        userEmail: String
+    ): MealTask
 
     /**
      * Creates a meal task in the database with the given parameters. Points are calculated

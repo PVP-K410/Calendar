@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.CustomMealTask
+import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import java.time.LocalDate
@@ -163,26 +165,29 @@ private fun TasksOfDayCounterContainer(tasks: List<Task>) {
         TasksOfDayCounter(
             Icons.Outlined.Event,
             tasks,
-            SportTask::class,
+            listOf(SportTask::class),
             true
         )
 
         TasksOfDayCounter(
             Icons.AutoMirrored.Outlined.LibraryBooks,
             tasks,
-            Task::class
+            listOf(GeneralTask::class)
         )
 
         TasksOfDayCounter(
             Icons.Outlined.Restaurant,
             tasks,
-            CustomMealTask::class
+            listOf(
+                CustomMealTask::class,
+                MealTask::class
+            )
         )
 
         TasksOfDayCounter(
             Icons.AutoMirrored.Outlined.DirectionsRun,
             tasks,
-            SportTask::class
+            listOf(SportTask::class)
         )
     }
 }
@@ -191,14 +196,14 @@ private fun TasksOfDayCounterContainer(tasks: List<Task>) {
 private fun TasksOfDayCounter(
     icon: ImageVector,
     tasks: List<Task>,
-    taskCategory: KClass<out Task>,
+    taskCategories: List<KClass<out Task>>,
     daily: Boolean = false
 ) {
     val (completed, uncompleted) = tasks
-        .filter { it::class == taskCategory }
+        .filter { it::class in taskCategories }
         .let { tasksFiltered ->
-            if (taskCategory == SportTask::class) {
-                tasksFiltered.filter { (it as SportTask).isDaily == daily }
+            if (SportTask::class in taskCategories) {
+                tasksFiltered.filter { (it as? SportTask)?.isDaily == daily }
             } else {
                 tasksFiltered
             }
@@ -207,7 +212,7 @@ private fun TasksOfDayCounter(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(
-            contentDescription = "Task ${taskCategory.simpleName} group icon",
+            contentDescription = "Task ${taskCategories.last().simpleName} group icon",
             imageVector = icon
         )
 
