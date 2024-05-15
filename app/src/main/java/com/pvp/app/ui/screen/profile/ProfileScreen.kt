@@ -76,7 +76,6 @@ private fun AccountDeleteButton(
 ) {
     val context = LocalContext.current
     val username = state.user.username
-
     var input by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
