@@ -88,7 +88,7 @@ fun TaskCard(
                     .padding(4.dp)
                     .fillMaxWidth()
             ) {
-                if (task.date == LocalDate.now()) {
+                if (!(task is SportTask && task.isDaily && task.date == LocalDate.now())) {
                     Checkbox(
                         checked = checked,
                         modifier = Modifier
