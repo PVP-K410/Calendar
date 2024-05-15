@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
@@ -420,7 +420,8 @@ fun TaskFormFieldMealCards(
             .padding(8.dp),
         onValueChange = onChangeQuery,
         singleLine = true,
-        value = query,
+        textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface),
+        value = query
     )
 }
 
@@ -464,18 +465,6 @@ private fun TaskFormMealCard(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.labelLarge,
                     text = "Select"
-                )
-            } else {
-                Icon(
-                    contentDescription = "Meal selected icon",
-                    imageVector = Icons.Outlined.Check,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .shadow(
-                            elevation = 4.dp,
-                            shape = MaterialTheme.shapes.medium
-                        ),
-                    tint = MaterialTheme.colorScheme.onTertiary
                 )
             }
         },

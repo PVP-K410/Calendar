@@ -68,7 +68,6 @@ private fun BoxScope.ButtonColumn(
 private fun BoxScope.NutritionColumn(
     ingredientsToAvoid: List<String>,
     meal: Meal,
-    onBackground: Color
 ) {
     Box(
         modifier = Modifier
@@ -84,7 +83,7 @@ private fun BoxScope.NutritionColumn(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                color = onBackground,
+                color = Color.White,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 2,
                 modifier = Modifier.width(120.dp),
@@ -95,19 +94,19 @@ private fun BoxScope.NutritionColumn(
             with(meal.nutrition.caloricBreakdown) {
                 Text(
                     style = MaterialTheme.typography.bodySmall,
-                    color = onBackground,
+                    color = Color.White,
                     text = "Carbs: $percentCarbs %"
                 )
 
                 Text(
-                    color = onBackground,
+                    color = Color.White,
                     style = MaterialTheme.typography.bodySmall,
                     text = "Fat: $percentFat %"
                 )
 
                 Text(
                     style = MaterialTheme.typography.bodySmall,
-                    color = onBackground,
+                    color = Color.White,
                     text = "Protein: $percentProtein %"
                 )
             }
@@ -130,7 +129,7 @@ fun MealCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    val background = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.65f)
+    val background = MaterialTheme.colorScheme.tertiary
     val onBackground = MaterialTheme.colorScheme.onTertiary
 
     val ingredientsToAvoid by model
@@ -152,8 +151,7 @@ fun MealCard(
 
             NutritionColumn(
                 ingredientsToAvoid = ingredientsToAvoid,
-                meal = meal,
-                onBackground = onBackground
+                meal = meal
             )
 
             ButtonColumn(
@@ -189,12 +187,12 @@ private fun BoxScope.MealCardToolTip(
             modifier = Modifier
                 .padding(8.dp)
                 .clip(MaterialTheme.shapes.medium)
-                .background(colorContainer),
+                .background(colorContainer.copy(alpha = 0.8f)),
             tooltip = {
                 Column(
                     modifier = Modifier
                         .clip(MaterialTheme.shapes.medium)
-                        .background(colorContainer)
+                        .background(colorContainer.copy(alpha = 0.8f))
                         .padding(8.dp)
                 ) {
                     CompositionLocalProvider(LocalContentColor provides colorContent) {
@@ -291,7 +289,7 @@ private fun TooltipIngredientsWarning(ingredientsToAvoid: List<String>) {
             Column(
                 modifier = Modifier
                     .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.75f))
+                    .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f))
                     .padding(8.dp)
             ) {
                 Text(
