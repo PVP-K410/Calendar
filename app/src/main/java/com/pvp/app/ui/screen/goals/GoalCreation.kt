@@ -1,16 +1,12 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.pvp.app.ui.screen.goals
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -28,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,6 +38,7 @@ import com.pvp.app.ui.common.LabelFieldWrapper
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerPair
 import com.pvp.app.ui.common.PickerState
+import com.pvp.app.ui.common.TabSelector
 import java.time.LocalDate
 
 private val goalActivities: List<SportActivity> = listOf(
@@ -92,8 +88,8 @@ fun DistancePicker(
                 textAlign = TextAlign.End
             )
         },
-        dialogTitle = { Text("Editing distance") },
-        label = "Distance",
+        dialogTitle = { Text("Editing kilometers") },
+        label = "Kilometers",
         onConfirm = { onDistanceChange(stateKilometers.value + (stateMeters.value / 1000.0)) },
         onDismiss = { },
         value = "${stateKilometers.value + (stateMeters.value / 1000.0)} (km)"
@@ -113,7 +109,6 @@ fun GoalCreateDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(8.dp)
         ) {
             GoalCreateForm(onCreate = onClose)
@@ -134,6 +129,7 @@ fun GoalCreateForm(
     var steps by remember { mutableStateOf(activity == SportActivity.Walking) }
     var stepCount by remember { mutableDoubleStateOf(0.0) }
     var monthly by remember { mutableStateOf(state.monthly) }
+    var selectedDistanceType by remember { mutableStateOf(DistanceType.Steps) }
 
     val isFormValid by remember(goal) {
         derivedStateOf {
@@ -142,8 +138,8 @@ fun GoalCreateForm(
     }
 
     Surface(
-        shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         Column(
             modifier = Modifier
@@ -160,7 +156,10 @@ fun GoalCreateForm(
                 )
             }
 
-            GoalTypeFilter(filter = value) {
+            GoalTypeFilter(
+                filter = value,
+                isForm = true
+            ) {
                 monthly = it == GoalFilter.Monthly
                 value = it
             }
@@ -237,36 +236,40 @@ fun GoalCreateForm(
                 onConfirm = {
                     activity = tempActivity
                     steps = activity == SportActivity.Walking && goal == 0.0
+                    if (activity != SportActivity.Walking) {
+                        selectedDistanceType = DistanceType.Kilometers
+                    }
                 },
                 onDismiss = { tempActivity = activity },
-                value = activity.title ?: ""
+                value = activity.title
             )
 
             Spacer(modifier = Modifier.padding(4.dp))
 
             if (activity == SportActivity.Walking) {
-                StepSelector(
-                    isSelected = steps
-                ) {
-                    steps = !steps
+                DistanceSelector(
+                    selectedDistanceType = selectedDistanceType
+                ) { newDistanceType ->
+                    if (selectedDistanceType != newDistanceType) {
+                        selectedDistanceType = newDistanceType
+                    }
                 }
 
                 Spacer(modifier = Modifier.padding(4.dp))
             }
 
-            when (steps) {
-                true -> {
+            when (selectedDistanceType) {
+                DistanceType.Steps -> {
                     StepPicker(steps = stepCount) {
                         stepCount = it
                         goal = 0.0
                     }
                 }
 
-                false -> {
+                DistanceType.Kilometers -> {
                     DistancePicker(distance = goal) {
                         goal = it
                         stepCount = 0.0
-                        steps = false
                     }
                 }
             }
@@ -274,6 +277,9 @@ fun GoalCreateForm(
             Spacer(modifier = Modifier.padding(4.dp))
 
             Button(
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = if (isFormValid) MaterialTheme.colorScheme.surface else Color.Gray
+                ),
                 onClick = {
                     model.create(
                         activity = activity,
@@ -285,7 +291,8 @@ fun GoalCreateForm(
                     onCreate()
                 },
                 enabled = isFormValid,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                shape = MaterialTheme.shapes.extraLarge
             ) {
                 Text("Create")
             }
@@ -329,56 +336,19 @@ fun StepPicker(
 }
 
 @Composable
-private fun StepSelector(
-    isSelected: Boolean,
-    onClick: () -> Unit
+fun DistanceSelector(
+    selectedDistanceType: DistanceType,
+    onDistanceTypeChange: (DistanceType) -> Unit
 ) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .background(
-                MaterialTheme.colorScheme.surfaceContainer,
-                MaterialTheme.shapes.medium
-            )
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .height(40.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(
-                    if (isSelected) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        Color.Transparent
-                    }
-                )
-                .clickable { onClick() }
-        ) {
-            Text(text = "Steps")
-        }
+    TabSelector(
+        onSelect = { onDistanceTypeChange(DistanceType.entries[it]) },
+        tab = selectedDistanceType.ordinal,
+        tabs = DistanceType.entries.map { it.displayName },
+        withShadow = false
+    )
+}
 
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .height(40.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(
-                    if (!isSelected) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        Color.Transparent
-                    }
-                )
-                .clickable { onClick() }
-        ) {
-            Text(text = "Distance")
-        }
-    }
+enum class DistanceType(val displayName: String) {
+    Steps("Steps"),
+    Kilometers("Kilometers")
 }

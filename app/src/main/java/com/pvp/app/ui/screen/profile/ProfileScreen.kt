@@ -76,6 +76,7 @@ private fun AccountDeleteButton(
 ) {
     val context = LocalContext.current
     val username = state.user.username
+
     var input by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
@@ -101,7 +102,7 @@ private fun AccountDeleteButton(
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(horizontal = 8.dp),
                 ) {
                     Icon(
                         contentDescription = null,
@@ -230,7 +231,7 @@ private fun BoxScope.Points(points: Int) {
         modifier = Modifier
             .align(Alignment.TopEnd)
             .padding(
-                end = 30.dp,
+                end = 16.dp,
                 top = 8.dp
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -278,7 +279,9 @@ fun ProfileScreen(
                 Experience(
                     experience = state.user.experience,
                     experienceRequired = state.experienceRequired,
-                    level = state.user.level
+                    level = state.user.level,
+                    paddingStart = 16.dp,
+                    paddingEnd = 16.dp
                 )
             } else {
                 Spacer(modifier = Modifier.height(180.dp))
@@ -310,7 +313,7 @@ private fun Properties(
         state.user.activities.map { it.title }
     }
 
-    var activitiesSelectedEdit by remember { mutableStateOf(activitiesSelected) }
+    var activitiesSelectedEdit by remember(activitiesSelected) { mutableStateOf(activitiesSelected) }
     var activitiesUnselected by remember(activitiesSelected) { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
     val context = LocalContext.current
     val height by remember(state.user.height) { mutableIntStateOf(state.user.height) }
@@ -319,17 +322,17 @@ private fun Properties(
         state.user.ingredients.map { it.title }
     }
 
-    var ingredientsSelectedEdit by remember { mutableStateOf(ingredientsSelected) }
-    var ingredientsUnselectedEdit by remember { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
+    var ingredientsSelectedEdit by remember(ingredientsSelected) { mutableStateOf(ingredientsSelected) }
+    var ingredientsUnselectedEdit by remember(ingredientsSelected) { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
     val mass by remember(state.user.mass) { mutableIntStateOf(state.user.mass) }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                end = 30.dp,
-                start = 30.dp,
-                top = 30.dp
+                end = 16.dp,
+                start = 16.dp,
+                top = 16.dp
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -516,7 +519,7 @@ fun WeeklyActivitiesItem(
     Box(
         modifier = Modifier
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(8.dp)
@@ -544,7 +547,8 @@ fun WeeklyActivitiesItem(
 
             FiltersBox(
                 filters = activities,
-                emptyBoxText = "No weekly activities have been assigned yet"
+                emptyBoxText = "No weekly activities have been assigned yet",
+                cardsClickable = false
             )
         }
     }

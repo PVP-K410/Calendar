@@ -1,9 +1,7 @@
 package com.pvp.app.ui.screen.calendar
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,9 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
@@ -30,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,6 +33,8 @@ import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.CustomMealTask
+import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import java.time.LocalDate
@@ -49,20 +47,7 @@ private fun AnalysesContainer(
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .background(
-                MaterialTheme.colorScheme.surface,
-                MaterialTheme.shapes.small
-            )
-            .border(
-                BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.outline
-                ),
-                shape = RoundedCornerShape(10.dp)
-            )
-    ) {
+    Box(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
         Column(
             modifier = columnModifier,
             verticalArrangement = verticalArrangement,
@@ -90,10 +75,11 @@ fun AnalysisOfDay(
     Spacer(modifier = Modifier.padding(16.dp))
 
     Box(
-        modifier = Modifier.size(
-            height = 300.dp,
-            width = 340.dp
-        )
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .fillMaxWidth()
+            .height(250.dp)
+            .clip(MaterialTheme.shapes.medium)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AnalysesContainer(
@@ -120,8 +106,6 @@ fun AnalysisOfDay(
                 TasksOfDayCounterContainer(tasks)
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier
@@ -143,8 +127,6 @@ fun AnalysisOfDay(
 
                     StepCounter(date = date)
                 }
-
-                Spacer(modifier = Modifier.width(4.dp))
 
                 AnalysesContainer(
                     columnModifier = Modifier.fillMaxSize(),
@@ -183,26 +165,29 @@ private fun TasksOfDayCounterContainer(tasks: List<Task>) {
         TasksOfDayCounter(
             Icons.Outlined.Event,
             tasks,
-            SportTask::class,
+            listOf(SportTask::class),
             true
         )
 
         TasksOfDayCounter(
             Icons.AutoMirrored.Outlined.LibraryBooks,
             tasks,
-            Task::class
+            listOf(GeneralTask::class)
         )
 
         TasksOfDayCounter(
             Icons.Outlined.Restaurant,
             tasks,
-            CustomMealTask::class
+            listOf(
+                CustomMealTask::class,
+                MealTask::class
+            )
         )
 
         TasksOfDayCounter(
             Icons.AutoMirrored.Outlined.DirectionsRun,
             tasks,
-            SportTask::class
+            listOf(SportTask::class)
         )
     }
 }
@@ -211,14 +196,14 @@ private fun TasksOfDayCounterContainer(tasks: List<Task>) {
 private fun TasksOfDayCounter(
     icon: ImageVector,
     tasks: List<Task>,
-    taskCategory: KClass<out Task>,
+    taskCategories: List<KClass<out Task>>,
     daily: Boolean = false
 ) {
     val (completed, uncompleted) = tasks
-        .filter { it::class == taskCategory }
+        .filter { it::class in taskCategories }
         .let { tasksFiltered ->
-            if (taskCategory == SportTask::class) {
-                tasksFiltered.filter { (it as SportTask).isDaily == daily }
+            if (SportTask::class in taskCategories) {
+                tasksFiltered.filter { (it as? SportTask)?.isDaily == daily }
             } else {
                 tasksFiltered
             }
@@ -227,7 +212,7 @@ private fun TasksOfDayCounter(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(
-            contentDescription = "Task ${taskCategory.simpleName} group icon",
+            contentDescription = "Task ${taskCategories.last().simpleName} group icon",
             imageVector = icon
         )
 

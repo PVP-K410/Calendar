@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -36,8 +37,6 @@ import com.pvp.app.common.DateUtil
 import com.pvp.app.common.DateUtil.getDisplayName
 import com.pvp.app.model.Task
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.YearMonth
 
 @Composable
@@ -50,6 +49,10 @@ private fun AnalysisOfDayBox(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 36.dp)
+            .shadow(
+                elevation = 16.dp,
+                shape = MaterialTheme.shapes.medium
+            )
     ) {
         AnalysisOfDay(
             date = selectedDate,
@@ -129,7 +132,9 @@ private fun ContentSwitch(
                     date
                 )
             } else {
-                TasksOfDay(tasks = tasks)
+                Column(modifier = Modifier.padding(top = 4.dp)) {
+                    TasksOfDay(tasks = tasks)
+                }
             }
         }
 
@@ -167,7 +172,7 @@ private fun CalendarMonthly(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(8.dp)
     ) {
         Row {
             repeat(days.size) {
@@ -208,7 +213,7 @@ private fun CalendarMonthlyContent(
     selectedDate: LocalDate,
     onClickListener: (CalendarUiState.DateEntry) -> Unit,
 ) {
-    Column {
+    Column(modifier = Modifier.padding(8.dp)) {
         var index = 0
 
         repeat(6) {
@@ -384,12 +389,8 @@ private fun TaskCreateSheet(
     onClose: (Boolean) -> Unit
 ) {
     TaskCreateSheet(
-        date = LocalDateTime.of(
-            selectedDate,
-            LocalTime.now()
-        ),
-        onClose = { onClose(false) },
+        date = selectedDate,
         isOpen = true,
-        shouldCloseOnSubmit = true
+        onClose = { onClose(false) }
     )
 }

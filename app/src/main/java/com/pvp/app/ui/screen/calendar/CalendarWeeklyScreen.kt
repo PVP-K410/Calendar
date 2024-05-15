@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -57,9 +60,7 @@ fun Week(
     var stateShowCards by remember { mutableStateOf(false) }
     val tasksFiltered = tasks.filter { it.date == date }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         HorizontalPager(
             contentPadding = PaddingValues(
                 90.dp,
@@ -91,23 +92,30 @@ fun Week(
 
         if (!stateShowCards || tasksFiltered.isEmpty()) {
             if (!date.isEqual(LocalDate.MIN) && !date.isAfter(LocalDate.now())) {
-                AnalysisOfDay(
-                    date = date,
-                    tasks = tasksFiltered
-                )
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .shadow(
+                            elevation = 55.dp,
+                            shape = MaterialTheme.shapes.medium
+                        )
+                ) {
+                    AnalysisOfDay(
+                        date = date,
+                        tasks = tasksFiltered
+                    )
+                }
             }
         } else {
-            TasksOfDay(tasksFiltered)
+            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                TasksOfDay(tasksFiltered)
+            }
         }
 
         TaskCreateSheet(
-            date = date.atTime(
-                0,
-                0
-            ),
+            date = date,
             isOpen = stateShowSheet,
-            onClose = { stateShowSheet = false },
-            shouldCloseOnSubmit = true
+            onClose = { stateShowSheet = false }
         )
     }
 }

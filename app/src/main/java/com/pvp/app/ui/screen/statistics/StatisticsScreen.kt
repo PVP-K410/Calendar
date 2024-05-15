@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.pvp.app.ui.screen.statistics
 
 import androidx.compose.foundation.background
@@ -10,15 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -63,6 +57,7 @@ import com.patrykandpatrick.vico.core.common.shape.Shape
 import com.pvp.app.common.DateUtil.toLocalDate
 import com.pvp.app.model.ActivityEntry
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.common.underline
 import java.time.format.TextStyle
 import java.util.Locale
@@ -81,6 +76,7 @@ fun StatisticsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
         val labelOfSum = remember<(GraphType) -> String> {
@@ -114,23 +110,10 @@ fun StatisticsScreen(
             )
         }
 
-        PrimaryTabRow(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 16.dp)
-                .fillMaxWidth(0.9f)
-                .clip(MaterialTheme.shapes.medium),
-            selectedTabIndex = tab
-        ) {
-            tabs.onEachIndexed { index, (title, _) ->
-                Tab(
-                    modifier = Modifier.height(32.dp),
-                    onClick = { tab = index },
-                    selected = tab == index,
-                ) { Text(title) }
-            }
-        }
+        TabSelector(
+            onSelect = { tab = it },
+            tabs = tabs.keys.toList()
+        )
 
         tabs.values.elementAt(tab)()
     }
@@ -228,7 +211,7 @@ private fun GraphOfDays(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(8.dp)

@@ -1,10 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.pvp.app.ui.screen.goals
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -38,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Goal
+import com.pvp.app.ui.common.TabSelector
 
 @Composable
 fun GoalScreen(
@@ -124,7 +125,8 @@ fun GoalScreen(
             ) {
                 Icon(
                     contentDescription = "Create goal",
-                    imageVector = Icons.Outlined.Add
+                    imageVector = Icons.Outlined.Add,
+                    tint = MaterialTheme.colorScheme.surface
                 )
             }
         },
@@ -140,7 +142,7 @@ fun GoalCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp)
+            .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
@@ -211,54 +213,15 @@ fun GoalCard(
 @Composable
 fun GoalTypeFilter(
     filter: GoalFilter,
+    isForm: Boolean = false,
     onClick: (GoalFilter) -> Unit
 ) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .background(
-                MaterialTheme.colorScheme.surfaceContainer,
-                MaterialTheme.shapes.medium
-            )
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        GoalFilter.entries.forEach { filterNew ->
-            GoalTypeSelector(
-                filter = filterNew,
-                isSelected = filter == filterNew,
-                onClick = { onClick(filterNew) },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .height(40.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun GoalTypeSelector(
-    filter: GoalFilter,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
-            .background(
-                if (isSelected) {
-                    MaterialTheme.colorScheme.secondaryContainer
-                } else {
-                    Color.Transparent
-                }
-            )
-            .clickable { onClick() }
-    ) {
-        Text(text = filter.displayName)
-    }
+    TabSelector(
+        onSelect = { onClick(GoalFilter.entries[it]) },
+        tab = filter.ordinal,
+        tabs = GoalFilter.entries.map { it.displayName },
+        withShadow = !isForm
+    )
 }
 
 @Composable

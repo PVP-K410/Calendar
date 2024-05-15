@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -22,10 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.ui.common.Dialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
 import com.pvp.app.ui.common.showToast
@@ -91,7 +88,7 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
 
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(vertical = 16.dp)
         )
 
         if (holdersOwned.isEmpty()) {
@@ -118,28 +115,12 @@ fun DecorationScreen(modifier: Modifier) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .then(modifier)
-            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
     ) {
-        Spacer(modifier = Modifier.size(16.dp))
-
-        PrimaryTabRow(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            divider = { VerticalDivider() },
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .fillMaxWidth(0.9f)
-                .clip(MaterialTheme.shapes.medium),
-            selectedTabIndex = screen
-        ) {
-            screens()
-                .forEachIndexed { index, (title, _) ->
-                    Tab(
-                        modifier = Modifier.height(32.dp),
-                        onClick = { screen = index },
-                        selected = screen == index,
-                    ) { Text(title) }
-                }
-        }
+        TabSelector(
+            onSelect = { screen = it },
+            tabs = screens().map { it.first },
+        )
 
         Spacer(modifier = Modifier.size(16.dp))
 
@@ -243,7 +224,7 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
 
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(vertical = 16.dp)
         )
 
         if (holders.size == state.holders.size) {

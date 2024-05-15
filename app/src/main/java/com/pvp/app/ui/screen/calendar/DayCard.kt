@@ -2,9 +2,7 @@ package com.pvp.app.ui.screen.calendar
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,7 +33,12 @@ fun Day(
     onClick: () -> Unit = {}
 ) {
     Column(
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .padding(8.dp)
+            .shadow(
+                elevation = 16.dp,
+                shape = MaterialTheme.shapes.medium
+            )
     ) {
         Box(
             modifier = Modifier
@@ -43,13 +47,6 @@ fun Day(
                 .size(
                     height = 180.dp,
                     width = 200.dp
-                )
-                .border(
-                    border = BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outline
-                    ),
-                    shape = RoundedCornerShape(10.dp)
                 )
                 .align(Alignment.CenterHorizontally)
         ) {
@@ -113,7 +110,7 @@ fun DayCard(
                 scaleX = scale,
                 scaleY = scale
             ),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.Center
     ) {
         Day(
             date = date,

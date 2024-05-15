@@ -53,7 +53,7 @@ private fun Body(
                         } else {
                             Color.Transparent
                         },
-                        shape = MaterialTheme.shapes.extraSmall
+                        shape = MaterialTheme.shapes.medium
                     )
                     .clickable(
                         enabled = route.path != it.path,
@@ -113,11 +113,17 @@ private fun Footer(
                     end = 10.dp
                 )
                 .fillMaxSize(),
-            content = { Text(text = signOut) },
+            content = {
+                Text(
+                    text = signOut,
+                    color = MaterialTheme.colorScheme.surface
+                )
+            },
             contentAlignment = Alignment.BottomEnd,
             confirmationButtonContent = { Text(text = signOut) },
             confirmationTitle = { Text(text = "Are you sure you want to sign out?") },
-            onConfirm = { onSignOut() }
+            onConfirm = { onSignOut() },
+            shape = MaterialTheme.shapes.extraLarge
         )
     }
 }

@@ -59,6 +59,7 @@ import com.pvp.app.model.Streak
 import com.pvp.app.ui.common.LocalHorizontalPagerSettled
 import com.pvp.app.ui.common.LocalRouteOptions
 import com.pvp.app.ui.common.LocalRouteOptionsApplier
+import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.navigateWithPopUp
 import com.pvp.app.ui.router.Route
 import com.pvp.app.ui.router.Router
@@ -175,13 +176,14 @@ private fun Content(
     paddingValues: PaddingValues,
     state: PagerState
 ) {
-    val modifier = remember(paddingValues) {
-        val padding = paddingValues.calculateTopPadding()
-
-        Modifier
-            .offset(y = padding)
-            .padding(bottom = padding)
+    val padding = remember(paddingValues) {
+        paddingValues.calculateTopPadding()
     }
+
+    val modifier = Modifier
+        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+        .offset(y = padding)
+        .padding(bottom = padding)
 
     HorizontalPager(state = state) {
         when (it) {
@@ -200,13 +202,13 @@ private fun Content(
 @Composable
 private fun Header(
     avatar: ImageBitmap,
-    colorAvatarBorder: Color = MaterialTheme.colorScheme.primaryContainer,
+    colorAvatarBorder: Color = MaterialTheme.colorScheme.surfaceContainerHighest.lighten(0.08f),
     colors: TopAppBarColors = TopAppBarColors(
         containerColor = MaterialTheme.colorScheme.primary,
         scrolledContainerColor = MaterialTheme.colorScheme.onPrimary,
-        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-        actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        navigationIconContentColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.surface,
+        actionIconContentColor = MaterialTheme.colorScheme.surfaceContainerHighest.lighten(0.08f)
     ),
     onClickNavigation: () -> Unit,
     onClickProfile: () -> Unit,

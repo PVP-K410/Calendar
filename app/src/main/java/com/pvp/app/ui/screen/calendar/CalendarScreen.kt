@@ -54,14 +54,14 @@ fun CalendarScreen(modifier: Modifier) {
         ) {
             Icon(
                 contentDescription = "Create task",
-                imageVector = Icons.Outlined.Add
+                imageVector = Icons.Outlined.Add,
+                tint = MaterialTheme.colorScheme.surface
             )
         }
 
         TaskCreateSheet(
-            onClose = toggle,
             isOpen = isOpen,
-            shouldCloseOnSubmit = true
+            onClose = toggle
         )
     }
 }
