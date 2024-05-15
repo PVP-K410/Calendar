@@ -44,7 +44,7 @@ open class TaskFormState<T : Task>(
     )
 
     class CustomMeal(
-        recipe: String? = null,
+        recipe: String = "",
         stateParent: TaskFormState<CustomMealTask>
     ) : TaskFormState<CustomMealTask>(stateParent) {
 
@@ -102,7 +102,7 @@ open class TaskFormState<T : Task>(
             val state by remember {
                 mutableStateOf(
                     CustomMeal(
-                        recipe = task?.recipe,
+                        recipe = task?.recipe ?: "",
                         stateParent = create(
                             date,
                             task

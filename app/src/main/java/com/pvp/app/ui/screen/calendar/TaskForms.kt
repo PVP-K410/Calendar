@@ -160,10 +160,10 @@ private fun TaskForm(
     onClose: () -> Unit,
     state: TaskFormState<*>
 ) {
-    if (state is TaskFormState.Meal) {
-        TaskFormStateMealValidator(state = state)
-    } else {
-        TaskFormStateGeneralValidator(state = state)
+    when (state) {
+        is TaskFormState.CustomMeal -> TaskFormStateCustomMealValidator(state = state)
+        is TaskFormState.Meal -> TaskFormStateMealValidator(state = state)
+        else -> TaskFormStateGeneralValidator(state = state)
     }
 
     Column(

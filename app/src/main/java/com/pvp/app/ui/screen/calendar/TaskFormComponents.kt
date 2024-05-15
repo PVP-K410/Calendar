@@ -503,6 +503,16 @@ fun TaskFormStateGeneralValidator(state: TaskFormState<*>) {
 }
 
 @Composable
+fun TaskFormStateCustomMealValidator(state: TaskFormState.CustomMeal) {
+    LaunchedEffect(
+        state.recipe,
+        state.title
+    ) {
+        state.isFormValid = state.recipe.isNotBlank() && (state.title?.isNotBlank() ?: false)
+    }
+}
+
+@Composable
 fun TaskFormStateMealValidator(state: TaskFormState.Meal) {
     LaunchedEffect(state.meal) {
         state.isFormValid = state.meal != null
