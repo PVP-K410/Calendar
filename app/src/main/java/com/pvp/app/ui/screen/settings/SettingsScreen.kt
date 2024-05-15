@@ -284,7 +284,9 @@ private fun SettingApplicationTheme(
 private fun SettingHealthConnectPermissions(context: Context) {
     SettingCard(
         title = "Health Connect",
-        description = "By enabling certain Health Connect permissions you are allowing us to provide you more great features. You can disable those permissions anytime by coming here.",
+        description = "By enabling certain Health Connect permissions you are" +
+                " allowing us to provide you more great features. You can disable" +
+                " those permissions anytime by coming here.",
         value = "Configure",
         onEdit = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -293,7 +295,7 @@ private fun SettingHealthConnectPermissions(context: Context) {
                 permissionsPreUpsideDownCake(context)
             }
         },
-        isPermissions = true
+        icon = Icons.Outlined.Settings,
     )
 }
 
@@ -401,13 +403,13 @@ fun ResetToDefaultButton(
 @Composable
 fun <T> SettingCard(
     description: String,
-    editContent: @Composable () -> Unit = {},
+    editContent: (@Composable () -> Unit)? = null,
     onEdit: () -> Unit,
     title: String,
     value: T,
+    icon : ImageVector = Icons.Outlined.Edit,
     iconDescription: String? = null,
-    isEnabled: Boolean = true,
-    isPermissions: Boolean = false
+    isEnabled: Boolean = true
 ) {
     var textColor = MaterialTheme.colorScheme.onSurface
     var backgroundColor = MaterialTheme.colorScheme.surfaceContainer
@@ -484,12 +486,10 @@ fun <T> SettingCard(
                 modifier = Modifier
                     .align(Alignment.End)
                     .clickable {
-                        if (isEnabled) {
-                            if (!isPermissions) {
-                                dialogOpen = true
-                            } else {
-                                onEdit()
-                            }
+                        if (isEnabled && editContent != null) {
+                            dialogOpen = true
+                        } else {
+                            onEdit()
                         }
                     },
                 verticalAlignment = Alignment.CenterVertically
@@ -502,22 +502,14 @@ fun <T> SettingCard(
 
                 Spacer(modifier = Modifier.size(8.dp))
 
-                if (isPermissions) {
-                    Icon(
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = iconDescription,
-                        imageVector = Icons.Outlined.Settings
-                    )
-                } else {
-                    Icon(
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = iconDescription,
-                        imageVector = Icons.Outlined.Edit
-                    )
-                }
+                Icon(
+                    tint = MaterialTheme.colorScheme.primary,
+                    contentDescription = iconDescription,
+                    imageVector = icon
+                )
             }
 
-            if (dialogOpen && !isPermissions) {
+            if (dialogOpen && editContent != null) {
                 Dialog(
                     onDismissRequest = {
                         onEdit()

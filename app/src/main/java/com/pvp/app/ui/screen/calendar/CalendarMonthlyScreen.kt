@@ -133,9 +133,7 @@ private fun ContentSwitch(
                     date
                 )
             } else {
-                Column(
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
+                Column(modifier = Modifier.padding(top = 4.dp)) {
                     TasksOfDay(tasks = tasks)
                 }
             }

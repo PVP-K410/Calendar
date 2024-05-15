@@ -48,15 +48,15 @@ private fun DecorationCard(
                 color = MaterialTheme.colorScheme.surfaceContainer.darken(0.2f),
                 shape = MaterialTheme.shapes.medium
             )
-            .let {
+            .then(
                 if (holder.applied)
-                    it.border(
+                    Modifier.border(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.primary,
                         shape = MaterialTheme.shapes.medium
                     )
-                else it
-            }
+                else Modifier
+            )
             .clickable(isClickable) { onClick() }
     ) {
         Column(

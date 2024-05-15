@@ -61,7 +61,12 @@ fun Button(
 @Composable
 fun ButtonConfirm(
     border: BorderStroke? = null,
-    confirmationButtonContent: @Composable RowScope.() -> Unit = { Text("Proceed", fontWeight = FontWeight.Bold) },
+    confirmationButtonContent: @Composable RowScope.() -> Unit = {
+        Text(
+            "Proceed",
+            fontWeight = FontWeight.Bold
+        )
+    },
     confirmationDescription: @Composable () -> Unit = { },
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
     colors: ButtonColors = ButtonDefaults.buttonColors(),
@@ -96,7 +101,12 @@ fun ButtonWithDialog(
     content: @Composable RowScope.() -> Unit = { Text("Open Dialog") },
     contentAlignment: Alignment = Alignment.TopStart,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
-    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm", fontWeight = FontWeight.Bold) },
+    confirmButtonContent: @Composable RowScope.() -> Unit = {
+        Text(
+            "Confirm",
+            fontWeight = FontWeight.Bold
+        )
+    },
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },

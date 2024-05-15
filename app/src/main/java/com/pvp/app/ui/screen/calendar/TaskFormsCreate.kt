@@ -97,8 +97,6 @@ fun TaskCreateSheet(
 
             Spacer(modifier = Modifier.size(16.dp))
 
-            Spacer(modifier = Modifier.size(8.dp))
-
             TaskCommonForm(
                 date = date,
                 targetClass = target,

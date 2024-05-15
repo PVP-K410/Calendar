@@ -133,7 +133,7 @@ fun GoalCreateForm(
     var steps by remember { mutableStateOf(activity == SportActivity.Walking) }
     var stepCount by remember { mutableDoubleStateOf(0.0) }
     var monthly by remember { mutableStateOf(state.monthly) }
-    var selectedStepType by remember { mutableStateOf(StepType.Steps) }
+    var selectedDistanceType by remember { mutableStateOf(DistanceType.Steps) }
 
     val isFormValid by remember(goal) {
         derivedStateOf {
@@ -238,36 +238,36 @@ fun GoalCreateForm(
                     activity = tempActivity
                     steps = activity == SportActivity.Walking && goal == 0.0
                     if (activity != SportActivity.Walking) {
-                        selectedStepType = StepType.Distance
+                        selectedDistanceType = DistanceType.Distance
                     }
                 },
                 onDismiss = { tempActivity = activity },
-                value = activity.title ?: ""
+                value = activity.title
             )
 
             Spacer(modifier = Modifier.padding(4.dp))
 
             if (activity == SportActivity.Walking) {
                 StepSelector(
-                    selectedStepType = selectedStepType
-                ) { newStepType ->
-                    if (selectedStepType != newStepType) {
-                        selectedStepType = newStepType
+                    selectedDistanceType = selectedDistanceType
+                ) { newDistanceType ->
+                    if (selectedDistanceType != newDistanceType) {
+                        selectedDistanceType = newDistanceType
                     }
                 }
 
                 Spacer(modifier = Modifier.padding(4.dp))
             }
 
-            when (selectedStepType) {
-                StepType.Steps -> {
+            when (selectedDistanceType) {
+                DistanceType.Steps -> {
                     StepPicker(steps = stepCount) {
                         stepCount = it
                         goal = 0.0
                     }
                 }
 
-                StepType.Distance -> {
+                DistanceType.Distance -> {
                     DistancePicker(distance = goal) {
                         goal = it
                         stepCount = 0.0
@@ -338,12 +338,12 @@ fun StepPicker(
 
 @Composable
 fun StepSelector(
-    selectedStepType: StepType,
-    onStepTypeChange: (StepType) -> Unit
+    selectedDistanceType: DistanceType,
+    onDistanceTypeChange: (DistanceType) -> Unit
 ) {
-    val selectedTabIndex = when (selectedStepType) {
-        StepType.Steps -> 0
-        StepType.Distance -> 1
+    val selectedTabIndex = when (selectedDistanceType) {
+        DistanceType.Steps -> 0
+        DistanceType.Distance -> 1
     }
 
     PrimaryTabRow(
@@ -354,24 +354,24 @@ fun StepSelector(
             .clip(MaterialTheme.shapes.medium),
         selectedTabIndex = selectedTabIndex
     ) {
-        StepType.values().forEach { stepType ->
+        DistanceType.entries.forEach { distanceType ->
             Tab(
                 modifier = Modifier.height(32.dp),
-                selected = selectedStepType == stepType,
-                onClick = { onStepTypeChange(stepType) }
+                selected = selectedDistanceType == distanceType,
+                onClick = { onDistanceTypeChange(distanceType) }
             ) {
                 Text(
-                    text = stepType.displayName,
+                    text = distanceType.displayName,
                     color = MaterialTheme.colorScheme.inverseSurface,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (stepType == selectedStepType) FontWeight.Bold else FontWeight.Normal
+                    fontWeight = if (distanceType == selectedDistanceType) FontWeight.Bold else FontWeight.Normal
                 )
             }
         }
     }
 }
 
-enum class StepType(val displayName: String) {
+enum class DistanceType(val displayName: String) {
     Steps("Steps"),
     Distance("Distance")
 }

@@ -239,7 +239,7 @@ private fun FriendInfo(mutualFriends: List<FriendEntry>) {
                         ) {
                             Image(
                                 bitmap = mutualFriend.avatar,
-                                contentDescription = "Friend avatar",
+                                contentDescription = "${mutualFriend.user.username} avatar",
                                 modifier = Modifier
                                     .size(28.dp)
                                     .clip(CircleShape)
