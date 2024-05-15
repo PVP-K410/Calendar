@@ -8,12 +8,14 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -40,14 +42,12 @@ import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
-import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.backgroundGradientHorizontal
 import com.pvp.app.ui.common.backgroundGradientLinear
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.common.showToast
-import com.pvp.app.ui.theme.ButtonTransparent
 
 private typealias LauncherIntent = ManagedActivityResultLauncher<Intent, ActivityResult>
 private typealias LauncherIntentSenderRequest = ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
@@ -78,13 +78,11 @@ private fun Authentication(
         isOneTap: Boolean,
         request: Intent
     ) -> Unit,
-    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     isEnabled: Boolean,
     onClick: (
         launcher: LauncherIntent,
         launcherOneTap: LauncherIntentSenderRequest
     ) -> Unit,
-    verticalArrangement: Arrangement.Vertical = Arrangement.Center,
 ) {
     val textBegin = stringResource(R.string.screen_authentication_button_begin)
 
@@ -112,46 +110,35 @@ private fun Authentication(
         }
     )
 
-    Column(
-        horizontalAlignment = horizontalAlignment,
-        verticalArrangement = verticalArrangement
-    ) {
-        Button(
-            colors = ButtonTransparent.copy(
-                contentColor = Color.Black,
-                disabledContentColor = Color.DarkGray
-            ),
-            enabled = isEnabled,
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .clip(MaterialTheme.shapes.large)
-                .backgroundGradientHorizontal(COLORS_GET_STARTED),
-            onClick = {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(0.8f)
+            .height(50.dp)
+            .clip(MaterialTheme.shapes.large)
+            .backgroundGradientHorizontal(COLORS_GET_STARTED)
+            .clickable(isEnabled) {
                 onClick(
                     launcher,
                     launcherOneTap
                 )
-            },
-            shape = MaterialTheme.shapes.large
-        ) {
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    alignment = Alignment.CenterStart,
-                    contentDescription = "Google authentication button logo",
-                    modifier = Modifier.size(26.dp),
-                    painter = painterResource(R.drawable.google)
-                )
-
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                    text = textBegin,
-                    textDecoration = TextDecoration.Underline
-                )
             }
-        }
+    ) {
+        Image(
+            contentDescription = "Google authentication button logo",
+            modifier = Modifier
+                .padding(start = 24.dp)
+                .size(26.dp)
+                .align(Alignment.CenterStart),
+            painter = painterResource(R.drawable.google)
+        )
+
+        Text(
+            text = textBegin,
+            color = Color.Black,
+            modifier = Modifier.align(Alignment.Center),
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+            textDecoration = TextDecoration.Underline
+        )
     }
 }
 

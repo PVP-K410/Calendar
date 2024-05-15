@@ -13,6 +13,7 @@ data class Decoration(
 )
 
 enum class Type {
+    AVATAR_ACCESSORY,
     AVATAR_BODY,
     AVATAR_FACE,
     AVATAR_HANDS,
@@ -22,6 +23,7 @@ enum class Type {
 
     override fun toString(): String {
         return when (this) {
+            AVATAR_ACCESSORY -> "Accessory"
             AVATAR_BODY -> "Body"
             AVATAR_FACE -> "Face"
             AVATAR_HANDS -> "Hands"
