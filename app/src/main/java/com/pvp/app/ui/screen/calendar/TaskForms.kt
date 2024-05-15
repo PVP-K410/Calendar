@@ -88,7 +88,7 @@ fun TaskCreateSheet(
                 tabs = listOf(
                     "General",
                     "Meal",
-                    "Predefined Meals",
+                    "Set Meals",
                     "Sport"
                 ),
                 withShadow = false
