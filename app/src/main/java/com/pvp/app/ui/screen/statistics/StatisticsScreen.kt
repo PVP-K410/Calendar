@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,6 +82,7 @@ fun StatisticsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
         val labelOfSum = remember<(GraphType) -> String> {
@@ -115,11 +117,10 @@ fun StatisticsScreen(
         }
 
         PrimaryTabRow(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            divider = {},
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 16.dp)
-                .fillMaxWidth(0.9f)
+                .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium),
             selectedTabIndex = tab
         ) {
@@ -128,7 +129,14 @@ fun StatisticsScreen(
                     modifier = Modifier.height(32.dp),
                     onClick = { tab = index },
                     selected = tab == index,
-                ) { Text(title) }
+                ) {
+                    Text(
+                        text = title,
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal
+                    )
+                }
             }
         }
 
@@ -228,7 +236,7 @@ private fun GraphOfDays(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(8.dp)

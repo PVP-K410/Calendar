@@ -1,8 +1,6 @@
 package com.pvp.app.ui.screen.profile
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -55,8 +52,8 @@ fun FiltersItem(
     Box(
         modifier = Modifier
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(8.dp)
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
             .fillMaxWidth()
@@ -89,7 +86,10 @@ fun FiltersItem(
                         icon = Icons.Outlined.Edit,
                         iconDescription = "Edit Icon Button",
                         confirmButtonContent = {
-                            Text("Save")
+                            Text(
+                                "Save",
+                                fontWeight = FontWeight.Bold
+                            )
                         },
                         dismissButtonContent = {
                             Text("Cancel")
@@ -166,18 +166,15 @@ fun FiltersBox(
                             Card(
                                 enabled = cardsClickable,
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                                    disabledContainerColor = MaterialTheme.colorScheme.primary,
-                                    disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    contentColor = MaterialTheme.colorScheme.onSurface,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    disabledContentColor = MaterialTheme.colorScheme.onSurface
                                 ),
                                 elevation = CardDefaults.cardElevation(
                                     defaultElevation = 8.dp
                                 ),
-                                border = BorderStroke(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.secondary
-                                ),
+                                shape = MaterialTheme.shapes.medium,
                                 onClick = {
                                     onClick(filter)
                                 },
@@ -205,11 +202,6 @@ fun FiltersBox(
                                         )
                                         .clip(CircleShape)
                                         .background(Color.White)
-                                        .border(
-                                            width = 1.dp,
-                                            color = MaterialTheme.colorScheme.secondary,
-                                            shape = CircleShape
-                                        )
                                         .size(16.dp)
                                 ) {
                                     Icon(

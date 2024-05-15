@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.pvp.app.ui.screen.friends
 
 import android.widget.Toast
@@ -29,12 +31,13 @@ import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +59,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.pvp.app.ui.common.ButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
+import com.pvp.app.ui.common.darken
+import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.router.Routes
 
 private enum class SortingType {
@@ -115,14 +120,10 @@ fun FriendsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(8.dp)
-            .clip(MaterialTheme.shapes.small)
-            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(16.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -135,6 +136,7 @@ fun FriendsScreen(
                     Icon(
                         Icons.Outlined.GroupAdd,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.surface,
                         modifier = Modifier.size(25.dp)
                     )
                 },
@@ -147,14 +149,19 @@ fun FriendsScreen(
                         label = { Text("Friend's email") },
                     )
                 },
-                confirmButtonContent = { Text("Add") },
+                confirmButtonContent = {
+                    Text(
+                        "Add",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 onConfirm = {
                     model.add(friendEmail.value.trim())
 
                     friendEmail.value = ""
                 },
                 onDismiss = { friendEmail.value = "" },
-                shape = MaterialTheme.shapes.small
+                shape = MaterialTheme.shapes.medium
             )
 
             BadgedBox(
@@ -181,6 +188,7 @@ fun FriendsScreen(
                         ) {
                             Text(
                                 "Requests",
+                                color = MaterialTheme.colorScheme.surface,
                                 style = MaterialTheme.typography.titleMedium
                             )
                         }
@@ -195,13 +203,21 @@ fun FriendsScreen(
                         val selectedTab = remember { mutableIntStateOf(0) }
 
                         Column {
-                            TabRow(selectedTabIndex = selectedTab.intValue) {
+                            PrimaryTabRow(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                divider = {},
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(MaterialTheme.shapes.medium),
+                                selectedTabIndex = selectedTab.intValue
+                            ) {
                                 Tab(
                                     selected = selectedTab.intValue == 0,
                                     onClick = { selectedTab.intValue = 0 }
                                 ) {
                                     Text(
                                         "Received",
+                                        color = MaterialTheme.colorScheme.inverseSurface,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = if (selectedTab.intValue == 0) FontWeight.Bold else FontWeight.Normal
                                     )
@@ -213,13 +229,14 @@ fun FriendsScreen(
                                 ) {
                                     Text(
                                         "Sent",
+                                        color = MaterialTheme.colorScheme.inverseSurface,
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = if (selectedTab.intValue == 1) FontWeight.Bold else FontWeight.Normal
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
                             when (selectedTab.intValue) {
                                 0 -> {
@@ -242,7 +259,7 @@ fun FriendsScreen(
                             }
                         }
                     },
-                    shape = MaterialTheme.shapes.small,
+                    shape = MaterialTheme.shapes.medium,
                     showConfirmButton = false
                 )
             }
@@ -256,6 +273,7 @@ fun FriendsScreen(
                     Icon(
                         Icons.Outlined.FilterAlt,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.surface,
                         modifier = Modifier.size(25.dp)
                     )
                 },
@@ -295,16 +313,13 @@ fun FriendsScreen(
                 },
                 onConfirm = { sortingType.value = sortingTypeTemp.value },
                 onDismiss = { sortingTypeTemp.value = sortingType.value },
-                shape = MaterialTheme.shapes.small
+                shape = MaterialTheme.shapes.medium
             )
         }
 
         Text(
             "All friends - ${friends.size}",
-            modifier = Modifier.padding(
-                horizontal = 16.dp,
-                vertical = 8.dp
-            ),
+            modifier = Modifier.padding(vertical = 8.dp),
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -332,13 +347,10 @@ private fun FriendList(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)
-                    .padding(
-                        horizontal = 16.dp,
-                        vertical = 2.dp
-                    )
-                    .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .height(50.dp)
+                    .padding(vertical = 2.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
                     .clickable { onSelect(friend) },
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -363,7 +375,7 @@ private fun ListItemContent(
                 contentDescription = "Top 1",
                 modifier = Modifier
                     .padding(start = 4.dp)
-                    .size(24.dp)
+                    .size(30.dp)
             )
         }
 
@@ -373,7 +385,7 @@ private fun ListItemContent(
                 contentDescription = "Top 2-3",
                 modifier = Modifier
                     .padding(start = 4.dp)
-                    .size(24.dp)
+                    .size(30.dp)
             )
         }
 
@@ -381,7 +393,7 @@ private fun ListItemContent(
             Spacer(
                 modifier = Modifier
                     .padding(start = 4.dp)
-                    .size(24.dp)
+                    .size(30.dp)
             )
         }
     }
@@ -402,15 +414,15 @@ private fun ListItemContent(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(30.dp)
+                .size(40.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest.lighten(0.08f))
         ) {
             Image(
                 bitmap = friend.avatar,
                 contentDescription = "Friend avatar",
                 modifier = Modifier
-                    .size(28.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
             )
         }
@@ -441,11 +453,11 @@ private fun RequestList(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(30.dp)
+                        .height(40.dp)
                         .padding(vertical = 2.dp)
                         .background(
-                            MaterialTheme.colorScheme.secondaryContainer,
-                            MaterialTheme.shapes.small
+                            MaterialTheme.colorScheme.surfaceContainer.darken(0.25f),
+                            MaterialTheme.shapes.medium
                         ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -453,7 +465,7 @@ private fun RequestList(
                         text = request,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier
-                            .padding(start = 2.dp)
+                            .padding(start = 4.dp)
                             .weight(1f)
                     )
 
@@ -461,7 +473,7 @@ private fun RequestList(
                         Icon(
                             imageVector = Icons.Outlined.CheckCircle,
                             contentDescription = "Accept request",
-                            tint = Color.Green,
+                            tint = Color.Green.lighten(0.45f),
                             modifier = Modifier
                                 .size(28.dp)
                                 .clip(CircleShape)
@@ -474,7 +486,7 @@ private fun RequestList(
                     Icon(
                         imageVector = Icons.Outlined.DoNotDisturbOn,
                         contentDescription = "Deny request",
-                        tint = Color.Red,
+                        tint = Color.Red.lighten(0.45f),
                         modifier = Modifier
                             .size(28.dp)
                             .clip(CircleShape)

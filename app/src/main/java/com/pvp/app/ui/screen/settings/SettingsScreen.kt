@@ -7,7 +7,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,9 +23,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PermIdentity
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -52,7 +51,6 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.health.connect.client.HealthConnectClient
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.Setting
-import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
@@ -232,24 +230,21 @@ private fun SettingApplicationTheme(
 
 @Composable
 private fun SettingHealthConnectPermissions(context: Context) {
-    Button(
-        modifier = Modifier
-            .padding(
-                horizontal = 8.dp,
-                vertical = 4.dp
-            )
-            .fillMaxWidth(),
-        onClick = {
+    SettingCard(
+        title = "Health Connect",
+        description = "By enabling certain Health Connect permissions you are" +
+                " allowing us to provide you more great features. You can disable" +
+                " those permissions anytime by coming here.",
+        value = "Configure",
+        onEdit = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 permissionsPostUpsideDownCake(context)
             } else {
                 permissionsPreUpsideDownCake(context)
             }
         },
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Text("Enable/Disable Health Connect permissions")
-    }
+        icon = Icons.Outlined.Settings
+    )
 }
 
 @Composable
@@ -261,7 +256,7 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .then(modifier)
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 16.dp)
     ) {
         CategoryRow(
             icon = Icons.Outlined.Notifications,
@@ -305,19 +300,15 @@ fun CategoryRow(
         Icon(
             imageVector = icon,
             contentDescription = title,
+            tint = MaterialTheme.colorScheme.primary,
         )
 
         Text(
             text = " $title",
             style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary
         )
     }
-
-    HorizontalDivider(
-        modifier = Modifier.fillMaxWidth(),
-        thickness = 1.dp,
-        color = MaterialTheme.colorScheme.tertiary
-    )
 }
 
 @Composable
@@ -359,15 +350,16 @@ fun ResetToDefaultButton(
 @Composable
 fun <T> SettingCard(
     description: String,
-    editContent: @Composable () -> Unit = {},
+    editContent: (@Composable () -> Unit)? = null,
     onEdit: () -> Unit,
     title: String,
     value: T,
+    icon : ImageVector = Icons.Outlined.Edit,
     iconDescription: String? = null,
     isEnabled: Boolean = true
 ) {
-    var textColor = MaterialTheme.colorScheme.onPrimary
-    var backgroundColor = MaterialTheme.colorScheme.primary
+    var textColor = MaterialTheme.colorScheme.onSurface
+    var backgroundColor = MaterialTheme.colorScheme.surfaceContainer
 
     if (!isEnabled) {
         textColor = textColor.copy(alpha = 0.5f)
@@ -377,12 +369,7 @@ fun <T> SettingCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .border(
-                color = MaterialTheme.colorScheme.primary,
-                shape = MaterialTheme.shapes.medium,
-                width = 1.dp
-            )
+            .padding(vertical = 8.dp)
             .background(
                 color = backgroundColor,
                 shape = MaterialTheme.shapes.medium
@@ -422,6 +409,7 @@ fun <T> SettingCard(
                                 imageVector = Icons.Filled.Check,
                                 contentDescription = null,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
+                                tint = MaterialTheme.colorScheme.surface
                             )
                         }
                     } else {
@@ -430,9 +418,9 @@ fun <T> SettingCard(
                     colors = SwitchDefaults.colors(
                         checkedTrackColor = MaterialTheme.colorScheme.surface,
                         uncheckedTrackColor = MaterialTheme.colorScheme.surfaceDim,
-                        checkedThumbColor = MaterialTheme.colorScheme.outline,
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
                         uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                        checkedBorderColor = MaterialTheme.colorScheme.outline,
+                        checkedBorderColor = MaterialTheme.colorScheme.primary,
                         uncheckedBorderColor = MaterialTheme.colorScheme.outline
                     ),
                     enabled = isEnabled
@@ -445,14 +433,16 @@ fun <T> SettingCard(
                 modifier = Modifier
                     .align(Alignment.End)
                     .clickable {
-                        if (isEnabled) {
+                        if (isEnabled && editContent != null) {
                             dialogOpen = true
+                        } else {
+                            onEdit()
                         }
                     },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    color = textColor,
+                    color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium,
                     text = value.toString()
                 )
@@ -460,13 +450,13 @@ fun <T> SettingCard(
                 Spacer(modifier = Modifier.size(8.dp))
 
                 Icon(
-                    tint = textColor,
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = iconDescription,
-                    imageVector = Icons.Outlined.Edit
+                    imageVector = icon
                 )
             }
 
-            if (dialogOpen) {
+            if (dialogOpen && editContent != null) {
                 Dialog(
                     onDismissRequest = {
                         onEdit()
