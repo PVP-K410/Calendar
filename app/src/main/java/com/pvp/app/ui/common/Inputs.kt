@@ -286,7 +286,7 @@ fun EditableTextItem(
     value: String,
     onValueChange: (String) -> Unit,
 ) {
-    var editingText by remember { mutableStateOf(value) }
+    var editingText by remember(value) { mutableStateOf(value) }
 
     EditableInfoItem(
         dialogContent = {
@@ -327,7 +327,7 @@ fun EditablePickerItem(
     itemsLabels: String,
     onValueChange: (Duration) -> Unit,
 ) {
-    var editingDuration by remember { mutableStateOf(value ?: Duration.ZERO) }
+    var editingDuration by remember(value) { mutableStateOf(value ?: Duration.ZERO) }
 
     EditableInfoItem(
         dialogContent = {
@@ -376,7 +376,7 @@ fun EditablePickerItem(
     itemsLabels: String,
     onValueChange: (Int) -> Unit,
 ) {
-    var editingValue by remember { mutableIntStateOf(value) }
+    var editingValue by remember(value) { mutableIntStateOf(value) }
 
     EditableInfoItem(
         dialogContent = {
@@ -520,7 +520,7 @@ fun EditableSportActivityItem(
     value: SportActivity,
     onValueChange: (SportActivity) -> Unit,
 ) {
-    var editingActivity by remember { mutableStateOf(value) }
+    var editingActivity by remember(value) { mutableStateOf(value) }
 
     EditableInfoItem(
         dialogContent = {

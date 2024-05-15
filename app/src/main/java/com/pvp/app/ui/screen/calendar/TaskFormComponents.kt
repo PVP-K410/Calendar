@@ -136,7 +136,7 @@ fun TaskFormFieldDate(state: TaskFormState<*>) {
 fun TaskFormFieldDescription(state: TaskFormState<*>) {
     val isRecipe = remember(state) { state is TaskFormState.CustomMeal }
 
-    val description by remember {
+    val description by remember(state) {
         derivedStateOf {
             when (state) {
                 is TaskFormState.CustomMeal -> state.recipe
