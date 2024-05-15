@@ -61,9 +61,9 @@ class DailyTaskWorker @AssistedInject constructor(
 
                     tasks
                         .filter { it.date.isBefore(today) && !it.isCompleted }
-                            .forEach { task ->
-                                taskService.remove(task)
-                            }
+                        .forEach { task ->
+                            taskService.remove(task)
+                        }
 
                     if (tasks.filter { it.date == today }.size >= configuration.dailyTaskCount) {
                         return Result.success()
