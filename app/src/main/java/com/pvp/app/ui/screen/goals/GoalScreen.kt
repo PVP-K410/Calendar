@@ -28,9 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -43,13 +41,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Goal
+import com.pvp.app.ui.common.TabSelector
 
 @Composable
 fun GoalScreen(
@@ -215,36 +213,15 @@ fun GoalCard(
 @Composable
 fun GoalTypeFilter(
     filter: GoalFilter,
+    isForm: Boolean = false,
     onClick: (GoalFilter) -> Unit
 ) {
-    val selectedTabIndex = when (filter) {
-        GoalFilter.Weekly -> 0
-        GoalFilter.Monthly -> 1
-    }
-
-    PrimaryTabRow(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        divider = {},
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium),
-        selectedTabIndex = selectedTabIndex
-    ) {
-        GoalFilter.entries.forEach { filterNew ->
-            Tab(
-                modifier = Modifier.height(32.dp),
-                selected = filter == filterNew,
-                onClick = { onClick(filterNew) }
-            ) {
-                Text(
-                    text = filterNew.displayName,
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (filterNew == filter) FontWeight.Bold else FontWeight.Normal
-                )
-            }
-        }
-    }
+    TabSelector(
+        onSelect = { onClick(GoalFilter.entries[it]) },
+        tab = filter.ordinal,
+        tabs = GoalFilter.entries.map { it.displayName },
+        withShadow = !isForm
+    )
 }
 
 @Composable

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -91,14 +90,11 @@ fun TaskCreateSheet(
                     "Meal",
                     "Set Meals",
                     "Sport"
-                )
+                ),
+                withShadow = false
             )
 
             Spacer(modifier = Modifier.size(16.dp))
-
-            HorizontalDivider()
-
-            Spacer(modifier = Modifier.size(8.dp))
 
             TaskForm(
                 onClose = onClose,
@@ -172,8 +168,8 @@ private fun TaskForm(
 
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.surfaceContainer)
             .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(
                 bottom = 24.dp,
                 end = 8.dp,

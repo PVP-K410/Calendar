@@ -117,30 +117,10 @@ fun DecorationScreen(modifier: Modifier) {
             .then(modifier)
             .padding(16.dp)
     ) {
-        PrimaryTabRow(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            divider = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(MaterialTheme.shapes.medium),
-            selectedTabIndex = screen
-        ) {
-            screens()
-                .forEachIndexed { index, (title, _) ->
-                    Tab(
-                        modifier = Modifier.height(32.dp),
-                        onClick = { screen = index },
-                        selected = screen == index,
-                    ) {
-                        Text(
-                            text = title,
-                            color = MaterialTheme.colorScheme.inverseSurface,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = if (screen == index) FontWeight.Bold else FontWeight.Normal
-                        )
-                    }
-                }
-        }
+        TabSelector(
+            onSelect = { screen = it },
+            tabs = screens().map { it.first },
+        )
 
         Spacer(modifier = Modifier.size(16.dp))
 

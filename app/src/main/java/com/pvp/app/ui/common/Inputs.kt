@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
@@ -209,7 +208,7 @@ fun EditableInfoItem(
         modifier = Modifier
             .background(
                 color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(8.dp)
+                shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
             .fillMaxWidth()
@@ -253,7 +252,7 @@ fun EditableDateItem(
         modifier = Modifier
             .background(
                 color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(8.dp)
+                shape = MaterialTheme.shapes.medium
             )
             .padding(8.dp)
             .fillMaxWidth()

@@ -5,7 +5,6 @@ package com.pvp.app.ui.screen.goals
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -13,9 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -27,9 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +38,7 @@ import com.pvp.app.ui.common.LabelFieldWrapper
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerPair
 import com.pvp.app.ui.common.PickerState
+import com.pvp.app.ui.common.TabSelector
 import java.time.LocalDate
 
 private val goalActivities: List<SportActivity> = listOf(
@@ -160,7 +156,10 @@ fun GoalCreateForm(
                 )
             }
 
-            GoalTypeFilter(filter = value) {
+            GoalTypeFilter(
+                filter = value,
+                isForm = true
+            ) {
                 monthly = it == GoalFilter.Monthly
                 value = it
             }
@@ -341,34 +340,12 @@ fun DistanceSelector(
     selectedDistanceType: DistanceType,
     onDistanceTypeChange: (DistanceType) -> Unit
 ) {
-    val selectedTabIndex = when (selectedDistanceType) {
-        DistanceType.Steps -> 0
-        DistanceType.Kilometers -> 1
-    }
-
-    PrimaryTabRow(
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        divider = {},
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium),
-        selectedTabIndex = selectedTabIndex
-    ) {
-        DistanceType.entries.forEach { distanceType ->
-            Tab(
-                modifier = Modifier.height(32.dp),
-                selected = selectedDistanceType == distanceType,
-                onClick = { onDistanceTypeChange(distanceType) }
-            ) {
-                Text(
-                    text = distanceType.displayName,
-                    color = MaterialTheme.colorScheme.inverseSurface,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (distanceType == selectedDistanceType) FontWeight.Bold else FontWeight.Normal
-                )
-            }
-        }
-    }
+    TabSelector(
+        onSelect = { onDistanceTypeChange(DistanceType.entries[it]) },
+        tab = selectedDistanceType.ordinal,
+        tabs = DistanceType.entries.map { it.displayName },
+        withShadow = false
+    )
 }
 
 enum class DistanceType(val displayName: String) {

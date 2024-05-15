@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -237,7 +238,7 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
     Column(
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .fillMaxWidth()
             .padding(8.dp)
     ) {
@@ -289,6 +290,7 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
                 }
             }
         },
+        darken = false,
         header = {
             Text(
                 fontWeight = FontWeight.Bold,
@@ -298,7 +300,7 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
         isFoldedInitially = true,
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
     )
 
     FoldableContent(
@@ -320,6 +322,7 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
                     }
             }
         },
+        darken = false,
         header = {
             Text(
                 fontWeight = FontWeight.Bold,
@@ -329,7 +332,7 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
         isFoldedInitially = true,
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
     )
 }
 
@@ -407,7 +410,7 @@ fun TaskFormFieldMealCards(
         modifier = Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(8.dp),
         onValueChange = onChangeQuery,
         singleLine = true,
@@ -494,18 +497,14 @@ private fun TaskFormMealCard(
 
 @Composable
 fun TaskFormStateGeneralValidator(state: TaskFormState<*>) {
-    val isValid by remember {
-        derivedStateOf { state.title?.isNotBlank() ?: false }
+    LaunchedEffect(state.title) {
+        state.isFormValid = state.title?.isNotBlank() ?: false
     }
-
-    state.isFormValid = isValid
 }
 
 @Composable
 fun TaskFormStateMealValidator(state: TaskFormState.Meal) {
-    val isValid by remember {
-        derivedStateOf { state.meal != null }
+    LaunchedEffect(state.meal) {
+        state.isFormValid = state.meal != null
     }
-
-    state.isFormValid = isValid
 }

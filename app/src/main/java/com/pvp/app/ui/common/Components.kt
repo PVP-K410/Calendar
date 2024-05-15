@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
@@ -161,6 +162,7 @@ fun Dialog(
 @Composable
 fun FoldableContent(
     content: @Composable ColumnScope.() -> Unit,
+    darken: Boolean = true,
     header: @Composable RowScope.() -> Unit,
     isFoldedInitially: Boolean = false,
     modifier: Modifier = Modifier
@@ -174,7 +176,7 @@ fun FoldableContent(
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceContainer.darken(0.2f),
+                    color = MaterialTheme.colorScheme.surfaceContainer.darken(if (darken) 0.2f else 0f),
                     shape = MaterialTheme.shapes.medium
                 )
                 .clickable { folded = !folded }
@@ -196,11 +198,13 @@ fun FoldableContent(
 @Composable
 fun FoldableContent(
     content: @Composable ColumnScope.() -> Unit,
+    darken: Boolean = true,
     header: String,
     isFoldedInitially: Boolean = false,
     modifier: Modifier = Modifier
 ) = FoldableContent(
     content = content,
+    darken = darken,
     header = {
         Text(
             style = MaterialTheme.typography.titleLarge,
@@ -365,31 +369,46 @@ fun InfoTooltip(
 
 @Composable
 fun TabSelector(
-    modifier: Modifier = Modifier,
     onSelect: (Int) -> Unit,
-    tabs: List<String>
+    tab: Int = 0,
+    tabs: List<String>,
+    withShadow: Boolean = true
 ) {
-    var tab by remember { mutableIntStateOf(0) }
+    var tab by remember(tab) { mutableIntStateOf(tab) }
 
-    PrimaryTabRow(
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        modifier = modifier,
-        selectedTabIndex = tab
+    Row(
+        modifier = Modifier.then(
+            if (withShadow) Modifier.shadow(
+                elevation = 6.dp,
+                shape = MaterialTheme.shapes.medium
+            ) else Modifier
+        )
     ) {
-        tabs.forEachIndexed { index, title ->
-            Tab(
-                modifier = Modifier.height(32.dp),
-                onClick = {
-                    tab = index
+        PrimaryTabRow(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            divider = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.medium),
+            selectedTabIndex = tab
+        ) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    modifier = Modifier.height(32.dp),
+                    onClick = {
+                        tab = index
 
-                    onSelect(index)
-                },
-                selected = tab == index,
-            ) {
-                Text(
-                    style = MaterialTheme.typography.labelLarge,
-                    text = title
-                )
+                        onSelect(index)
+                    },
+                    selected = tab == index
+                ) {
+                    Text(
+                        color = MaterialTheme.colorScheme.inverseSurface,
+                        fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal,
+                        style = MaterialTheme.typography.titleMedium,
+                        text = title
+                    )
+                }
             }
         }
     }

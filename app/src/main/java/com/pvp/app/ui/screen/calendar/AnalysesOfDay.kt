@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.CustomMealTask
+import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -171,7 +172,7 @@ private fun TasksOfDayCounterContainer(tasks: List<Task>) {
         TasksOfDayCounter(
             Icons.AutoMirrored.Outlined.LibraryBooks,
             tasks,
-            listOf(Task::class)
+            listOf(GeneralTask::class)
         )
 
         TasksOfDayCounter(
