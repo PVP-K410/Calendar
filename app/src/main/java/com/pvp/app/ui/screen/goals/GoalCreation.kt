@@ -92,8 +92,8 @@ fun DistancePicker(
                 textAlign = TextAlign.End
             )
         },
-        dialogTitle = { Text("Editing distance") },
-        label = "Distance",
+        dialogTitle = { Text("Editing kilometers") },
+        label = "Kilometers",
         onConfirm = { onDistanceChange(stateKilometers.value + (stateMeters.value / 1000.0)) },
         onDismiss = { },
         value = "${stateKilometers.value + (stateMeters.value / 1000.0)} (km)"
@@ -238,7 +238,7 @@ fun GoalCreateForm(
                     activity = tempActivity
                     steps = activity == SportActivity.Walking && goal == 0.0
                     if (activity != SportActivity.Walking) {
-                        selectedDistanceType = DistanceType.Distance
+                        selectedDistanceType = DistanceType.Kilometers
                     }
                 },
                 onDismiss = { tempActivity = activity },
@@ -248,7 +248,7 @@ fun GoalCreateForm(
             Spacer(modifier = Modifier.padding(4.dp))
 
             if (activity == SportActivity.Walking) {
-                StepSelector(
+                DistanceSelector(
                     selectedDistanceType = selectedDistanceType
                 ) { newDistanceType ->
                     if (selectedDistanceType != newDistanceType) {
@@ -267,7 +267,7 @@ fun GoalCreateForm(
                     }
                 }
 
-                DistanceType.Distance -> {
+                DistanceType.Kilometers -> {
                     DistancePicker(distance = goal) {
                         goal = it
                         stepCount = 0.0
@@ -337,13 +337,13 @@ fun StepPicker(
 }
 
 @Composable
-fun StepSelector(
+fun DistanceSelector(
     selectedDistanceType: DistanceType,
     onDistanceTypeChange: (DistanceType) -> Unit
 ) {
     val selectedTabIndex = when (selectedDistanceType) {
         DistanceType.Steps -> 0
-        DistanceType.Distance -> 1
+        DistanceType.Kilometers -> 1
     }
 
     PrimaryTabRow(
@@ -373,5 +373,5 @@ fun StepSelector(
 
 enum class DistanceType(val displayName: String) {
     Steps("Steps"),
-    Distance("Distance")
+    Kilometers("Kilometers")
 }
