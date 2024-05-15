@@ -114,7 +114,7 @@ class TaskViewModel @Inject constructor(
         date: LocalDate,
         duration: Duration? = null,
         reminderTime: Duration? = null,
-        recipe: String?,
+        recipe: String,
         time: LocalTime? = null,
         title: String
     ) {

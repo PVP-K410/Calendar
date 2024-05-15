@@ -97,7 +97,7 @@ interface TaskService : DocumentsCollection {
         date: LocalDate,
         duration: Duration? = null,
         reminderTime: Duration? = null,
-        recipe: String? = null,
+        recipe: String,
         time: LocalTime? = null,
         title: String,
         userEmail: String

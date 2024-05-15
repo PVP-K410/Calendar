@@ -203,7 +203,7 @@ class TaskServiceImpl @Inject constructor(
         date: LocalDate,
         duration: Duration?,
         reminderTime: Duration?,
-        recipe: String?,
+        recipe: String,
         time: LocalTime?,
         title: String,
         userEmail: String

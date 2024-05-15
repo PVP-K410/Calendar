@@ -350,19 +350,9 @@ fun TaskFormFieldMealCards(
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth(),
-        state = stateRow
+        state = stateRow,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        if (meals.isEmpty()) {
-            item {
-                Text(
-                    style = MaterialTheme.typography.labelLarge,
-                    text = "No meals found"
-                )
-            }
-
-            return@LazyRow
-        }
-
         if (state.meal != null) {
             item {
                 TaskFormMealCard(
@@ -371,6 +361,10 @@ fun TaskFormFieldMealCards(
                     state = state
                 )
             }
+        }
+
+        if (meals.isEmpty()) {
+            return@LazyRow
         }
 
         items(meals.filter { it.id != state.meal?.id }) {
@@ -392,6 +386,13 @@ fun TaskFormFieldMealCards(
                 state = state
             )
         }
+    }
+
+    if (meals.isEmpty()) {
+        Text(
+            style = MaterialTheme.typography.labelLarge,
+            text = "No meals found"
+        )
     }
 
     BasicTextField(
