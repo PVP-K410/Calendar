@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.pvp.app.common.DurationUtil.asString
+import com.pvp.app.common.TimeUtil.asString
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.SportTask
@@ -50,7 +50,6 @@ fun TaskCard(
 ) {
     var checked = task.isCompleted
     var showDialog by remember { mutableStateOf(false) }
-    val isTodayDailyTask = task is SportTask && task.isDaily && task.date == LocalDate.now()
 
     TaskEditSheet(
         isOpen = showDialog,
@@ -90,23 +89,23 @@ fun TaskCard(
                 if (task.date <= LocalDate.now()) {
                     Checkbox(
                         checked = checked,
+                        enabled = task !is SportTask || !task.isDaily || task.date == LocalDate.now(),
                         colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface),
-                        enabled = isTodayDailyTask || (task is SportTask && !task.isDaily),
                         modifier = Modifier
                             .size(36.dp)
                             .align(CenterVertically),
                         onCheckedChange = {
-                            if (isTodayDailyTask) {
-                                model.update(
-                                    { task ->
-                                        Task.copy(
-                                            task,
-                                            isCompleted = it
-                                        )
-                                    },
-                                    task
-                                )
-                            }
+                            model.update(
+                                { task ->
+                                    Task.copy(
+                                        task,
+                                        isCompleted = it
+                                    )
+                                },
+                                task
+                            )
+
+                            checked = it
                         }
                     )
                 }
