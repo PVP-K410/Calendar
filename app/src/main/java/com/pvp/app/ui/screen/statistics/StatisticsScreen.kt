@@ -84,6 +84,7 @@ fun StatisticsScreen(
                 when (it) {
                     is GraphType.Chain.Calories -> "kcal"
                     is GraphType.Chain.Steps -> "steps"
+                    is GraphType.Chain.Distance -> "km"
                     else -> ""
                 }
             }
@@ -205,6 +206,7 @@ private fun GraphOfDays(
         when (type) {
             GraphType.Chain.Calories -> { entry -> (entry.calories / 1000).toInt() }
             GraphType.Chain.Steps -> { entry -> entry.steps.toInt() }
+            GraphType.Chain.Distance -> { entry -> (entry.steps * 0.8 * 0.0001).toInt() }
         }
     }
 
@@ -248,7 +250,14 @@ private fun GraphOfDays(
         Text(
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.labelMedium,
-            text = "${values.sumOf { selector(it) }} ${labelOfSum(type)}",
+            text = "Total: ${values.sumOf { selector(it) }} ${labelOfSum(type)}",
+            textAlign = TextAlign.End
+        )
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.labelMedium,
+            text = "Average: ${values.sumOf { selector(it) } / values.size} ${labelOfSum(type)}",
             textAlign = TextAlign.End
         )
     }
@@ -285,7 +294,7 @@ private fun GraphsOngoing(
 
     GraphOfDays(
         labelOfSum = labelOfSum,
-        title = "Week",
+        title = "Current Week",
         values = valuesWeek
     )
 
@@ -294,7 +303,7 @@ private fun GraphsOngoing(
     GraphOfDays(
         labelAsDay = false,
         labelOfSum = labelOfSum,
-        title = "Month",
+        title = "Current Month",
         values = valuesMonth
     )
 }
@@ -309,7 +318,7 @@ private fun GraphsPast(
 
     GraphOfDays(
         labelOfSum = labelOfSum,
-        title = "7 Days",
+        title = "Past 7 Days",
         values = values7d
     )
 
@@ -318,7 +327,7 @@ private fun GraphsPast(
     GraphOfDays(
         labelAsDay = false,
         labelOfSum = labelOfSum,
-        title = "30 Days",
+        title = "Past 30 Days",
         values = values30d
     )
 }
@@ -328,6 +337,8 @@ private sealed class GraphType(val title: String) {
     data object Calories : GraphType("Calories")
 
     data object Steps : GraphType("Steps")
+
+    data object Distance : GraphType("Distance")
 
     sealed class Chain(
         current: GraphType,
@@ -341,6 +352,11 @@ private sealed class GraphType(val title: String) {
 
         data object Steps : Chain(
             GraphType.Steps,
+            GraphType.Distance
+        )
+
+        data object Distance : Chain(
+            GraphType.Distance,
             GraphType.Calories
         )
 
@@ -350,6 +366,7 @@ private sealed class GraphType(val title: String) {
                 return when (type) {
                     is GraphType.Calories -> Calories
                     is GraphType.Steps -> Steps
+                    is GraphType.Distance -> Distance
                     else -> error("Unhandled graph type: $type")
                 }
             }
