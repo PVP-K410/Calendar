@@ -5,6 +5,7 @@ package com.pvp.app.ui.screen.goals
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,6 +69,7 @@ fun GoalScreen(
             ) {
                 Column {
                     val goals = state.currentGoals
+                    val completed: List<Goal> = goals.filter { it.completed }
 
                     val filter by remember {
                         derivedStateOf {
@@ -103,6 +105,28 @@ fun GoalScreen(
                         } else {
                             items(goals) { goal ->
                                 GoalCard(
+                                    goal = goal,
+                                    monthSteps = state.monthSteps
+                                )
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.padding(30.dp))
+
+                            Text(
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                text = "Completed:"
+                            )
+
+                            Spacer(modifier = Modifier.padding(12.dp))
+                        }
+
+                        if (completed.isNotEmpty()) {
+                            items(completed) { goal ->
+                                GoalCompletedCard(
                                     goal = goal,
                                     monthSteps = state.monthSteps
                                 )
@@ -206,6 +230,87 @@ fun GoalCard(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun GoalCompletedCard(
+    goal: Goal,
+    monthSteps: Long
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .border(
+                2.dp,
+                MaterialTheme.colorScheme.secondary,
+                RoundedCornerShape(10.dp)
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = goal.activity.title + " goal is completed!"
+            )
+
+            Spacer(modifier = Modifier.padding(2.dp))
+
+            Text(
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 10.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = goal.startDate.toString() + " - " + goal.endDate.toString()
+            )
+
+            Spacer(modifier = Modifier.padding(8.dp))
+
+            Row(modifier = Modifier.padding(6.dp)) {
+                Text(
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(end = 8.dp),
+                    textAlign = TextAlign.Left,
+                    text = "Your goal was: ${
+                        when (goal.steps) {
+                            true -> "${goal.target.toInt()} steps"
+                            false -> "${goal.target} km"
+                        }
+                    }"
+                )
+
+                Icon(
+                    imageVector = goal.activity.icon,
+                    contentDescription = "Activity icon",
+                )
+            }
+
+            if (goal.steps) {
+                Spacer(modifier = Modifier.padding(2.dp))
+
+                Text(
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 6.dp),
+                    textAlign = TextAlign.Left,
+                    text = "Your average pace was " + when (goal.monthly) {
+                        true -> "$monthSteps"
+                        false -> "${monthSteps / 30 * 7}"
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.padding(8.dp))
+
+            ProgressBar(goal = goal)
         }
     }
 }
