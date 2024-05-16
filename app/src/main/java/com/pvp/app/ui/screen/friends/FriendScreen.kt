@@ -113,7 +113,7 @@ private fun ActivityInfo(
             ActivityRow(
                 icon = Icons.Outlined.Straighten,
                 contentDescription = "Distance",
-                text = "%.2f km".format(distance)
+                text = "%.2f km".format(distance / 1000)
             )
 
             HorizontalDivider(
