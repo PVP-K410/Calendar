@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.settings
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -9,16 +10,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.SettingService
+import com.pvp.app.api.TaskService
 import com.pvp.app.model.Setting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val configuration: Configuration,
-    private val settingService: SettingService
+    private val settingService: SettingService,
+    private val taskService: TaskService
 ) : ViewModel() {
 
     fun clear() {
@@ -57,5 +62,22 @@ class SettingsViewModel @Inject constructor(
 
     fun <T> fromConfiguration(function: (Configuration) -> T): T {
         return function(configuration)
+    }
+
+    fun synchronizeGoogleTasks(onException: (Exception) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                taskService.synchronizeGoogleTasks(LocalDate.now())
+            } catch (e: Exception) {
+                Log.e(
+                    "SettingsViewModel",
+                    "Google Calendar synchronization failed: ${e.message}"
+                )
+
+                withContext(Dispatchers.Main) {
+                    onException(e)
+                }
+            }
+        }
     }
 }

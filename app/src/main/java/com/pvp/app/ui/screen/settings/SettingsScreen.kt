@@ -1,9 +1,12 @@
 package com.pvp.app.ui.screen.settings
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.health.connect.HealthConnectManager
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -25,6 +28,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PermIdentity
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Style
+import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +54,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.startActivity
 import androidx.health.connect.client.HealthConnectClient
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.pvp.app.model.Setting
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Picker
@@ -248,9 +253,45 @@ private fun SettingHealthConnectPermissions(context: Context) {
 }
 
 @Composable
-fun SettingsScreen(
-    modifier: Modifier
-) {
+private fun GoogleCalendarSynchronizer(model: SettingsViewModel = hiltViewModel()) {
+    var intent by remember { mutableStateOf<Intent?>(null) }
+
+    fun synchronize() {
+        model.synchronizeGoogleTasks { e ->
+            intent = when (e) {
+                is UserRecoverableAuthIOException -> e.intent
+                else -> null
+            }
+        }
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            synchronize()
+        }
+    }
+
+    if (intent != null) {
+        launcher.launch(intent!!)
+
+        intent = null
+    }
+
+    SettingCard(
+        title = "Google Calendar",
+        description = "Synchronize your Google Calendar with our app to find all your tasks " +
+                "in one place. Google tasks from the past will not be synchronized, only today's " +
+                "and future tasks will be synchronized.",
+        value = "Synchronize",
+        onEdit = ::synchronize,
+        icon = Icons.Outlined.Sync
+    )
+}
+
+@Composable
+fun SettingsScreen(modifier: Modifier) {
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
@@ -280,8 +321,10 @@ fun SettingsScreen(
 
         CategoryRow(
             icon = Icons.Outlined.PermIdentity,
-            title = "Permissions"
+            title = "3rd Party Services"
         )
+
+        GoogleCalendarSynchronizer()
 
         SettingHealthConnectPermissions(LocalContext.current)
 
@@ -354,7 +397,7 @@ fun <T> SettingCard(
     onEdit: () -> Unit,
     title: String,
     value: T,
-    icon : ImageVector = Icons.Outlined.Edit,
+    icon: ImageVector = Icons.Outlined.Edit,
     iconDescription: String? = null,
     isEnabled: Boolean = true
 ) {

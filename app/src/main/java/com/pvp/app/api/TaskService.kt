@@ -190,6 +190,14 @@ interface TaskService : DocumentsCollection {
     suspend fun removeAll(userEmail: String)
 
     /**
+     * Synchronizes google calendar events/tasks from certain date onwards with the local
+     * cached data.
+     *
+     * @param dateStart date to start synchronization from
+     */
+    suspend fun synchronizeGoogleTasks(dateStart: LocalDate)
+
+    /**
      * Updates the task in the database.
      *
      * @param task task to update

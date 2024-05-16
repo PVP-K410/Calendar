@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.common.TimeUtil.asString
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.InfoTooltip
@@ -71,7 +72,7 @@ fun TaskCard(
                     MaterialTheme.colorScheme.surfaceContainer.darken(0.2f)
                 )
             )
-            .clickable(enabled = !(task is SportTask && task.isDaily)) {
+            .clickable(enabled = !(task is SportTask && task.isDaily || task is GoogleTask)) {
                 showDialog = true
             }
     ) {
@@ -86,7 +87,7 @@ fun TaskCard(
                     .padding(4.dp)
                     .fillMaxWidth()
             ) {
-                if (task.date <= LocalDate.now()) {
+                if (task !is GoogleTask && task.date <= LocalDate.now()) {
                     Checkbox(
                         checked = checked,
                         enabled = task !is SportTask || !task.isDaily || task.date == LocalDate.now(),
@@ -129,8 +130,9 @@ fun TaskCard(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     when (task) {
-                        is SportTask -> TaskCardContentSport(task)
                         is CustomMealTask -> TaskCardContentMeal(task)
+                        is GoogleTask -> TaskCardContentGoogle(task)
+                        is SportTask -> TaskCardContentSport(task)
                         else -> TaskCardContent(task)
                     }
                 }
@@ -175,6 +177,38 @@ private fun TaskCardContentMeal(task: CustomMealTask) {
         text = "Recipe: " + task.recipe,
         textAlign = TextAlign.Left
     )
+}
+
+@Composable
+private fun TaskCardContentGoogle(task: GoogleTask) {
+    task.duration?.let { duration ->
+        Row(modifier = Modifier.padding(6.dp)) {
+            Icon(
+                contentDescription = "Duration",
+                imageVector = Icons.Outlined.Timelapse
+            )
+
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp),
+                text = duration.asString(),
+                textAlign = TextAlign.Left
+            )
+        }
+    }
+
+    if (task.description != null) {
+        Text(
+            maxLines = 3,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp),
+            overflow = TextOverflow.Ellipsis,
+            text = task.description,
+            textAlign = TextAlign.Left
+        )
+    }
 }
 
 @Composable
