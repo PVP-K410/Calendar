@@ -197,6 +197,7 @@ fun EditableInfoItem(
 
 @Composable
 fun EditableInfoItem(
+    confirmButtonEnabled: Boolean = true,
     dialogContent: @Composable () -> Unit,
     dialogTitle: @Composable () -> Unit,
     label: @Composable ColumnScope.() -> Unit,
@@ -230,6 +231,7 @@ fun EditableInfoItem(
                     fontWeight = FontWeight.Bold
                 )
             },
+            confirmationButtonEnabled = confirmButtonEnabled,
             confirmationDescription = dialogContent,
             confirmationTitle = dialogTitle,
             icon = Icons.Outlined.Edit,
@@ -285,37 +287,56 @@ fun EditableTextItem(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
+    validate: (String) -> Boolean = { true },
+    errorMessage: String = "Invalid input"
 ) {
     var editingText by remember(value) { mutableStateOf(value) }
 
-    EditableInfoItem(
-        dialogContent = {
-            OutlinedTextField(
-                label = { Text(label) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                onValueChange = { editingText = it },
-                value = editingText
-            )
-        },
-        dialogTitle = { Text("Editing $label") },
-        label = {
-            Text(
-                fontWeight = FontWeight.Bold,
-                text = label
-            )
-        },
-        onConfirm = {
-            onValueChange(editingText)
-        },
-        onDismiss = { },
-        value = {
-            if (value.isNotEmpty()) {
-                Text(value)
+    Column {
+        EditableInfoItem(
+            confirmButtonEnabled = validate(editingText),
+            dialogContent = {
+                Column {
+                    OutlinedTextField(
+                        label = { Text(label) },
+                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = { editingText = it },
+                        value = editingText
+                    )
+
+                    TextError(
+                        enabled = !validate(editingText),
+                        text = errorMessage
+                    )
+                }
+            },
+            dialogTitle = { Text("Editing $label") },
+            label = {
+                Text(
+                    fontWeight = FontWeight.Bold,
+                    text = label
+                )
+            },
+            onConfirm = {
+                if (validate(editingText)) {
+                    onValueChange(editingText)
+                }
+            },
+            onDismiss = {
+                editingText = value
+            },
+            value = {
+                if (value.isNotEmpty()) {
+                    Text(value)
+                }
             }
-        }
-    )
+        )
+
+        TextError(
+            enabled = !validate(value),
+            text = errorMessage
+        )
+    }
 }
 
 @Composable

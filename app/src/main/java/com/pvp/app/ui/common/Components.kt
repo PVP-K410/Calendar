@@ -118,6 +118,7 @@ fun AsyncImage(
 fun Dialog(
     buttonContentConfirm: @Composable RowScope.() -> Unit,
     buttonContentDismiss: @Composable RowScope.() -> Unit,
+    buttonEnabledConfirm: Boolean = true,
     content: @Composable () -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
@@ -134,6 +135,7 @@ fun Dialog(
                 Button(
                     content = buttonContentConfirm,
                     onClick = onConfirm,
+                    enabled = buttonEnabledConfirm,
                     shape = MaterialTheme.shapes.extraLarge,
                     colors = ButtonDefaults.buttonColors(contentColor = MaterialTheme.colorScheme.surface)
                 )

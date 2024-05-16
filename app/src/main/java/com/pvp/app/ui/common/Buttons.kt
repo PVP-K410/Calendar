@@ -155,6 +155,7 @@ fun ButtonWithDialog(
 fun IconButtonConfirm(
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     confirmationButtonContent: @Composable RowScope.() -> Unit = { Text("Proceed") },
+    confirmationButtonEnabled: Boolean = true,
     confirmationDescription: @Composable () -> Unit = { },
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
     icon: ImageVector,
@@ -167,6 +168,7 @@ fun IconButtonConfirm(
     IconButtonWithDialog(
         colors = colors,
         confirmButtonContent = confirmationButtonContent,
+        confirmButtonEnabled = confirmationButtonEnabled,
         dialogContent = confirmationDescription,
         dialogTitle = confirmationTitle,
         dismissButtonContent = { Text("Cancel") },
@@ -225,6 +227,7 @@ fun IconButtonWithDialog(
     iconDescription: String? = null,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
+    confirmButtonEnabled: Boolean = true,
     dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
@@ -252,6 +255,7 @@ fun IconButtonWithDialog(
     Dialog(
         buttonContentConfirm = confirmButtonContent,
         buttonContentDismiss = dismissButtonContent,
+        buttonEnabledConfirm = confirmButtonEnabled,
         content = dialogContent,
         onConfirm = {
             onConfirm()
