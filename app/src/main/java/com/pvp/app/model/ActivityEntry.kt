@@ -9,6 +9,7 @@ data class ActivityEntry(
     var calories: Double = 0.0,
     @Contextual
     var date: Timestamp = Timestamp.now(),
+    var distance: Double = 0.0,
     val email: String = "",
     var id: String? = null,
     var steps: Long = 0
