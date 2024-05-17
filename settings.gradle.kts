@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Calendar"
+rootProject.name = "Calencup"
 include(":app")
  
