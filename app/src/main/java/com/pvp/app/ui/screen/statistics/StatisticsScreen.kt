@@ -117,6 +117,14 @@ fun StatisticsScreen(
         )
 
         tabs.values.elementAt(tab)()
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Text(text = "Average amount of completed tasks (7d): ${state.averageTasksCompleted7d}")
+        Text(text = "Average amount of completed tasks (30d): ${state.averageTasksCompleted30d}")
+        Text(text = "Average points ${state.averagePoints}")
+        Text(text = "Top3 most frequent activities ${state.top3FrequentActivities}")
+        Text(text = "Unique activities (30d) ${state.uniqueActivities30d}")
     }
 }
 
