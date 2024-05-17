@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -36,6 +37,7 @@ import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.screen.calendar.TaskFormState.Companion.rememberCustomMealFormState
 import com.pvp.app.ui.screen.calendar.TaskFormState.Companion.rememberGeneralFormState
+import com.pvp.app.ui.screen.calendar.TaskFormState.Companion.rememberGoogleFormState
 import com.pvp.app.ui.screen.calendar.TaskFormState.Companion.rememberMealFormState
 import com.pvp.app.ui.screen.calendar.TaskFormState.Companion.rememberSportFormState
 import java.time.LocalDate
@@ -105,7 +107,7 @@ fun TaskCreateSheet(
 }
 
 @Composable
-fun TaskEditSheet(
+fun TaskPreviewSheet(
     isOpen: Boolean,
     onClose: () -> Unit,
     task: Task
@@ -118,27 +120,7 @@ fun TaskEditSheet(
         onDismissRequest = onClose,
         sheetState = rememberModalBottomSheetState(true)
     ) {
-        val state = when (task) {
-            is CustomMealTask -> rememberCustomMealFormState(
-                date = task.date,
-                task = task
-            )
-
-            is MealTask -> rememberMealFormState(
-                date = task.date,
-                task = task
-            )
-
-            is SportTask -> rememberSportFormState(
-                date = task.date,
-                task = task
-            )
-
-            else -> rememberGeneralFormState(
-                date = task.date,
-                task = task as GeneralTask
-            )
-        }
+        val state = rememberTaskToStateConversion(task = task)
 
         Column(
             modifier = Modifier
@@ -180,7 +162,10 @@ private fun TaskForm(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         if (state !is TaskFormState.Meal) {
-            TaskFormFieldsTopShared(state = state)
+            TaskFormFieldsTopShared(
+                editable = state.editable,
+                state = state
+            )
 
             if (state is TaskFormState.Sport) {
                 TaskFormFieldActivity(state = state)
@@ -188,7 +173,7 @@ private fun TaskForm(
 
             if (state is TaskFormState.Sport && state.activity.supportsDistanceMetrics) {
                 TaskFormFieldDistance(state = state)
-            } else {
+            } else if (state !is TaskFormState.Google) {
                 TaskFormFieldDuration(state = state)
             }
         } else {
@@ -214,11 +199,46 @@ private fun TaskForm(
             TaskFormFieldsMealBreakdown(state.meal)
         }
 
-        TaskFormFieldsBottomShared(state = state)
+        TaskFormFieldsBottomShared(
+            editable = state.editable,
+            state = state
+        )
 
         TaskFormButtonsRow(
             onClose = onClose,
             state = state
         )
+    }
+}
+
+@Composable
+private fun rememberTaskToStateConversion(task: Task): TaskFormState<*> {
+    return when (task) {
+        is CustomMealTask -> rememberCustomMealFormState(
+            date = task.date,
+            task = task
+        )
+
+        is MealTask -> rememberMealFormState(
+            date = task.date,
+            task = task
+        )
+
+        is SportTask -> rememberSportFormState(
+            date = task.date,
+            task = task
+        )
+
+        is GeneralTask -> rememberGeneralFormState(
+            date = task.date,
+            task = task
+        )
+
+        is GoogleTask -> rememberGoogleFormState(
+            date = task.date,
+            task = task
+        )
+
+        else -> error("Unsupported task type")
     }
 }

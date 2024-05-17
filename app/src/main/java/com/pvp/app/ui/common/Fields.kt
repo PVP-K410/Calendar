@@ -1,13 +1,68 @@
 package com.pvp.app.ui.common
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+@Composable
+fun InfoCustomField(
+    label: @Composable () -> Unit,
+    value: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = MaterialTheme.shapes.medium
+            )
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            label()
+
+            value()
+        }
+    }
+}
+
+@Composable
+fun InfoDateField(
+    label: String,
+    value: LocalDate
+) = InfoTextField(
+    label = label,
+    value = value.format(DateTimeFormatter.ofPattern("yyyy-MM-dd, EEEE"))
+)
+
+@Composable
+fun InfoTextField(
+    label: String,
+    value: String
+) = InfoCustomField(label = {
+    Text(
+        fontWeight = FontWeight.Bold,
+        text = label
+    )
+}) { Text(text = value) }
 
 @Composable
 fun ErrorFieldWrapper(

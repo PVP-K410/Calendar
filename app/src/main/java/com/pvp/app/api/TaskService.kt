@@ -2,6 +2,7 @@ package com.pvp.app.api
 
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.Meal
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
@@ -183,11 +184,26 @@ interface TaskService : DocumentsCollection {
     suspend fun remove(task: Task)
 
     /**
+     * Removes a google task from the local cached data.
+     *
+     * @param task google task to remove
+     */
+    suspend fun removeGoogle(task: GoogleTask)
+
+    /**
      * Removes all tasks from the database.
      *
      * @param userEmail email of the user to remove tasks for
      */
     suspend fun removeAll(userEmail: String)
+
+    /**
+     * Synchronizes google calendar events/tasks from certain date onwards with the local
+     * cached data.
+     *
+     * @param dateStart date to start synchronization from
+     */
+    suspend fun synchronizeGoogleCalendar(dateStart: LocalDate)
 
     /**
      * Updates the task in the database.
