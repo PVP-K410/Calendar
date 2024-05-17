@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FactCheck
 import androidx.compose.material.icons.outlined.LocalFireDepartment
+import androidx.compose.material.icons.outlined.Straighten
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -62,6 +63,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 private fun ActivityInfo(
     calories: Double,
+    distance: Double,
+    goalsCompleted: Int,
     tasksCompleted: Int,
     steps: Long
 ) {
@@ -78,7 +81,7 @@ private fun ActivityInfo(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .height(90.dp)
+                .height(120.dp)
                 .clip(MaterialTheme.shapes.small)
                 .padding(vertical = 4.dp),
             verticalArrangement = Arrangement.SpaceEvenly
@@ -108,9 +111,33 @@ private fun ActivityInfo(
             )
 
             ActivityRow(
+                icon = Icons.Outlined.Straighten,
+                contentDescription = "Distance",
+                text = "%.2f km".format(distance / 1000)
+            )
+
+            HorizontalDivider(
+                color = Color.Gray,
+                thickness = 1.dp,
+                modifier = Modifier.padding(horizontal = 14.dp)
+            )
+
+            ActivityRow(
                 icon = Icons.AutoMirrored.Outlined.FactCheck,
                 contentDescription = "tasks",
                 text = "$tasksCompleted sport tasks completed"
+            )
+
+            HorizontalDivider(
+                color = Color.Gray,
+                thickness = 1.dp,
+                modifier = Modifier.padding(horizontal = 14.dp)
+            )
+
+            ActivityRow(
+                icon = Icons.AutoMirrored.Outlined.FactCheck,
+                contentDescription = "goals",
+                text = "$goalsCompleted goals completed"
             )
         }
 
@@ -167,7 +194,9 @@ private fun AvatarBox(friend: FriendEntry) {
 private fun Content(
     calories: Double,
     details: Friends,
+    distance: Double,
     friends: List<FriendEntry>,
+    goals: Int,
     steps: Long,
     tasks: Int
 ) {
@@ -185,6 +214,8 @@ private fun Content(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         ActivityInfo(
             calories,
+            distance,
+            goals,
             tasks,
             steps
         )
@@ -283,8 +314,6 @@ fun FriendScreen(
     val details = state.details
     val entry = state.entry
     val friends = state.friendsMutual
-    val steps = state.steps
-    val tasks = state.tasksCompleted
     val stateScroll = rememberScrollState()
 
     Column(
@@ -303,9 +332,11 @@ fun FriendScreen(
         Content(
             calories = calories,
             details = details,
+            distance = entry.distance,
             friends = friends,
-            steps = steps,
-            tasks = tasks
+            goals = entry.goalsCompleted,
+            steps = entry.steps,
+            tasks = entry.tasksCompleted
         )
 
         Spacer(modifier = Modifier.size(12.dp))

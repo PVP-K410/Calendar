@@ -10,6 +10,10 @@ data class FriendEntry(
         1,
         1
     ),
+    val distance: Double = 0.0,
+    val goalsCompleted: Int = 0,
+    val steps: Long = 0L,
+    val tasksCompleted: Int = 0,
     val user: User = User()
 )
 
@@ -19,8 +23,6 @@ data class FriendState(
     val entry: FriendEntry = FriendEntry(),
     val friendsMutual: List<FriendEntry> = emptyList(),
     val state: FriendScreenState = FriendScreenState.Loading,
-    val steps: Long = 0L,
-    val tasksCompleted: Int = 0
 )
 
 sealed class FriendScreenState {
