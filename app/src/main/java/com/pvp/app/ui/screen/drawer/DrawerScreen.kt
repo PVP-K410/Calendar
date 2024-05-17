@@ -138,7 +138,7 @@ private fun Header(modifier: Modifier = Modifier) {
         Column {
             Text(
                 style = MaterialTheme.typography.displaySmall,
-                text = "Calendar"
+                text = "Calencup"
             )
 
             Text(

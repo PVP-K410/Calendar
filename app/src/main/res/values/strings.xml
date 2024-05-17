@@ -1,7 +1,7 @@
 <resources>
     <string name="action_continue">Continue</string>
     <string name="action_submit">Submit</string>
-    <string name="application_name">Calendar</string>
+    <string name="application_name">Calencup</string>
     <string name="empty" />
     <string name="form_create_meal_description">Description</string>
     <string name="form_create_meal_duration">Preparation time</string>
