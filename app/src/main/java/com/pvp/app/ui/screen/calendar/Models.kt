@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
@@ -18,6 +19,7 @@ import java.time.LocalTime
 open class TaskFormState<T : Task>(
     date: LocalDate,
     duration: Duration? = null,
+    val editable: Boolean = true,
     isFormValid: Boolean = false,
     reminderTime: Duration? = null,
     task: T? = null,
@@ -35,11 +37,12 @@ open class TaskFormState<T : Task>(
 
     constructor(state: TaskFormState<T>) : this(
         date = state.date,
-        time = state.time,
         duration = state.duration,
+        editable = state.editable,
         isFormValid = state.isFormValid,
         reminderTime = state.reminderTime,
         task = state.task,
+        time = state.time,
         title = state.title
     )
 
@@ -55,6 +58,14 @@ open class TaskFormState<T : Task>(
         description: String? = null,
         stateParent: TaskFormState<GeneralTask>
     ) : TaskFormState<GeneralTask>(stateParent) {
+
+        var description by mutableStateOf(description)
+    }
+
+    class Google(
+        description: String? = null,
+        stateParent: TaskFormState<GoogleTask>
+    ) : TaskFormState<GoogleTask>(stateParent) {
 
         var description by mutableStateOf(description)
     }
@@ -87,6 +98,7 @@ open class TaskFormState<T : Task>(
         ) = TaskFormState(
             date = task?.date ?: date ?: LocalDate.now(),
             duration = task?.duration,
+            editable = task !is GoogleTask && (task !is SportTask || !task.isDaily),
             isFormValid = task != null,
             reminderTime = task?.reminderTime,
             task = task,
@@ -122,6 +134,26 @@ open class TaskFormState<T : Task>(
             val state by remember {
                 mutableStateOf(
                     General(
+                        description = task?.description,
+                        stateParent = create(
+                            date,
+                            task
+                        )
+                    )
+                )
+            }
+
+            return state
+        }
+
+        @Composable
+        fun rememberGoogleFormState(
+            date: LocalDate? = null,
+            task: GoogleTask? = null
+        ): Google {
+            val state by remember {
+                mutableStateOf(
+                    Google(
                         description = task?.description,
                         stateParent = create(
                             date,

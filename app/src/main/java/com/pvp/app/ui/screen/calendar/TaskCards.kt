@@ -52,7 +52,7 @@ fun TaskCard(
     var checked = task.isCompleted
     var showDialog by remember { mutableStateOf(false) }
 
-    TaskEditSheet(
+    TaskPreviewSheet(
         isOpen = showDialog,
         onClose = { showDialog = false },
         task = task
@@ -72,7 +72,7 @@ fun TaskCard(
                     MaterialTheme.colorScheme.surfaceContainer.darken(0.2f)
                 )
             )
-            .clickable(enabled = !(task is SportTask && task.isDaily || task is GoogleTask)) {
+            .clickable(enabled = !(task is SportTask && task.isDaily)) {
                 showDialog = true
             }
     ) {

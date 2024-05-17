@@ -37,6 +37,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +60,7 @@ import com.pvp.app.model.Setting
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
+import com.pvp.app.ui.common.showToast
 
 @Composable
 private fun SettingNotificationReminderMinutes(
@@ -255,9 +257,12 @@ private fun SettingHealthConnectPermissions(context: Context) {
 @Composable
 private fun GoogleCalendarSynchronizer(model: SettingsViewModel = hiltViewModel()) {
     var intent by remember { mutableStateOf<Intent?>(null) }
+    val context = LocalContext.current
 
     fun synchronize() {
-        model.synchronizeGoogleTasks { e ->
+        model.synchronizeGoogleTasks(onCallback = {
+            context.showToast(message = "Google Calendar successfully synchronized")
+        }) { e ->
             intent = when (e) {
                 is UserRecoverableAuthIOException -> e.intent
                 else -> null
@@ -273,10 +278,12 @@ private fun GoogleCalendarSynchronizer(model: SettingsViewModel = hiltViewModel(
         }
     }
 
-    if (intent != null) {
-        launcher.launch(intent!!)
+    LaunchedEffect(intent) {
+        if (intent != null) {
+            launcher.launch(intent!!)
 
-        intent = null
+            intent = null
+        }
     }
 
     SettingCard(

@@ -431,6 +431,15 @@ class TaskServiceImpl @Inject constructor(
             .await()
     }
 
+    override suspend fun removeGoogle(task: GoogleTask) {
+        editGoogleEventTasks(
+            context,
+            getGoogleEventTasks(context)
+                .firstOr(emptyList())
+                .filter { it.id != task.id }
+        )
+    }
+
     override suspend fun removeAll(userEmail: String) {
         database
             .collection(identifier)
@@ -446,7 +455,7 @@ class TaskServiceImpl @Inject constructor(
             }
     }
 
-    override suspend fun synchronizeGoogleTasks(dateStart: LocalDate) {
+    override suspend fun synchronizeGoogleCalendar(dateStart: LocalDate) {
         val user = userService.user.firstOrNull() ?: return
 
         val service = Calendar

@@ -64,10 +64,17 @@ class SettingsViewModel @Inject constructor(
         return function(configuration)
     }
 
-    fun synchronizeGoogleTasks(onException: (Exception) -> Unit) {
+    fun synchronizeGoogleTasks(
+        onCallback: () -> Unit,
+        onException: (Exception) -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                taskService.synchronizeGoogleTasks(LocalDate.now())
+                taskService.synchronizeGoogleCalendar(LocalDate.now())
+
+                withContext(Dispatchers.Main) {
+                    onCallback()
+                }
             } catch (e: Exception) {
                 Log.e(
                     "SettingsViewModel",
