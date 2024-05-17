@@ -1,5 +1,19 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.pvp.app.service
 
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.util.DateTime
+import com.google.api.services.calendar.Calendar
+import com.google.api.services.calendar.CalendarScopes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.Configuration
@@ -9,22 +23,30 @@ import com.pvp.app.api.MealService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.FlowUtil.firstOr
 import com.pvp.app.common.JsonUtil.JSON
 import com.pvp.app.common.JsonUtil.toJsonElement
 import com.pvp.app.common.JsonUtil.toPrimitivesMap
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.Meal
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.Points
 import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.tasks.await
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
@@ -32,12 +54,20 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneOffset
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+private val Context.dataStoreGoogleCalendarEvents: DataStore<Preferences> by preferencesDataStore(
+    name = "google_calendar_events"
+)
+
+private val eventsKey: Preferences.Key<Set<String>> = stringSetPreferencesKey("events")
+
 class TaskServiceImpl @Inject constructor(
     private val configuration: Configuration,
+    @ApplicationContext private val context: Context,
     private val database: FirebaseFirestore,
     private val exerciseService: ExerciseService,
     private val experienceService: ExperienceService,
@@ -384,6 +414,9 @@ class TaskServiceImpl @Inject constructor(
                         task
                     }
             }
+            .combine(getGoogleEventTasks(context)) { tasks, tasksGoogle ->
+                tasks.plus(tasksGoogle)
+            }
     }
 
     override suspend fun remove(task: Task) {
@@ -396,6 +429,15 @@ class TaskServiceImpl @Inject constructor(
             .document(task.id!!)
             .delete()
             .await()
+    }
+
+    override suspend fun removeGoogle(task: GoogleTask) {
+        editGoogleEventTasks(
+            context,
+            getGoogleEventTasks(context)
+                .firstOr(emptyList())
+                .filter { it.id != task.id }
+        )
     }
 
     override suspend fun removeAll(userEmail: String) {
@@ -411,6 +453,71 @@ class TaskServiceImpl @Inject constructor(
             .forEach { d ->
                 d.reference.delete()
             }
+    }
+
+    override suspend fun synchronizeGoogleCalendar(dateStart: LocalDate) {
+        val user = userService.user.firstOrNull() ?: return
+
+        val service = Calendar
+            .Builder(
+                NetHttpTransport(),
+                JacksonFactory.getDefaultInstance(),
+                GoogleAccountCredential
+                    .usingOAuth2(
+                        context,
+                        setOf(
+                            CalendarScopes.CALENDAR_READONLY,
+                            CalendarScopes.CALENDAR_EVENTS_READONLY
+                        )
+                    )
+                    .also { it.selectedAccountName = user.email }
+            )
+            .setApplicationName("Calendar")
+            .build()
+
+        val now = DateTime(System.currentTimeMillis())
+
+        val events = service
+            .calendarList()
+            .list()
+            .execute().items
+            .map { it.id }
+            .flatMap { id ->
+                service
+                    .events()
+                    .list(id)
+                    .setTimeMin(now)
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .execute().items
+                    .map {
+                        val date = it.start.dateTime ?: it.start.date
+
+                        val dateTime = LocalDateTime.ofEpochSecond(
+                            date.value / 1000,
+                            0,
+                            ZoneOffset.ofTotalSeconds(date.timeZoneShift * 60)
+                        )
+
+                        GoogleTask(
+                            date = dateTime.toLocalDate(),
+                            description = it.description,
+                            id = it.id,
+                            time = dateTime.toLocalTime(),
+                            title = it.summary
+                        )
+                    }
+            }
+
+        val eventsAll = getGoogleEventTasks(context)
+            .firstOr(emptyList())
+            .filter { it.date < dateStart }
+            .plus(events)
+
+        editGoogleEventTasks(
+            context,
+            eventsAll
+        )
     }
 
     override suspend fun update(
@@ -476,6 +583,17 @@ class TaskServiceImpl @Inject constructor(
                 else -> {
                     JSON.decodeFromJsonElement<GeneralTask>(element)
                 }
+            }
+        }
+
+        private suspend fun editGoogleEventTasks(
+            context: Context,
+            tasks: List<GoogleTask>
+        ) {
+            context.dataStoreGoogleCalendarEvents.edit { preferences ->
+                preferences[eventsKey] = tasks
+                    .map { JSON.encodeToString<GoogleTask>(it) }
+                    .toSet()
             }
         }
 
@@ -582,6 +700,17 @@ class TaskServiceImpl @Inject constructor(
                     .take(count - 1)
                     .plus(SportActivity.Walking)
             }
+        }
+
+        private fun getGoogleEventTasks(context: Context): Flow<List<GoogleTask>> {
+            return context.dataStoreGoogleCalendarEvents.data
+                .mapLatest { it[eventsKey] ?: emptySet() }
+                .mapLatest { events ->
+                    events.map {
+                        JSON.decodeFromJsonElement<GoogleTask>(JSON.parseToJsonElement(it))
+                    }
+                }
+                .onStart { emit(emptyList()) }
         }
 
         private suspend fun isWeekly(

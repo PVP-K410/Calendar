@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -105,7 +106,7 @@ private fun filterTasks(
         TaskFilter.Daily -> tasks.filter { it is SportTask && it.isDaily }
         TaskFilter.Sports -> tasks.filter { it is SportTask && !it.isDaily }
         TaskFilter.Meal -> tasks.filter { it is CustomMealTask || it is MealTask }
-        TaskFilter.General -> tasks.filterIsInstance<GeneralTask>()
+        TaskFilter.General -> tasks.filter { it is GeneralTask || it is GoogleTask }
     }
 }
 

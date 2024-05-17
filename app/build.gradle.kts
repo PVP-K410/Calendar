@@ -103,6 +103,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/DEPENDENCIES"
         }
     }
 }
@@ -131,6 +132,11 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("com.google.android.gms:play-services-auth:21.1.1")
+
+    // at >= 2.3.0 gRPC version mismatch with firebase libraries
+    implementation("com.google.api-client:google-api-client-android:2.2.0")
+
+    implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.google.dagger:hilt-android:2.51.1")
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
