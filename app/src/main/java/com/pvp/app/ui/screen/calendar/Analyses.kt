@@ -69,7 +69,7 @@ fun CalorieCounter(
     )
 
     Text(
-        text = "${(calories / 1000).roundToInt()} kCal",
+        text = "%.2f kCal".format(calories / 1000),
         style = MaterialTheme.typography.titleSmall,
         modifier = Modifier.padding(start = 8.dp)
     )
