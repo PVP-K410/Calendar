@@ -269,4 +269,17 @@
     <string name="friends_success_request_accepted">Friend request accepted</string>
     <string name="friends_success_request_denied">Friend request denied</string>
     <string name="friends_success_request_canceled">Friend request canceled</string>
+    <string name="friend_7_days_activity">7 days activity</string>
+    <string name="friend_steps_made">%1$s steps made</string>
+    <string name="friend_calories_burned">%1$.2f calories burned</string>
+    <string name="friend_distance">%1$.2f km</string>
+    <string name="friend_sport_tasks_completed">%1$s sport tasks completed</string>
+    <string name="friend_goals_completed">%1$s goals completed</string>
+    <string name="friend_mutual_friends">Mutual friends</string>
+    <string name="friend_mutual_friends_error">No mutual friends</string>
+    <string name="friend_other_information">Other information</string>
+    <string name="friend_friends_since">Friends since - %1$s</string>
+    <string name="friend_button_remove_confirmation_description">If friend is removed, you will have to request for friendship again</string>
+    <string name="friend_button_remove_confirmation_title">Are you sure you want to remove this friend?</string>
+    <string name="friend_button_remove">Remove Friend</string>
 </resources>

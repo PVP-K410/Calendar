@@ -257,4 +257,17 @@
     <string name="friends_success_request_accepted">Draugo užklausa priimta</string>
     <string name="friends_success_request_denied">Draugo užklausa atmesta</string>
     <string name="friends_success_request_canceled">Draugavimo užklausa atšaukta</string>
+    <string name="friend_7_days_activity">7 dienų aktyvumas</string>
+    <string name="friend_steps_made">%1$s žingsnių</string>
+    <string name="friend_calories_burned">%1$.2f sudegintų kalorijų</string>
+    <string name="friend_distance">%1$.2f km</string>
+    <string name="friend_sport_tasks_completed">%1$s sportinių užsiėmimų pabaigta</string>
+    <string name="friend_goals_completed">%1$s siekių pabaigta</string>
+    <string name="friend_mutual_friends">Bendri draugai</string>
+    <string name="friend_mutual_friends_error">Neturite bendrų draugų</string>
+    <string name="friend_other_information">Kita informacija</string>
+    <string name="friend_friends_since">Draugai nuo - %1$s</string>
+    <string name="friend_button_remove_confirmation_description">Jeigu draugas bus panaikintas, turėsite jį pakviesti iš naujo į draugus.</string>
+    <string name="friend_button_remove_confirmation_title">Ar tikrai norite panaikinti savo draugą?</string>
+    <string name="friend_button_remove">Panaikinti draugą</string>
 </resources>
