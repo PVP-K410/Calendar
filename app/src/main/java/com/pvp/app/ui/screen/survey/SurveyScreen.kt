@@ -128,7 +128,7 @@ fun SurveyInput(
 
         Survey.FILTER_ACTIVITIES -> {
             FilterSurvey(
-                filters = state.user.activities.map { it.title },
+                filters = state.user.activities.map { it.title() },
                 handler = { filters ->
                     handler {
                         viewModel.updateUserFilters(
@@ -148,7 +148,7 @@ fun SurveyInput(
 
         Survey.FILTER_INGREDIENTS -> {
             FilterSurvey(
-                filters = state.user.ingredients.map { it.title },
+                filters = state.user.ingredients.map { it.title() },
                 handler = { filters ->
                     handler {
                         viewModel.updateUserFilters(

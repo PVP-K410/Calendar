@@ -71,8 +71,8 @@ fun StatisticsScreen(
 ) {
     val localeGraphOngoing = stringResource(R.string.dashboard_graph_type_ongoing)
     val localeGraphPast = stringResource(R.string.dashboard_graph_type_past)
-    val localeMeasurementKCal = stringResource(R.string.dashboard_measurement_kcal)
-    val localeMeasurementSteps = stringResource(R.string.dashboard_measurement_steps)
+    val localeMeasurementKCal = stringResource(R.string.measurement_kcal)
+    val localeMeasurementSteps = stringResource(R.string.measurement_steps)
     val state by model.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {

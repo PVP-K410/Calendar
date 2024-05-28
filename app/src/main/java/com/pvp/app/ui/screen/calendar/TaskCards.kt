@@ -256,7 +256,7 @@ private fun TaskCardContentSport(task: SportTask) {
 
         Text(
             modifier = Modifier.padding(start = 8.dp),
-            text = task.activity.title,
+            text = task.activity.title(),
             textAlign = TextAlign.Left
         )
 

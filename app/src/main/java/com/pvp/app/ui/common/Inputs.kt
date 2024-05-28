@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,10 +27,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pvp.app.R
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import java.time.Duration
@@ -44,7 +42,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun <T> DropdownMenu(
     onSelect: (T) -> Unit,
-    optionToLabel: (T) -> String = { it.toString() },
+    optionToLabel: @Composable (T) -> String = { it.toString() },
     options: List<T>,
     value: T
 ) {
@@ -80,95 +78,6 @@ fun <T> DropdownMenu(
     }
 }
 
-/**
- * @param keyboardOptions (optional) software keyboard options that contains configuration such
- * as KeyboardType and ImeAction.
- * @param label label displayed inside text container
- * @param modifier (optional) the Modifier applies to the text field
- * @param onValueChange (optional) callback triggered when text inside text field is updated
- * @param validationPolicies (optional) how text inside should be validated, should be specified
- * via InputValidator
- * @param value text field input text
- */
-@Composable
-fun TextField(
-    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-    label: String,
-    modifier: Modifier = Modifier
-        .background(MaterialTheme.colorScheme.background)
-        .fillMaxWidth(),
-    onValueChange: (String, List<String>) -> Unit = { _, _ -> },
-    validationPolicies: (String) -> List<String> = { listOf() },
-    value: String
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        validationPolicies = validationPolicies,
-        label = {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium
-            )
-        },
-        keyboardOptions = keyboardOptions,
-        modifier = modifier
-    )
-}
-
-/**
- * @param keyboardOptions (optional) software keyboard options that contains configuration such
- * as KeyboardType and ImeAction.
- * @param label label displayed inside text container
- * @param modifier (optional) the Modifier applies to the text field
- * @param onValueChange (optional) callback triggered when text inside text field is updated
- * @param validationPolicies (optional) how text inside should be validated, should be specified
- * via InputValidator
- * @param value text field input text
- */
-@Composable
-fun TextField(
-    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-    label: @Composable () -> Unit,
-    modifier: Modifier = Modifier
-        .background(MaterialTheme.colorScheme.background)
-        .fillMaxWidth(),
-    onValueChange: (String, List<String>) -> Unit = { _, _ -> },
-    validationPolicies: (String) -> List<String> = { listOf() },
-    value: String
-) {
-    var errors by remember { mutableStateOf(emptyList<String>()) }
-    var input by remember { mutableStateOf(value) }
-
-    ErrorFieldWrapper(
-        content = {
-            androidx.compose.material3.TextField(
-                value = input,
-                onValueChange = {
-                    input = it
-                    errors = validationPolicies(it)
-                    onValueChange(
-                        it,
-                        errors
-                    )
-                },
-                label = label,
-                modifier = modifier,
-                trailingIcon = {
-                    if (errors.isNotEmpty()) {
-                        Icon(
-                            imageVector = Icons.Outlined.Error,
-                            contentDescription = "Error"
-                        )
-                    }
-                },
-                keyboardOptions = keyboardOptions,
-            )
-        },
-        messages = errors
-    )
-}
-
 @Composable
 fun EditableInfoItem(
     dialogContent: @Composable () -> Unit,
@@ -187,49 +96,6 @@ fun EditableInfoItem(
                 text = label
             )
         },
-        onConfirm = onConfirm,
-        onDismiss = onDismiss,
-        value = { Text(value) }
-    )
-}
-
-@Composable
-fun EditableInfoItem(
-    dialogContent: @Composable () -> Unit,
-    dialogTitle: @Composable () -> Unit,
-    label: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-    value: @Composable ColumnScope.() -> Unit
-) {
-    EditableInfoItem(
-        dialogContent = dialogContent,
-        dialogTitle = dialogTitle,
-        label = {
-            Text(
-                fontWeight = FontWeight.Bold,
-                text = label
-            )
-        },
-        onConfirm = onConfirm,
-        onDismiss = onDismiss,
-        value = value
-    )
-}
-
-@Composable
-fun EditableInfoItem(
-    dialogContent: @Composable () -> Unit,
-    dialogTitle: @Composable () -> Unit,
-    label: @Composable ColumnScope.() -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-    value: String
-) {
-    EditableInfoItem(
-        dialogContent = dialogContent,
-        dialogTitle = dialogTitle,
-        label = label,
         onConfirm = onConfirm,
         onDismiss = onDismiss,
         value = { Text(value) }
@@ -246,6 +112,8 @@ fun EditableInfoItem(
     onDismiss: () -> Unit,
     value: @Composable ColumnScope.() -> Unit
 ) {
+    val localeSave = stringResource(R.string.action_save)
+
     Box(
         modifier = Modifier
             .background(
@@ -268,7 +136,7 @@ fun EditableInfoItem(
         IconButtonConfirm(
             confirmationButtonContent = {
                 Text(
-                    "Save",
+                    localeSave,
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -325,6 +193,7 @@ fun EditableDateItem(
 
 @Composable
 fun EditableTextItem(
+    editLabel: String,
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -351,7 +220,7 @@ fun EditableTextItem(
                     )
                 }
             },
-            dialogTitle = { Text("Editing $label") },
+            dialogTitle = { Text(editLabel) },
             label = {
                 Text(
                     fontWeight = FontWeight.Bold,
@@ -382,6 +251,7 @@ fun EditableTextItem(
 
 @Composable
 fun EditablePickerItem(
+    editLabel: String,
     label: String,
     value: Duration?,
     valueLabel: String,
@@ -410,7 +280,7 @@ fun EditablePickerItem(
                 )
             }
         },
-        dialogTitle = { Text("Editing $label") },
+        dialogTitle = { Text(editLabel) },
         label = {
             Text(
                 fontWeight = FontWeight.Bold,
@@ -431,6 +301,7 @@ fun EditablePickerItem(
 
 @Composable
 fun EditablePickerItem(
+    editLabel: String,
     label: String,
     value: Int,
     valueLabel: String,
@@ -452,7 +323,7 @@ fun EditablePickerItem(
                 )
             }
         },
-        dialogTitle = { Text("Editing $label") },
+        dialogTitle = { Text(editLabel) },
         label = {
             Text(
                 fontWeight = FontWeight.Bold,
@@ -469,6 +340,7 @@ fun EditablePickerItem(
 
 @Composable
 fun EditableTimeItem(
+    editLabel: String,
     label: String,
     value: LocalTime,
     valueDisplay: String? = null,
@@ -488,7 +360,7 @@ fun EditableTimeItem(
                 }
             )
         },
-        dialogTitle = { Text("Editing $label") },
+        dialogTitle = { Text(editLabel) },
         label = {
             Text(
                 fontWeight = FontWeight.Bold,
@@ -514,12 +386,18 @@ fun EditableTimeItem(
 
 @Composable
 fun EditableDistanceItem(
+    editLabel: String,
     label: String,
     value: Double?,
     rangeKilometers: List<Int>,
     rangeMeters: List<Int>,
     onValueChange: (Double) -> Unit,
 ) {
+    val localeDistance = stringResource(R.string.input_field_distance_value)
+    val localeMeasurementKilometers = stringResource(R.string.measurement_km)
+    val localeMeasurementMeters = stringResource(R.string.measurement_m)
+    val localeTotalDistance = stringResource(R.string.input_field_distance_total)
+
     val stateKilometers = rememberPickerState(
         value
             ?.toInt()
@@ -539,8 +417,8 @@ fun EditableDistanceItem(
                     PickerPair(
                         itemsFirst = rangeKilometers,
                         itemsSecond = rangeMeters,
-                        labelFirst = { "$it (km)" },
-                        labelSecond = { "$it (m)" },
+                        labelFirst = { "$it $localeMeasurementKilometers" },
+                        labelSecond = { "$it $localeMeasurementMeters" },
                         onChange = { stateFirst, stateSecond ->
                             stateKilometers.value = stateFirst
                             stateMeters.value = stateSecond
@@ -550,13 +428,13 @@ fun EditableDistanceItem(
                     )
                 },
                 putBelow = true,
-                text = "%.2f (km) distance".format(
+                text = localeTotalDistance.format(
                     stateKilometers.value + (stateMeters.value / 1000.0)
                 ),
                 textAlign = TextAlign.End
             )
         },
-        dialogTitle = { Text("Editing $label") },
+        dialogTitle = { Text(editLabel) },
         label = {
             Text(
                 fontWeight = FontWeight.Bold,
@@ -571,58 +449,33 @@ fun EditableDistanceItem(
         onDismiss = { },
         value = {
             if (value != null) {
-                Text("%.2f (km)".format(value))
+                Text(localeDistance.format(value))
             }
         }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditableSportActivityItem(
+    editLabel: String,
     label: String,
+    activities: List<SportActivity> = SportActivity.entries,
     value: SportActivity,
     onValueChange: (SportActivity) -> Unit,
 ) {
+    val localeTooltip = stringResource(R.string.activity_tooltip_autocomplete)
     var editingActivity by remember(value) { mutableStateOf(value) }
 
     EditableInfoItem(
         dialogContent = {
-            var isExpanded by remember { mutableStateOf(false) }
-
-            ExposedDropdownMenuBox(
-                expanded = isExpanded,
-                onExpandedChange = { isExpanded = it },
-            ) {
-                androidx.compose.material3.TextField(
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
-                    value = editingActivity.title,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-                    }
-                )
-
-                ExposedDropdownMenu(
-                    expanded = isExpanded,
-                    onDismissRequest = { isExpanded = false }
-                ) {
-                    SportActivity.entries.forEach {
-                        DropdownMenuItem(
-                            text = { Text(text = it.title) },
-                            onClick = {
-                                editingActivity = it
-                                isExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
+            DropdownMenu(
+                onSelect = { editingActivity = it },
+                optionToLabel = { it.title() },
+                options = activities,
+                value = editingActivity
+            )
         },
-        dialogTitle = { Text("Editing $label") },
+        dialogTitle = { Text(editLabel) },
         label = {
             Text(
                 fontWeight = FontWeight.Bold,
@@ -638,10 +491,10 @@ fun EditableSportActivityItem(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(value.title)
+                Text(value.title())
 
                 if (value.supportsDistanceMetrics) {
-                    InfoTooltip(tooltipText = "This task is likely to be autocompleted")
+                    InfoTooltip(tooltipText = localeTooltip)
                 }
             }
         }

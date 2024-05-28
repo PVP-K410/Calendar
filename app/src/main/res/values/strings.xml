@@ -1,8 +1,65 @@
 <resources>
+    <string name="activity_badminton">Badminton</string>
+    <string name="activity_baseball">Baseball</string>
+    <string name="activity_basketball">Basketball</string>
+    <string name="activity_boxing">Boxing</string>
+    <string name="activity_cricket">Cricket</string>
+    <string name="activity_cycling">Cycling</string>
+    <string name="activity_football">Football</string>
+    <string name="activity_golf">Golf</string>
+    <string name="activity_gymnastics">Gymnastics</string>
+    <string name="activity_handball">Handball</string>
+    <string name="activity_hiking">Hiking</string>
+    <string name="activity_ice_hockey">Ice Hockey</string>
+    <string name="activity_ice_skating">Ice Skating</string>
+    <string name="activity_other">Other</string>
+    <string name="activity_pilates">Pilates</string>
+    <string name="activity_rock_climbing">Rock Climbing</string>
+    <string name="activity_rowing">Rowing</string>
+    <string name="activity_rugby">Rugby</string>
+    <string name="activity_running">Running</string>
+    <string name="activity_skiing">Skiing</string>
+    <string name="activity_snowboarding">Snowboarding</string>
+    <string name="activity_softball">Softball</string>
+    <string name="activity_squash">Squash</string>
+    <string name="activity_swimming">Swimming</string>
+    <string name="activity_table_tennis">Table Tennis</string>
+    <string name="activity_tennis">Tennis</string>
+    <string name="activity_volleyball">Volleyball</string>
+    <string name="activity_walking">Walking</string>
+    <string name="activity_wheelchair">Wheelchair</string>
+    <string name="activity_yoga">Yoga</string>
     <string name="action_continue">Continue</string>
     <string name="action_submit">Submit</string>
     <string name="application_name" translatable="false">Calencup</string>
     <string name="empty" translatable="false" />
+    <string name="ingredient_beans">Beans</string>
+    <string name="ingredient_beef">Beef</string>
+    <string name="ingredient_broccoli">Broccoli</string>
+    <string name="ingredient_carrots">Carrots</string>
+    <string name="ingredient_cheese">Cheese</string>
+    <string name="ingredient_chicken">Chicken</string>
+    <string name="ingredient_corn">Corn</string>
+    <string name="ingredient_eggs">Eggs</string>
+    <string name="ingredient_fish">Fish</string>
+    <string name="ingredient_garlic">Garlic</string>
+    <string name="ingredient_lamb">Lamb</string>
+    <string name="ingredient_milk">Milk</string>
+    <string name="ingredient_mushrooms">Mushrooms</string>
+    <string name="ingredient_nuts">Nuts</string>
+    <string name="ingredient_onions">Onions</string>
+    <string name="ingredient_peanuts">Peanuts</string>
+    <string name="ingredient_pork">Pork</string>
+    <string name="ingredient_potatoes">Potatoes</string>
+    <string name="ingredient_rice">Rice</string>
+    <string name="ingredient_shellfish">Shellfish</string>
+    <string name="ingredient_shrimp">Shrimp</string>
+    <string name="ingredient_soybeans">Soybeans</string>
+    <string name="ingredient_spinach">Spinach</string>
+    <string name="ingredient_tofu">Tofu</string>
+    <string name="ingredient_tomatoes">Tomatoes</string>
+    <string name="ingredient_turkey">Turkey</string>
+    <string name="ingredient_wheat">Wheat</string>
     <string name="form_create_meal_description">Description</string>
     <string name="form_create_meal_duration">Preparation time</string>
     <string name="form_create_meal_ingredients">Ingredients</string>
@@ -51,10 +108,10 @@
     <string name="settings_setting_hydration_reminder_description">Choose whether to toggle water drinking reminder notifications</string>
     <string name="settings_setting_cup_volume_title">Cup Volume</string>
     <string name="settings_setting_cup_volume_description">Choose your cup size for more accurate water drinking reminders. Default is %1$s ml</string>
-    <string name="settings_setting_cup_volume_button">%1$s ml</string>
+    <string name="settings_setting_cup_volume_button" translatable="false">%1$s ml</string>
     <string name="settings_button_reset_description">Are you sure you want to reset all your settings?</string>
-    <string name="dashboard_measurement_kcal">kcal</string>
-    <string name="dashboard_measurement_steps">steps</string>
+    <string name="measurement_kcal" translatable="false">kcal</string>
+    <string name="measurement_steps">steps</string>
     <string name="dashboard_graph_type_ongoing">Ongoing</string>
     <string name="dashboard_graph_type_past">Past</string>
     <string name="dashboard_week">Week</string>
@@ -66,7 +123,7 @@
     <string name="goals_text_nothing_set">No goals have been set yet, try it!</string>
     <string name="goals_icon_create_goal_content_description">Create goal</string>
     <string name="goals_card_goal">Goal</string>
-    <string name="goals_card_km">%1$.2f km</string>
+    <string name="goals_card_km" translatable="false">%1$.2f km</string>
     <string name="goals_card_steps">%1$s steps</string>
     <string name="goals_card_average_monthly_steps">Your average monthly steps %1$s</string>
     <string name="goals_card_average_weekly_steps">Your average weekly steps %1$s</string>
@@ -75,8 +132,89 @@
     <string name="drawer_application_motto">Schedule Your Day</string>
     <string name="drawer_button_sign_out_confirmation">Are you sure you want to sign out?</string>
     <string name="action_cancel">Cancel</string>
-    <string name="goals_card_km_progress">%1$.2f / %2$.2f km</string>
+    <string name="goals_card_km_progress" translatable="false">%1$.2f / %2$.2f km</string>
     <string name="goals_card_steps_progress">%1$s / %2$s steps</string>
     <string name="goals_weekly">Weekly</string>
     <string name="goals_monthly">Monthly</string>
+    <string name="activity_tooltip_autocomplete">This task is likely to be autocompleted</string>
+    <string name="input_field_activity_label">Activity</string>
+    <string name="input_field_activity_edit_label">Editing Activity</string>
+    <string name="measurement_km" translatable="false">km</string>
+    <string name="measurement_m" translatable="false">m</string>
+    <string name="input_field_distance_total" translatable="false">%1$.2f km distance</string>
+    <string name="input_field_distance_value" translatable="false">%1$.2f km</string>
+    <string name="input_field_distance_label">Distance</string>
+    <string name="input_field_distance_edit_label">Editing Distance</string>
+    <string name="action_save">Save</string>
+    <string name="action_create">Create</string>
+    <string name="input_field_kilometers_label">Kilometers</string>
+    <string name="input_field_kilometers_edit_label">Editing Kilometers</string>
+    <string name="input_field_steps_label">Steps</string>
+    <string name="input_field_steps_edit_label">Editing Steps</string>
+    <string name="goals_label_steps">Steps</string>
+    <string name="goals_label_kilometers">Kilometers</string>
+    <string name="input_field_recipe_label">Recipe</string>
+    <string name="input_field_recipe_edit_label">Editing Recipe</string>
+    <string name="input_field_description_label">Description</string>
+    <string name="input_field_description_edit_label">Editing Description</string>
+    <string name="input_field_recipe_error_cannot_be_empty">Recipe cannot be empty</string>
+    <string name="input_field_duration_label">Duration</string>
+    <string name="input_field_duration_edit_label">Editing Duration</string>
+    <string name="measurement_minutes" translatable="false">min</string>
+    <string name="input_field_reminder_time_edit_label">Editing Reminder Time</string>
+    <string name="input_field_reminder_time_label">Reminder Time</string>
+    <string name="input_field_reminder_time_result_label">%1$s min. before task</string>
+    <string name="input_field_scheduled_at_edit_label">Editing Scheduled At</string>
+    <string name="input_field_scheduled_at_label">Scheduled At</string>
+    <string name="input_field_ingredients_label">Ingredients</string>
+    <string name="input_field_meals_error_not_found">No meals have been found</string>
+    <string name="input_field_meals_error_not_selected">Please select a meal</string>
+    <string name="input_field_title_edit_label">Editing Title</string>
+    <string name="input_field_title_label">Title</string>
+    <string name="input_field_title_error_cannot_be_empty">Title cannot be empty</string>
+    <string name="action_select">Select</string>
+    <string name="action_delete">Delete</string>
+    <string name="input_field_task_delete_confirm_label">Are you sure you want to delete this task?</string>
+    <string name="input_field_task_delete_confirm_description">If task is deleted, it cannot be recovered</string>
+    <string name="action_update">Update</string>
+    <string name="input_field_date_label">Date</string>
+    <string name="input_field_meals_label">Meal</string>
+    <string name="input_field_mass_edit_label">Editing Mass</string>
+    <string name="input_field_mass_label">Mass</string>
+    <string name="input_field_height_edit_label">Editing Height</string>
+    <string name="input_field_height_label">Height</string>
+    <string name="input_field_mass_success">Your mass has been updated</string>
+    <string name="input_field_height_success">Your height has been updated</string>
+    <string name="measurement_cm" translatable="false">cm</string>
+    <string name="measurement_kg" translatable="false">kg</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="input_field_weekly_activities_label">Your weekly activities</string>
+    <string name="input_field_filter_sport_activities_label">Sport activities that you prefer</string>
+    <string name="input_field_filter_ingredients_label">Ingredients that you can\'t take</string>
+    <string name="input_field_filter_sport_activities_success">Your preferred sport activities have been updated</string>
+    <string name="input_field_filter_ingredients_success">Your ingredients that you can\'t take have been updated</string>
+    <string name="input_field_filter_ingredients_edit_label">Editing ingredients that you can\'t take</string>
+    <string name="input_field_filter_sport_activities_edit_label">Editing sport activities that you prefer</string>
+    <string name="input_field_filter_ingredients_selected_label">Ingredients that I can\'t take</string>
+    <string name="input_field_filter_ingredients_other_label">Other ingredients</string>
+    <string name="input_field_filter_ingredients_selected_empty">No ingredients selected</string>
+    <string name="input_field_filter_ingredients_other_empty">No other ingredients</string>
+    <string name="input_field_filter_sport_activities_selected_label">Sport activities that I prefer</string>
+    <string name="input_field_filter_sport_activities_other_label">Other sport activities</string>
+    <string name="input_field_filter_sport_activities_selected_empty">No sport activities selected</string>
+    <string name="input_field_filter_sport_activities_other_empty">No other sport activities</string>
+    <string name="input_field_weekly_activities_unassigned">No weekly activities have been assigned yet</string>
+    <string name="input_field_username_label">Username</string>
+    <string name="input_field_username_edit_label">Editing username</string>
+    <string name="input_field_username_error_length">Username must be between %1$s and %2$s characters long</string>
+    <string name="profile_button_delete">Delete Account</string>
+    <string name="profile_button_delete_confirm_title">Are you sure you want to delete your account?</string>
+    <string name="profile_button_delete_confirm_description">Your account will be permanently deleted and recovery will not be possible</string>
+    <string name="profile_button_delete_confirm_input_label">To confirm, please enter your username \"%1$s\" in the box below:</string>
+    <string name="profile_button_delete_success">Account has been deleted successfully</string>
+    <string name="profile_button_delete_error">Error has occurred while deleting your account</string>
+    <string name="profile_button_delete_error_incorrect">You entered an incorrect username</string>
+    <string name="input_field_username_success">Your username has been changed</string>
+    <string name="global_experience">Exp</string>
+    <string name="global_level">Level</string>
 </resources>

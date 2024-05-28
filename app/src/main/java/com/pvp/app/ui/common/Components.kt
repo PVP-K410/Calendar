@@ -22,13 +22,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberBasicTooltipState
@@ -73,6 +71,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -166,7 +165,6 @@ fun CenteredSnackbarHost(snackbarHostState: SnackbarHostState) {
         }
     )
 }
-
 
 @Composable
 fun Dialog(
@@ -325,7 +323,7 @@ fun Experience(
         Text(
             fontSize = fontSize.sp,
             fontWeight = fontWeight,
-            text = "Level $level",
+            text = stringResource(R.string.global_level) + " $level",
             style = textStyle
         )
 
@@ -357,7 +355,7 @@ fun Experience(
 
             Text(
                 style = progressTextStyle,
-                text = "$experience / $experienceRequired Exp",
+                text = "$experience / $experienceRequired " + stringResource(R.string.global_experience),
                 textAlign = TextAlign.Center
             )
         }

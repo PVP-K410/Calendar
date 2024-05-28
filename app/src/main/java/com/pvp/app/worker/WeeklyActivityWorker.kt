@@ -72,12 +72,12 @@ class WeeklyActivityWorker @AssistedInject constructor(
             true -> {
                 when (activities.contains(SportActivity.Wheelchair)) {
                     true -> {
-                        "Participating in Wheelchair activities " +
-                                "will give you more points this week!"
+                        "Participating in ${applicationContext.getString(SportActivity.Wheelchair.titleId)}" +
+                                " activities will give you more points this week!"
                     }
 
                     else -> {
-                        "Participating in ${activities.first().title} " +
+                        "Participating in ${applicationContext.getString(activities.first().titleId)} " +
                                 "will give you more points this week!"
                     }
                 }
@@ -86,8 +86,8 @@ class WeeklyActivityWorker @AssistedInject constructor(
             else -> {
                 activities
                     .dropLast(1)
-                    .joinToString(separator = ", ") { it.title } +
-                        " and " + activities.last().title +
+                    .joinToString(separator = ", ") { applicationContext.getString(it.titleId) } +
+                        " and " + applicationContext.getString(activities.last().titleId) +
                         " will give you more points this week!"
             }
         }

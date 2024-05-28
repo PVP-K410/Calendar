@@ -162,7 +162,7 @@ fun GoalCard(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = goal.activity.title
+                text = goal.activity.title()
             )
 
             Spacer(modifier = Modifier.padding(2.dp))
@@ -310,8 +310,8 @@ fun ProgressBar(goal: Goal) {
                 localeKmProgress
             }
                 .format(
-                    goal.progress.toInt(),
-                    goal.target.toInt()
+                    goal.progress,
+                    goal.target
                 ),
             style = MaterialTheme.typography.bodyMedium,
         )

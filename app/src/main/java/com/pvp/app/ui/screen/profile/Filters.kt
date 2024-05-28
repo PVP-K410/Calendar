@@ -32,22 +32,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pvp.app.R
 import com.pvp.app.ui.common.IconButtonWithDialog
 
 @Composable
 fun FiltersItem(
-    filtersType: String,
     title: String,
     selectedFilters: List<String>,
     dialogTitle: @Composable () -> Unit,
     dialogContent: @Composable () -> Unit,
     onConfirmClick: () -> Unit,
     onDismiss: () -> Unit,
+    textOtherEmpty: String,
+    textSelectedEmpty: String
 ) {
     Box(
         modifier = Modifier
@@ -86,13 +89,17 @@ fun FiltersItem(
                         icon = Icons.Outlined.Edit,
                         iconDescription = "Edit Icon Button",
                         confirmButtonContent = {
+                            val localeSave = stringResource(R.string.action_save)
+
                             Text(
-                                "Save",
+                                localeSave,
                                 fontWeight = FontWeight.Bold
                             )
                         },
                         dismissButtonContent = {
-                            Text("Cancel")
+                            val localeCancel = stringResource(R.string.action_cancel)
+
+                            Text(localeCancel)
                         },
                         dialogTitle = dialogTitle,
                         dialogContent = dialogContent,
@@ -104,8 +111,9 @@ fun FiltersItem(
 
             FiltersBox(
                 filters = selectedFilters,
-                title = filtersType,
-                cardsClickable = false
+                cardsClickable = false,
+                textOtherEmpty = textOtherEmpty,
+                textSelectedEmpty = textSelectedEmpty
             )
         }
     }
@@ -118,10 +126,15 @@ fun FiltersBox(
     filters: List<String>,
     isSelected: Boolean? = null,
     onClick: (String) -> Unit = {},
-    title: String? = null,
+    textOtherEmpty: String? = null,
+    textSelectedEmpty: String? = null,
     emptyBoxText: String? = null,
     cardsClickable: Boolean = true
 ) {
+    require(emptyBoxText != null || textOtherEmpty != null && textSelectedEmpty != null) {
+        "Either emptyBoxText or textOtherEmpty and textSelectedEmpty must be provided."
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,7 +154,7 @@ fun FiltersBox(
             if (filters.isEmpty()) {
                 Text(
                     text = emptyBoxText
-                        ?: if (isSelected == false) "No other $title" else "No $title selected",
+                        ?: if (isSelected == false) textOtherEmpty!! else textSelectedEmpty!!,
                     style = TextStyle(
                         fontSize = 15.sp,
                         fontStyle = FontStyle.Italic
@@ -220,11 +233,13 @@ fun FiltersBox(
 
 @Composable
 fun FiltersDialog(
-    boxTitle: String,
     selectedFilters: List<String>,
     unselectedFilters: List<String>,
     onValueChange: (List<String>, List<String>) -> Unit,
-    title: String
+    titleSelected: String,
+    titleOther: String,
+    textSelectedEmpty: String,
+    textOtherEmpty: String
 ) {
     var selected by remember { mutableStateOf(selectedFilters) }
     var unselected by remember { mutableStateOf(unselectedFilters) }
@@ -236,29 +251,37 @@ fun FiltersDialog(
             .verticalScroll(rememberScrollState())
     ) {
         FiltersBox(
-            boxTitle = boxTitle,
+            boxTitle = titleSelected,
             filters = selected,
             isSelected = true,
             onClick = { filter ->
                 selected = selected.minus(filter)
                 unselected = unselected.plus(filter)
 
-                onValueChange(selected, unselected)
+                onValueChange(
+                    selected,
+                    unselected
+                )
             },
-            title = title
+            textOtherEmpty = textOtherEmpty,
+            textSelectedEmpty = textSelectedEmpty
         )
 
         FiltersBox(
-            boxTitle = "Other $title",
+            boxTitle = titleOther,
             filters = unselected,
             isSelected = false,
             onClick = { filter ->
                 unselected = unselected.minus(filter)
                 selected = selected.plus(filter)
 
-                onValueChange(selected, unselected)
+                onValueChange(
+                    selected,
+                    unselected
+                )
             },
-            title = title
+            textOtherEmpty = textOtherEmpty,
+            textSelectedEmpty = textSelectedEmpty
         )
     }
 }

@@ -155,9 +155,6 @@ private fun BodyMassIndexPicker(
     )
 }
 
-private val activities = SportActivity.entries.map { it.title }
-private val ingredients = Ingredient.entries.map { it.title }
-
 @Composable
 fun FilterSurvey(
     filters: List<String>,
@@ -166,6 +163,8 @@ fun FilterSurvey(
     modifier: Modifier = Modifier,
     title: String
 ) {
+    val activities = SportActivity.entries.map { it.title() }
+    val ingredients = Ingredient.entries.map { it.title() }
     var filtersSelected by remember { mutableStateOf(filters) }
     var filtersUnselected by remember { mutableStateOf(emptyList<String>()) }
     val informativeText: String

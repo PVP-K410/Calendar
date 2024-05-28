@@ -78,8 +78,8 @@ class SurveyViewModel @Inject constructor(
 
             userService.merge(
                 state.user.copy(
-                    activities = if (isActivities) filters.map { SportActivity.fromTitle(it) } else state.user.activities,
-                    ingredients = if (!isActivities) filters.mapNotNull { Ingredient.fromTitle(it) } else state.user.ingredients,
+                    activities = if (isActivities) filters.map { SportActivity.fromName(it) } else state.user.activities,
+                    ingredients = if (!isActivities) filters.mapNotNull { Ingredient.fromName(it) } else state.user.ingredients,
                     surveys = state.user.surveys + state.current
                 )
             )
