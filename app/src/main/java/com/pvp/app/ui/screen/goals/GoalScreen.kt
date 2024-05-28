@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -112,16 +113,23 @@ fun GoalScreen(
                         }
 
                         item {
-                            Spacer(modifier = Modifier.padding(30.dp))
+                            Spacer(modifier = Modifier.padding(24.dp))
 
-                            Text(
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center,
-                                text = "Completed:"
-                            )
+                            Row {
+                                Icon(
+                                    imageVector = Icons.Outlined.Check,
+                                    contentDescription = "Completed goals",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
 
-                            Spacer(modifier = Modifier.padding(12.dp))
+                                Text(
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Left,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    text = "Completed"
+                                )
+                            }
                         }
 
                         if (completed.isNotEmpty()) {
@@ -225,8 +233,8 @@ fun GoalCard(
                     modifier = Modifier.padding(start = 6.dp),
                     textAlign = TextAlign.Left,
                     text = "Your average " + when (goal.monthly) {
-                        true -> "monthly steps: $monthSteps"
-                        false -> "weekly steps: ${monthSteps / 30 * 7}"
+                        true -> "monthly steps: %.2f".format(monthSteps / 30.0)
+                        false -> "weekly steps: %.2f".format(monthSteps / 30.0 / 7.0)
                     }
                 )
             }
@@ -296,6 +304,8 @@ fun GoalCompletedCard(
 
             if (goal.steps) {
                 Spacer(modifier = Modifier.padding(2.dp))
+
+                val d = goal.startDate
 
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
