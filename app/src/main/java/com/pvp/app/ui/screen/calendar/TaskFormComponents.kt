@@ -42,6 +42,7 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.common.TimeUtil.asString
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.Meal
 import com.pvp.app.ui.common.Button
 import com.pvp.app.ui.common.ButtonConfirm
@@ -52,6 +53,8 @@ import com.pvp.app.ui.common.EditableSportActivityItem
 import com.pvp.app.ui.common.EditableTextItem
 import com.pvp.app.ui.common.EditableTimeItem
 import com.pvp.app.ui.common.FoldableContent
+import com.pvp.app.ui.common.InfoDateField
+import com.pvp.app.ui.common.InfoTextField
 import com.pvp.app.ui.common.TextError
 import com.pvp.app.ui.common.pixelsToDp
 import kotlinx.coroutines.launch
@@ -63,6 +66,8 @@ fun TaskFormButtonsRow(
     onClose: () -> Unit,
     state: TaskFormState<*>
 ) {
+    val showUpdate = state.task !is GoogleTask
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -96,7 +101,11 @@ fun TaskFormButtonsRow(
                 confirmationDescription = { Text("If the task is deleted, it cannot be recovered") },
                 confirmationTitle = { Text("Are you sure you want to delete this task?") },
                 onConfirm = {
-                    model.remove(state.task!!)
+                    if (state.task is GoogleTask) {
+                        model.removeGoogle(state.task as GoogleTask)
+                    } else {
+                        model.remove(state.task!!)
+                    }
 
                     onClose()
                 },
@@ -104,19 +113,21 @@ fun TaskFormButtonsRow(
             )
         }
 
-        Button(
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.surface
-            ),
-            enabled = state.isFormValid,
-            onClick = {
-                model.mergeTaskFromState(state = state)
+        if (showUpdate) {
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.surface
+                ),
+                enabled = state.isFormValid,
+                onClick = {
+                    model.mergeTaskFromState(state = state)
 
-                onClose()
-            },
-            shape = MaterialTheme.shapes.extraLarge
-        ) { Text(if (state.task == null) "Create" else "Update") }
+                    onClose()
+                },
+                shape = MaterialTheme.shapes.extraLarge
+            ) { Text(if (state.task == null) "Create" else "Update") }
+        }
     }
 }
 
@@ -130,16 +141,29 @@ fun TaskFormFieldActivity(state: TaskFormState.Sport) {
 }
 
 @Composable
-fun TaskFormFieldDate(state: TaskFormState<*>) {
-    EditableDateItem(
-        label = "Date",
-        value = state.date,
-        onValueChange = { state.date = it }
-    )
+fun TaskFormFieldDate(
+    editable: Boolean,
+    state: TaskFormState<*>
+) {
+    if (editable) {
+        EditableDateItem(
+            label = "Date",
+            value = state.date,
+            onValueChange = { state.date = it }
+        )
+    } else {
+        InfoDateField(
+            label = "Date",
+            value = state.date
+        )
+    }
 }
 
 @Composable
-fun TaskFormFieldDescription(state: TaskFormState<*>) {
+fun TaskFormFieldDescription(
+    editable: Boolean,
+    state: TaskFormState<*>
+) {
     val isRecipe = remember(state) { state is TaskFormState.CustomMeal }
 
     val description by remember(state) {
@@ -147,36 +171,47 @@ fun TaskFormFieldDescription(state: TaskFormState<*>) {
             when (state) {
                 is TaskFormState.CustomMeal -> state.recipe
                 is TaskFormState.General -> state.description
+                is TaskFormState.Google -> state.description
                 is TaskFormState.Sport -> state.description
                 else -> null
             } ?: ""
         }
     }
 
-    val onChange = remember<(String) -> Unit>(state) {
-        {
-            when (state) {
-                is TaskFormState.CustomMeal -> state.recipe = it
-                is TaskFormState.General -> state.description = it
-                is TaskFormState.Sport -> state.description = it
-                else -> Unit
+    if (editable) {
+        val onChange = remember<(String) -> Unit>(state) {
+            {
+                when (state) {
+                    is TaskFormState.CustomMeal -> state.recipe = it
+                    is TaskFormState.General -> state.description = it
+                    is TaskFormState.Google -> Unit
+                    is TaskFormState.Sport -> state.description = it
+                    else -> Unit
+                }
             }
         }
-    }
 
-    EditableTextItem(
-        label = if (isRecipe) "Recipe" else "Description",
-        value = description,
-        onValueChange = { onChange(it) },
-        validate = {
-            if (isRecipe) {
-                it.isNotBlank()
-            } else {
-                true
-            }
-        },
-        errorMessage = if (isRecipe) "Recipe cannot be empty" else ""
-    )
+        EditableTextItem(
+            label = if (isRecipe) "Recipe" else "Description",
+            value = description,
+            onValueChange = { onChange(it) },
+            validate = {
+                if (isRecipe) {
+                    it.isNotBlank()
+                } else {
+                    true
+                }
+            },
+            errorMessage = if (isRecipe) "Recipe cannot be empty" else ""
+        )
+    } else {
+        if (description.isNotBlank()) {
+            InfoTextField(
+                label = if (isRecipe) "Recipe" else "Description",
+                value = description
+            )
+        }
+    }
 }
 
 @Composable
@@ -210,37 +245,59 @@ fun TaskFormFieldDuration(
 
 @Composable
 fun TaskFormFieldReminderTime(
+    editable: Boolean,
     model: TaskViewModel = hiltViewModel(),
     state: TaskFormState<*>
 ) {
-    EditablePickerItem(
-        label = "Reminder Time",
-        value = state.reminderTime,
-        valueLabel = "minutes before task",
-        items = model.rangeReminderTime,
-        itemsLabels = "minutes",
-        onValueChange = { state.reminderTime = it }
-    )
+    if (editable) {
+        EditablePickerItem(
+            label = "Reminder Time",
+            value = state.reminderTime,
+            valueLabel = "minutes before task",
+            items = model.rangeReminderTime,
+            itemsLabels = "minutes",
+            onValueChange = { state.reminderTime = it }
+        )
+    } else {
+        if (state.reminderTime != null) {
+            InfoTextField(
+                label = "Reminder Time",
+                value = state.reminderTime.toString() + " minutes before task"
+            )
+        }
+    }
 }
 
 @Composable
-fun TaskFormFieldScheduledAt(state: TaskFormState<*>) {
-    val supportsDuration = remember(
-        (state as? TaskFormState.Sport)?.activity,
-        state.duration
-    ) {
-        when (state) {
-            is TaskFormState.Sport -> !state.activity.supportsDistanceMetrics
-            else -> true
+fun TaskFormFieldScheduledAt(
+    editable: Boolean,
+    state: TaskFormState<*>
+) {
+    if (editable) {
+        val supportsDuration = remember(
+            (state as? TaskFormState.Sport)?.activity,
+            state.duration
+        ) {
+            when (state) {
+                is TaskFormState.Sport -> !state.activity.supportsDistanceMetrics
+                else -> true
+            }
+        }
+
+        EditableTimeItem(
+            label = "Scheduled At",
+            value = state.time ?: LocalTime.now(),
+            valueDisplay = state.time?.asString(if (supportsDuration && state.duration?.isZero == false) state.duration else null),
+            onValueChange = { state.time = it }
+        )
+    } else {
+        if (state.time != null) {
+            InfoTextField(
+                label = "Scheduled At",
+                value = state.time!!.asString()
+            )
         }
     }
-
-    EditableTimeItem(
-        label = "Scheduled At",
-        value = state.time ?: LocalTime.now(),
-        valueDisplay = state.time?.asString(if (supportsDuration && state.duration?.isZero == false) state.duration else null),
-        onValueChange = { state.time = it }
-    )
 }
 
 @Composable
@@ -442,30 +499,61 @@ fun TaskFormFieldMealCards(
 }
 
 @Composable
-fun TaskFormFieldTitle(state: TaskFormState<*>) {
-    EditableTextItem(
-        label = "Title",
-        value = state.title ?: "",
-        onValueChange = { state.title = it },
-        validate = { it.isNotBlank() },
-        errorMessage = "Title cannot be empty"
+fun TaskFormFieldTitle(
+    editable: Boolean,
+    state: TaskFormState<*>
+) {
+    if (editable) {
+        EditableTextItem(
+            label = "Title",
+            value = state.title ?: "",
+            onValueChange = { state.title = it },
+            validate = { it.isNotBlank() },
+            errorMessage = "Title cannot be empty"
+        )
+    } else {
+        InfoTextField(
+            label = "Title",
+            value = state.title ?: ""
+        )
+    }
+}
+
+@Composable
+fun TaskFormFieldsBottomShared(
+    editable: Boolean,
+    state: TaskFormState<*>
+) {
+    TaskFormFieldScheduledAt(
+        editable = editable,
+        state = state
+    )
+
+    TaskFormFieldDate(
+        editable = editable,
+        state = state
+    )
+
+    TaskFormFieldReminderTime(
+        editable = editable,
+        state = state
     )
 }
 
 @Composable
-fun TaskFormFieldsBottomShared(state: TaskFormState<*>) {
-    TaskFormFieldScheduledAt(state = state)
+fun TaskFormFieldsTopShared(
+    editable: Boolean,
+    state: TaskFormState<*>
+) {
+    TaskFormFieldTitle(
+        editable = editable,
+        state = state
+    )
 
-    TaskFormFieldDate(state = state)
-
-    TaskFormFieldReminderTime(state = state)
-}
-
-@Composable
-fun TaskFormFieldsTopShared(state: TaskFormState<*>) {
-    TaskFormFieldTitle(state = state)
-
-    TaskFormFieldDescription(state = state)
+    TaskFormFieldDescription(
+        editable = editable,
+        state = state
+    )
 }
 
 @Composable

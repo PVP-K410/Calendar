@@ -31,7 +31,7 @@ object TimeUtil {
      * Parses LocalTime object to a string
      * @return HH:mm or HH:mm - HH:mm if range is provided
      */
-    fun LocalTime.asString(range: Duration?): String {
+    fun LocalTime.asString(range: Duration? = null): String {
         return if (range == null) {
             format(DateTimeFormatter.ofPattern("HH:mm"))
         } else {

@@ -64,8 +64,12 @@ import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.router.Routes
 
 private enum class SortingType {
+    DISTANCE,
     EXPERIENCE,
-    POINTS
+    GOALS,
+    POINTS,
+    STEPS,
+    TASKS,
 }
 
 @Composable
@@ -97,8 +101,12 @@ fun FriendsScreen(
     ) {
         mutableStateOf(
             when (sortingType.value) {
+                SortingType.DISTANCE -> friends.sortedByDescending { it.distance }
                 SortingType.EXPERIENCE -> friends.sortedByDescending { it.user.experience }
+                SortingType.GOALS -> friends.sortedByDescending { it.goalsCompleted }
                 SortingType.POINTS -> friends.sortedByDescending { it.user.points }
+                SortingType.STEPS -> friends.sortedByDescending { it.steps }
+                SortingType.TASKS -> friends.sortedByDescending { it.tasksCompleted }
             }
         )
     }

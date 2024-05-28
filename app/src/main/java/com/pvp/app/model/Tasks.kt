@@ -264,6 +264,26 @@ class SportTask(
 }
 
 @Serializable
+class GoogleTask(
+    override val date: LocalDate,
+    val description: String? = null,
+    override val id: String?,
+    override val time: LocalTime? = null,
+    override val title: String
+) : Task() {
+
+    override val duration: Duration? = null
+    override val isCompleted: Boolean = false
+    override val points: Points = Points()
+    override val reminderTime: Duration? = null
+    override val userEmail: String = ""
+
+    override fun toString(): String {
+        return "GoogleTask(title='$title', description=$description, id=$id, date=$date, time=$time)"
+    }
+}
+
+@Serializable
 class GeneralTask(
     override val date: LocalDate,
     val description: String? = null,

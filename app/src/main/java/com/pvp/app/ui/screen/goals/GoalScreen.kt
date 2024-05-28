@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.pvp.app.ui.screen.goals
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -22,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -206,7 +203,7 @@ fun GoalCard(
                     text = "Set goal: ${
                         when (goal.steps) {
                             true -> "${goal.target.toInt()} steps"
-                            false -> "${goal.target} km"
+                            false -> "%.2f km".format(goal.target)
                         }
                     }"
                 )
@@ -398,7 +395,7 @@ fun ProgressBar(goal: Goal) {
         Text(
             text = when (goal.steps) {
                 true -> "${goal.progress.toInt()} / ${goal.target.toInt()} steps"
-                false -> "${"%.2f".format(goal.progress)} / ${goal.target} km"
+                false -> "%.2f / %.2f km".format(goal.progress, goal.target)
             },
             style = MaterialTheme.typography.bodyMedium,
         )

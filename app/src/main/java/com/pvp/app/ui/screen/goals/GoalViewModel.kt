@@ -40,6 +40,7 @@ class GoalViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     val rangeKilometers = configuration.rangeKilometers
+    val rangeMeters = configuration.rangeMeters
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
