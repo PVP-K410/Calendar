@@ -29,7 +29,7 @@ interface ExerciseService {
 
     /**
      * Reads user activity data from HealthConnect and finds the most frequently done activity
-     * @return the most frequently done activity
+     * @return the most frequently done activity or the Walking activity if no activities are found
      */
     suspend fun getMostFrequentActivity(): SportActivity
 }
