@@ -26,4 +26,10 @@ interface ExerciseService {
      * @return a list of sport activities that the user does not participate in frequently
      */
     suspend fun getInfrequentActivities(maxOccurrence: Int = 1): List<SportActivity>
+
+    /**
+     * Reads user activity data from HealthConnect and finds the most frequently done activity
+     * @return the most frequently done activity
+     */
+    suspend fun getMostFrequentActivity(): SportActivity
 }

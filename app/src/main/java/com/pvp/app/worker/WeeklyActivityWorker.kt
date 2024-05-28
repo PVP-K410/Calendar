@@ -98,13 +98,16 @@ class WeeklyActivityWorker @AssistedInject constructor(
             .getInfrequentActivities()
             .toMutableList()
 
+        val mostFrequentActivity = exerciseService.getMostFrequentActivity()
+
         return when (activities.contains(SportActivity.Wheelchair)) {
             true -> {
                 activities.remove(SportActivity.Wheelchair)
 
                 activities
                     .shuffled()
-                    .take(count)
+                    .take(count - 1)
+                    .plus(mostFrequentActivity)
             }
 
             else -> listOf(SportActivity.Wheelchair)
