@@ -287,8 +287,8 @@ private fun GraphsOngoing(
     valuesWeek: List<ActivityEntry>,
     valuesMonth: List<ActivityEntry>
 ) {
-    val localeWeek = stringResource(R.string.global_week)
-    val localeMonth = stringResource(R.string.global_month)
+    val localeWeek = stringResource(R.string.dashboard_week)
+    val localeMonth = stringResource(R.string.dashboard_month)
 
     Spacer(modifier = Modifier.size(16.dp))
 
@@ -314,8 +314,8 @@ private fun GraphsPast(
     values7d: List<ActivityEntry>,
     values30d: List<ActivityEntry>
 ) {
-    val locale7Days = stringResource(R.string.global_7_days)
-    val locale30Days = stringResource(R.string.global_30_days)
+    val locale7Days = stringResource(R.string.dashboard_7_days)
+    val locale30Days = stringResource(R.string.dashboard_30_days)
 
     Spacer(modifier = Modifier.size(16.dp))
 
@@ -337,9 +337,9 @@ private fun GraphsPast(
 
 private sealed class GraphType(val title: @Composable () -> String) {
 
-    data object Calories : GraphType({ stringResource(R.string.global_calories) })
+    data object Calories : GraphType({ stringResource(R.string.dashboard_calories) })
 
-    data object Steps : GraphType({ stringResource(R.string.global_steps) })
+    data object Steps : GraphType({ stringResource(R.string.dashboard_steps) })
 
     sealed class Chain(
         current: GraphType,

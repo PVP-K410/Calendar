@@ -37,12 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.R
 import com.pvp.app.model.Goal
 import com.pvp.app.ui.common.TabSelector
 
@@ -51,6 +53,8 @@ fun GoalScreen(
     model: GoalViewModel = hiltViewModel(),
     modifier: Modifier
 ) {
+    val localeButtonContent = stringResource(R.string.goals_icon_create_goal_content_description)
+    val localeNotSet = stringResource(R.string.goals_text_nothing_set)
     val state by model.state.collectAsStateWithLifecycle()
     var isDialogOpen by remember { mutableStateOf(false) }
     val toggleDialog = remember { { isDialogOpen = !isDialogOpen } }
@@ -93,7 +97,7 @@ fun GoalScreen(
                                         fontStyle = FontStyle.Italic,
                                         modifier = Modifier.padding(32.dp),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        text = "No goals have been set up yet"
+                                        text = localeNotSet
                                     )
                                 }
                             }
@@ -121,7 +125,7 @@ fun GoalScreen(
                 shape = CircleShape
             ) {
                 Icon(
-                    contentDescription = "Create goal",
+                    contentDescription = localeButtonContent,
                     imageVector = Icons.Outlined.Add,
                     tint = MaterialTheme.colorScheme.surface
                 )
@@ -136,6 +140,12 @@ fun GoalCard(
     goal: Goal,
     monthSteps: Long
 ) {
+    val localeGoal = stringResource(R.string.goals_card_goal)
+    val localeSteps = stringResource(R.string.goals_card_steps)
+    val localeStepsMonthly = stringResource(R.string.goals_card_average_monthly_steps)
+    val localeStepsWeekly = stringResource(R.string.goals_card_average_weekly_steps)
+    val localeKm = stringResource(R.string.goals_card_km)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -176,17 +186,17 @@ fun GoalCard(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(end = 8.dp),
                     textAlign = TextAlign.Left,
-                    text = "Set goal: ${
+                    text = "$localeGoal ${
                         when (goal.steps) {
-                            true -> "${goal.target.toInt()} steps"
-                            false -> "%.2f km".format(goal.target)
+                            true -> localeSteps.format(goal.target.toInt())
+                            false -> localeKm.format(goal.target)
                         }
                     }"
                 )
 
                 Icon(
                     imageVector = goal.activity.icon,
-                    contentDescription = "Activity icon",
+                    contentDescription = null,
                 )
             }
 
@@ -197,9 +207,10 @@ fun GoalCard(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 6.dp),
                     textAlign = TextAlign.Left,
-                    text = "Your average " + when (goal.monthly) {
-                        true -> "monthly steps: $monthSteps"
-                        false -> "weekly steps: ${monthSteps / 30 * 7}"
+                    text = if (goal.monthly) {
+                        localeStepsMonthly.format(monthSteps)
+                    } else {
+                        localeStepsWeekly.format(monthSteps / 30 * 7)
                     }
                 )
             }
@@ -216,13 +227,15 @@ fun GoalTypeFilter(
     TabSelector(
         onSelect = { onClick(GoalFilter.entries[it]) },
         tab = filter.ordinal,
-        tabs = GoalFilter.entries.map { it.displayName },
+        tabs = GoalFilter.entries.map { it.displayName() },
         withShadow = !isForm
     )
 }
 
 @Composable
 private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
+    val localeBack = stringResource(R.string.goals_icon_back_content_description)
+    val localeForward = stringResource(R.string.goals_icon_forward_content_description)
     val state by model.state.collectAsStateWithLifecycle()
 
     Row {
@@ -230,7 +243,7 @@ private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
             model.previous()
         }) {
             Icon(
-                contentDescription = "Back",
+                contentDescription = localeBack,
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft
             )
         }
@@ -256,7 +269,7 @@ private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
             model.next()
         }) {
             Icon(
-                contentDescription = "Forward",
+                contentDescription = localeForward,
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight
             )
         }
@@ -265,6 +278,9 @@ private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
 
 @Composable
 fun ProgressBar(goal: Goal) {
+    val localeStepsProgress = stringResource(R.string.goals_card_steps_progress)
+    val localeKmProgress = stringResource(R.string.goals_card_km_progress)
+
     val progress by animateFloatAsState(
         animationSpec = tween(durationMillis = 1000),
         label = "ExperienceProgressAnimation",
@@ -288,16 +304,21 @@ fun ProgressBar(goal: Goal) {
         )
 
         Text(
-            text = when (goal.steps) {
-                true -> "${goal.progress.toInt()} / ${goal.target.toInt()} steps"
-                false -> "%.2f / %.2f km".format(goal.progress, goal.target)
-            },
+            text = if (goal.steps) {
+                localeStepsProgress
+            } else {
+                localeKmProgress
+            }
+                .format(
+                    goal.progress.toInt(),
+                    goal.target.toInt()
+                ),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
 
-enum class GoalFilter(val displayName: String) {
-    Weekly("Weekly"),
-    Monthly("Monthly")
+enum class GoalFilter(val displayName: @Composable () -> String) {
+    Weekly({ stringResource(R.string.goals_weekly) }),
+    Monthly({ stringResource(R.string.goals_monthly) })
 }
