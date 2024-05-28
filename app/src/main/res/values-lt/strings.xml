@@ -270,4 +270,22 @@
     <string name="friend_button_remove_confirmation_description">Jeigu draugas bus panaikintas, turėsite jį pakviesti iš naujo į draugus.</string>
     <string name="friend_button_remove_confirmation_title">Ar tikrai norite panaikinti savo draugą?</string>
     <string name="friend_button_remove">Panaikinti draugą</string>
+    <string name="analyses_today_tasks">Šiandienos užduotys</string>
+    <string name="analyses_day_tasks">Dienos užduotys</string>
+    <string name="analyses_steps_of_the_day">Dienos žingsnių siekis</string>
+    <string name="meal_card_carbs">Angliavandeniai: %1$s %</string>
+    <string name="meal_card_fat">Riebalai: %1$s %</string>
+    <string name="meal_card_protein">Baltymai: %1$s %</string>
+    <string name="meal_card_servings_breakdown">Porcijų informacija</string>
+    <string name="meal_card_servings">%1$s porcijos</string>
+    <string name="meal_card_weight_per_serving">%1$s per porciją</string>
+    <string name="meal_card_calories_per_serving">%1$s kalorijos per porciją</string>
+    <string name="meal_card_ingredients">Ingredientai</string>
+    <string name="meal_card_ingredients_avoided">Sudaryta iš ingredientų, kuriu vengiate</string>
+    <string name="task_type_general">Bendrinės</string>
+    <string name="task_type_daily">Kasdienės</string>
+    <string name="task_type_sport">Sporto</string>
+    <string name="task_type_meal">Patiekalų</string>
+    <string name="task_type_set_meal">Receptų</string>
+    <string name="tasks_of_day_empty">Nėra šio tipo užduočių šioje dienoje</string>
 </resources>

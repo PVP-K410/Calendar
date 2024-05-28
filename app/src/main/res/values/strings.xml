@@ -282,4 +282,22 @@
     <string name="friend_button_remove_confirmation_description">If friend is removed, you will have to request for friendship again</string>
     <string name="friend_button_remove_confirmation_title">Are you sure you want to remove this friend?</string>
     <string name="friend_button_remove">Remove Friend</string>
+    <string name="analyses_today_tasks">Today\'s tasks</string>
+    <string name="analyses_day_tasks">Day\'s tasks</string>
+    <string name="analyses_steps_of_the_day">Steps goal of the day</string>
+    <string name="meal_card_carbs">Carbs: %1$s %</string>
+    <string name="meal_card_fat">Fat: %1$s %</string>
+    <string name="meal_card_protein">Protein: %1$s %</string>
+    <string name="meal_card_servings_breakdown">Servings breakdown</string>
+    <string name="meal_card_servings">%1$s servings</string>
+    <string name="meal_card_weight_per_serving">%1$s per serving</string>
+    <string name="meal_card_calories_per_serving">%1$s calories per serving</string>
+    <string name="meal_card_ingredients">Ingredients</string>
+    <string name="meal_card_ingredients_avoided">Consists of ingredients you avoid</string>
+    <string name="task_type_general">General</string>
+    <string name="task_type_daily">Daily</string>
+    <string name="task_type_sport">Sport</string>
+    <string name="task_type_meal">Meal</string>
+    <string name="task_type_set_meal">Set Meals</string>
+    <string name="tasks_of_day_empty">There are no tasks of selected type in this day</string>
 </resources>
