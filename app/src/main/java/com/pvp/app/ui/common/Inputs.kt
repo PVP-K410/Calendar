@@ -509,7 +509,9 @@ fun EditableDistanceItem(
                     )
                 },
                 putBelow = true,
-                text = "${stateKilometers.value + (stateMeters.value / 1000.0)} (km) distance",
+                text = "%.2f (km) distance".format(
+                    stateKilometers.value + (stateMeters.value / 1000.0)
+                ),
                 textAlign = TextAlign.End
             )
         },
@@ -528,7 +530,7 @@ fun EditableDistanceItem(
         onDismiss = { },
         value = {
             if (value != null) {
-                Text("$value (km)")
+                Text("%.2f (km)".format(value))
             }
         }
     )

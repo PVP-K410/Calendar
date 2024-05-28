@@ -117,6 +117,7 @@ class ActivityWorker @AssistedInject constructor(
 
         for (date in start.datesUntil(end.plusDays(1))) {
             val calories = getCalories(date)
+            val distance = getDistance(date)
             val steps = getSteps(date)
 
             val activity = activityService
@@ -130,6 +131,7 @@ class ActivityWorker @AssistedInject constructor(
                 activityService.merge(
                     ActivityEntry(
                         date = date.toTimestamp(),
+                        distance = distance,
                         calories = calories,
                         steps = steps,
                         email = email
@@ -139,6 +141,7 @@ class ActivityWorker @AssistedInject constructor(
                 activityService.merge(
                     activity.copy(
                         calories = calories,
+                        distance = distance,
                         steps = steps
                     )
                 )
@@ -154,6 +157,22 @@ class ActivityWorker @AssistedInject constructor(
             .toInstant()
 
         return healthConnectService.aggregateTotalCalories(
+            start,
+            end
+        )
+    }
+
+    private suspend fun getDistance(date: LocalDate): Double {
+        val end = date
+            .plusDays(1)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        val start = date
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+
+        return healthConnectService.aggregateDistance(
             start,
             end
         )

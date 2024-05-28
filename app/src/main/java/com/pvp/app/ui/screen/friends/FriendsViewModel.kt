@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.ActivityService
 import com.pvp.app.api.DecorationService
 import com.pvp.app.api.FriendService
+import com.pvp.app.api.GoalService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.common.FlowUtil.firstOr
@@ -36,6 +37,7 @@ class FriendsViewModel @Inject constructor(
     private val activityService: ActivityService,
     private val decorationService: DecorationService,
     private val friendService: FriendService,
+    private val goalService: GoalService,
     private val userService: UserService,
     private val taskService: TaskService
 ) : ViewModel() {
@@ -101,10 +103,17 @@ class FriendsViewModel @Inject constructor(
                 .flatMapLatest { pairs ->
                     pairs
                         .map { (user, avatar) ->
+                            val userEntry = user.first()
+                            val activity = getWeeklyActivityEntry(userEntry.email)
+
                             flowOf(
                                 FriendEntry(
                                     avatar = avatar.first(),
-                                    user = user.first()
+                                    distance = activity.distance,
+                                    goalsCompleted = getWeeklyGoalsCompleted(userEntry.email),
+                                    user = userEntry,
+                                    steps = activity.steps,
+                                    tasksCompleted = getWeeklyTasksCompleted(userEntry.email)
                                 )
                             )
                         }
@@ -225,11 +234,42 @@ class FriendsViewModel @Inject constructor(
         }
     }
 
+    private suspend fun getWeeklyGoalsCompleted(email: String): Int {
+        val dateRange = LocalDate
+            .now()
+            .minusDays(7)..
+                LocalDate.now()
+        return goalService
+            .get(email)
+            .firstOr(emptyList())
+            .count {
+                it.completed &&
+                        (it.startDate in dateRange || it.endDate in dateRange)
+
+            }
+    }
+
+    private suspend fun getWeeklyTasksCompleted(email: String): Int {
+        return taskService
+            .get(email)
+            .firstOr(emptyList())
+            .count {
+                it.isCompleted &&
+                        it.date in
+                        LocalDate
+                            .now()
+                            .minusDays(7)..
+                        LocalDate.now()
+            }
+    }
+
     private suspend fun getWeeklyActivityEntry(email: String): ActivityEntry {
         val activityEntries = activityService
             .get(
                 Pair(
-                    LocalDate.now().minusDays(7),
+                    LocalDate
+                        .now()
+                        .minusDays(7),
                     LocalDate.now()
                 ),
                 email
@@ -240,6 +280,7 @@ class FriendsViewModel @Inject constructor(
         return ActivityEntry(
             email = email,
             calories = activityEntries.sumOf { it.calories },
+            distance = activityEntries.sumOf { it.distance },
             steps = activityEntries.sumOf { it.steps }
         )
     }
@@ -262,20 +303,6 @@ class FriendsViewModel @Inject constructor(
 
                 return@launch
             }
-
-            val activity = getWeeklyActivityEntry(friendEmail)
-
-            val tasks = taskService
-                .get(friendEmail)
-                .firstOr(emptyList())
-                .count {
-                    it.isCompleted &&
-                            it.date in
-                            LocalDate
-                                .now()
-                                .minusDays(7)..
-                            LocalDate.now()
-                }
 
             val state = _stateFriends.first()
 
@@ -302,14 +329,12 @@ class FriendsViewModel @Inject constructor(
 
             _stateFriend.value = FriendState(
                 details = state.friendObject.friends.first { friend -> friend.email == friendEmail },
-                calories = activity.calories,
+                calories = getWeeklyActivityEntry(friendEmail).calories,
                 entry = state.friends
                     .find { friend -> friend.user.email == friendEmail }
                     ?: FriendEntry(),
                 friendsMutual = friends,
                 state = FriendScreenState.Finished,
-                steps = activity.steps,
-                tasksCompleted = tasks
             )
 
             _stateFriends.update { it.copy(state = FriendsScreenState.Finished.SelectedFriend) }

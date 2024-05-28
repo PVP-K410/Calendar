@@ -12,6 +12,7 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.Setting
 import com.pvp.app.model.SportActivity
@@ -425,6 +426,12 @@ class TaskViewModel @Inject constructor(
             task.cancelNotification()
 
             taskService.remove(task)
+        }
+    }
+
+    fun removeGoogle(task: GoogleTask) {
+        viewModelScope.launch(Dispatchers.IO) {
+            taskService.removeGoogle(task)
         }
     }
 
