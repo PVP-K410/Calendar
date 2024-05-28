@@ -2,6 +2,7 @@
 
 package com.pvp.app.ui.screen.goals
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,13 +34,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.EditableDistanceItem
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.LabelFieldWrapper
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerPair
 import com.pvp.app.ui.common.PickerState
+import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.TabSelector
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 private val goalActivities: List<SportActivity> = listOf(
     SportActivity.Cycling,
@@ -58,12 +62,12 @@ fun DistancePicker(
     distance: Double,
     onDistanceChange: (Double) -> Unit
 ) {
-    val stateKilometers = PickerState.rememberPickerState(
+    val stateKilometers = rememberPickerState(
         distance.toInt()
     )
 
-    val stateMeters = PickerState.rememberPickerState(
-        distance.let { ((it - stateKilometers.value) * 900).toInt() }
+    val stateMeters = rememberPickerState(
+        distance.let { (((it - it.toInt()) * 1000) / 100).roundToInt() * 100 }
     )
 
     EditableInfoItem(
@@ -72,7 +76,7 @@ fun DistancePicker(
                 content = {
                     PickerPair(
                         itemsFirst = model.rangeKilometers,
-                        itemsSecond = (0..1000 step 100).toList(),
+                        itemsSecond = model.rangeMeters,
                         labelFirst = { "$it (km)" },
                         labelSecond = { "$it (m)" },
                         onChange = { stateFirst, stateSecond ->
@@ -84,7 +88,9 @@ fun DistancePicker(
                     )
                 },
                 putBelow = true,
-                text = "${stateKilometers.value + (stateMeters.value / 1000.0)} (km) distance",
+                text = "%.2f (km) distance".format(
+                    stateKilometers.value + (stateMeters.value / 1000.0)
+                ),
                 textAlign = TextAlign.End
             )
         },
@@ -92,7 +98,7 @@ fun DistancePicker(
         label = "Kilometers",
         onConfirm = { onDistanceChange(stateKilometers.value + (stateMeters.value / 1000.0)) },
         onDismiss = { },
-        value = "${stateKilometers.value + (stateMeters.value / 1000.0)} (km)"
+        value = "%.2f km".format(distance)
     )
 }
 
@@ -267,10 +273,13 @@ fun GoalCreateForm(
                 }
 
                 DistanceType.Kilometers -> {
-                    DistancePicker(distance = goal) {
-                        goal = it
-                        stepCount = 0.0
-                    }
+                    DistancePicker(
+                        distance = goal,
+                        onDistanceChange = {
+                            goal = it
+                            stepCount = 0.0
+                        }
+                    )
                 }
             }
 
@@ -317,13 +326,13 @@ fun StepPicker(
                         onChange = { state ->
                             stepCount = state.toDouble()
                         },
-                        state = PickerState.rememberPickerState(
+                        state = rememberPickerState(
                             steps.toInt()
                         )
                     )
                 },
                 putBelow = true,
-                text = "${steps.toInt()} steps",
+                text = "${stepCount.toInt()} steps",
                 textAlign = TextAlign.End
             )
         },
