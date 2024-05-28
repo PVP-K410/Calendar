@@ -150,7 +150,7 @@ fun CenteredSnackbarHost(snackbarHostState: SnackbarHostState) {
                 ) {
                     Image(
                         imageVector = ImageVector.vectorResource(R.drawable.logo),
-                        contentDescription = null,
+                        contentDescription = "App logo",
                         modifier = Modifier.size(24.dp)
                     )
 
