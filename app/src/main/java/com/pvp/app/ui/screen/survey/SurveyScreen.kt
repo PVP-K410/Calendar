@@ -142,7 +142,11 @@ fun SurveyInput(
                     .fillMaxSize()
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState()),
-                title = "activities"
+                textOtherEmpty = stringResource(R.string.surveys_activities_other_empty),
+                textSelectedEmpty = stringResource(R.string.surveys_activities_selected_empty),
+                title = stringResource(R.string.surveys_activities_title),
+                titleOther = stringResource(R.string.surveys_activities_title_other),
+                titleSelected = stringResource(R.string.surveys_activities_title_selected)
             )
         }
 
@@ -162,7 +166,11 @@ fun SurveyInput(
                     .fillMaxSize()
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState()),
-                title = "ingredients"
+                textOtherEmpty = stringResource(R.string.surveys_ingredients_other_empty),
+                textSelectedEmpty = stringResource(R.string.surveys_ingredients_selected_empty),
+                title = stringResource(R.string.surveys_ingredients_title),
+                titleOther = stringResource(R.string.surveys_ingredients_title_other),
+                titleSelected = stringResource(R.string.surveys_ingredients_title_selected)
             )
         }
 

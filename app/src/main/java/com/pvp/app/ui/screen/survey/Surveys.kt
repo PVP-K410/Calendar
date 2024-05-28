@@ -37,12 +37,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.R
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.LabelFieldWrapper
@@ -82,23 +84,28 @@ fun BodyMassIndexSurvey(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center
         ) {
+            val localeMeasurementKilograms = stringResource(R.string.measurement_kg)
+
             BodyMassIndexPicker(
                 contentDescription = "Mass",
                 imageVector = Icons.Outlined.Scale,
                 state = stateMass,
-                textResult = { "$it kg" },
-                textSelect = "Select your mass",
+                textResult = { "$it $localeMeasurementKilograms" },
+                textSelect = stringResource(R.string.surveys_select_mass),
                 values = rangeMass
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
 
+            val localeMeasurementCentimeters = stringResource(R.string.measurement_cm)
+            val localeMeasurementMeters = stringResource(R.string.measurement_m)
+
             BodyMassIndexPicker(
                 contentDescription = "Height",
                 imageVector = Icons.Outlined.Height,
                 state = stateHeight,
-                textResult = { "$it cm (${it / 100.0} m)" },
-                textSelect = "Select your height",
+                textResult = { "$it $localeMeasurementCentimeters (${it / 100.0} $localeMeasurementMeters)" },
+                textSelect = stringResource(R.string.surveys_select_height),
                 values = rangeHeight
             )
         }
@@ -161,23 +168,19 @@ fun FilterSurvey(
     handler: (filters: List<String>) -> Unit,
     isActivities: Boolean,
     modifier: Modifier = Modifier,
-    title: String
+    textOtherEmpty: String,
+    textSelectedEmpty: String,
+    title: String,
+    titleOther: String,
+    titleSelected: String
 ) {
-    val activities = SportActivity.entries.map { it.title() }
-    val ingredients = Ingredient.entries.map { it.title() }
     var filtersSelected by remember { mutableStateOf(filters) }
     var filtersUnselected by remember { mutableStateOf(emptyList<String>()) }
-    val informativeText: String
-    val boxTitle: String
 
-    if (isActivities) {
-        filtersUnselected = activities - filtersSelected.toSet()
-        informativeText = "Select sport activities that you like doing"
-        boxTitle = "${title.capitalize()} that I like"
+    filtersUnselected = if (isActivities) {
+        SportActivity.entries.map { it.title() } - filtersSelected.toSet()
     } else {
-        filtersUnselected = ingredients - filtersSelected.toSet()
-        informativeText = "Select ingredients that you can't take"
-        boxTitle = "${title.capitalize()} that I can't take"
+        Ingredient.entries.map { it.title() } - filtersSelected.toSet()
     }
 
     LaunchedEffect(
@@ -197,29 +200,31 @@ fun FilterSurvey(
             color = Color.Black,
             modifier = Modifier.padding(8.dp),
             style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp),
-            text = informativeText
+            text = title
         )
 
         FiltersBox(
-            boxTitle = boxTitle,
+            boxTitle = titleSelected,
             filters = filtersSelected,
             isSelected = true,
             onClick = { filter ->
                 filtersSelected = filtersSelected.minus(filter)
                 filtersUnselected = filtersUnselected.plus(filter)
             },
-            title = title
+            textOtherEmpty = textOtherEmpty,
+            textSelectedEmpty = textSelectedEmpty
         )
 
         FiltersBox(
-            boxTitle = "Other $title",
+            boxTitle = titleOther,
             filters = filtersUnselected,
             isSelected = false,
             onClick = { filter ->
                 filtersUnselected = filtersUnselected.minus(filter)
                 filtersSelected = filtersSelected.plus(filter)
             },
-            title = title
+            textOtherEmpty = textOtherEmpty,
+            textSelectedEmpty = textSelectedEmpty
         )
     }
 }
@@ -230,7 +235,8 @@ private fun FiltersBox(
     filters: List<String>,
     isSelected: Boolean,
     onClick: (String) -> Unit,
-    title: String
+    textOtherEmpty: String,
+    textSelectedEmpty: String,
 ) {
     Box(
         modifier = Modifier
@@ -252,7 +258,7 @@ private fun FiltersBox(
 
             if (filters.isEmpty()) {
                 Text(
-                    text = if (!isSelected) "No other $title" else "No $title selected",
+                    text = if (!isSelected) textOtherEmpty else textSelectedEmpty,
                     style = TextStyle(
                         fontSize = 15.sp,
                         fontStyle = FontStyle.Italic
