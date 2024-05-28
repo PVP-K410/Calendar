@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="decoration_type_accessory">Aksesuarai</string>
+    <string name="decoration_type_body">Kūnas</string>
+    <string name="decoration_type_face">Veidas</string>
+    <string name="decoration_type_hands">Rankos</string>
+    <string name="decoration_type_head">Galva</string>
+    <string name="decoration_type_leggings">Kelnės</string>
+    <string name="decoration_type_shoes">Batai</string>
     <string name="activity_badminton">Badmintonas</string>
     <string name="activity_baseball">Beisbolas</string>
     <string name="activity_basketball">Krepšinis</string>
@@ -205,4 +212,20 @@
     <string name="input_field_username_success">Jūsų slapyvardis sėkmingai pakeistas</string>
     <string name="global_experience">Patirtis</string>
     <string name="global_level">Lygis</string>
+    <string name="decorations_store_title">Parduotuvė</string>
+    <string name="decorations_owned_title">Inventorius</string>
+    <string name="decorations_success_apply">Sėkmingai užsidėjote dekoraciją</string>
+    <string name="decorations_success_unapply">Sėkmingai nusiėmėte dekoraciją</string>
+    <string name="decorations_success_purchase">Sėkmingai nusipirkote dekoraciją</string>
+    <string name="decorations_success">Pavyko atlikti operaciją</string>
+    <string name="decorations_error">Įvyko klaida vykdant operaciją</string>
+    <string name="decorations_error_own">Jūs jau turite šią dekoraciją</string>
+    <string name="decorations_error_funds">Nepakanka taškų balanse, jog nusipirktumėte dekoraciją</string>
+    <string name="decorations_points">Jūsų taškai %1$s</string>
+    <string name="decorations_none_to_purchase">Nėra dekoracijų, kurias galėtumėte nusipirkti</string>
+    <string name="decorations_purchase_dialog_decoration">Dekoracija</string>
+    <string name="decorations_purchase_dialog_price">Kaina</string>
+    <string name="action_purchase">Pirkti</string>
+    <string name="decorations_purchase_dialog_title">Patvirtinkite pirkimą</string>
+    <string name="decorations_none_to_apply">Nėra dekoracijų, kurias galėtumėte užsidėti</string>
 </resources>

@@ -1,4 +1,11 @@
 <resources>
+    <string name="decoration_type_accessory">Accessory</string>
+    <string name="decoration_type_body">Body</string>
+    <string name="decoration_type_face">Face</string>
+    <string name="decoration_type_hands">Hands</string>
+    <string name="decoration_type_head">Head</string>
+    <string name="decoration_type_leggings">Leggings</string>
+    <string name="decoration_type_shoes">Shoes</string>
     <string name="activity_badminton">Badminton</string>
     <string name="activity_baseball">Baseball</string>
     <string name="activity_basketball">Basketball</string>
@@ -217,4 +224,20 @@
     <string name="input_field_username_success">Your username has been changed</string>
     <string name="global_experience">Exp</string>
     <string name="global_level">Level</string>
+    <string name="decorations_store_title">Store</string>
+    <string name="decorations_owned_title">Owned</string>
+    <string name="decorations_success_apply">Successfully applied decoration</string>
+    <string name="decorations_success_unapply">Successfully removed decoration</string>
+    <string name="decorations_success_purchase">Successfully purchased decoration</string>
+    <string name="decorations_success">Success</string>
+    <string name="decorations_error">Error has occurred while processing</string>
+    <string name="decorations_error_own">You already own this decoration</string>
+    <string name="decorations_error_funds">Not enough points to purchase this decoration</string>
+    <string name="decorations_points">Your points %1$s</string>
+    <string name="decorations_none_to_purchase">No decorations to purchase</string>
+    <string name="decorations_purchase_dialog_decoration">Decoration</string>
+    <string name="decorations_purchase_dialog_price">Price</string>
+    <string name="action_purchase">Purchase</string>
+    <string name="decorations_purchase_dialog_title">Confirm purchase</string>
+    <string name="decorations_none_to_apply">No decoratinos owned</string>
 </resources>
