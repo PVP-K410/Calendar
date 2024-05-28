@@ -7,8 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
@@ -22,7 +22,7 @@ import com.pvp.app.ui.theme.CalendarTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class Activity : ComponentActivity() {
+class Activity : AppCompatActivity() {
 
     override fun onCreate(stateApp: Bundle?) {
         super.onCreate(stateApp)

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.pvp.app.ui.common
 
 import androidx.compose.foundation.background
@@ -38,6 +40,45 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+
+@Composable
+fun <T> DropdownMenu(
+    onSelect: (T) -> Unit,
+    optionToLabel: (T) -> String = { it.toString() },
+    options: List<T>,
+    value: T
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        androidx.compose.material3.TextField(
+            modifier = Modifier.menuAnchor(),
+            onValueChange = { },
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            value = optionToLabel(value)
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { o ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+
+                        onSelect(o)
+                    },
+                    text = { Text(text = optionToLabel(o)) }
+                )
+            }
+        }
+    }
+}
 
 /**
  * @param keyboardOptions (optional) software keyboard options that contains configuration such
