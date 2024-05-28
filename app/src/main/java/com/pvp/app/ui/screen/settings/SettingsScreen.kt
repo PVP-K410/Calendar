@@ -33,8 +33,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -43,7 +41,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,11 +58,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.pvp.app.model.Setting
 import com.pvp.app.ui.common.ButtonConfirm
-import com.pvp.app.ui.common.CenteredSnackbarHost
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 private fun SettingNotificationReminderMinutes(
@@ -262,16 +257,14 @@ private fun SettingHealthConnectPermissions(context: Context) {
 @Composable
 private fun GoogleCalendarSynchronizer(
     model: SettingsViewModel = hiltViewModel(),
-    coroutineScope: CoroutineScope,
-    snackbarHostState: SnackbarHostState
 ) {
     var intent by remember { mutableStateOf<Intent?>(null) }
 
+    val showSnackbar = LocalShowSnackbar.current
+
     fun synchronize() {
         model.synchronizeGoogleTasks(onCallback = {
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar("Google Calendar successfully synchronized")
-            }
+            showSnackbar("Google Calendar successfully synchronized")
         }) { e ->
             intent = when (e) {
                 is UserRecoverableAuthIOException -> e.intent
@@ -309,54 +302,43 @@ private fun GoogleCalendarSynchronizer(
 
 @Composable
 fun SettingsScreen(modifier: Modifier) {
-    val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .then(modifier)
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        CategoryRow(
+            icon = Icons.Outlined.Notifications,
+            title = "Notifications"
+        )
 
-    Scaffold(
-        snackbarHost = { CenteredSnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .then(modifier)
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-        ) {
-            CategoryRow(
-                icon = Icons.Outlined.Notifications,
-                title = "Notifications"
-            )
+        SettingNotificationReminderMinutes()
 
-            SettingNotificationReminderMinutes()
+        SettingHydrationNotificationToggle()
 
-            SettingHydrationNotificationToggle()
+        SettingCupVolumeMl()
 
-            SettingCupVolumeMl()
+        CategoryRow(
+            icon = Icons.Outlined.Style,
+            title = "Appearance"
+        )
 
-            CategoryRow(
-                icon = Icons.Outlined.Style,
-                title = "Appearance"
-            )
+        SettingApplicationTheme()
 
-            SettingApplicationTheme()
+        SettingDynamicTheme()
 
-            SettingDynamicTheme()
+        CategoryRow(
+            icon = Icons.Outlined.PermIdentity,
+            title = "3rd Party Services"
+        )
 
-            CategoryRow(
-                icon = Icons.Outlined.PermIdentity,
-                title = "3rd Party Services"
-            )
+        GoogleCalendarSynchronizer()
 
-            GoogleCalendarSynchronizer(
-                coroutineScope = coroutineScope,
-                snackbarHostState = snackbarHostState
-            )
+        SettingHealthConnectPermissions(LocalContext.current)
 
-            SettingHealthConnectPermissions(LocalContext.current)
-
-            ResetToDefaultButton()
-        }
+        ResetToDefaultButton()
     }
 }
 

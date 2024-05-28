@@ -22,13 +22,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,13 +41,12 @@ import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
-import com.pvp.app.ui.common.CenteredSnackbarHost
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.backgroundGradientHorizontal
 import com.pvp.app.ui.common.backgroundGradientLinear
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
-import kotlinx.coroutines.launch
 
 private typealias LauncherIntent = ManagedActivityResultLauncher<Intent, ActivityResult>
 private typealias LauncherIntentSenderRequest = ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
@@ -150,73 +145,64 @@ private fun Authentication(
 fun AuthenticationScreen(
     viewModel: AuthenticationViewModel = hiltViewModel()
 ) {
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val showSnackbar = LocalShowSnackbar.current
 
-    Scaffold(
-        snackbarHost = { CenteredSnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.Center
-        ) {
-            val state by viewModel.state.collectAsStateWithLifecycle()
-            val textError = stringResource(R.string.screen_authentication_toast_error)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        val state by viewModel.state.collectAsStateWithLifecycle()
+        val textError = stringResource(R.string.screen_authentication_toast_error)
 
-            FeatureCard.cards.forEachIndexed { index, card ->
-                FeatureCardBlock(
-                    radius = card.radius,
-                    text = card.text,
-                    textAlign = card.textAlign
-                )
-
-                if (index != FeatureCard.cards.size - 1) {
-                    Spacer(modifier = Modifier.size(48.dp))
-                }
-            }
-
-            when (state.isLoading) {
-                true -> {
-                    ProgressIndicator(modifier = Modifier.size(84.dp))
-                }
-
-                else -> {
-                    Icon(
-                        contentDescription = "Authenticate button",
-                        imageVector = Icons.Outlined.ArrowDownward,
-                        modifier = Modifier
-                            .padding(vertical = 24.dp)
-                            .size(36.dp),
-                        tint = Color.Black
-                    )
-                }
-            }
-
-            Authentication(
-                authenticate = { isOneTap, request ->
-                    viewModel.authenticate(
-                        request,
-                        isOneTap
-                    ) {
-                        if (!it.isSuccess) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(textError)
-                            }
-                        }
-                    }
-                },
-                isEnabled = !state.isLoading,
-                onClick = { launcher, launcherOneTap ->
-                    viewModel.beginSignInRequest(
-                        launcher = { launcher.launch(it) },
-                        launcherOneTap = { launcherOneTap.launch(it) }
-                    )
-                }
+        FeatureCard.cards.forEachIndexed { index, card ->
+            FeatureCardBlock(
+                radius = card.radius,
+                text = card.text,
+                textAlign = card.textAlign
             )
+
+            if (index != FeatureCard.cards.size - 1) {
+                Spacer(modifier = Modifier.size(48.dp))
+            }
         }
+
+        when (state.isLoading) {
+            true -> {
+                ProgressIndicator(modifier = Modifier.size(84.dp))
+            }
+
+            else -> {
+                Icon(
+                    contentDescription = "Authenticate button",
+                    imageVector = Icons.Outlined.ArrowDownward,
+                    modifier = Modifier
+                        .padding(vertical = 24.dp)
+                        .size(36.dp),
+                    tint = Color.Black
+                )
+            }
+        }
+
+        Authentication(
+            authenticate = { isOneTap, request ->
+                viewModel.authenticate(
+                    request,
+                    isOneTap
+                ) {
+                    if (!it.isSuccess) {
+                        showSnackbar(textError)
+                    }
+                }
+            },
+            isEnabled = !state.isLoading,
+            onClick = { launcher, launcherOneTap ->
+                viewModel.beginSignInRequest(
+                    launcher = { launcher.launch(it) },
+                    launcherOneTap = { launcherOneTap.launch(it) }
+                )
+            }
+        )
     }
 }
 

@@ -13,14 +13,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,9 +28,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
 import com.pvp.app.model.Survey
 import com.pvp.app.ui.common.Button
-import com.pvp.app.ui.common.CenteredSnackbarHost
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.ProgressIndicator
-import kotlinx.coroutines.launch
 
 @Composable
 fun SurveyScreen(
@@ -43,75 +39,64 @@ fun SurveyScreen(
     val textError = stringResource(R.string.form_survey_toast_error)
     val textSubmit = stringResource(R.string.action_submit)
 
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val showSnackbar = LocalShowSnackbar.current
 
-    Scaffold(
-        snackbarHost = { CenteredSnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        val state by viewModel.state.collectAsStateWithLifecycle()
+
+        if (state.surveys.isEmpty()) {
+            ProgressIndicator()
+
+            return
+        }
+
+        var handler by remember { mutableStateOf({}) }
+        var success by remember { mutableStateOf(true) }
+
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.weight(0.9f)
         ) {
-            val state by viewModel.state.collectAsStateWithLifecycle()
+            SurveyInput(
+                handler = { onSubmit ->
+                    handler = onSubmit
+                },
+                viewModel = viewModel
+            )
+        }
 
-            if (state.surveys.isEmpty()) {
-                ProgressIndicator()
+        Row(
+            modifier = Modifier.weight(0.1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                modifier = Modifier.fillMaxWidth(0.8f),
+                onClick = {
+                    try {
+                        handler()
+                    } catch (e: Exception) {
+                        success = false
 
-                return@Column
-            }
-
-            var handler by remember { mutableStateOf({}) }
-            var success by remember { mutableStateOf(true) }
-
-            Column(
-                modifier = Modifier.weight(0.9f)
-            ) {
-                SurveyInput(
-                    handler = { onSubmit ->
-                        handler = onSubmit
-                    },
-                    viewModel = viewModel
-                )
-            }
-
-            Row(
-                modifier = Modifier.weight(0.1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    modifier = Modifier.fillMaxWidth(0.8f),
-                    onClick = {
-                        try {
-                            handler()
-                        } catch (e: Exception) {
-                            success = false
-
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = textError
-                                )
-                            }
-                        }
+                        showSnackbar(textError)
                     }
-                ) {
-                    if (!success) {
-                        Icon(
-                            imageVector = Icons.Outlined.ErrorOutline,
-                            contentDescription = "Submission was not successful indicator"
-                        )
-
-                        Spacer(modifier = Modifier.padding(8.dp))
-                    }
-
-                    Text(
-                        style = MaterialTheme.typography.labelMedium,
-                        text = if (state.surveys.size > 1) textContinue else textSubmit,
-                    )
                 }
+            ) {
+                if (!success) {
+                    Icon(
+                        imageVector = Icons.Outlined.ErrorOutline,
+                        contentDescription = "Submission was not successful indicator"
+                    )
+
+                    Spacer(modifier = Modifier.padding(8.dp))
+                }
+
+                Text(
+                    style = MaterialTheme.typography.labelMedium,
+                    text = if (state.surveys.size > 1) textContinue else textSubmit,
+                )
             }
         }
     }
