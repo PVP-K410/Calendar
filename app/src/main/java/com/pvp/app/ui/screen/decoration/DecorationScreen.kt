@@ -21,6 +21,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,33 +35,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.ui.common.CenteredSnackbarHost
 import com.pvp.app.ui.common.Dialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
-import com.pvp.app.ui.common.showToast
 
 @Composable
-private fun screens() = listOf<Pair<String, @Composable () -> Unit>>(
-    "Store" to { Store() },
-    "Owned" to { Apply() },
-)
+private fun screens(snackbarHostState: SnackbarHostState) =
+    listOf<Pair<String, @Composable () -> Unit>>(
+        "Store" to { Store(snackbarHostState = snackbarHostState) },
+        "Owned" to { Apply(snackbarHostState = snackbarHostState) },
+    )
 
 @Composable
-private fun Apply(model: DecorationViewModel = hiltViewModel()) {
+private fun Apply(
+    model: DecorationViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState
+) {
     val state by model.state.collectAsStateWithLifecycle()
     val holdersOwned by remember(state.holders) { mutableStateOf(state.holders.filter { it.owned }) }
 
     StateHandler(
         resetState = model::resetScreenState,
-        state = state.state
+        state = state.state,
+        snackbarHostState = snackbarHostState
     )
 
     Column(
@@ -109,33 +115,38 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
 @Composable
 fun DecorationScreen(modifier: Modifier) {
     var screen by remember { mutableIntStateOf(0) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .then(modifier)
-            .padding(16.dp)
-    ) {
-        TabSelector(
-            onSelect = { screen = it },
-            tabs = screens().map { it.first },
-        )
+    Scaffold(
+        snackbarHost = { CenteredSnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .then(modifier)
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            TabSelector(
+                onSelect = { screen = it },
+                tabs = screens(snackbarHostState).map { it.first },
+            )
 
-        Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(16.dp))
 
-        screens()[screen]
-            .second()
+            screens(snackbarHostState)[screen]
+                .second()
+        }
     }
 }
 
 @Composable
 private fun StateHandler(
     resetState: () -> Unit,
-    state: DecorationScreenState
+    state: DecorationScreenState,
+    snackbarHostState: SnackbarHostState
 ) {
-    val context = LocalContext.current
-
     if (state is DecorationScreenState.Loading) {
         ProgressIndicatorWithinDialog()
 
@@ -146,19 +157,19 @@ private fun StateHandler(
         is DecorationScreenState.Success -> {
             LaunchedEffect(state) {
                 when (state) {
-                    is DecorationScreenState.Success.Apply -> context.showToast(
+                    is DecorationScreenState.Success.Apply -> snackbarHostState.showSnackbar(
                         message = "Successfully applied decoration"
                     )
 
-                    is DecorationScreenState.Success.Purchase -> context.showToast(
+                    is DecorationScreenState.Success.Purchase -> snackbarHostState.showSnackbar(
                         message = "Successfully purchased decoration"
                     )
 
-                    is DecorationScreenState.Success.Unapply -> context.showToast(
+                    is DecorationScreenState.Success.Unapply -> snackbarHostState.showSnackbar(
                         message = "Successfully removed decoration"
                     )
 
-                    else -> context.showToast(message = "Success")
+                    else -> snackbarHostState.showSnackbar(message = "Success")
                 }
 
                 resetState()
@@ -168,15 +179,15 @@ private fun StateHandler(
         is DecorationScreenState.Error -> {
             LaunchedEffect(state) {
                 when (state) {
-                    is DecorationScreenState.Error.AlreadyOwned -> context.showToast(
+                    is DecorationScreenState.Error.AlreadyOwned -> snackbarHostState.showSnackbar(
                         message = "You already own this decoration"
                     )
 
-                    is DecorationScreenState.Error.InsufficientFunds -> context.showToast(
+                    is DecorationScreenState.Error.InsufficientFunds -> snackbarHostState.showSnackbar(
                         message = "Not enough points to purchase decoration"
                     )
 
-                    else -> context.showToast(message = "Error has occurred")
+                    else -> snackbarHostState.showSnackbar(message = "Error has occurred")
                 }
 
                 resetState()
@@ -188,7 +199,10 @@ private fun StateHandler(
 }
 
 @Composable
-private fun Store(model: DecorationViewModel = hiltViewModel()) {
+private fun Store(
+    model: DecorationViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState
+) {
     var item by remember { mutableStateOf<DecorationHolder?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     val state by model.state.collectAsStateWithLifecycle()
@@ -199,7 +213,8 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
 
     StateHandler(
         resetState = model::resetScreenState,
-        state = state.state
+        state = state.state,
+        snackbarHostState = snackbarHostState
     )
 
     Column(

@@ -28,6 +28,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,6 +53,7 @@ import com.pvp.app.R
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.ButtonConfirm
+import com.pvp.app.ui.common.CenteredSnackbarHost
 import com.pvp.app.ui.common.EditablePickerItem
 import com.pvp.app.ui.common.Experience
 import com.pvp.app.ui.common.IconButtonWithDialog
@@ -62,8 +64,8 @@ import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.common.TextError
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
-import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.router.Route
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 private val ACTIVITIES = SportActivity.entries.map { it.title }
@@ -72,9 +74,9 @@ private val INGREDIENTS = Ingredient.entries.map { it.title }
 @Composable
 private fun AccountDeleteButton(
     viewModel: ProfileViewModel = hiltViewModel(),
-    state: ProfileState
+    state: ProfileState,
+    snackbarHostState: SnackbarHostState
 ) {
-    val context = LocalContext.current
     val username = state.user.username
     var input by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -143,15 +145,17 @@ private fun AccountDeleteButton(
                         val result = viewModel.deleteAccount()
 
                         if (result.isSuccess) {
-                            context.showToast(message = "Account deleted successfully")
+                            snackbarHostState.showSnackbar("Account deleted successfully")
                         } else {
-                            context.showToast(message = "An error occurred while deleting the account")
+                            snackbarHostState.showSnackbar("An error occurred while deleting the account")
                         }
                     }
                 } else {
                     input = ""
 
-                    context.showToast(message = "Incorrect username")
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Incorrect username")
+                    }
                 }
             }
         )
@@ -254,6 +258,9 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
 
     if (state.isLoading) {
         ProgressIndicatorWithinDialog()
@@ -261,40 +268,53 @@ fun ProfileScreen(
 
     RouteOptionsApplier()
 
-    Box(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .then(modifier)
-    ) {
-        Points(points = state.user.points)
+    Scaffold(
+        snackbarHost = { CenteredSnackbarHost(snackbarHostState) },
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .then(modifier)
+        ) {
+            Points(points = state.user.points)
 
-        Column(modifier = Modifier.fillMaxWidth()) {
-            if (!state.isLoading) {
-                Initials(
-                    onUsernameChange = { viewModel.update { u -> u.username = it } },
-                    state = state
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(paddingValues)
+            ) {
+                if (!state.isLoading) {
+                    Initials(
+                        onUsernameChange = { viewModel.update { u -> u.username = it } },
+                        state = state
+                    )
+
+                    Experience(
+                        experience = state.user.experience,
+                        experienceRequired = state.experienceRequired,
+                        level = state.user.level,
+                        paddingStart = 16.dp,
+                        paddingEnd = 16.dp
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(180.dp))
+                }
+
+                Properties(
+                    onUpdateActivities = { viewModel.update { u -> u.activities = it } },
+                    onUpdateIngredients = { viewModel.update { u -> u.ingredients = it } },
+                    onUpdateHeight = { viewModel.update { u -> u.height = it } },
+                    onUpdateMass = { viewModel.update { u -> u.mass = it } },
+                    state = state,
+                    snackbarHostState = snackbarHostState,
+                    coroutineScope = scope
                 )
 
-                Experience(
-                    experience = state.user.experience,
-                    experienceRequired = state.experienceRequired,
-                    level = state.user.level,
-                    paddingStart = 16.dp,
-                    paddingEnd = 16.dp
+                AccountDeleteButton(
+                    state = state,
+                    snackbarHostState = snackbarHostState
                 )
-            } else {
-                Spacer(modifier = Modifier.height(180.dp))
             }
-
-            Properties(
-                onUpdateActivities = { viewModel.update { u -> u.activities = it } },
-                onUpdateIngredients = { viewModel.update { u -> u.ingredients = it } },
-                onUpdateHeight = { viewModel.update { u -> u.height = it } },
-                onUpdateMass = { viewModel.update { u -> u.mass = it } },
-                state = state
-            )
-
-            AccountDeleteButton(state = state)
         }
     }
 }
@@ -306,7 +326,9 @@ private fun Properties(
     onUpdateHeight: (Int) -> Unit,
     onUpdateIngredients: (List<Ingredient>) -> Unit,
     onUpdateMass: (Int) -> Unit,
-    state: ProfileState
+    state: ProfileState,
+    snackbarHostState: SnackbarHostState,
+    coroutineScope: CoroutineScope
 ) {
     var activitiesSelected = remember(state.user.activities) {
         state.user.activities.map { it.title }
@@ -314,7 +336,6 @@ private fun Properties(
 
     var activitiesSelectedEdit by remember(activitiesSelected) { mutableStateOf(activitiesSelected) }
     var activitiesUnselected by remember(activitiesSelected) { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
-    val context = LocalContext.current
     val height by remember(state.user.height) { mutableIntStateOf(state.user.height) }
 
     var ingredientsSelected = remember(state.user.ingredients) {
@@ -344,7 +365,9 @@ private fun Properties(
             onValueChange = {
                 onUpdateMass(it)
 
-                context.showToast(message = "Your mass has been updated")
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Your mass has been updated")
+                }
             },
         )
 
@@ -356,8 +379,9 @@ private fun Properties(
             itemsLabels = "cm",
             onValueChange = {
                 onUpdateHeight(it)
-
-                context.showToast(message = "Your height has been updated")
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Your height has been updated")
+                }
             },
         )
 
@@ -388,7 +412,9 @@ private fun Properties(
 
                 onUpdateActivities(activitiesSelectedEdit.map { SportActivity.fromTitle(it) })
 
-                context.showToast(message = "Your sport activities have been updated")
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Your sport activities have been updated")
+                }
             },
             onDismiss = {
                 activitiesSelectedEdit = activitiesSelected
@@ -420,7 +446,9 @@ private fun Properties(
 
                 onUpdateIngredients(ingredientsSelectedEdit.mapNotNull { Ingredient.fromTitle(it) })
 
-                context.showToast(message = "Your ingredients have been updated")
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Your ingredients have been updated")
+                }
             },
             onDismiss = {
                 ingredientsSelectedEdit = ingredientsSelected

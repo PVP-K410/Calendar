@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.drawer
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,22 +18,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.R
 import com.pvp.app.ui.common.ButtonConfirm
+import com.pvp.app.ui.common.CenteredSnackbarHost
 import com.pvp.app.ui.common.RouteTitle
-import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.router.Route
+import kotlinx.coroutines.launch
 
 @Composable
 private fun Body(
@@ -149,6 +153,7 @@ private fun Header(modifier: Modifier = Modifier) {
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun DrawerScreen(
     onClick: Route.() -> Unit,
@@ -156,47 +161,56 @@ fun DrawerScreen(
     routes: List<Route>,
     viewModel: DrawerViewModel = hiltViewModel()
 ) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
     ModalDrawerSheet(drawerShape = RectangleShape) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Scaffold(
+            snackbarHost = { CenteredSnackbarHost(snackbarHostState)}
         ) {
-            val textSignOut = stringResource(R.string.screen_profile_toast_error)
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                val textSignOut = stringResource(R.string.screen_profile_toast_error)
 
-            Header(
-                Modifier
-                    .fillMaxWidth()
-                    .weight(0.1f)
-            )
+                Header(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(0.1f)
+                )
 
-            Spacer(modifier = Modifier.size(8.dp))
+                Spacer(modifier = Modifier.size(8.dp))
 
-            HorizontalDivider()
+                HorizontalDivider()
 
-            Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(16.dp))
 
-            Body(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.8f),
-                onClick = onClick,
-                route = route,
-                routes = routes
-            )
+                Body(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.8f),
+                    onClick = onClick,
+                    route = route,
+                    routes = routes
+                )
 
-            val context = LocalContext.current
-
-            Footer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.1f),
-                onSignOut = {
-                    viewModel.signOut {
-                        if (!it.isSuccess) {
-                            context.showToast(message = textSignOut)
+                Footer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.1f),
+                    onSignOut = {
+                        viewModel.signOut {
+                            if (!it.isSuccess) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = textSignOut
+                                    )
+                                }
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
