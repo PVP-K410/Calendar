@@ -53,4 +53,14 @@
     <string name="settings_setting_cup_volume_description">Choose your cup size for more accurate water drinking reminders. Default is %1$s ml</string>
     <string name="settings_setting_cup_volume_button">%1$s ml</string>
     <string name="settings_button_reset_description">Are you sure you want to reset all your settings?</string>
+    <string name="dashboard_measurement_kcal">kcal</string>
+    <string name="dashboard_measurement_steps">steps</string>
+    <string name="dashboard_graph_type_ongoing">Ongoing</string>
+    <string name="dashboard_graph_type_past">Past</string>
+    <string name="global_week">Week</string>
+    <string name="global_month">Month</string>
+    <string name="global_7_days">7 Days</string>
+    <string name="global_30_days">30 Days</string>
+    <string name="global_calories">Calories</string>
+    <string name="global_steps">Steps</string>
 </resources>

@@ -52,4 +52,14 @@
     <string name="settings_setting_cup_volume_description">Pasirinkite savo puodelio dydį tikslesniems vandens išgėrimo priminimams gauti. Įprastas nustatymas lygus %1$s ml</string>
     <string name="settings_setting_cup_volume_button">%1$s ml</string>
     <string name="settings_button_reset_description">Ar tikrai norite atstatyti visus savo nustatymus?</string>
+    <string name="dashboard_measurement_kcal">kcal</string>
+    <string name="dashboard_measurement_steps">žingsniai</string>
+    <string name="dashboard_graph_type_ongoing">Esamos</string>
+    <string name="dashboard_graph_type_past">Praeities</string>
+    <string name="global_week">Savaitė</string>
+    <string name="global_month">Mėnesis</string>
+    <string name="global_7_days">7 Dienų</string>
+    <string name="global_30_days">30 Dienų</string>
+    <string name="global_calories">Kalorijos</string>
+    <string name="global_steps">Žingsniai</string>
 </resources>

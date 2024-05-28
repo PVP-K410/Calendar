@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +55,7 @@ import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shader.DynamicShader
 import com.patrykandpatrick.vico.core.common.shader.TopBottomShader
 import com.patrykandpatrick.vico.core.common.shape.Shape
+import com.pvp.app.R
 import com.pvp.app.common.DateUtil.toLocalDate
 import com.pvp.app.model.ActivityEntry
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
@@ -67,6 +69,10 @@ fun StatisticsScreen(
     model: StatisticsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
+    val localeGraphOngoing = stringResource(R.string.dashboard_graph_type_ongoing)
+    val localeGraphPast = stringResource(R.string.dashboard_graph_type_past)
+    val localeMeasurementKCal = stringResource(R.string.dashboard_measurement_kcal)
+    val localeMeasurementSteps = stringResource(R.string.dashboard_measurement_steps)
     val state by model.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {
@@ -82,8 +88,8 @@ fun StatisticsScreen(
         val labelOfSum = remember<(GraphType) -> String> {
             {
                 when (it) {
-                    is GraphType.Chain.Calories -> "kcal"
-                    is GraphType.Chain.Steps -> "steps"
+                    is GraphType.Chain.Calories -> localeMeasurementKCal
+                    is GraphType.Chain.Steps -> localeMeasurementSteps
                     else -> ""
                 }
             }
@@ -93,14 +99,14 @@ fun StatisticsScreen(
 
         val tabs = remember(state) {
             mapOf<String, @Composable () -> Unit>(
-                "Ongoing" to {
+                localeGraphOngoing to {
                     GraphsOngoing(
                         labelOfSum = labelOfSum,
                         valuesWeek = state.valuesWeek,
                         valuesMonth = state.valuesMonth
                     )
                 },
-                "Past" to {
+                localeGraphPast to {
                     GraphsPast(
                         labelOfSum = labelOfSum,
                         values7d = state.values7d,
@@ -271,7 +277,7 @@ private fun GraphTypeSelector(
             )
             .clickable { onTypeChange(GraphType.Chain.fromType(type.next)) }
             .padding(8.dp),
-        text = type.title
+        text = type.title()
     )
 }
 
@@ -281,11 +287,14 @@ private fun GraphsOngoing(
     valuesWeek: List<ActivityEntry>,
     valuesMonth: List<ActivityEntry>
 ) {
+    val localeWeek = stringResource(R.string.global_week)
+    val localeMonth = stringResource(R.string.global_month)
+
     Spacer(modifier = Modifier.size(16.dp))
 
     GraphOfDays(
         labelOfSum = labelOfSum,
-        title = "Week",
+        title = localeWeek,
         values = valuesWeek
     )
 
@@ -294,7 +303,7 @@ private fun GraphsOngoing(
     GraphOfDays(
         labelAsDay = false,
         labelOfSum = labelOfSum,
-        title = "Month",
+        title = localeMonth,
         values = valuesMonth
     )
 }
@@ -305,11 +314,14 @@ private fun GraphsPast(
     values7d: List<ActivityEntry>,
     values30d: List<ActivityEntry>
 ) {
+    val locale7Days = stringResource(R.string.global_7_days)
+    val locale30Days = stringResource(R.string.global_30_days)
+
     Spacer(modifier = Modifier.size(16.dp))
 
     GraphOfDays(
         labelOfSum = labelOfSum,
-        title = "7 Days",
+        title = locale7Days,
         values = values7d
     )
 
@@ -318,16 +330,16 @@ private fun GraphsPast(
     GraphOfDays(
         labelAsDay = false,
         labelOfSum = labelOfSum,
-        title = "30 Days",
+        title = locale30Days,
         values = values30d
     )
 }
 
-private sealed class GraphType(val title: String) {
+private sealed class GraphType(val title: @Composable () -> String) {
 
-    data object Calories : GraphType("Calories")
+    data object Calories : GraphType({ stringResource(R.string.global_calories) })
 
-    data object Steps : GraphType("Steps")
+    data object Steps : GraphType({ stringResource(R.string.global_steps) })
 
     sealed class Chain(
         current: GraphType,
