@@ -6,6 +6,7 @@ import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.pvp.app.R
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.NotificationService
@@ -72,23 +73,29 @@ class WeeklyActivityWorker @AssistedInject constructor(
             true -> {
                 when (activities.contains(SportActivity.Wheelchair)) {
                     true -> {
-                        "Participating in ${applicationContext.getString(SportActivity.Wheelchair.titleId)}" +
-                                " activities will give you more points this week!"
+                        applicationContext.getString(
+                            R.string.worker_activity_notification_wheelchair_activities,
+                            applicationContext.getString(SportActivity.Wheelchair.titleId)
+                        )
                     }
 
                     else -> {
-                        "Participating in ${applicationContext.getString(activities.first().titleId)} " +
-                                "will give you more points this week!"
+                        applicationContext.getString(
+                            R.string.worker_activity_notification_single_activity,
+                            applicationContext.getString(activities.first().titleId)
+                        )
                     }
                 }
             }
 
             else -> {
-                activities
-                    .dropLast(1)
-                    .joinToString(separator = ", ") { applicationContext.getString(it.titleId) } +
-                        " and " + applicationContext.getString(activities.last().titleId) +
-                        " will give you more points this week!"
+                applicationContext.getString(
+                    R.string.worker_activity_notification_many,
+                    activities
+                        .dropLast(1)
+                        .joinToString(separator = ", ") { applicationContext.getString(it.titleId) },
+                    applicationContext.getString(activities.last().titleId)
+                )
             }
         }
     }
@@ -118,7 +125,7 @@ class WeeklyActivityWorker @AssistedInject constructor(
         notificationService.show(
             Notification(
                 channel = NotificationChannel.WeeklyActivityReminder,
-                title = "Weekly Activities",
+                title = applicationContext.getString(R.string.worker_activity_notification_title),
                 text = formNotificationBody(activities)
             )
         )

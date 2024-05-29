@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.pvp.app.R
 import com.pvp.app.api.FriendService
 import com.pvp.app.api.GoalService
 import com.pvp.app.api.NotificationService
@@ -45,23 +46,30 @@ class GoalMotivationWorker @AssistedInject constructor(
                     return@forEachIndexed
                 }
 
-                val weekOrMonth = if (goal.monthly) "month" else "week"
-
-                val goalType = goal.activity
-                    .toString()
-                    .lowercase()
+                val goalType = applicationContext.getString(goal.activity.titleId)
 
                 val target = if (goal.steps) {
-                    "${goal.target.toInt()} steps"
+                    "${goal.target.toInt()} ${applicationContext.getString(R.string.measurement_steps)}"
                 } else {
-                    "${goal.target} km"
+                    "${goal.target} ${applicationContext.getString(R.string.measurement_km)}"
                 }
 
                 val notification = Notification(
                     channel = NotificationChannel.GoalMotivation,
-                    title = "🏆 One Step Closer to Success!",
-                    text = "You have a $goalType goal to achieve" +
-                            "this $weekOrMonth ($target). Keep going!"
+                    title = applicationContext.getString(R.string.worker_goal_motivation_notification_close_title),
+                    text = if (goal.monthly) {
+                        applicationContext.getString(
+                            R.string.worker_goal_motivation_notification_close_description_monthly,
+                            goalType,
+                            target
+                        )
+                    } else {
+                        applicationContext.getString(
+                            R.string.worker_goal_motivation_notification_close_description_weekly,
+                            goalType,
+                            target
+                        )
+                    }
                 )
 
                 notificationService.post(
@@ -97,8 +105,8 @@ class GoalMotivationWorker @AssistedInject constructor(
         if (hasActiveFriends) {
             val notification = Notification(
                 channel = NotificationChannel.GoalMotivation,
-                title = "🚀 Keep Up with Your Active Buddies!",
-                text = "Participate in goals to keep up with your friends!"
+                title = applicationContext.getString(R.string.worker_goal_motivation_notification_buddies_title),
+                text = applicationContext.getString(R.string.worker_goal_motivation_notification_buddies_description)
             )
 
             notificationService.post(
