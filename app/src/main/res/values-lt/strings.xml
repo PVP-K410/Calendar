@@ -319,6 +319,7 @@
     <string name="task_type_general">Bendrinės</string>
     <string name="task_type_meal">Patiekalų</string>
     <string name="task_type_set_meal">Receptų</string>
+    <string name="task_type_set_meal_label">Dieta #%1$d: %2$s</string>
     <string name="task_type_sport">Sporto</string>
     <string name="worker_activity_notification_many">%1$s ir %2$s veiklos duos daugiau taškų šią savaitę!</string>
     <string name="worker_activity_notification_single_activity">Dalyvavimas "%1$s" veikloje duos daugiau taškų šią savaitę!</string>

@@ -10,6 +10,7 @@ data class User(
     var decorationsApplied: List<String> = emptyList(),
     var decorationsOwned: List<String> = emptyList(),
     var diet: Diet = Diet.Carbohydrates,
+    var lastMealPlanGeneratedWeek: Int = 0,
     var hasDisability: Boolean = false,
     val email: String = "",
     var experience: Int = 0,
