@@ -141,27 +141,32 @@ fun CenteredSnackbarHost(snackbarHostState: SnackbarHostState) {
                             Text(text = actionLabel)
                         }
                     }
-                }
+                },
+                containerColor = MaterialTheme.colorScheme.surface
             ) {
-                Row(
+                Box(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    contentAlignment = Alignment.Center
                 ) {
                     Image(
                         imageVector = ImageVector.vectorResource(R.drawable.logo),
                         contentDescription = "App logo",
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.CenterStart)
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(text = snackbarData.visuals.message)
+                    Text(
+                        text = snackbarData.visuals.message,
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }
     )
 }
+
 
 @Composable
 fun Dialog(
