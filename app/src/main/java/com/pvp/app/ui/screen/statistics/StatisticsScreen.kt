@@ -220,11 +220,11 @@ private fun GraphOfDays(
     val values = values.ifEmpty { listOf(ActivityEntry()) }
     var type by remember { mutableStateOf<GraphType.Chain>(GraphType.Chain.Steps) }
 
-    val selector: (ActivityEntry) -> Int = remember(type) {
+    val selector: (ActivityEntry) -> Double = remember(type) {
         when (type) {
-            GraphType.Chain.Calories -> { entry -> (entry.calories / 1000).toInt() }
-            GraphType.Chain.Steps -> { entry -> entry.steps.toInt() }
-            GraphType.Chain.Distance -> { entry -> (entry.steps * 0.8 * 0.0001).toInt() }
+            GraphType.Chain.Calories -> { entry -> entry.calories / 1000 }
+            GraphType.Chain.Steps -> { entry -> entry.steps.toDouble() }
+            GraphType.Chain.Distance -> { entry -> entry.steps * 0.00075 }
         }
     }
 
@@ -268,14 +268,14 @@ private fun GraphOfDays(
         Text(
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.labelMedium,
-            text = "$localeTotal: ${values.sumOf { selector(it) }} ${labelOfSum(type)}",
+            text = "$localeTotal: ${"%.2f".format(values.sumOf { selector(it) })} ${labelOfSum(type)}",
             textAlign = TextAlign.End
         )
 
         Text(
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.labelMedium,
-            text = "$localeAverage: ${values.sumOf { selector(it) } / values.size} ${labelOfSum(type)}",
+            text = "$localeAverage: ${"%.2f".format(values.sumOf { selector(it) } / values.size)} ${labelOfSum(type)}",
             textAlign = TextAlign.End
         )
     }
