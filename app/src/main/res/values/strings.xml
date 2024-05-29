@@ -185,7 +185,7 @@
     <string name="input_field_activity_label">Activity</string>
     <string name="input_field_date_label">Date</string>
     <string name="input_field_description_edit_label">Editing description</string>
-    <string name="input_field_description_error_cannot_be_empty">Description can not be empty</string>
+    <string name="input_field_description_error_cannot_be_empty">Description cannot be empty</string>
     <string name="input_field_description_label">Description</string>
     <string name="input_field_distance_edit_label">Editing distance</string>
     <string name="input_field_distance_label">Distance</string>
