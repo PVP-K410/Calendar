@@ -215,23 +215,21 @@ class StatisticsViewModel @Inject constructor(
                 )
             }
 
-            combine(
+            val valuesFlow = combine(
                 valuesWeekFlow,
                 valuesMonthFlow,
                 values7dFlow,
                 values30dFlow
             ) { valuesWeek, valuesMonth, values7d, values30d ->
                 StatisticsState(
-                    isLoading = false,
                     valuesWeek = valuesWeek,
                     valuesMonth = valuesMonth,
                     values7d = values7d,
                     values30d = values30d
                 )
             }
-                .collectLatest { state -> _state.update { state } }
 
-            combine(
+            val averagesFlow = combine(
                 averageTasksCompleted7dFlow,
                 averageTasksCompleted30dFlow,
                 averagePointsFlow,
@@ -246,9 +244,26 @@ class StatisticsViewModel @Inject constructor(
                     top3FrequentActivities = top3FrequentActivities
                 )
             }
-                .collectLatest { state ->
-                    _state.update { state }
-                }
+
+            combine(
+                valuesFlow,
+                averagesFlow
+            ) { partialState1, partialState2 ->
+                StatisticsState(
+                    isLoading = false,
+                    valuesWeek = partialState1.valuesWeek,
+                    valuesMonth = partialState1.valuesMonth,
+                    values7d = partialState1.values7d,
+                    values30d = partialState1.values30d,
+                    averageTasksCompleted7d = partialState2.averageTasksCompleted7d,
+                    averageTasksCompleted30d = partialState2.averageTasksCompleted30d,
+                    averagePoints = partialState2.averagePoints,
+                    uniqueActivities30d = partialState2.uniqueActivities30d,
+                    top3FrequentActivities = partialState2.top3FrequentActivities
+                )
+            }.collectLatest { state ->
+                _state.update { state }
+            }
         }
     }
 }
