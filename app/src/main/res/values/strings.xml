@@ -188,6 +188,7 @@
     <string name="input_field_description_label">Description</string>
     <string name="input_field_diet_edit_label">Editing diet</string>
     <string name="input_field_diet_label">Diet</string>
+    <string name="input_field_diet_success">Your diet has been updated</string>
     <string name="input_field_distance_edit_label">Editing distance</string>
     <string name="input_field_distance_label">Distance</string>
     <string name="input_field_distance_total" translatable="false">%1$.2f km distance</string>

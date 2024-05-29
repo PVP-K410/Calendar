@@ -392,6 +392,8 @@ private fun Properties(
             valueLabel = localeMeasurementCentimeters
         )
 
+        val localeSuccessDiet = stringResource(R.string.input_field_diet_success)
+
         EditablePickerItem(
             editLabel = stringResource(R.string.input_field_diet_edit_label),
             label = stringResource(R.string.input_field_diet_label),
@@ -402,7 +404,7 @@ private fun Properties(
             onValueChange = {
                 onUpdateDiet(it)
 
-                showSnackbar("Your diet has been updated")
+                showSnackbar(localeSuccessDiet)
             }
         )
 
