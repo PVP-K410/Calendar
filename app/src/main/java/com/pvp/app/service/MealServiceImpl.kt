@@ -5,16 +5,32 @@ package com.pvp.app.service
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.api.MealService
+import com.pvp.app.api.UserService
 import com.pvp.app.model.Meal
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapLatest
+import java.time.DayOfWeek
 import javax.inject.Inject
 
 class MealServiceImpl @Inject constructor(
-    private val database: FirebaseFirestore
+    private val database: FirebaseFirestore,
+    private val userService: UserService
 ) : MealService {
+
+    override suspend fun generateWeekPlan(): Map<DayOfWeek, List<Meal>> {
+        val user = userService.user.firstOrNull()
+
+        user ?: error("User is not logged in")
+
+        val meals = get()
+            .first()
+
+        return emptyMap()
+    }
 
     override fun get(): Flow<List<Meal>> {
         return database
