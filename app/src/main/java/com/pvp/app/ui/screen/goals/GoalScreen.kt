@@ -47,6 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.Goal
 import com.pvp.app.ui.common.TabSelector
+import kotlin.math.max
 
 @Composable
 fun GoalScreen(
@@ -66,8 +67,7 @@ fun GoalScreen(
                     .padding(16.dp)
             ) {
                 Column {
-                    val goals = state.currentGoals
-                    val completed: List<Goal> = goals.filter { it.completed }
+                    val (completed, goals) = state.currentGoals.partition { it.completed }
 
                     val filter by remember {
                         derivedStateOf {
@@ -109,27 +109,27 @@ fun GoalScreen(
                             }
                         }
 
-                        item {
-                            Spacer(modifier = Modifier.padding(24.dp))
-
-                            Row {
-                                Icon(
-                                    imageVector = Icons.Outlined.Check,
-                                    contentDescription = "Completed goals",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
-
-                                Text(
-                                    style = MaterialTheme.typography.titleLarge,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Left,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    text = "Completed"
-                                )
-                            }
-                        }
-
                         if (completed.isNotEmpty()) {
+                            item {
+                                Spacer(modifier = Modifier.padding(24.dp))
+
+                                Row {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Check,
+                                        contentDescription = "Completed goals",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                    )
+
+                                    Text(
+                                        style = MaterialTheme.typography.titleLarge,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Left,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        text = " Completed"
+                                    )
+                                }
+                            }
+
                             items(completed) { goal ->
                                 GoalCompletedCard(
                                     goal = goal,
@@ -230,8 +230,8 @@ fun GoalCard(
                     modifier = Modifier.padding(start = 6.dp),
                     textAlign = TextAlign.Left,
                     text = "Your average " + when (goal.monthly) {
-                        true -> "monthly steps: %.2f".format(monthSteps / 30.0)
-                        false -> "weekly steps: %.2f".format(monthSteps / 30.0 / 7.0)
+                        true -> "monthly steps: %d".format((monthSteps / 30))
+                        false -> "weekly steps: %d".format((monthSteps / 30 * 7))
                     }
                 )
             }
@@ -301,8 +301,6 @@ fun GoalCompletedCard(
 
             if (goal.steps) {
                 Spacer(modifier = Modifier.padding(2.dp))
-
-                val d = goal.startDate
 
                 Text(
                     style = MaterialTheme.typography.bodyMedium,
@@ -383,7 +381,10 @@ fun ProgressBar(goal: Goal) {
     val progress by animateFloatAsState(
         animationSpec = tween(durationMillis = 1000),
         label = "ExperienceProgressAnimation",
-        targetValue = goal.progress.toFloat() / goal.target.toFloat(),
+        targetValue = goal.progress.toFloat() / max(
+            1f,
+            goal.target.toFloat()
+        )
     )
 
     Box(
@@ -405,7 +406,10 @@ fun ProgressBar(goal: Goal) {
         Text(
             text = when (goal.steps) {
                 true -> "${goal.progress.toInt()} / ${goal.target.toInt()} steps"
-                false -> "%.2f / %.2f km".format(goal.progress, goal.target)
+                false -> "%.2f / %.2f km".format(
+                    goal.progress,
+                    goal.target
+                )
             },
             style = MaterialTheme.typography.bodyMedium,
         )
