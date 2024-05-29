@@ -224,6 +224,11 @@
     <string name="input_field_username_success">Jūsų slapyvardis sėkmingai pakeistas</string>
     <string name="input_field_weekly_activities_label">Jūsų savaitinės veiklos</string>
     <string name="input_field_weekly_activities_unassigned">Jums dar nėra priskirtų savaitinių veiklų</string>
+    <string name="layout_dialog_reward_button_claim">Atsiimti</string>
+    <string name="layout_dialog_reward_decoration_label">%1$s dekoraciją!</string>
+    <string name="layout_dialog_reward_experience_label">%1$d patirties!</string>
+    <string name="layout_dialog_reward_received">Jūs gavote</string>
+    <string name="layout_dialog_reward_title">Jūsų kasdienis prisijungimo streak\'as paaugo!</string>
     <string name="meal_card_calories_per_serving">%1$s kalorijos per porciją</string>
     <string name="meal_card_carbs">Angliavandeniai: %1$s %%</string>
     <string name="meal_card_fat">Riebalai: %1$s %%</string>

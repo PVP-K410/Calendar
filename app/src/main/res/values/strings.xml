@@ -229,6 +229,11 @@
     <string name="input_field_username_success">Your username has been changed</string>
     <string name="input_field_weekly_activities_label">Your weekly activities</string>
     <string name="input_field_weekly_activities_unassigned">No weekly activities have been assigned yet</string>
+    <string name="layout_dialog_reward_button_claim">Claim</string>
+    <string name="layout_dialog_reward_decoration_label">%1$s decoration!</string>
+    <string name="layout_dialog_reward_experience_label">%1$d exp!</string>
+    <string name="layout_dialog_reward_received">You received</string>
+    <string name="layout_dialog_reward_title">Your daily login streak increased!</string>
     <string name="meal_card_calories_per_serving">%1$s calories per serving</string>
     <string name="meal_card_carbs">Carbs: %1$s %%</string>
     <string name="meal_card_fat">Fat: %1$s %%</string>
