@@ -101,9 +101,7 @@ fun FeedbackForm(
 
             Spacer(modifier = Modifier.padding(6.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
                 for (i in 1..5) {
                     Icon(
                         imageVector = Icons.Outlined.Star,
