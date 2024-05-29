@@ -158,6 +158,7 @@ fun CenteredSnackbarHost(snackbarHostState: SnackbarHostState) {
                     Text(
                         style = MaterialTheme.typography.labelMedium,
                         text = snackbarData.visuals.message,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth(0.8f)
                             .align(Alignment.Center),
