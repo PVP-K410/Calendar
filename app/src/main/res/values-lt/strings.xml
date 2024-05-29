@@ -305,6 +305,8 @@
     <string name="surveys_ingredients_title_selected">Ingredientai, kurių netoleruoju</string>
     <string name="surveys_select_height">Pasirinkite savo ūgį</string>
     <string name="surveys_select_mass">Pasirinkite savo svorį</string>
+    <string name="tasks_notification_reminder_description">Užduotis \'%1$s\' prasidės už %2$d %3$s.</string>
+    <string name="tasks_notification_reminder_title">Užduoties Priminimas</string>
     <string name="tasks_of_day_empty">Nėra šio tipo užduočių šioje dienoje</string>
     <string name="task_type_daily">Kasdienės</string>
     <string name="task_type_daily_label">Užduotis #%1$d: %2$s</string>
