@@ -142,9 +142,7 @@ private fun Authentication(
 }
 
 @Composable
-fun AuthenticationScreen(
-    viewModel: AuthenticationViewModel = hiltViewModel()
-) {
+fun AuthenticationScreen(viewModel: AuthenticationViewModel = hiltViewModel()) {
     val showSnackbar = LocalShowSnackbar.current
 
     Column(
@@ -158,7 +156,7 @@ fun AuthenticationScreen(
         FeatureCard.cards.forEachIndexed { index, card ->
             FeatureCardBlock(
                 radius = card.radius,
-                text = card.text,
+                text = card.text(),
                 textAlign = card.textAlign
             )
 

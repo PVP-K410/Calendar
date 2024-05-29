@@ -45,6 +45,12 @@
     <string name="analyses_day_tasks">Dienos užduotys</string>
     <string name="analyses_steps_of_the_day">Dienos žingsnių siekis</string>
     <string name="analyses_today_tasks">Šiandienos užduotys</string>
+    <string name="authentication_featur_all_in_one">Viskas vienoje vietoje</string>
+    <string name="authentication_featur_assign_tasks">Prisiskirk užduotis</string>
+    <string name="authentication_featur_compete_friends">Konkuruok su draugais</string>
+    <string name="authentication_featur_reach_goals">Išsikelk siekius</string>
+    <string name="authentication_featur_schedule_day">Susiplanuok savo dieną</string>
+    <string name="authentication_featur_track_calories">Sek savo kalorijas</string>
     <string name="dashboard_7_days">7 Dienų</string>
     <string name="dashboard_30_days">30 Dienų</string>
     <string name="dashboard_calories">Kalorijos</string>
@@ -255,7 +261,7 @@
     <string name="route_settings">Nustatymai</string>
     <string name="route_statistics">Statistikos</string>
     <string name="route_survey">Apklausa</string>
-    <string name="screen_authentication_button_begin">Pradėkite!</string>
+    <string name="screen_authentication_button_begin">Pradėkime!</string>
     <string name="screen_authentication_toast_error">Nepavyko prisijungti. Bandykite dar kartą</string>
     <string name="settings_button_reset">Atstatyti nustatymus</string>
     <string name="settings_button_reset_description">Ar tikrai norite atstatyti visus savo nustatymus?</string>

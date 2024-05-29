@@ -45,6 +45,12 @@
     <string name="analyses_steps_of_the_day">Steps goal of the day</string>
     <string name="analyses_today_tasks">Today\'s tasks</string>
     <string name="application_name" translatable="false">Calencup</string>
+    <string name="authentication_featur_all_in_one">All in one application</string>
+    <string name="authentication_featur_assign_tasks">Assign tasks</string>
+    <string name="authentication_featur_compete_friends">Compete with friends</string>
+    <string name="authentication_featur_reach_goals">Reach your goals</string>
+    <string name="authentication_featur_schedule_day">Schedule your day</string>
+    <string name="authentication_featur_track_calories">Track your calories</string>
     <string name="dashboard_7_days">7 Days</string>
     <string name="dashboard_30_days">30 Days</string>
     <string name="dashboard_calories">Calories</string>
