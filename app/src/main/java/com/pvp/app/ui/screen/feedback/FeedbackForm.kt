@@ -113,7 +113,7 @@ fun FeedbackForm(
                             .clickable { rating = i },
                         tint = when (i <= rating) {
                             true -> MaterialTheme.colorScheme.primary
-                            false -> MaterialTheme.colorScheme.surfaceContainer
+                            false -> MaterialTheme.colorScheme.surfaceDim
                         }
                     )
                 }
