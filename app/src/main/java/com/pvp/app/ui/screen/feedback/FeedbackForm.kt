@@ -56,9 +56,7 @@ fun FeedbackForm(
     var bug by remember { mutableStateOf(true) }
     var description by remember { mutableStateOf("") }
     var rating by remember { mutableStateOf(0) }
-
     val isFormValid by remember { derivedStateOf { description.isNotEmpty() } }
-    val localeCreate = stringResource(R.string.action_create)
 
     Surface(
         shape = MaterialTheme.shapes.medium,
@@ -139,7 +137,7 @@ fun FeedbackForm(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 shape = MaterialTheme.shapes.extraLarge
             ) {
-                Text(localeCreate)
+                Text(stringResource(R.string.action_create))
             }
         }
     }
