@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.pvp.app.ui.screen.goals
 
 import androidx.compose.foundation.layout.Column
@@ -7,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -136,7 +133,7 @@ fun GoalCreateForm(
     val localeEditLabel = stringResource(R.string.input_field_activity_edit_label)
     val localeLabel = stringResource(R.string.input_field_activity_label)
     val state by model.state.collectAsStateWithLifecycle()
-    var steps by remember { mutableStateOf(activity == SportActivity.Walking) }
+    var steps by remember(goal) { mutableStateOf(activity == SportActivity.Walking && goal == 0.0) }
     var stepCount by remember { mutableDoubleStateOf(0.0) }
     var monthly by remember { mutableStateOf(state.monthly) }
     var selectedDistanceType by remember { mutableStateOf(DistanceType.Steps) }
