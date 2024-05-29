@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
+import com.pvp.app.model.Diet
 import com.pvp.app.model.Ingredient
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.ButtonConfirm
@@ -304,6 +305,7 @@ fun ProfileScreen(
 
             Properties(
                 onUpdateActivities = { viewModel.update { u -> u.activities = it } },
+                onUpdateDiet = { viewModel.update { u -> u.diet = it } },
                 onUpdateIngredients = { viewModel.update { u -> u.ingredients = it } },
                 onUpdateHeight = { viewModel.update { u -> u.height = it } },
                 onUpdateMass = { viewModel.update { u -> u.mass = it } },
@@ -319,6 +321,7 @@ fun ProfileScreen(
 private fun Properties(
     model: ProfileViewModel = hiltViewModel(),
     onUpdateActivities: (List<SportActivity>) -> Unit,
+    onUpdateDiet: (Diet) -> Unit,
     onUpdateHeight: (Int) -> Unit,
     onUpdateIngredients: (List<Ingredient>) -> Unit,
     onUpdateMass: (Int) -> Unit,
@@ -387,6 +390,19 @@ private fun Properties(
             },
             value = height,
             valueLabel = localeMeasurementCentimeters
+        )
+
+        EditablePickerItem(
+            label = "Diet",
+            value = state.user.diet,
+            valueLabel = { it.title },
+            items = Diet.entries,
+            itemsLabel = { it.title },
+            onValueChange = {
+                onUpdateDiet(it)
+
+                showSnackbar("Your diet has been updated")
+            }
         )
 
 

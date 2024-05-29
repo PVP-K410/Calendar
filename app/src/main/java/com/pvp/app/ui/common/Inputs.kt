@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pvp.app.R
+import com.pvp.app.common.CollectionUtil.indexOfOrNull
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import java.time.Duration
@@ -247,6 +248,46 @@ fun EditableTextItem(
             text = errorMessage
         )
     }
+}
+
+@Composable
+fun <T> EditablePickerItem(
+    label: String,
+    items: List<T>,
+    itemsLabel: @Composable (T) -> String,
+    onValueChange: (T) -> Unit,
+    value: T,
+    valueLabel: @Composable (T) -> String
+) {
+    var valueEdit by remember(value) { mutableStateOf(value) }
+
+    EditableInfoItem(
+        dialogContent = {
+            Column {
+                Picker(
+                    items = items,
+                    label = { itemsLabel(it) },
+                    onChange = { valueEdit = it },
+                    startIndex = items.indexOfOrNull(valueEdit) ?: 0,
+                    state = rememberPickerState(initialValue = valueEdit)
+                )
+            }
+        },
+        dialogTitle = { Text("Editing $label") },
+        label = {
+            Text(
+                fontWeight = FontWeight.Bold,
+                text = label
+            )
+        },
+        onConfirm = { onValueChange(valueEdit) },
+        onDismiss = { },
+        value = {
+            if (value != null) {
+                Text(valueLabel(value))
+            }
+        }
+    )
 }
 
 @Composable

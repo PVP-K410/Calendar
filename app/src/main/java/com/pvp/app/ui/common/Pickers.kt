@@ -40,7 +40,9 @@ class PickerState<T>(initialValue: T) {
     companion object {
 
         @Composable
-        fun <T> rememberPickerState(initialValue: T) = remember(initialValue) { PickerState(initialValue) }
+        fun <T> rememberPickerState(initialValue: T) = remember(initialValue) {
+            PickerState(initialValue)
+        }
     }
 }
 

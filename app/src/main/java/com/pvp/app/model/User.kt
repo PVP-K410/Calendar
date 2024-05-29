@@ -9,6 +9,7 @@ data class User(
     var activities: List<SportActivity> = emptyList(),
     var decorationsApplied: List<String> = emptyList(),
     var decorationsOwned: List<String> = emptyList(),
+    var diet: Diet = Diet.Carbohydrates,
     var hasDisability: Boolean = false,
     val email: String = "",
     var experience: Int = 0,

@@ -81,6 +81,9 @@
     <string name="decoration_type_head">Head</string>
     <string name="decoration_type_leggings">Leggings</string>
     <string name="decoration_type_shoes">Shoes</string>
+    <string name="diet_carbohydrates">Carbohydrates</string>
+    <string name="diet_fat">Fat</string>
+    <string name="diet_protein">Protein</string>
     <string name="drawer_application_motto">Schedule Your Day</string>
     <string name="drawer_button_sign_out">Sign Out</string>
     <string name="drawer_button_sign_out_confirmation">Are you sure you want to sign out?</string>
