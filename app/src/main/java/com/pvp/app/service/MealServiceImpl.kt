@@ -88,7 +88,7 @@ class MealServiceImpl @Inject constructor(
             }
 
         require(mealsBreakfast.isNotEmpty()) {
-            "No breakfast meals found. Please add some meals to the database."
+            "No breakfast meals found. Administrators, please add some meals to the database."
         }
 
         daysToMeals.forEach { (day, mealsOfDay) ->
@@ -122,8 +122,8 @@ class MealServiceImpl @Inject constructor(
         }
 
         require(mealsMain.isNotEmpty()) {
-            "No main meals found. Please add some meals to the database and make sure " +
-                    "they have at least 40% of the required nutrients."
+            "No main meals found. Administrators, please add some meals to the database and " +
+                    "make sure they have at least 40% of the required nutrients."
         }
 
         daysToMeals.forEach { (day, mealsOfDay) ->
