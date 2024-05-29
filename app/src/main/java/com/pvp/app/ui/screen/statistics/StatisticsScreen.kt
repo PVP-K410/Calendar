@@ -5,6 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -75,6 +78,7 @@ fun StatisticsScreen(
     val localeGraphPast = stringResource(R.string.dashboard_graph_type_past)
     val localeMeasurementKCal = stringResource(R.string.measurement_kcal)
     val localeMeasurementSteps = stringResource(R.string.measurement_steps)
+    val localeMeasurementKm = stringResource(R.string.measurement_km)
     val state by model.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {
@@ -92,7 +96,7 @@ fun StatisticsScreen(
                 when (it) {
                     is GraphType.Chain.Calories -> localeMeasurementKCal
                     is GraphType.Chain.Steps -> localeMeasurementSteps
-                    is GraphType.Chain.Distance -> "km"
+                    is GraphType.Chain.Distance -> localeMeasurementKm
                     else -> ""
                 }
             }
@@ -128,66 +132,7 @@ fun StatisticsScreen(
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(
-                    MaterialTheme.colorScheme.secondaryContainer,
-                    RoundedCornerShape(8.dp)
-                )
-                .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.onSecondaryContainer,
-                    RoundedCornerShape(8.dp)
-                )
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-
-            StatisticItem(
-                label = "Average tasks completed (7d):",
-                value = "${state.averageTasksCompleted7d}"
-            )
-            StatisticItem(
-                label = "Average tasks completed (30d):",
-                value = "${state.averageTasksCompleted30d}"
-            )
-            StatisticItem(
-                label = "Average points:",
-                value = "${state.averagePoints}"
-            )
-            StatisticItem(
-                label = "Top 3 frequent activities:",
-                value = "${state.top3FrequentActivities}"
-            )
-            StatisticItem(
-                label = "Unique activities (30d):",
-                value = "${state.uniqueActivities30d}"
-            )
-        }
-    }
-}
-
-@Composable
-fun StatisticItem(
-    label: String,
-    value: String
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
-        )
+        StatisticsContainers(state)
     }
 }
 
@@ -270,6 +215,8 @@ private fun GraphOfDays(
     title: String,
     values: List<ActivityEntry>
 ) {
+    val localeAverage = stringResource(R.string.average)
+    val localeTotal = stringResource(R.string.total)
     val values = values.ifEmpty { listOf(ActivityEntry()) }
     var type by remember { mutableStateOf<GraphType.Chain>(GraphType.Chain.Steps) }
 
@@ -321,14 +268,14 @@ private fun GraphOfDays(
         Text(
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.labelMedium,
-            text = "Total: ${values.sumOf { selector(it) }} ${labelOfSum(type)}",
+            text = "$localeTotal: ${values.sumOf { selector(it) }} ${labelOfSum(type)}",
             textAlign = TextAlign.End
         )
 
         Text(
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.labelMedium,
-            text = "Average: ${values.sumOf { selector(it) } / values.size} ${labelOfSum(type)}",
+            text = "$localeAverage: ${values.sumOf { selector(it) } / values.size} ${labelOfSum(type)}",
             textAlign = TextAlign.End
         )
     }
@@ -409,13 +356,135 @@ private fun GraphsPast(
     )
 }
 
+@Composable
+fun StatisticsContainers(state: StatisticsState) {
+    val localeAverageTasksCompleted = stringResource(R.string.statistics_average_tasks_completed)
+    val localeAveragePoints = stringResource(R.string.statistics_average_points)
+    val localeTop3FrequentActivities = stringResource(R.string.statistics_top3_frequent_activities)
+    val localeUniqueActivities = stringResource(R.string.statistics_unique_activities)
+
+    StatisticsContainerColumn {
+        StatisticItem(
+            label = "$localeAverageTasksCompleted (7d):",
+            value = "%.2f".format(state.averageTasksCompleted7d)
+        )
+        StatisticItem(
+            label = "$localeAverageTasksCompleted (30d):",
+            value = "%.2f".format(state.averageTasksCompleted30d)
+        )
+        StatisticItem(
+            label = "$localeAveragePoints:",
+            value = "%.2f".format(state.averagePoints)
+        )
+    }
+
+    StatisticsContainerColumn {
+        StatisticItem(
+            label = "$localeTop3FrequentActivities:",
+            values = state.top3FrequentActivities
+        )
+        StatisticItem(
+            label = "$localeUniqueActivities (30d):",
+            values = state.uniqueActivities30d
+        )
+    }
+}
+
+
+@Composable
+fun StatisticsContainerColumn(
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .background(
+                MaterialTheme.colorScheme.secondaryContainer,
+                RoundedCornerShape(8.dp)
+            )
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSecondaryContainer,
+                RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        content = content
+    )
+}
+
+@Composable
+fun StatisticItem(
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun StatisticItem(
+    label: String,
+    values: List<@Composable () -> String>
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+
+        FlowRow(
+            modifier = Modifier.align(Alignment.CenterVertically)
+        ) {
+            values.forEachIndexed { index, composableString ->
+                Text(
+                    text = composableString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                if (index < values.size - 1) {
+                    Text(
+                        text = ", ",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+        }
+    }
+}
+
 private sealed class GraphType(val title: @Composable () -> String) {
 
     data object Calories : GraphType({ stringResource(R.string.dashboard_calories) })
 
     data object Steps : GraphType({ stringResource(R.string.dashboard_steps) })
 
-    data object Distance : GraphType("Distance")
+    data object Distance : GraphType({ stringResource(R.string.dashboard_distance) })
 
     sealed class Chain(
         current: GraphType,

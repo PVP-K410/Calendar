@@ -2,6 +2,7 @@
 
 package com.pvp.app.ui.screen.statistics
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.ActivityService
@@ -104,9 +105,10 @@ class StatisticsViewModel @Inject constructor(
                     now.minusDays(29) to now,
                     user.email
                 ).map { entries ->
-                    entries.map { task ->
-                        (task as? SportTask)?.activity.toString()
-                    }
+                    entries
+                        .mapNotNull { task ->
+                            (task as? SportTask)?.activity?.title
+                        }
                         .distinct()
                 }
             }
@@ -128,7 +130,7 @@ class StatisticsViewModel @Inject constructor(
                         .toList()
                         .sortedByDescending { it.second }
                         .take(3)
-                        .map { it.first.toString() }
+                        .map { it.first.title }
                 }
             }
 
@@ -277,6 +279,6 @@ data class StatisticsState(
     val averageTasksCompleted7d: Double = 0.0,
     val averageTasksCompleted30d: Double = 0.0,
     val averagePoints: Double = 0.0,
-    val uniqueActivities30d: List<String> = listOf(),
-    val top3FrequentActivities: List<String> = listOf()
+    val uniqueActivities30d: List<@Composable () -> String> = listOf(),
+    val top3FrequentActivities: List<@Composable () -> String> = listOf()
 )

@@ -51,9 +51,11 @@
     <string name="authentication_featur_reach_goals">Išsikelk siekius</string>
     <string name="authentication_featur_schedule_day">Susiplanuok savo dieną</string>
     <string name="authentication_featur_track_calories">Sek savo kalorijas</string>
+    <string name="average">Vidurkis</string>
     <string name="dashboard_7_days">7 Dienų</string>
     <string name="dashboard_30_days">30 Dienų</string>
     <string name="dashboard_calories">Kalorijos</string>
+    <string name="dashboard_distance">Atstumas</string>
     <string name="dashboard_graph_type_ongoing">Esamos</string>
     <string name="dashboard_graph_type_past">Praeities</string>
     <string name="dashboard_month">Mėnesis</string>
@@ -293,6 +295,10 @@
     <string name="settings_setting_theme_label_dark">Tamsi</string>
     <string name="settings_setting_theme_label_light">Šviesi</string>
     <string name="settings_setting_theme_title">Tema</string>
+    <string name="statistics_average_tasks_completed">Vidutiniškai įvykdyta užduočių</string>
+    <string name="statistics_average_points">Vidutiniškai gauta taškų</string>
+    <string name="statistics_top3_frequent_activities">Top 3 dažniausios veiklos</string>
+    <string name="statistics_unique_activities">Unikalios veiklos</string>
     <string name="surveys_activities_other_empty">Nebėra parinkčių</string>
     <string name="surveys_activities_selected_empty">Nepasirinkote jokių sportinių veiklų</string>
     <string name="surveys_activities_title">Pasirinkite patinkančias sportines veiklas</string>
@@ -314,6 +320,7 @@
     <string name="task_type_meal">Patiekalų</string>
     <string name="task_type_set_meal">Receptų</string>
     <string name="task_type_sport">Sporto</string>
+    <string name="total">Iš viso</string>
     <string name="worker_activity_notification_many">%1$s ir %2$s veiklos duos daugiau taškų šią savaitę!</string>
     <string name="worker_activity_notification_single_activity">Dalyvavimas "%1$s" veikloje duos daugiau taškų šią savaitę!</string>
     <string name="worker_activity_notification_title">Savaitinės Veiklos</string>
