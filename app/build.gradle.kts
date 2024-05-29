@@ -32,7 +32,6 @@ android {
         versionCode = 1
         versionName = "dev-1.0.0.0"
 
-
         resourceConfigurations.addAll(
             listOf(
                 "en",

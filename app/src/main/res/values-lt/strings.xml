@@ -70,7 +70,7 @@
     <string name="decorations_purchase_dialog_price">Kaina</string>
     <string name="decorations_purchase_dialog_title">Patvirtinkite pirkimą</string>
     <string name="decorations_store_title">Parduotuvė</string>
-    <string name="decorations_success">Pavyko atlikti operaciją</string>
+    <string name="decorations_success">Operacija atlikta sėkmingai</string>
     <string name="decorations_success_apply">Sėkmingai užsidėjote dekoraciją</string>
     <string name="decorations_success_purchase">Sėkmingai nusipirkote dekoraciją</string>
     <string name="decorations_success_unapply">Sėkmingai nusiėmėte dekoraciją</string>
@@ -121,7 +121,7 @@
     <string name="friends_success_sent">Draugavimo užklausa išsiųsta</string>
     <string name="friend_7_days_activity">7 dienų aktyvumas</string>
     <string name="friend_button_remove">Panaikinti draugą</string>
-    <string name="friend_button_remove_confirmation_description">Jeigu draugas bus panaikintas, turėsite jį pakviesti iš naujo į draugus.</string>
+    <string name="friend_button_remove_confirmation_description">Jeigu draugas bus panaikintas, turėsite jį pakviesti iš naujo.</string>
     <string name="friend_button_remove_confirmation_title">Ar tikrai norite panaikinti savo draugą?</string>
     <string name="friend_calories_burned">%1$.2f sudegintų kalorijų</string>
     <string name="friend_distance">%1$.2f km</string>
@@ -134,8 +134,8 @@
     <string name="friend_steps_made">%1$s žingsnių</string>
     <string name="global_experience">Patirtis</string>
     <string name="global_level">Lygis</string>
-    <string name="goals_card_average_monthly_steps">Jūsų vidutiniškai atliekami žingsniai mėnesyje %1$s</string>
-    <string name="goals_card_average_weekly_steps">Jūsų vidutiniškai atliekami žingsniai savaitėje %1$s</string>
+    <string name="goals_card_average_monthly_steps">Vidutinis nueitų žingsnių kiekis per mėnesį %1$s</string>
+    <string name="goals_card_average_weekly_steps">Vidutinis nueitų žingsnių kiekis per savaitę %1$s</string>
     <string name="goals_card_goal">Siekis</string>
     <string name="goals_card_steps">%1$s žingsniai</string>
     <string name="goals_card_steps_progress">%1$s / %2$s žingsniai</string>
@@ -270,7 +270,7 @@
     <string name="settings_category_notifications_title">Pranešimai</string>
     <string name="settings_locale_en">Anglų</string>
     <string name="settings_locale_lt">Lietuvių</string>
-    <string name="settings_setting_cup_volume_description">Pasirinkite savo puodelio dydį tikslesniems vandens išgėrimo priminimams gauti. Įprastas nustatymas lygus %1$s ml</string>
+    <string name="settings_setting_cup_volume_description">Pasirinkite savo puodelio dydį tikslesniems vandens gėrimo priminimams gauti. Įprastas nustatymas lygus %1$s ml</string>
     <string name="settings_setting_cup_volume_title">Puodelio Dydis</string>
     <string name="settings_setting_google_calendar_button_synchronize">Sinchronizuoti</string>
     <string name="settings_setting_google_calendar_description">Susinchronizuokite savo \"Google\" kalendoriaus užduotis ir renginius su mūsų programėle, kad rastumėte visas savo veiklas vienoje vietoje. Praėjusių dienų \"Google\" užduotys nebus sinchronizuotos. Tik šiandienos ir ateities užduotys bus sinchronizuotos.</string>
@@ -279,8 +279,8 @@
     <string name="settings_setting_health_connect_button_configure">Konfigūruoti</string>
     <string name="settings_setting_health_connect_description">Skirdami tam tikrus \"Health Connect\" leidimus padedate mums pateikti daugiau puikių funkcionalumų jums. Skirtus leidimus bet kada galite išjungti ateidami čia. \"Health Connect\" mums leidžia pasinaudoti kitų programėlių surinktais duomenimis apie jūsų aktyvumą.</string>
     <string name="settings_setting_health_connect_title">\"Health Connect\" įrankis</string>
-    <string name="settings_setting_hydration_reminder_description">Pasirinkite ar norite įjungti vandens išgėrimo priminimus</string>
-    <string name="settings_setting_hydration_reminder_title">Vandens Išgėrimo Priminimas</string>
+    <string name="settings_setting_hydration_reminder_description">Pasirinkite ar norite įjungti vandens gėrimo priminimus</string>
+    <string name="settings_setting_hydration_reminder_title">Vandens Gėrimo Priminimas</string>
     <string name="settings_setting_language_description">Pasirinkite pageidaujamą programos kalbą</string>
     <string name="settings_setting_language_title">Kalba</string>
     <string name="settings_setting_reminder_button">%1$s min</string>
