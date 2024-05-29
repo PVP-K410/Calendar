@@ -71,7 +71,7 @@ private val INGREDIENTS = Ingredient.entries.map { it.title }
 @Composable
 private fun AccountDeleteButton(
     viewModel: ProfileViewModel = hiltViewModel(),
-    state: ProfileState,
+    state: ProfileState
 ) {
     val username = state.user.username
     var input by remember { mutableStateOf("") }
@@ -255,7 +255,6 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-
     if (state.isLoading) {
         ProgressIndicatorWithinDialog()
     }
@@ -269,9 +268,7 @@ fun ProfileScreen(
     ) {
         Points(points = state.user.points)
 
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             if (!state.isLoading) {
                 Initials(
                     onUsernameChange = { viewModel.update { u -> u.username = it } },
@@ -294,7 +291,7 @@ fun ProfileScreen(
                 onUpdateIngredients = { viewModel.update { u -> u.ingredients = it } },
                 onUpdateHeight = { viewModel.update { u -> u.height = it } },
                 onUpdateMass = { viewModel.update { u -> u.mass = it } },
-                state = state,
+                state = state
             )
 
             AccountDeleteButton(state = state)
@@ -309,7 +306,7 @@ private fun Properties(
     onUpdateHeight: (Int) -> Unit,
     onUpdateIngredients: (List<Ingredient>) -> Unit,
     onUpdateMass: (Int) -> Unit,
-    state: ProfileState,
+    state: ProfileState
 ) {
     var activitiesSelected = remember(state.user.activities) {
         state.user.activities.map { it.title }

@@ -149,7 +149,6 @@ private fun Header(modifier: Modifier = Modifier) {
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun DrawerScreen(
     onClick: Route.() -> Unit,

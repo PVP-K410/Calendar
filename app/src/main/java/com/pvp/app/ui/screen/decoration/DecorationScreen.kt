@@ -53,15 +53,13 @@ private fun screens() =
     )
 
 @Composable
-private fun Apply(
-    model: DecorationViewModel = hiltViewModel(),
-) {
+private fun Apply(model: DecorationViewModel = hiltViewModel()) {
     val state by model.state.collectAsStateWithLifecycle()
     val holdersOwned by remember(state.holders) { mutableStateOf(state.holders.filter { it.owned }) }
 
     StateHandler(
         resetState = model::resetScreenState,
-        state = state.state,
+        state = state.state
     )
 
     Column(
@@ -134,7 +132,7 @@ fun DecorationScreen(modifier: Modifier) {
 @Composable
 private fun StateHandler(
     resetState: () -> Unit,
-    state: DecorationScreenState,
+    state: DecorationScreenState
 ) {
     if (state is DecorationScreenState.Loading) {
         ProgressIndicatorWithinDialog()
@@ -190,9 +188,7 @@ private fun StateHandler(
 }
 
 @Composable
-private fun Store(
-    model: DecorationViewModel = hiltViewModel(),
-) {
+private fun Store(model: DecorationViewModel = hiltViewModel()) {
     var item by remember { mutableStateOf<DecorationHolder?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     val state by model.state.collectAsStateWithLifecycle()
@@ -203,7 +199,7 @@ private fun Store(
 
     StateHandler(
         resetState = model::resetScreenState,
-        state = state.state,
+        state = state.state
     )
 
     Column(

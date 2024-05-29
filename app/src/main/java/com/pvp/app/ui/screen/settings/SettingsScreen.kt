@@ -255,9 +255,7 @@ private fun SettingHealthConnectPermissions(context: Context) {
 }
 
 @Composable
-private fun GoogleCalendarSynchronizer(
-    model: SettingsViewModel = hiltViewModel(),
-) {
+private fun GoogleCalendarSynchronizer(model: SettingsViewModel = hiltViewModel()) {
     var intent by remember { mutableStateOf<Intent?>(null) }
 
     val showSnackbar = LocalShowSnackbar.current
