@@ -308,7 +308,7 @@
     <string name="settings_setting_theme_label_light">Light</string>
     <string name="settings_setting_theme_title">Theme</string>
     <string name="statistics_average_tasks_completed">Average tasks completed</string>
-    <string name="statistics_average_points">Average points</string>
+    <string name="statistics_average_points">Average points per day</string>
     <string name="statistics_top3_frequent_activities">Top 3 frequent activities</string>
     <string name="statistics_unique_activities">Unique activities</string>
     <string name="surveys_activities_other_empty">No other sport activities</string>

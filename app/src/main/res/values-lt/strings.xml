@@ -296,7 +296,7 @@
     <string name="settings_setting_theme_label_light">Šviesi</string>
     <string name="settings_setting_theme_title">Tema</string>
     <string name="statistics_average_tasks_completed">Vidutiniškai įvykdyta užduočių</string>
-    <string name="statistics_average_points">Vidutiniškai gauta taškų</string>
+    <string name="statistics_average_points">Vidutiniškai gauta taškų per dieną</string>
     <string name="statistics_top3_frequent_activities">Top 3 dažniausios veiklos</string>
     <string name="statistics_unique_activities">Unikalios veiklos</string>
     <string name="surveys_activities_other_empty">Nebėra parinkčių</string>
