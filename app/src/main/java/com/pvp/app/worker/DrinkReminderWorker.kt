@@ -6,6 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
+import com.pvp.app.R
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
@@ -45,7 +46,10 @@ class DrinkReminderWorker @AssistedInject constructor(
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val sharedPreferences = context.getSharedPreferences(
+        PREFS_NAME,
+        Context.MODE_PRIVATE
+    )
     private var scheduledNotificationIds = mutableListOf<Int>()
 
     init {
@@ -62,7 +66,10 @@ class DrinkReminderWorker @AssistedInject constructor(
         val stateFlow = settingService
             .get(Setting.Notifications.CupVolumeMl)
             .combine(settingService.get(Setting.Notifications.HydrationNotificationsEnabled)) { volume, isEnabled ->
-                Pair(volume, isEnabled)
+                Pair(
+                    volume,
+                    isEnabled
+                )
             }
             .combine(userService.user) { (volume, isEnabled), user ->
                 DrinkReminderState(
@@ -101,7 +108,10 @@ class DrinkReminderWorker @AssistedInject constructor(
         val endHour = configuration.intervalDrinkReminder.second
         val totalDuration = Duration.ofHours((endHour - startHour).toLong())
         val intervalDuration = totalDuration.dividedBy(count.toLong())
-        var notificationTime = LocalTime.of(startHour, 0)
+        var notificationTime = LocalTime.of(
+            startHour,
+            0
+        )
 
         repeat(count) {
             val currentCupVolume = if (it == initialCount && remainder > 0) remainder else cupVolume
@@ -109,11 +119,13 @@ class DrinkReminderWorker @AssistedInject constructor(
 
             val notification = Notification(
                 channel = NotificationChannel.DrinkReminder,
-                title = "Hydration Reminder 💦",
-                text = "Time for a cup of water ($currentCupVolume ml)! 😋 " +
-                        "Today's progress: " +
-                        "${"%.1f".format(cumulativeVolume / 1000.0)}/" +
-                        "${"%.1f".format(recommendedIntake / 1000.0)} liters"
+                title = applicationContext.getString(R.string.worker_hydration_notification_title),
+                text = applicationContext.getString(
+                    R.string.worker_hydration_notification_description,
+                    currentCupVolume,
+                    cumulativeVolume / 1000.0,
+                    recommendedIntake / 1000.0
+                )
             )
 
             scheduledNotificationIds.add(notification.id)
@@ -146,7 +158,8 @@ class DrinkReminderWorker @AssistedInject constructor(
             .putString(
                 NOTIFICATION_IDS_KEY,
                 notificationIdsJson
-            ).apply()
+            )
+            .apply()
     }
 
     private fun getScheduledNotificationIds(): MutableList<Int> {

@@ -3,6 +3,7 @@
 package com.pvp.app.ui.screen.friends
 
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -49,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.pvp.app.R
 import com.pvp.app.ui.common.ButtonWithDialog
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.TabSelector
@@ -63,13 +66,16 @@ import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
 import com.pvp.app.ui.router.Routes
 
-private enum class SortingType {
-    DISTANCE,
-    EXPERIENCE,
-    GOALS,
-    POINTS,
-    STEPS,
-    TASKS,
+private enum class SortingType(@StringRes val titleId: Int) {
+    DISTANCE(R.string.friends_sort_type_distance),
+    EXPERIENCE(R.string.friends_sort_type_experience),
+    GOALS(R.string.friends_sort_type_goals),
+    POINTS(R.string.friends_sort_type_points),
+    STEPS(R.string.friends_sort_type_steps),
+    TASKS(R.string.friends_sort_type_tasks);
+
+    val title: @Composable () -> String
+        get() = { stringResource(titleId) }
 }
 
 @Composable
@@ -149,17 +155,17 @@ fun FriendsScreen(
                     )
                 },
                 contentPadding = PaddingValues(2.dp),
-                dialogTitle = { Text("Add friend") },
+                dialogTitle = { Text(stringResource(R.string.friends_button_add_friend)) },
                 dialogContent = {
                     OutlinedTextField(
                         value = friendEmail.value,
                         onValueChange = { friendEmail.value = it },
-                        label = { Text("Friend's email") },
+                        label = { Text(stringResource(R.string.friends_button_add_friend_input_label)) },
                     )
                 },
                 confirmButtonContent = {
                     Text(
-                        "Add",
+                        stringResource(R.string.action_add),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -195,7 +201,7 @@ fun FriendsScreen(
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                "Requests",
+                                stringResource(R.string.friends_button_requests),
                                 color = MaterialTheme.colorScheme.surface,
                                 style = MaterialTheme.typography.titleMedium
                             )
@@ -206,7 +212,7 @@ fun FriendsScreen(
                         horizontal = 10.dp,
                         vertical = 2.dp
                     ),
-                    dialogTitle = { Text("Friend requests") },
+                    dialogTitle = { Text(stringResource(R.string.friends_button_request_dialog_title)) },
                     dialogContent = {
                         var tab by remember { mutableIntStateOf(0) }
 
@@ -214,8 +220,8 @@ fun FriendsScreen(
                             TabSelector(
                                 onSelect = { tab = it },
                                 tabs = listOf(
-                                    "Received",
-                                    "Sent"
+                                    stringResource(R.string.friends_button_request_dialog_tab_type_received),
+                                    stringResource(R.string.friends_button_request_dialog_tab_type_sent)
                                 ),
                                 withShadow = false
                             )
@@ -226,7 +232,8 @@ fun FriendsScreen(
                                 0 -> {
                                     RequestList(
                                         requests = friendObject.receivedRequests,
-                                        requestTitle = "received",
+                                        requestTitleEmpty = stringResource(R.string.friends_button_request_dialog_empty_received),
+                                        isReceived = true,
                                         acceptAction = { request -> model.accept(request) },
                                         denyAction = { request -> model.deny(request) }
                                     )
@@ -235,7 +242,7 @@ fun FriendsScreen(
                                 1 -> {
                                     RequestList(
                                         requests = friendObject.sentRequests,
-                                        requestTitle = "sent",
+                                        requestTitleEmpty = stringResource(R.string.friends_button_request_dialog_empty_sent),
                                         acceptAction = { },
                                         denyAction = { request -> model.cancel(request) }
                                     )
@@ -262,37 +269,32 @@ fun FriendsScreen(
                     )
                 },
                 contentPadding = PaddingValues(2.dp),
-                dialogTitle = { Text("Sort by") },
+                dialogTitle = { Text(stringResource(R.string.friends_sort_by)) },
                 dialogContent = {
                     Column {
-                        SortingType
-                            .entries
-                            .forEach { type ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.clickable(
-                                        onClick = {
-                                            sortingTypeTemp.value = type
-                                        }
-                                    )
-                                ) {
-                                    RadioButton(
-                                        selected = sortingTypeTemp.value == type,
-                                        onClick = {
-                                            sortingTypeTemp.value = type
-                                        }
-                                    )
+                        SortingType.entries.forEach { type ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.clickable(
+                                    onClick = {
+                                        sortingTypeTemp.value = type
+                                    }
+                                )
+                            ) {
+                                RadioButton(
+                                    selected = sortingTypeTemp.value == type,
+                                    onClick = {
+                                        sortingTypeTemp.value = type
+                                    }
+                                )
 
-                                    Text(
-                                        text = type
-                                            .name
-                                            .toLowerCase()
-                                            .capitalize(),
-                                        modifier = Modifier.padding(start = 8.dp),
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                }
+                                Text(
+                                    text = type.title(),
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
                             }
+                        }
                     }
                 },
                 onConfirm = { sortingType.value = sortingTypeTemp.value },
@@ -302,7 +304,10 @@ fun FriendsScreen(
         }
 
         Text(
-            "All friends - ${friends.size}",
+            stringResource(
+                R.string.friends_size,
+                friends.size
+            ),
             modifier = Modifier.padding(vertical = 8.dp),
             style = MaterialTheme.typography.titleMedium
         )
@@ -418,7 +423,8 @@ private fun ListItemContent(
 @Composable
 private fun RequestList(
     requests: List<String>,
-    requestTitle: String,
+    requestTitleEmpty: String,
+    isReceived: Boolean = false,
     acceptAction: (String) -> Unit,
     denyAction: (String) -> Unit
 ) {
@@ -427,7 +433,7 @@ private fun RequestList(
     Column(modifier = Modifier.verticalScroll(scrollState)) {
         if (requests.isEmpty()) {
             Text(
-                "No $requestTitle requests",
+                requestTitleEmpty,
                 fontStyle = FontStyle.Italic,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -453,7 +459,7 @@ private fun RequestList(
                             .weight(1f)
                     )
 
-                    if (requestTitle == "received") {
+                    if (isReceived) {
                         Icon(
                             imageVector = Icons.Outlined.CheckCircle,
                             contentDescription = "Accept request",

@@ -102,7 +102,8 @@ private fun Footer(
     modifier: Modifier = Modifier,
     onSignOut: () -> Unit
 ) {
-    val signOut = stringResource(R.string.screen_profile_button_sign_out)
+    val localeButton = stringResource(R.string.drawer_button_sign_out)
+    val localeConfirmation = stringResource(R.string.drawer_button_sign_out_confirmation)
 
     Column(modifier = modifier) {
         ButtonConfirm(
@@ -115,13 +116,13 @@ private fun Footer(
                 .fillMaxSize(),
             content = {
                 Text(
-                    text = signOut,
+                    text = localeButton,
                     color = MaterialTheme.colorScheme.surface
                 )
             },
             contentAlignment = Alignment.BottomEnd,
-            confirmationButtonContent = { Text(text = signOut) },
-            confirmationTitle = { Text(text = "Are you sure you want to sign out?") },
+            confirmationButtonContent = { Text(text = localeButton) },
+            confirmationTitle = { Text(text = localeConfirmation) },
             onConfirm = { onSignOut() },
             shape = MaterialTheme.shapes.extraLarge
         )
@@ -130,6 +131,9 @@ private fun Footer(
 
 @Composable
 private fun Header(modifier: Modifier = Modifier) {
+    val localeApplication = stringResource(R.string.application_name)
+    val localeMotto = stringResource(R.string.drawer_application_motto)
+
     Row(
         horizontalArrangement = Arrangement.Start,
         modifier = modifier,
@@ -138,12 +142,12 @@ private fun Header(modifier: Modifier = Modifier) {
         Column {
             Text(
                 style = MaterialTheme.typography.displaySmall,
-                text = "Calencup"
+                text = localeApplication
             )
 
             Text(
                 style = MaterialTheme.typography.titleLarge,
-                text = "Schedule Your Day"
+                text = localeMotto
             )
         }
     }
@@ -162,7 +166,7 @@ fun DrawerScreen(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            val textSignOut = stringResource(R.string.screen_profile_toast_error)
+            val textSignOut = stringResource(R.string.drawer_button_sign_out_error)
 
             Header(
                 Modifier

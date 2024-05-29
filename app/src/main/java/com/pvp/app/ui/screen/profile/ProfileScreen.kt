@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,9 +66,6 @@ import com.pvp.app.ui.common.orInDarkTheme
 import com.pvp.app.ui.router.Route
 import kotlinx.coroutines.launch
 
-private val ACTIVITIES = SportActivity.entries.map { it.title }
-private val INGREDIENTS = Ingredient.entries.map { it.title }
-
 @Composable
 private fun AccountDeleteButton(
     viewModel: ProfileViewModel = hiltViewModel(),
@@ -76,7 +74,9 @@ private fun AccountDeleteButton(
     val username = state.user.username
     var input by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
-
+    val localeError = stringResource(R.string.profile_button_delete_error)
+    val localeErrorIncorrect = stringResource(R.string.profile_button_delete_error_incorrect)
+    val localeSuccess = stringResource(R.string.profile_button_delete_success)
     val showSnackbar = LocalShowSnackbar.current
 
     Column(
@@ -110,19 +110,24 @@ private fun AccountDeleteButton(
 
                     Text(
                         textAlign = TextAlign.Center,
-                        text = "Delete Account"
+                        text = stringResource(R.string.profile_button_delete)
                     )
                 }
             },
-            confirmationButtonContent = { Text("Delete Account") },
-            confirmationTitle = { Text("Are you sure you want to delete your account?") },
+            confirmationButtonContent = { Text(stringResource(R.string.action_confirm)) },
+            confirmationTitle = { Text(stringResource(R.string.profile_button_delete_confirm_title)) },
             confirmationDescription = {
                 Column {
-                    Text("Your account will be permanently deleted and recovery will not be possible.")
+                    Text(stringResource(R.string.profile_button_delete_confirm_description))
 
                     Spacer(modifier = Modifier.height(30.dp))
 
-                    Text("To confirm, please enter your username \"$username\" in the box below:")
+                    Text(
+                        stringResource(
+                            R.string.profile_button_delete_confirm_input_label,
+                            username
+                        )
+                    )
 
                     Spacer(modifier = Modifier.height(15.dp))
 
@@ -143,15 +148,15 @@ private fun AccountDeleteButton(
                         val result = viewModel.deleteAccount()
 
                         if (result.isSuccess) {
-                            showSnackbar("Account deleted successfully")
+                            showSnackbar(localeSuccess)
                         } else {
-                            showSnackbar("An error occurred while deleting the account")
+                            showSnackbar(localeError)
                         }
                     }
                 } else {
                     input = ""
 
-                    showSnackbar("Incorrect username")
+                    showSnackbar(localeErrorIncorrect)
                 }
             }
         )
@@ -213,7 +218,11 @@ private fun Initials(
             },
             username = userName,
             validate = { it.length in lengthMin..lengthMax },
-            errorMessage = "Username must be between $lengthMin and $lengthMax characters long"
+            errorMessage = stringResource(
+                R.string.input_field_username_error_length,
+                lengthMin,
+                lengthMax
+            )
         )
 
         Text(
@@ -270,8 +279,15 @@ fun ProfileScreen(
 
         Column(modifier = Modifier.fillMaxWidth()) {
             if (!state.isLoading) {
+                val showSnackbar = LocalShowSnackbar.current
+                val localeSuccess = stringResource(R.string.input_field_username_success)
+
                 Initials(
-                    onUsernameChange = { viewModel.update { u -> u.username = it } },
+                    onUsernameChange = {
+                        viewModel.update { u -> u.username = it }
+
+                        showSnackbar(localeSuccess)
+                    },
                     state = state
                 )
 
@@ -308,22 +324,25 @@ private fun Properties(
     onUpdateMass: (Int) -> Unit,
     state: ProfileState
 ) {
+    val activities = SportActivity.entries.associateBy { it.title() }
+    val context = LocalContext.current
+
     var activitiesSelected = remember(state.user.activities) {
-        state.user.activities.map { it.title }
+        state.user.activities.map { context.getString(it.titleId) }
     }
 
     var activitiesSelectedEdit by remember(activitiesSelected) { mutableStateOf(activitiesSelected) }
-    var activitiesUnselected by remember(activitiesSelected) { mutableStateOf(ACTIVITIES - activitiesSelected.toSet()) }
+    var activitiesUnselected by remember(activitiesSelected) { mutableStateOf(activities.keys.toList() - activitiesSelected.toSet()) }
     val height by remember(state.user.height) { mutableIntStateOf(state.user.height) }
+    val ingredients = Ingredient.entries.associateBy { it.title() }
 
     var ingredientsSelected = remember(state.user.ingredients) {
-        state.user.ingredients.map { it.title }
+        state.user.ingredients.map { context.getString(it.titleId) }
     }
 
     var ingredientsSelectedEdit by remember(ingredientsSelected) { mutableStateOf(ingredientsSelected) }
-    var ingredientsUnselectedEdit by remember(ingredientsSelected) { mutableStateOf(INGREDIENTS - ingredientsSelected.toSet()) }
+    var ingredientsUnselectedEdit by remember(ingredientsSelected) { mutableStateOf(ingredients.keys.toList() - ingredientsSelected.toSet()) }
     val mass by remember(state.user.mass) { mutableIntStateOf(state.user.mass) }
-
     val showSnackbar = LocalShowSnackbar.current
 
     Column(
@@ -336,101 +355,134 @@ private fun Properties(
             ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        val localeMeasurementKilograms = stringResource(R.string.measurement_kg)
+        val localeSuccessMass = stringResource(R.string.input_field_mass_success)
+
         EditablePickerItem(
-            label = "Mass",
-            value = mass,
-            valueLabel = "kg",
+            editLabel = stringResource(R.string.input_field_mass_edit_label),
             items = model.rangeMass,
-            itemsLabels = "kg",
+            itemsLabels = localeMeasurementKilograms,
+            label = stringResource(R.string.input_field_mass_label),
             onValueChange = {
                 onUpdateMass(it)
 
-                showSnackbar("Your mass has been updated")
-
+                showSnackbar(localeSuccessMass)
             },
+            value = mass,
+            valueLabel = localeMeasurementKilograms
         )
 
+        val localeMeasurementCentimeters = stringResource(R.string.measurement_cm)
+        val localeSuccessHeight = stringResource(R.string.input_field_height_success)
+
         EditablePickerItem(
-            label = "Height",
-            value = height,
-            valueLabel = "cm",
+            editLabel = stringResource(R.string.input_field_height_edit_label),
             items = model.rangeHeight,
-            itemsLabels = "cm",
+            itemsLabels = localeMeasurementCentimeters,
+            label = stringResource(R.string.input_field_height_label),
             onValueChange = {
                 onUpdateHeight(it)
 
-                showSnackbar("Your height has been updated")
+                showSnackbar(localeSuccessHeight)
             },
+            value = height,
+            valueLabel = localeMeasurementCentimeters
         )
 
+
         WeeklyActivitiesItem(
-            title = "Your weekly activities",
-            activities = state.user.weeklyActivities.map { it.title }
+            title = stringResource(R.string.input_field_weekly_activities_label),
+            activities = state.user.weeklyActivities.map { it.title() }
+        )
+
+        val localeFilterActivitiesSuccess = stringResource(
+            R.string.input_field_filter_sport_activities_success
+        )
+
+        val localeFilterActivitiesOtherEmptyText = stringResource(
+            R.string.input_field_filter_sport_activities_other_empty
+        )
+
+        val localeFilterActivitiesSelectedEmptyText = stringResource(
+            R.string.input_field_filter_sport_activities_selected_empty
         )
 
         FiltersItem(
             dialogContent = {
                 FiltersDialog(
-                    boxTitle = "Activities that I like",
                     onValueChange = { selected, unselected ->
                         activitiesSelectedEdit = selected
                         activitiesUnselected = unselected
                     },
                     selectedFilters = activitiesSelectedEdit,
-                    title = "activities",
-                    unselectedFilters = activitiesUnselected
+                    unselectedFilters = activitiesUnselected,
+                    textOtherEmpty = localeFilterActivitiesOtherEmptyText,
+                    textSelectedEmpty = localeFilterActivitiesSelectedEmptyText,
+                    titleOther = stringResource(R.string.input_field_filter_sport_activities_other_label),
+                    titleSelected = stringResource(R.string.input_field_filter_sport_activities_selected_label)
                 )
             },
-            dialogTitle = {
-                Text("Editing preferable sport activities")
-            },
-            filtersType = "activities",
+            dialogTitle = { Text(stringResource(R.string.input_field_filter_sport_activities_edit_label)) },
             onConfirmClick = {
                 activitiesSelected = activitiesSelectedEdit
 
-                onUpdateActivities(activitiesSelectedEdit.map { SportActivity.fromTitle(it) })
+                onUpdateActivities(activitiesSelectedEdit.mapNotNull { activities[it] })
 
-                showSnackbar("Your sport activities have been updated")
+                showSnackbar(localeFilterActivitiesSuccess)
             },
             onDismiss = {
                 activitiesSelectedEdit = activitiesSelected
-                activitiesUnselected = ACTIVITIES - activitiesSelected.toSet()
+                activitiesUnselected = activities.keys.toList() - activitiesSelected.toSet()
             },
             selectedFilters = activitiesSelected,
-            title = "Sport activities that you like"
+            textOtherEmpty = localeFilterActivitiesOtherEmptyText,
+            textSelectedEmpty = localeFilterActivitiesSelectedEmptyText,
+            title = stringResource(R.string.input_field_filter_sport_activities_label)
+        )
+
+        val localeFilterIngredientsSuccess = stringResource(
+            R.string.input_field_filter_ingredients_success
+        )
+
+        val localeFilterIngredientsOtherEmptyText = stringResource(
+            R.string.input_field_filter_ingredients_other_empty
+        )
+
+        val localeFilterIngredientsSelectedEmptyText = stringResource(
+            R.string.input_field_filter_ingredients_selected_empty
         )
 
         FiltersItem(
             dialogContent = {
                 FiltersDialog(
-                    boxTitle = "Ingredients that I can't take",
                     onValueChange = { selected, unselected ->
                         ingredientsSelectedEdit = selected
                         ingredientsUnselectedEdit = unselected
                     },
                     selectedFilters = ingredientsSelectedEdit,
-                    title = "ingredients",
-                    unselectedFilters = ingredientsUnselectedEdit
+                    unselectedFilters = ingredientsUnselectedEdit,
+                    textOtherEmpty = localeFilterIngredientsOtherEmptyText,
+                    textSelectedEmpty = localeFilterIngredientsSelectedEmptyText,
+                    titleOther = stringResource(R.string.input_field_filter_ingredients_other_label),
+                    titleSelected = stringResource(R.string.input_field_filter_ingredients_selected_label)
                 )
             },
-            dialogTitle = {
-                Text("Editing ingredients that you can't take")
-            },
-            filtersType = "ingredients",
+            dialogTitle = { Text(stringResource(R.string.input_field_filter_ingredients_edit_label)) },
             onConfirmClick = {
                 ingredientsSelected = ingredientsSelectedEdit
 
-                onUpdateIngredients(ingredientsSelectedEdit.mapNotNull { Ingredient.fromTitle(it) })
+                onUpdateIngredients(ingredientsSelectedEdit.mapNotNull { ingredients[it] })
 
-                showSnackbar("Your ingredients have been updated")
-
+                showSnackbar(localeFilterIngredientsSuccess)
             },
             onDismiss = {
                 ingredientsSelectedEdit = ingredientsSelected
-                ingredientsUnselectedEdit = INGREDIENTS - ingredientsSelected.toSet()
+                ingredientsUnselectedEdit = ingredients.keys.toList() - ingredientsSelected.toSet()
             },
             selectedFilters = ingredientsSelected,
-            title = "Ingredients that you can't take"
+            textOtherEmpty = localeFilterIngredientsOtherEmptyText,
+            textSelectedEmpty = localeFilterIngredientsSelectedEmptyText,
+            title = stringResource(R.string.input_field_filter_ingredients_label)
         )
     }
 }
@@ -456,7 +508,7 @@ private fun Username(
     onSave: (String) -> Unit,
     username: String,
     validate: (String) -> Boolean = { false },
-    errorMessage: String = "Invalid input"
+    errorMessage: String
 ) {
     var usernameEdit by remember { mutableStateOf(username) }
 
@@ -471,13 +523,13 @@ private fun Username(
         )
 
         IconButtonWithDialog(
-            confirmButtonContent = { Text("Save") },
+            confirmButtonContent = { Text(stringResource(R.string.action_save)) },
             confirmButtonEnabled = validate(usernameEdit),
-            dismissButtonContent = { Text("Cancel") },
+            dismissButtonContent = { Text(stringResource(R.string.action_cancel)) },
             dialogContent = {
                 Column {
                     OutlinedTextField(
-                        label = { Text("Username") },
+                        label = { Text(stringResource(R.string.input_field_username_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         onValueChange = { usernameEdit = it },
                         value = usernameEdit
@@ -489,7 +541,7 @@ private fun Username(
                     )
                 }
             },
-            dialogTitle = { Text("Editing username") },
+            dialogTitle = { Text(stringResource(R.string.input_field_username_edit_label)) },
             icon = Icons.Outlined.Edit,
             iconSize = 30.dp,
             iconDescription = "Edit Icon Button",
@@ -545,7 +597,7 @@ fun WeeklyActivitiesItem(
 
             FiltersBox(
                 filters = activities,
-                emptyBoxText = "No weekly activities have been assigned yet",
+                emptyBoxText = stringResource(R.string.input_field_weekly_activities_unassigned),
                 cardsClickable = false
             )
         }

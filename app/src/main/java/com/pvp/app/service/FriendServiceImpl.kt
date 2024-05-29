@@ -1,12 +1,14 @@
 package com.pvp.app.service
 
+import android.content.Context
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
+import com.pvp.app.R
 import com.pvp.app.api.FriendService
-import com.pvp.app.api.UserService
 import com.pvp.app.model.FriendObject
 import com.pvp.app.model.Friends
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -14,7 +16,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class FriendServiceImpl @Inject constructor(
-    private val userService: UserService,
+    @ApplicationContext private val context: Context,
     private val database: FirebaseFirestore
 ) : FriendService {
 
@@ -74,7 +76,11 @@ class FriendServiceImpl @Inject constructor(
                 try {
                     user = userDoc.toObject(FriendObject::class.java)
                 } catch (e: Exception) {
-                    Log.e("FriendServiceImpl", "Error parsing user document", e)
+                    Log.e(
+                        "FriendServiceImpl",
+                        "Error parsing user document",
+                        e
+                    )
                 }
 
                 if (user != null) {
@@ -135,18 +141,24 @@ class FriendServiceImpl @Inject constructor(
         friendEmail: String
     ): String {
         if (email == friendEmail) {
-            return "You are always your very best friend!"
+            return context.getString(R.string.friends_error_invite_self)
         }
 
         val friend = get(friendEmail)
             .first()!!
 
         if (friendObject.friends.any { it.email == friendEmail }) {
-            return "$friendEmail is already your friend"
+            return context.getString(
+                R.string.friends_error_already_friend,
+                friendEmail
+            )
         }
 
         if (friendEmail in friendObject.sentRequests) {
-            return "Friend request already sent to $friendEmail"
+            return context.getString(
+                R.string.friends_error_already_sent_request,
+                friendEmail
+            )
         }
 
         if (friendEmail in friendObject.receivedRequests) {
@@ -156,7 +168,7 @@ class FriendServiceImpl @Inject constructor(
                 friendEmail
             )
 
-            return "Both of you want to be friends! Request accepted!"
+            return context.getString(R.string.friends_success_already_received_request)
         }
 
         val friendNew = friend.copy(
@@ -177,7 +189,7 @@ class FriendServiceImpl @Inject constructor(
             email
         )
 
-        return "Friend request sent!"
+        return context.getString(R.string.friends_success_sent)
     }
 
     override suspend fun acceptFriendRequest(
@@ -187,7 +199,7 @@ class FriendServiceImpl @Inject constructor(
     ): String {
         val friend = get(friendEmail)
             .first()
-            ?: return "Friend not found"
+            ?: return context.getString(R.string.friends_error_not_found)
 
         val friendNew = friend.copy(
             sentRequests = friend.sentRequests - email,
@@ -209,7 +221,7 @@ class FriendServiceImpl @Inject constructor(
             email
         )
 
-        return "Friend request accepted!"
+        return context.getString(R.string.friends_success_request_accepted)
     }
 
     override suspend fun denyFriendRequest(
@@ -219,7 +231,7 @@ class FriendServiceImpl @Inject constructor(
     ): String {
         val friend = get(friendEmail)
             .first()
-            ?: return "Friend not found"
+            ?: return context.getString(R.string.friends_error_not_found)
 
         val friendNew = friend.copy(
             sentRequests = friend.sentRequests - email
@@ -239,7 +251,7 @@ class FriendServiceImpl @Inject constructor(
             email
         )
 
-        return "Friend request denied!"
+        return context.getString(R.string.friends_success_request_denied)
     }
 
     override suspend fun cancelSentRequest(
@@ -249,7 +261,7 @@ class FriendServiceImpl @Inject constructor(
     ): String {
         val friend = get(friendEmail)
             .first()
-            ?: return "Friend not found"
+            ?: return context.getString(R.string.friends_error_not_found)
 
         val friendNew = friend.copy(
             receivedRequests = friend.receivedRequests - email
@@ -269,6 +281,6 @@ class FriendServiceImpl @Inject constructor(
             email
         )
 
-        return "Friend request cancelled!"
+        return context.getString(R.string.friends_success_request_canceled)
     }
 }

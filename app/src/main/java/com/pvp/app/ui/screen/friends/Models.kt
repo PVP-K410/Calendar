@@ -30,8 +30,6 @@ sealed class FriendScreenState {
     data object Finished : FriendScreenState()
 
     data object Loading : FriendScreenState()
-
-    data object NoOperation : FriendScreenState()
 }
 
 data class FriendsState(

@@ -2,6 +2,7 @@
 
 package com.pvp.app.ui.screen.survey
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.Configuration
@@ -11,6 +12,7 @@ import com.pvp.app.model.SportActivity
 import com.pvp.app.model.Survey
 import com.pvp.app.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SurveyViewModel @Inject constructor(
     private val configuration: Configuration,
+    @ApplicationContext private val context: Context,
     private val userService: UserService
 ) : ViewModel() {
 
@@ -76,13 +79,27 @@ class SurveyViewModel @Inject constructor(
 
             state.current ?: return@launch
 
-            userService.merge(
-                state.user.copy(
-                    activities = if (isActivities) filters.map { SportActivity.fromTitle(it) } else state.user.activities,
-                    ingredients = if (!isActivities) filters.mapNotNull { Ingredient.fromTitle(it) } else state.user.ingredients,
-                    surveys = state.user.surveys + state.current
+            if (isActivities) {
+                val pairs = SportActivity.entries.associateBy { context.getString(it.titleId) }
+
+                userService.merge(
+                    state.user.copy(
+                        activities = filters.mapNotNull { pairs[it] },
+                        ingredients = state.user.ingredients,
+                        surveys = state.user.surveys + state.current
+                    )
                 )
-            )
+            } else {
+                val pairs = Ingredient.entries.associateBy { context.getString(it.titleId) }
+
+                userService.merge(
+                    state.user.copy(
+                        activities = state.user.activities,
+                        ingredients = filters.mapNotNull { pairs[it] },
+                        surveys = state.user.surveys + state.current
+                    )
+                )
+            }
         }
     }
 }

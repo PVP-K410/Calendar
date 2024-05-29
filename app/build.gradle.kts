@@ -32,6 +32,13 @@ android {
         versionCode = 1
         versionName = "dev-1.0.0.0"
 
+        resourceConfigurations.addAll(
+            listOf(
+                "en",
+                "lt"
+            )
+        )
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -111,6 +118,7 @@ android {
 dependencies {
     // Development
     implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation(platform("androidx.compose:compose-bom:2024.05.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")

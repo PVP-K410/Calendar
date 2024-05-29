@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.permission.HealthPermission
@@ -35,6 +36,7 @@ import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import com.pvp.app.R
 import com.pvp.app.common.TimeUtil.asString
 import java.time.Duration
 import java.time.LocalDate
@@ -68,7 +70,7 @@ fun CalorieCounter(
     )
 
     Text(
-        text = "%.2f kCal".format(calories / 1000),
+        text = "%.2f ".format(calories / 1000) + stringResource(R.string.measurement_kcal),
         style = MaterialTheme.typography.titleSmall,
         modifier = Modifier.padding(start = 8.dp)
     )
@@ -104,7 +106,7 @@ fun HeartRateCounterAverage(
     Text(
         modifier = Modifier.padding(start = 8.dp),
         style = MaterialTheme.typography.titleSmall,
-        text = if (heartRate > 0) "$heartRate" else "-"
+        text = if (heartRate > 0) "$heartRate bpm" else "-"
     )
 }
 
@@ -138,7 +140,7 @@ fun SleepDurationCounter(
     Text(
         modifier = Modifier.padding(start = 8.dp),
         style = MaterialTheme.typography.titleSmall,
-        text = if (!duration.equals(Duration.ZERO)) duration.asString() else "- hr - m"
+        text = if (!duration.equals(Duration.ZERO)) duration.asString() else "-"
     )
 }
 

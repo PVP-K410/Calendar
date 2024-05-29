@@ -2,9 +2,11 @@
 
 package com.pvp.app.ui.screen.friends
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pvp.app.R
 import com.pvp.app.api.ActivityService
 import com.pvp.app.api.DecorationService
 import com.pvp.app.api.FriendService
@@ -15,6 +17,7 @@ import com.pvp.app.common.FlowUtil.firstOr
 import com.pvp.app.common.FlowUtil.flattenFlow
 import com.pvp.app.model.ActivityEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +38,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FriendsViewModel @Inject constructor(
     private val activityService: ActivityService,
+    @ApplicationContext private val context: Context,
     private val decorationService: DecorationService,
     private val friendService: FriendService,
     private val goalService: GoalService,
@@ -142,7 +146,7 @@ class FriendsViewModel @Inject constructor(
     fun add(friendEmail: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if (friendEmail.isEmpty()) {
-                toastMessage.value = "Please enter an email"
+                toastMessage.value = context.getString(R.string.friends_error_input_empty)
 
                 return@launch
             }
@@ -159,7 +163,10 @@ class FriendsViewModel @Inject constructor(
                 .firstOrNull()
 
             if (friendUser == null) {
-                toastMessage.value = "User with email $friendEmail does not exist"
+                toastMessage.value = context.getString(
+                    R.string.friends_error_not_exists,
+                    friendEmail
+                )
 
                 return@launch
             }
@@ -354,7 +361,7 @@ class FriendsViewModel @Inject constructor(
                 friendEmail
             )
 
-            toastMessage.value = "Friend removed successfully!"
+            toastMessage.value = context.getString(R.string.friends_success_remove)
         }
     }
 

@@ -158,10 +158,11 @@ class NotificationServiceImpl @Inject constructor(
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val notificationAndroid = NotificationCompat.Builder(
-            context,
-            notification.channel.channelId
-        )
+        val notificationAndroid = NotificationCompat
+            .Builder(
+                context,
+                notification.channel.channelId
+            )
             .setContentTitle(notification.title)
             .setContentText(notification.text)
             .setSmallIcon(R.drawable.logo)
@@ -228,9 +229,13 @@ class NotificationServiceImpl @Inject constructor(
 
         return Notification(
             channel = NotificationChannel.TaskReminder,
-            title = "Task Reminder",
-            text = "Task '${task.title}' is in $reminderMinutes minute" +
-                    "${if (reminderMinutes > 1) "s" else ""}...",
+            title = context.getString(R.string.tasks_notification_reminder_title),
+            text = context.getString(
+                R.string.tasks_notification_reminder_description,
+                task.title,
+                reminderMinutes,
+                context.getString(R.string.measurement_minutes)
+            ),
             dateTime = reminderDateTime
         )
     }

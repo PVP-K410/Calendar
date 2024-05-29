@@ -27,11 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.R
 import com.pvp.app.common.TimeUtil.asString
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
@@ -174,7 +176,7 @@ private fun TaskCardContentMeal(task: CustomMealTask) {
             .fillMaxWidth()
             .padding(start = 8.dp),
         overflow = TextOverflow.Ellipsis,
-        text = "Recipe: " + task.recipe,
+        text = task.recipe,
         textAlign = TextAlign.Left
     )
 }
@@ -224,7 +226,7 @@ private fun TaskCardContentSport(task: SportTask) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 8.dp),
-                text = "${task.distance} km",
+                text = "${task.distance} " + stringResource(R.string.measurement_km),
                 textAlign = TextAlign.Left
             )
         }
@@ -256,12 +258,12 @@ private fun TaskCardContentSport(task: SportTask) {
 
         Text(
             modifier = Modifier.padding(start = 8.dp),
-            text = task.activity.title,
+            text = task.activity.title(),
             textAlign = TextAlign.Left
         )
 
         if (task.activity.supportsDistanceMetrics) {
-            InfoTooltip(tooltipText = "This task is likely to be autocompleted")
+            InfoTooltip(tooltipText = stringResource(R.string.activity_tooltip_autocomplete))
         }
     }
 }
