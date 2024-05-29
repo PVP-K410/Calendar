@@ -10,7 +10,6 @@ data class User(
     var decorationsApplied: List<String> = emptyList(),
     var decorationsOwned: List<String> = emptyList(),
     var diet: Diet = Diet.Carbohydrates,
-    var lastMealPlanGeneratedWeek: Int = 0,
     var hasDisability: Boolean = false,
     val email: String = "",
     var experience: Int = 0,
@@ -18,6 +17,7 @@ data class User(
     var ingredients: List<Ingredient> = emptyList(),
     @Contextual
     var lastActivitySync: Timestamp? = null,
+    var lastMealPlanGeneratedWeek: Int = 0,
     var level: Int = 0,
     var mass: Int = 0,
     var points: Int = 0,
