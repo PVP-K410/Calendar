@@ -252,6 +252,7 @@ fun EditableTextItem(
 
 @Composable
 fun <T> EditablePickerItem(
+    editLabel: String,
     label: String,
     items: List<T>,
     itemsLabel: @Composable (T) -> String,
@@ -273,7 +274,7 @@ fun <T> EditablePickerItem(
                 )
             }
         },
-        dialogTitle = { Text("Editing $label") },
+        dialogTitle = { Text(editLabel) },
         label = {
             Text(
                 fontWeight = FontWeight.Bold,

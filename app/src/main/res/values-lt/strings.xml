@@ -81,6 +81,10 @@
     <string name="decoration_type_head">Galva</string>
     <string name="decoration_type_leggings">Kelnės</string>
     <string name="decoration_type_shoes">Batai</string>
+    <string name="diet_carbohydrates">Angliavandeniai</string>
+    <string name="diet_fat">Riebalai</string>
+    <string name="diet_protein">Baltymai</string>
+    <string name="diet_take_everything">Valgau viską</string>
     <string name="drawer_application_motto">Susiplanuok Savo Dieną</string>
     <string name="drawer_button_sign_out">Atsijungti</string>
     <string name="drawer_button_sign_out_confirmation">Ar tikrai norite atsijungti?</string>
@@ -179,6 +183,8 @@
     <string name="input_field_date_label">Data</string>
     <string name="input_field_description_edit_label">Redaguojate aprašymą</string>
     <string name="input_field_description_label">Aprašymas</string>
+    <string name="input_field_diet_edit_label">Redaguojate dietą</string>
+    <string name="input_field_diet_label">Dieta</string>
     <string name="input_field_distance_edit_label">Redaguojate atstumą</string>
     <string name="input_field_distance_label">Atstumas</string>
     <string name="input_field_duration_edit_label">Redaguojate trukmę</string>

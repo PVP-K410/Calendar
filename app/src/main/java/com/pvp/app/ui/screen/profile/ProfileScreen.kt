@@ -393,7 +393,8 @@ private fun Properties(
         )
 
         EditablePickerItem(
-            label = "Diet",
+            editLabel = stringResource(R.string.input_field_diet_edit_label),
+            label = stringResource(R.string.input_field_diet_label),
             value = state.user.diet,
             valueLabel = { it.title },
             items = Diet.entries,
