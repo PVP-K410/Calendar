@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.pvp.app.ui.screen.decoration
 
 import androidx.compose.foundation.Image
@@ -17,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Stars
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,24 +30,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.R
 import com.pvp.app.ui.common.Dialog
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
-import com.pvp.app.ui.common.showToast
-
-@Composable
-private fun screens() = listOf<Pair<String, @Composable () -> Unit>>(
-    "Store" to { Store() },
-    "Owned" to { Apply() },
-)
 
 @Composable
 private fun Apply(model: DecorationViewModel = hiltViewModel()) {
@@ -94,7 +86,7 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
         if (holdersOwned.isEmpty()) {
             Text(
                 style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                text = "No decorations owned"
+                text = stringResource(R.string.decorations_none_to_apply)
             )
         } else {
             DecorationCards(
@@ -110,6 +102,11 @@ private fun Apply(model: DecorationViewModel = hiltViewModel()) {
 fun DecorationScreen(modifier: Modifier) {
     var screen by remember { mutableIntStateOf(0) }
 
+    val screens = listOf<Pair<String, @Composable () -> Unit>>(
+        stringResource(R.string.decorations_store_title) to { Store() },
+        stringResource(R.string.decorations_owned_title) to { Apply() },
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -119,13 +116,12 @@ fun DecorationScreen(modifier: Modifier) {
     ) {
         TabSelector(
             onSelect = { screen = it },
-            tabs = screens().map { it.first },
+            tabs = screens.map { it.first },
         )
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        screens()[screen]
-            .second()
+        screens[screen].second()
     }
 }
 
@@ -134,31 +130,27 @@ private fun StateHandler(
     resetState: () -> Unit,
     state: DecorationScreenState
 ) {
-    val context = LocalContext.current
-
     if (state is DecorationScreenState.Loading) {
         ProgressIndicatorWithinDialog()
 
         return
     }
 
+    val showSnackbar = LocalShowSnackbar.current
+
     when (state) {
         is DecorationScreenState.Success -> {
+            val localeSuccessApply = stringResource(R.string.decorations_success_apply)
+            val localeSuccessPurchase = stringResource(R.string.decorations_success_purchase)
+            val localeSuccessUnapply = stringResource(R.string.decorations_success_unapply)
+            val localeSuccess = stringResource(R.string.decorations_success)
+
             LaunchedEffect(state) {
                 when (state) {
-                    is DecorationScreenState.Success.Apply -> context.showToast(
-                        message = "Successfully applied decoration"
-                    )
-
-                    is DecorationScreenState.Success.Purchase -> context.showToast(
-                        message = "Successfully purchased decoration"
-                    )
-
-                    is DecorationScreenState.Success.Unapply -> context.showToast(
-                        message = "Successfully removed decoration"
-                    )
-
-                    else -> context.showToast(message = "Success")
+                    is DecorationScreenState.Success.Apply -> showSnackbar(localeSuccessApply)
+                    is DecorationScreenState.Success.Purchase -> showSnackbar(localeSuccessPurchase)
+                    is DecorationScreenState.Success.Unapply -> showSnackbar(localeSuccessUnapply)
+                    else -> showSnackbar(localeSuccess)
                 }
 
                 resetState()
@@ -166,17 +158,15 @@ private fun StateHandler(
         }
 
         is DecorationScreenState.Error -> {
+            val localeError = stringResource(R.string.decorations_error)
+            val localeErrorOwn = stringResource(R.string.decorations_error_own)
+            val localeErrorFunds = stringResource(R.string.decorations_error_funds)
+
             LaunchedEffect(state) {
                 when (state) {
-                    is DecorationScreenState.Error.AlreadyOwned -> context.showToast(
-                        message = "You already own this decoration"
-                    )
-
-                    is DecorationScreenState.Error.InsufficientFunds -> context.showToast(
-                        message = "Not enough points to purchase decoration"
-                    )
-
-                    else -> context.showToast(message = "Error has occurred")
+                    is DecorationScreenState.Error.AlreadyOwned -> showSnackbar(localeErrorOwn)
+                    is DecorationScreenState.Error.InsufficientFunds -> showSnackbar(localeErrorFunds)
+                    else -> showSnackbar(localeError)
                 }
 
                 resetState()
@@ -210,10 +200,14 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Text(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(end = 4.dp),
-                text = "Your points ${state.user.points}"
+                text = stringResource(
+                    R.string.decorations_points,
+                    state.user.points
+                )
             )
 
             Icon(
@@ -230,7 +224,7 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
         if (holders.size == state.holders.size) {
             Text(
                 style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                text = "No decorations to purchase"
+                text = stringResource(R.string.decorations_none_to_purchase)
             )
         } else {
             DecorationCards(
@@ -250,7 +244,7 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
             Column {
                 Text(
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    text = "Decoration"
+                    text = stringResource(R.string.decorations_purchase_dialog_decoration)
                 )
 
                 Text(
@@ -261,7 +255,7 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
 
                 Text(
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    text = "Price"
+                    text = stringResource(R.string.decorations_purchase_dialog_price)
                 )
 
                 Row {
@@ -278,8 +272,12 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
                 }
             }
         },
-        buttonContentConfirm = { Text("Purchase") },
-        buttonContentDismiss = { Text("Cancel") },
+        buttonContentConfirm = {
+            Text(stringResource(R.string.action_purchase))
+        },
+        buttonContentDismiss = {
+            Text(stringResource(R.string.action_cancel))
+        },
         onConfirm = {
             model.purchase(item!!.decoration)
 
@@ -291,6 +289,6 @@ private fun Store(model: DecorationViewModel = hiltViewModel()) {
             item = null
         },
         show = showDialog,
-        title = { Text("Confirm purchase") }
+        title = { Text(stringResource(R.string.decorations_purchase_dialog_title)) }
     )
 }

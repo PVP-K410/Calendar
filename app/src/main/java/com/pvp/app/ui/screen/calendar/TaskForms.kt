@@ -24,9 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.R
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.GoogleTask
@@ -88,10 +90,10 @@ fun TaskCreateSheet(
                     }
                 },
                 tabs = listOf(
-                    "General",
-                    "Meal",
-                    "Set Meals",
-                    "Sport"
+                    stringResource(R.string.task_type_general),
+                    stringResource(R.string.task_type_meal),
+                    stringResource(R.string.task_type_set_meal),
+                    stringResource(R.string.task_type_sport)
                 ),
                 withShadow = false
             )

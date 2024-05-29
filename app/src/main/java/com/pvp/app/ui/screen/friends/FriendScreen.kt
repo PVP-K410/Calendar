@@ -76,7 +76,7 @@ private fun ActivityInfo(
                 MaterialTheme.shapes.medium
             )
     ) {
-        InfoHeader(text = "7 days activity")
+        InfoHeader(text = stringResource(R.string.friend_7_days_activity))
 
         Column(
             modifier = Modifier
@@ -89,7 +89,10 @@ private fun ActivityInfo(
             ActivityRow(
                 icon = ImageVector.vectorResource(R.drawable.steps_icon),
                 contentDescription = "steps",
-                text = "$steps steps made"
+                text = stringResource(
+                    R.string.friend_steps_made,
+                    steps
+                )
             )
 
             HorizontalDivider(
@@ -101,7 +104,10 @@ private fun ActivityInfo(
             ActivityRow(
                 icon = Icons.Outlined.LocalFireDepartment,
                 contentDescription = "calories",
-                text = "%.2f calories burned".format(calories / 1000)
+                text = stringResource(
+                    R.string.friend_calories_burned,
+                    calories / 1000
+                )
             )
 
             HorizontalDivider(
@@ -113,7 +119,10 @@ private fun ActivityInfo(
             ActivityRow(
                 icon = Icons.Outlined.Straighten,
                 contentDescription = "Distance",
-                text = "%.2f km".format(distance / 1000)
+                text = stringResource(
+                    R.string.friend_distance,
+                    distance / 1000
+                )
             )
 
             HorizontalDivider(
@@ -125,7 +134,10 @@ private fun ActivityInfo(
             ActivityRow(
                 icon = Icons.AutoMirrored.Outlined.FactCheck,
                 contentDescription = "tasks",
-                text = "$tasksCompleted sport tasks completed"
+                text = stringResource(
+                    R.string.friend_sport_tasks_completed,
+                    tasksCompleted
+                )
             )
 
             HorizontalDivider(
@@ -137,7 +149,10 @@ private fun ActivityInfo(
             ActivityRow(
                 icon = Icons.AutoMirrored.Outlined.FactCheck,
                 contentDescription = "goals",
-                text = "$goalsCompleted goals completed"
+                text = stringResource(
+                    R.string.friend_goals_completed,
+                    goalsCompleted
+                )
             )
         }
 
@@ -240,7 +255,7 @@ private fun FriendInfo(mutualFriends: List<FriendEntry>) {
                 MaterialTheme.shapes.medium
             )
     ) {
-        InfoHeader(text = "Mutual friends")
+        InfoHeader(text = stringResource(R.string.friend_mutual_friends))
 
         Column(
             modifier = Modifier
@@ -253,7 +268,7 @@ private fun FriendInfo(mutualFriends: List<FriendEntry>) {
             if (mutualFriends.isEmpty()) {
                 Text(
                     style = MaterialTheme.typography.titleSmall,
-                    text = "No mutual friends"
+                    text = stringResource(R.string.friend_mutual_friends_error)
                 )
             } else {
                 for (mutualFriend in mutualFriends) {
@@ -425,7 +440,7 @@ private fun OtherInfo(formattedDate: String) {
                 MaterialTheme.shapes.medium
             )
     ) {
-        InfoHeader(text = "Other information")
+        InfoHeader(text = stringResource(R.string.friend_other_information))
 
         Column(
             modifier = Modifier
@@ -437,7 +452,10 @@ private fun OtherInfo(formattedDate: String) {
         ) {
             Text(
                 style = MaterialTheme.typography.titleSmall,
-                text = "Friends since - $formattedDate"
+                text = stringResource(
+                    R.string.friend_friends_since,
+                    formattedDate
+                )
             )
         }
 
@@ -453,10 +471,10 @@ private fun Remove(onRemove: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         ButtonConfirm(
-            confirmationDescription = { Text("If friend is removed, you will have to request for friendship again") },
-            confirmationTitle = { Text("Are you sure you want to remove this friend?") },
+            confirmationDescription = { Text(stringResource(R.string.friend_button_remove_confirmation_description)) },
+            confirmationTitle = { Text(stringResource(R.string.friend_button_remove_confirmation_title)) },
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
-            content = { Text("Remove Friend") },
+            content = { Text(stringResource(R.string.friend_button_remove)) },
             modifier = Modifier
                 .height(38.dp)
                 .border(

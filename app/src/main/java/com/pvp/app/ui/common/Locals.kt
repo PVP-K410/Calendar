@@ -37,3 +37,10 @@ val LocalRouteOptionsApplier = staticCompositionLocalOf<
         @Composable ((options: Route.Options) -> Route.Options) -> Unit> {
     notProvided("LocalRouteOptionsApplier")
 }
+
+/**
+ * Composition local for showing snackbar
+ */
+val LocalShowSnackbar = staticCompositionLocalOf<(String) -> Unit> {
+    error("No showSnackbar function provided")
+}

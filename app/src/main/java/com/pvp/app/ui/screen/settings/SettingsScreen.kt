@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,117 +49,131 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.os.LocaleListCompat
 import androidx.health.connect.client.HealthConnectClient
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
+import com.pvp.app.R
 import com.pvp.app.model.Setting
 import com.pvp.app.ui.common.ButtonConfirm
+import com.pvp.app.ui.common.DropdownMenu
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
-import com.pvp.app.ui.common.showToast
 
 @Composable
-private fun SettingNotificationReminderMinutes(
-    model: SettingsViewModel = hiltViewModel()
-) {
+private fun SettingNotificationReminderMinutes(model: SettingsViewModel = hiltViewModel()) {
     val range = remember { model.fromConfiguration { it.rangeReminderMinutes } }
     var minutes by model.rememberSetting(Setting.Notifications.ReminderBeforeTaskMinutes)
     val state = rememberPickerState(initialValue = minutes)
+    val localeTitle = stringResource(R.string.settings_setting_reminder_title)
 
     SettingCard(
-        title = "Reminder Time",
-        description = "Choose minutes before tasks reminder executes. Default is 10 minutes",
-        iconDescription = "Clickable icon to edit reminder time",
-        value = "$minutes minute${if (minutes != 1) "s" else ""}",
+        description = stringResource(
+            R.string.settings_setting_reminder_description,
+            Setting.Notifications.ReminderBeforeTaskMinutes.defaultValue
+        ),
         editContent = {
             Column(
                 modifier = Modifier
-                    .clip(shape = MaterialTheme.shapes.small)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = MaterialTheme.shapes.small
-                    )
+                    .clip(shape = MaterialTheme.shapes.medium)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
                     .wrapContentSize()
                     .padding(32.dp)
             ) {
                 Text(
                     style = MaterialTheme.typography.titleLarge,
-                    text = "Select Reminder Minutes"
+                    text = localeTitle
                 )
 
                 Picker(
                     items = range,
-                    label = { "$it minutes" },
+                    label = {
+                        stringResource(
+                            R.string.settings_setting_reminder_button,
+                            it
+                        )
+                    },
                     modifier = Modifier.padding(top = 16.dp),
                     startIndex = minutes / 5,
                     state = state
                 )
             }
         },
-        onEdit = { minutes = state.value }
+        onEdit = { minutes = state.value },
+        title = localeTitle,
+        value = stringResource(
+            R.string.settings_setting_reminder_button,
+            minutes
+        )
     )
 }
 
 @Composable
-private fun SettingCupVolumeMl(
-    model: SettingsViewModel = hiltViewModel()
-) {
+private fun SettingCupVolumeMl(model: SettingsViewModel = hiltViewModel()) {
     val range = remember { model.fromConfiguration { it.rangeCupVolume } }
     var volume by model.rememberSetting(Setting.Notifications.CupVolumeMl)
     val isEnabled by model.rememberSetting(Setting.Notifications.HydrationNotificationsEnabled)
     val state = rememberPickerState(initialValue = volume)
+    val localeTitle = stringResource(R.string.settings_setting_cup_volume_title)
 
     SettingCard(
-        title = "Cup Volume",
-        description = "Choose your cup volume for more accurate water drinking reminders. Default is 250 ml",
-        iconDescription = "Clickable icon to edit cup volume",
-        value = "$volume ml",
-        isEnabled = isEnabled,
+        description = stringResource(
+            R.string.settings_setting_cup_volume_description,
+            Setting.Notifications.CupVolumeMl.defaultValue
+        ),
         editContent = {
             Column(
                 modifier = Modifier
-                    .clip(shape = MaterialTheme.shapes.small)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = MaterialTheme.shapes.small
-                    )
+                    .clip(shape = MaterialTheme.shapes.medium)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
                     .wrapContentSize()
                     .padding(32.dp)
             ) {
                 Text(
                     style = MaterialTheme.typography.titleLarge,
-                    text = "Select Cup Volume"
+                    text = localeTitle
                 )
 
                 Picker(
                     items = range,
-                    label = { "$it ml" },
+                    label = {
+                        stringResource(
+                            R.string.settings_setting_cup_volume_button,
+                            it
+                        )
+                    },
                     modifier = Modifier.padding(top = 16.dp),
                     startIndex = range.indexOf(volume),
                     state = state
                 )
             }
         },
-        onEdit = { volume = state.value }
+        isEnabled = isEnabled,
+        onEdit = { volume = state.value },
+        title = localeTitle,
+        value = stringResource(
+            R.string.settings_setting_cup_volume_button,
+            volume
+        )
     )
 }
 
 @Composable
-private fun SettingHydrationNotificationToggle(
-    model: SettingsViewModel = hiltViewModel()
-) {
+private fun SettingHydrationNotificationToggle(model: SettingsViewModel = hiltViewModel()) {
     var isEnabled by model.rememberSetting(Setting.Notifications.HydrationNotificationsEnabled)
 
     SettingCard(
-        title = "Hydration Notifications",
-        description = "Toggle water drinking reminder notifications",
-        value = isEnabled,
-        onEdit = { isEnabled = !isEnabled }
+        description = stringResource(R.string.settings_setting_hydration_reminder_description),
+        onEdit = { isEnabled = !isEnabled },
+        title = stringResource(R.string.settings_setting_hydration_reminder_title),
+        value = isEnabled
     )
 }
 
@@ -169,46 +184,45 @@ enum class Theme {
 }
 
 @Composable
-private fun SettingDynamicTheme(
-    model: SettingsViewModel = hiltViewModel()
-) {
+private fun SettingDynamicTheme(model: SettingsViewModel = hiltViewModel()) {
     var isEnabled by model.rememberSetting(Setting.Appearance.DynamicThemeEnabled)
 
     SettingCard(
-        title = "Dynamic Theme",
-        description = "Choose whether or not you want to use the dynamic theme",
-        value = isEnabled,
-        onEdit = { isEnabled = !isEnabled }
+        description = stringResource(R.string.settings_setting_theme_dynamic_description),
+        onEdit = { isEnabled = !isEnabled },
+        title = stringResource(R.string.settings_setting_theme_dynamic_title),
+        value = isEnabled
     )
 }
 
 @Composable
-private fun SettingApplicationTheme(
-    model: SettingsViewModel = hiltViewModel()
-) {
+private fun SettingApplicationTheme(model: SettingsViewModel = hiltViewModel()) {
+    val localeTitle = stringResource(R.string.settings_setting_theme_title)
     var themeValue by model.rememberSetting(Setting.Appearance.ApplicationTheme)
 
+    val themes = mapOf(
+        Theme.Auto to stringResource(R.string.settings_setting_theme_label_auto),
+        Theme.Dark to stringResource(R.string.settings_setting_theme_label_dark),
+        Theme.Light to stringResource(R.string.settings_setting_theme_label_light)
+    )
+
     SettingCard(
-        description = "Choose the theme of the application",
+        description = stringResource(R.string.settings_setting_theme_description),
         editContent = {
             Column(
                 modifier = Modifier
-                    .clip(shape = MaterialTheme.shapes.small)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = MaterialTheme.shapes.small
-                    )
+                    .clip(shape = MaterialTheme.shapes.medium)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
                     .wrapContentSize()
                     .padding(32.dp)
             ) {
                 Text(
                     style = MaterialTheme.typography.titleLarge,
-                    text = "Select Application Theme"
+                    text = localeTitle
                 )
 
                 Spacer(modifier = Modifier.size(16.dp))
-
-                Theme.entries.forEach {
+                themes.forEach { (theme, label) ->
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -216,33 +230,31 @@ private fun SettingApplicationTheme(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = themeValue == it.ordinal,
-                            onClick = { themeValue = it.ordinal }
+                            selected = themeValue == theme.ordinal,
+                            onClick = { themeValue = theme.ordinal }
                         )
 
                         Text(
-                            text = it.toString(),
+                            text = label,
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(start = 10.dp)
                         )
                     }
+
                 }
             }
         },
         onEdit = {},
-        value = Theme.entries[themeValue],
-        title = "Application Theme"
+        value = themes[Theme.entries[themeValue]],
+        title = localeTitle
     )
 }
 
 @Composable
 private fun SettingHealthConnectPermissions(context: Context) {
     SettingCard(
-        title = "Health Connect",
-        description = "By enabling certain Health Connect permissions you are" +
-                " allowing us to provide you more great features. You can disable" +
-                " those permissions anytime by coming here.",
-        value = "Configure",
+        description = stringResource(R.string.settings_setting_health_connect_description),
+        icon = Icons.Outlined.Settings,
         onEdit = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 permissionsPostUpsideDownCake(context)
@@ -250,18 +262,83 @@ private fun SettingHealthConnectPermissions(context: Context) {
                 permissionsPreUpsideDownCake(context)
             }
         },
-        icon = Icons.Outlined.Settings
+        title = stringResource(R.string.settings_setting_health_connect_title),
+        value = stringResource(R.string.settings_setting_health_connect_button_configure)
+    )
+}
+
+@Composable
+fun SettingLanguage() {
+    val localeTitle = stringResource(R.string.settings_setting_language_title)
+
+    val options = mapOf(
+        R.string.settings_locale_en to "",
+        R.string.settings_locale_lt to "lt"
+    )
+        .mapKeys { stringResource(it.key) }
+
+    var value = remember {
+        val tag = AppCompatDelegate
+            .getApplicationLocales()[0]
+            ?.toLanguageTag() ?: ""
+
+        options.entries.find {
+            it.value.equals(
+                tag,
+                ignoreCase = true
+            )
+        }?.key ?: options.keys.first()
+    }
+
+    SettingCard(
+        description = stringResource(R.string.settings_setting_language_description),
+        editContent = {
+            Column(
+                modifier = Modifier
+                    .clip(shape = MaterialTheme.shapes.medium)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
+                    .wrapContentSize()
+                    .padding(32.dp)
+            ) {
+                Text(
+                    style = MaterialTheme.typography.titleLarge,
+                    text = localeTitle
+                )
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                DropdownMenu(
+                    onSelect = { option ->
+                        value = option
+
+                        AppCompatDelegate.setApplicationLocales(
+                            LocaleListCompat.forLanguageTags(options[option])
+                        )
+                    },
+                    options = options.keys.toList(),
+                    value = value
+                )
+            }
+        },
+        icon = Icons.Outlined.Edit,
+        onEdit = { },
+        title = localeTitle,
+        value = value,
     )
 }
 
 @Composable
 private fun GoogleCalendarSynchronizer(model: SettingsViewModel = hiltViewModel()) {
+    val localeSuccess = stringResource(
+        R.string.settings_setting_google_calendar_synchronize_success
+    )
+
     var intent by remember { mutableStateOf<Intent?>(null) }
-    val context = LocalContext.current
+    val showSnackbar = LocalShowSnackbar.current
 
     fun synchronize() {
         model.synchronizeGoogleTasks(onCallback = {
-            context.showToast(message = "Google Calendar successfully synchronized")
+            showSnackbar(localeSuccess)
         }) { e ->
             intent = when (e) {
                 is UserRecoverableAuthIOException -> e.intent
@@ -287,11 +364,9 @@ private fun GoogleCalendarSynchronizer(model: SettingsViewModel = hiltViewModel(
     }
 
     SettingCard(
-        title = "Google Calendar",
-        description = "Synchronize your Google Calendar with our app to find all your tasks " +
-                "in one place. Google tasks from the past will not be synchronized, only today's " +
-                "and future tasks will be synchronized.",
-        value = "Synchronize",
+        title = stringResource(R.string.settings_setting_google_calendar_title),
+        description = stringResource(R.string.settings_setting_google_calendar_description),
+        value = stringResource(R.string.settings_setting_google_calendar_button_synchronize),
         onEdit = ::synchronize,
         icon = Icons.Outlined.Sync
     )
@@ -307,8 +382,19 @@ fun SettingsScreen(modifier: Modifier) {
             .padding(horizontal = 16.dp)
     ) {
         CategoryRow(
+            icon = Icons.Outlined.Style,
+            title = stringResource(R.string.settings_category_appearance_title)
+        )
+
+        SettingLanguage()
+
+        SettingApplicationTheme()
+
+        SettingDynamicTheme()
+
+        CategoryRow(
             icon = Icons.Outlined.Notifications,
-            title = "Notifications"
+            title = stringResource(R.string.settings_category_notifications_title)
         )
 
         SettingNotificationReminderMinutes()
@@ -318,17 +404,8 @@ fun SettingsScreen(modifier: Modifier) {
         SettingCupVolumeMl()
 
         CategoryRow(
-            icon = Icons.Outlined.Style,
-            title = "Appearance"
-        )
-
-        SettingApplicationTheme()
-
-        SettingDynamicTheme()
-
-        CategoryRow(
             icon = Icons.Outlined.PermIdentity,
-            title = "3rd Party Services"
+            title = stringResource(R.string.settings_category_3rd_party_services_title)
         )
 
         GoogleCalendarSynchronizer()
@@ -362,9 +439,9 @@ fun CategoryRow(
 }
 
 @Composable
-fun ResetToDefaultButton(
-    model: SettingsViewModel = hiltViewModel()
-) {
+fun ResetToDefaultButton(model: SettingsViewModel = hiltViewModel()) {
+    val localeLabel = stringResource(R.string.settings_button_reset)
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -385,13 +462,12 @@ fun ResetToDefaultButton(
             shape = MaterialTheme.shapes.extraLarge,
             content = {
                 Text(
-                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    text = "Reset to Default"
+                    text = localeLabel
                 )
             },
-            confirmationButtonContent = { Text(text = "Reset to Default") },
-            confirmationTitle = { Text(text = "Are you sure you want to reset all of your settings to default?") },
+            confirmationButtonContent = { Text(text = localeLabel) },
+            confirmationTitle = { Text(text = stringResource(R.string.settings_button_reset_description)) },
             onConfirm = { model.clear() }
         )
     }

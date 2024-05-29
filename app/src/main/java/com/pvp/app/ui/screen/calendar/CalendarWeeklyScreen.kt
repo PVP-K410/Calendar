@@ -26,6 +26,7 @@ import com.pvp.app.model.Task
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
 
 @Composable
@@ -44,7 +45,16 @@ fun Week(
     modifier: Modifier = Modifier,
     tasks: List<Task>
 ) {
-    val days = (1..7).map { DayOfWeek.of(it).name }
+    val days = (1..7).map {
+        DayOfWeek
+            .of(it)
+            .getDisplayName(
+                TextStyle.FULL,
+                java.util.Locale.getDefault()
+            )
+            .capitalize()
+    }
+
     val today = LocalDate.now()
     val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     val dates = (0..6).map { startOfWeek.plusDays(it.toLong()) }

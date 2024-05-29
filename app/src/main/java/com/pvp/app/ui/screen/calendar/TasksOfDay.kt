@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.calendar
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,8 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import com.pvp.app.R
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.GoogleTask
@@ -27,7 +30,6 @@ import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import com.pvp.app.ui.common.TabSelector
-import java.util.Locale
 
 @Composable
 fun TasksOfDay(tasks: List<Task>) {
@@ -63,11 +65,7 @@ fun TasksOfDay(tasks: List<Task>) {
                                     fontStyle = FontStyle.Italic,
                                     modifier = Modifier.padding(32.dp),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    text = "No ${
-                                        filter
-                                            .toString()
-                                            .lowercase(Locale.ROOT)
-                                    } tasks have been setup for this day"
+                                    text = stringResource(R.string.tasks_of_day_empty)
                                 )
                             }
                         }
@@ -94,7 +92,7 @@ private fun TaskTypeFilter(
     TabSelector(
         onSelect = { onClick(TaskFilter.entries[it]) },
         tab = filter.ordinal,
-        tabs = TaskFilter.entries.map { it.displayName }
+        tabs = TaskFilter.entries.map { it.title() }
     )
 }
 
@@ -110,9 +108,12 @@ private fun filterTasks(
     }
 }
 
-enum class TaskFilter(val displayName: String) {
-    Daily("Daily"),
-    General("General"),
-    Meal("Meal"),
-    Sports("Sport")
+enum class TaskFilter(@StringRes val titleId: Int) {
+    Daily(R.string.task_type_daily),
+    General(R.string.task_type_general),
+    Meal(R.string.task_type_meal),
+    Sports(R.string.task_type_sport);
+
+    val title: @Composable () -> String
+        get() = { stringResource(titleId) }
 }

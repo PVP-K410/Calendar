@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.R
 import com.pvp.app.model.Meal
 import com.pvp.app.ui.common.AsyncImage
 import com.pvp.app.ui.common.Button
@@ -95,19 +97,28 @@ private fun BoxScope.NutritionColumn(
                 Text(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White,
-                    text = "Carbs: $percentCarbs %"
+                    text = stringResource(
+                        R.string.meal_card_carbs,
+                        percentCarbs
+                    )
                 )
 
                 Text(
                     color = Color.White,
                     style = MaterialTheme.typography.bodySmall,
-                    text = "Fat: $percentFat %"
+                    text = stringResource(
+                        R.string.meal_card_fat,
+                        percentFat
+                    )
                 )
 
                 Text(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White,
-                    text = "Protein: $percentProtein %"
+                    text = stringResource(
+                        R.string.meal_card_protein,
+                        percentProtein
+                    )
                 )
             }
         }
@@ -207,13 +218,23 @@ private fun BoxScope.MealCardToolTip(
                         Text(
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleSmall,
-                            text = "Servings Breakdown"
+                            text = stringResource(R.string.meal_card_servings_breakdown)
                         )
 
-                        TextBody("${meal.servings} servings")
+                        TextBody(
+                            stringResource(
+                                R.string.meal_card_servings,
+                                meal.servings
+                            )
+                        )
 
                         with(meal.nutrition.weightPerServing) {
-                            TextBody("$amount $unit per serving")
+                            TextBody(
+                                stringResource(
+                                    R.string.meal_card_weight_per_serving,
+                                    "$amount $unit"
+                                )
+                            )
                         }
 
                         val calories = meal.nutrition.nutrients.firstOrNull {
@@ -224,7 +245,12 @@ private fun BoxScope.MealCardToolTip(
                         }?.amount
 
                         if (calories != null) {
-                            TextBody("$calories calories per serving")
+                            TextBody(
+                                stringResource(
+                                    R.string.meal_card_calories_per_serving,
+                                    calories
+                                )
+                            )
                         }
 
                         Spacer(modifier = Modifier.size(8.dp))
@@ -232,7 +258,7 @@ private fun BoxScope.MealCardToolTip(
                         Text(
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleSmall,
-                            text = "Ingredients"
+                            text = stringResource(R.string.meal_card_ingredients)
                         )
 
                         val ingredients = meal.recipe
@@ -295,7 +321,7 @@ private fun TooltipIngredientsWarning(ingredientsToAvoid: List<String>) {
                 Text(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleSmall,
-                    text = "Consists of ingredients you avoid"
+                    text = stringResource(R.string.meal_card_ingredients_avoided)
                 )
 
                 if (ingredientsToAvoid.size > 5) {

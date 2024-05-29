@@ -141,7 +141,7 @@ fun DecorationCards(
                     }
                 }
             },
-            header = type.toString(),
+            header = type.title(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(vertical = 8.dp)
