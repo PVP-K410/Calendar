@@ -85,7 +85,11 @@
     <string name="drawer_button_sign_out">Sign Out</string>
     <string name="drawer_button_sign_out_confirmation">Are you sure you want to sign out?</string>
     <string name="drawer_button_sign_out_error">Error has occurred while signing out</string>
+    <string name="drawer_button_feedback">Feedback</string>
     <string name="empty" translatable="false" />
+    <string name="feedback_form_bug">Bug</string>
+    <string name="feedback_form_feature_request">Feature request</string>
+    <string name="feedback_form_rating">Rating</string>
     <string name="form_create_meal_description">Description</string>
     <string name="form_create_meal_duration">Preparation time</string>
     <string name="form_create_meal_ingredients">Ingredients</string>
@@ -181,6 +185,7 @@
     <string name="input_field_activity_label">Activity</string>
     <string name="input_field_date_label">Date</string>
     <string name="input_field_description_edit_label">Editing description</string>
+    <string name="input_field_description_error_cannot_be_empty">Description can not be empty</string>
     <string name="input_field_description_label">Description</string>
     <string name="input_field_distance_edit_label">Editing distance</string>
     <string name="input_field_distance_label">Distance</string>
