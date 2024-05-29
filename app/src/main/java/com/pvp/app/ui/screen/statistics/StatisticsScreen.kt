@@ -1,6 +1,7 @@
 package com.pvp.app.ui.screen.statistics
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -120,11 +122,66 @@ fun StatisticsScreen(
 
         Spacer(modifier = Modifier.size(16.dp))
 
-        Text(text = "Average amount of completed tasks (7d): ${state.averageTasksCompleted7d}")
-        Text(text = "Average amount of completed tasks (30d): ${state.averageTasksCompleted30d}")
-        Text(text = "Average points ${state.averagePoints}")
-        Text(text = "Top3 most frequent activities ${state.top3FrequentActivities}")
-        Text(text = "Unique activities (30d) ${state.uniqueActivities30d}")
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(
+                    MaterialTheme.colorScheme.secondaryContainer,
+                    RoundedCornerShape(8.dp)
+                )
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.onSecondaryContainer,
+                    RoundedCornerShape(8.dp)
+                )
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            StatisticItem(
+                label = "Average tasks completed (7d):",
+                value = "${state.averageTasksCompleted7d}"
+            )
+            StatisticItem(
+                label = "Average tasks completed (30d):",
+                value = "${state.averageTasksCompleted30d}"
+            )
+            StatisticItem(
+                label = "Average points:",
+                value = "${state.averagePoints}"
+            )
+            StatisticItem(
+                label = "Top 3 frequent activities:",
+                value = "${state.top3FrequentActivities}"
+            )
+            StatisticItem(
+                label = "Unique activities (30d):",
+                value = "${state.uniqueActivities30d}"
+            )
+        }
+    }
+}
+
+@Composable
+fun StatisticItem(
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
     }
 }
 
