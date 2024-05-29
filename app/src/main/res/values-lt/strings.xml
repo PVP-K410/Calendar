@@ -225,11 +225,11 @@
     <string name="input_field_weekly_activities_label">Jūsų savaitinės veiklos</string>
     <string name="input_field_weekly_activities_unassigned">Jums dar nėra priskirtų savaitinių veiklų</string>
     <string name="meal_card_calories_per_serving">%1$s kalorijos per porciją</string>
-    <string name="meal_card_carbs">Angliavandeniai: %1$s %</string>
-    <string name="meal_card_fat">Riebalai: %1$s %</string>
+    <string name="meal_card_carbs">Angliavandeniai: %1$s %%</string>
+    <string name="meal_card_fat">Riebalai: %1$s %%</string>
     <string name="meal_card_ingredients">Ingredientai</string>
     <string name="meal_card_ingredients_avoided">Sudaryta iš ingredientų, kuriu vengiate</string>
-    <string name="meal_card_protein">Baltymai: %1$s %</string>
+    <string name="meal_card_protein">Baltymai: %1$s %%</string>
     <string name="meal_card_servings">%1$s porcijos</string>
     <string name="meal_card_servings_breakdown">Porcijų informacija</string>
     <string name="meal_card_weight_per_serving">%1$s per porciją</string>
