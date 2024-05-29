@@ -58,9 +58,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.pvp.app.model.Setting
 import com.pvp.app.ui.common.ButtonConfirm
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
-import com.pvp.app.ui.common.showToast
 
 @Composable
 private fun SettingNotificationReminderMinutes(
@@ -257,11 +257,12 @@ private fun SettingHealthConnectPermissions(context: Context) {
 @Composable
 private fun GoogleCalendarSynchronizer(model: SettingsViewModel = hiltViewModel()) {
     var intent by remember { mutableStateOf<Intent?>(null) }
-    val context = LocalContext.current
+
+    val showSnackbar = LocalShowSnackbar.current
 
     fun synchronize() {
         model.synchronizeGoogleTasks(onCallback = {
-            context.showToast(message = "Google Calendar successfully synchronized")
+            showSnackbar("Google Calendar successfully synchronized")
         }) { e ->
             intent = when (e) {
                 is UserRecoverableAuthIOException -> e.intent

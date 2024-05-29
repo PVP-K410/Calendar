@@ -2,7 +2,6 @@
 
 package com.pvp.app.ui.screen.goals
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,12 +33,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.Button
-import com.pvp.app.ui.common.EditableDistanceItem
 import com.pvp.app.ui.common.EditableInfoItem
 import com.pvp.app.ui.common.LabelFieldWrapper
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerPair
-import com.pvp.app.ui.common.PickerState
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.TabSelector
 import java.time.LocalDate

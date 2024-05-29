@@ -33,24 +33,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.ui.common.Dialog
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.TabSelector
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
-import com.pvp.app.ui.common.showToast
 
 @Composable
-private fun screens() = listOf<Pair<String, @Composable () -> Unit>>(
-    "Store" to { Store() },
-    "Owned" to { Apply() },
-)
+private fun screens() =
+    listOf<Pair<String, @Composable () -> Unit>>(
+        "Store" to { Store() },
+        "Owned" to { Apply() },
+    )
 
 @Composable
 private fun Apply(model: DecorationViewModel = hiltViewModel()) {
@@ -134,31 +134,31 @@ private fun StateHandler(
     resetState: () -> Unit,
     state: DecorationScreenState
 ) {
-    val context = LocalContext.current
-
     if (state is DecorationScreenState.Loading) {
         ProgressIndicatorWithinDialog()
 
         return
     }
 
+    val showSnackbar = LocalShowSnackbar.current
+
     when (state) {
         is DecorationScreenState.Success -> {
             LaunchedEffect(state) {
                 when (state) {
-                    is DecorationScreenState.Success.Apply -> context.showToast(
-                        message = "Successfully applied decoration"
+                    is DecorationScreenState.Success.Apply -> showSnackbar(
+                        "Successfully applied decoration"
                     )
 
-                    is DecorationScreenState.Success.Purchase -> context.showToast(
-                        message = "Successfully purchased decoration"
+                    is DecorationScreenState.Success.Purchase -> showSnackbar(
+                        "Successfully purchased decoration"
                     )
 
-                    is DecorationScreenState.Success.Unapply -> context.showToast(
-                        message = "Successfully removed decoration"
+                    is DecorationScreenState.Success.Unapply -> showSnackbar(
+                        "Successfully removed decoration"
                     )
 
-                    else -> context.showToast(message = "Success")
+                    else -> showSnackbar("Success")
                 }
 
                 resetState()
@@ -168,15 +168,15 @@ private fun StateHandler(
         is DecorationScreenState.Error -> {
             LaunchedEffect(state) {
                 when (state) {
-                    is DecorationScreenState.Error.AlreadyOwned -> context.showToast(
-                        message = "You already own this decoration"
+                    is DecorationScreenState.Error.AlreadyOwned -> showSnackbar(
+                        "You already own this decoration"
                     )
 
-                    is DecorationScreenState.Error.InsufficientFunds -> context.showToast(
-                        message = "Not enough points to purchase decoration"
+                    is DecorationScreenState.Error.InsufficientFunds -> showSnackbar(
+                        "Not enough points to purchase decoration"
                     )
 
-                    else -> context.showToast(message = "Error has occurred")
+                    else -> showSnackbar("Error has occurred")
                 }
 
                 resetState()

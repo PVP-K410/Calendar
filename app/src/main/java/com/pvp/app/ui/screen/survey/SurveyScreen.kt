@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,8 +28,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
 import com.pvp.app.model.Survey
 import com.pvp.app.ui.common.Button
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.ProgressIndicator
-import com.pvp.app.ui.common.showToast
 
 @Composable
 fun SurveyScreen(
@@ -39,6 +38,8 @@ fun SurveyScreen(
     val textContinue = stringResource(R.string.action_continue)
     val textError = stringResource(R.string.form_survey_toast_error)
     val textSubmit = stringResource(R.string.action_submit)
+
+    val showSnackbar = LocalShowSnackbar.current
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -71,8 +72,6 @@ fun SurveyScreen(
             modifier = Modifier.weight(0.1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val context = LocalContext.current
-
             Button(
                 modifier = Modifier.fillMaxWidth(0.8f),
                 onClick = {
@@ -81,7 +80,7 @@ fun SurveyScreen(
                     } catch (e: Exception) {
                         success = false
 
-                        context.showToast(message = textError)
+                        showSnackbar(textError)
                     }
                 }
             ) {

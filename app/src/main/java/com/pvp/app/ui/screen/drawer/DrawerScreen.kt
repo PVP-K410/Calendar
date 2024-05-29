@@ -1,5 +1,6 @@
 package com.pvp.app.ui.screen.drawer
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,14 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.R
 import com.pvp.app.ui.common.ButtonConfirm
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.RouteTitle
-import com.pvp.app.ui.common.showToast
 import com.pvp.app.ui.router.Route
 
 @Composable
@@ -156,6 +156,8 @@ fun DrawerScreen(
     routes: List<Route>,
     viewModel: DrawerViewModel = hiltViewModel()
 ) {
+    val showSnackbar = LocalShowSnackbar.current
+
     ModalDrawerSheet(drawerShape = RectangleShape) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -183,8 +185,6 @@ fun DrawerScreen(
                 routes = routes
             )
 
-            val context = LocalContext.current
-
             Footer(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -192,7 +192,7 @@ fun DrawerScreen(
                 onSignOut = {
                     viewModel.signOut {
                         if (!it.isSuccess) {
-                            context.showToast(message = textSignOut)
+                            showSnackbar(textSignOut)
                         }
                     }
                 }
