@@ -88,7 +88,9 @@
     <string name="drawer_button_feedback">Feedback</string>
     <string name="empty" translatable="false" />
     <string name="feedback_form_bug">Bug</string>
+    <string name="feedback_form_bug_description">Provide information about the bug you encountered:\n1. Where did you find the bug?\n2. What steps did you take in order for the bug to present itself?</string>
     <string name="feedback_form_feature_request">Feature request</string>
+    <string name="feedback_form_feature_request_description">Provide description about new functionality/change of functionality you want to request.</string>
     <string name="feedback_form_rating">Rating</string>
     <string name="form_create_meal_description">Description</string>
     <string name="form_create_meal_duration">Preparation time</string>

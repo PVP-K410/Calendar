@@ -87,7 +87,9 @@
     <string name="drawer_button_sign_out_error">Nepavyko atsijungti, įvyko klaida</string>
     <string name="drawer_button_feedback">Palikti atsiliepimą</string>
     <string name="feedback_form_bug">Klaida</string>
-    <string name="feedback_form_feature_request">Funkcijos užklausa</string>
+    <string name="feedback_form_bug_description">Įveskite informaciją apie klaidą su kuria susidūrėte:\n1. Kurioje programėles vietoje klaida aptikta?\n2. Kokius veiksmus atliekant susidūrėte su klaida?</string>
+    <string name="feedback_form_feature_request">Prašymas</string>
+    <string name="feedback_form_feature_request_description">Įveskite naujo funkcionalumo/funkcionalumo pakeitimo prašymo aprašymą.</string>
     <string name="feedback_form_rating">Įvertinimas</string>
     <string name="form_create_meal_description">Aprašymas</string>
     <string name="form_create_meal_duration">Gaminimo trukmė</string>

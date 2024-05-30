@@ -78,6 +78,16 @@ fun FeedbackForm(
                 withShadow = false
             )
 
+            Spacer(modifier = Modifier.padding(4.dp))
+
+            Text(
+                text = when(bug) {
+                    true -> stringResource(R.string.feedback_form_bug_description)
+                    false -> stringResource(R.string.feedback_form_feature_request_description)
+                },
+                style = MaterialTheme.typography.bodySmall
+            )
+
             Spacer(modifier = Modifier.padding(6.dp))
 
             EditableTextItem(
