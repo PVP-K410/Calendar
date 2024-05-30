@@ -343,10 +343,12 @@
     <string name="task_type_set_meal_label">Dieta #%1$d: %2$s</string>
     <string name="task_type_sport">Sporto</string>
     <string name="total">Iš viso</string>
-    <string name="worker_activity_notification_many">%1$s ir %2$s veiklos duos daugiau taškų šią savaitę!</string>
+    <string name="worker_activity_notification_many">%1$s ir %2$s duos daugiau taškų šią savaitę!</string>
     <string name="worker_activity_notification_single_activity">Dalyvavimas "%1$s" veikloje duos daugiau taškų šią savaitę!</string>
     <string name="worker_activity_notification_title">Savaitinės veiklos</string>
     <string name="worker_activity_notification_wheelchair_activities">Dalyvavimas "%1$s" veiklose duos daugiau taškų šią savaitę!</string>
+    <string name="worker_daily_notification_description">Dieninės Užduotys</string>
+    <string name="worker_daily_notification_title">Jūsų dieninės užduotys sugeneruotos! Užeikite į programėlę ir pamatykite jas</string>
     <string name="worker_goal_motivation_notification_close_description_monthly">Bandote įveikti %1$s siekį šį mėnesį (%2$s). Taip ir toliau!</string>
     <string name="worker_goal_motivation_notification_close_description_monthly_1">Trūksta %2$s! Užbaikite savo %1$s mėnesio siekį</string>
     <string name="worker_goal_motivation_notification_close_description_monthly_2">Nepamirškite savo %1$s mėnesio siekio! Liko %2$s!</string>

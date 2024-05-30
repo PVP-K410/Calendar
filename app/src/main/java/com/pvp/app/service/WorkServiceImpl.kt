@@ -20,11 +20,13 @@ import com.pvp.app.worker.AutocompleteWorker
 import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.GoalMotivationWorker
+import com.pvp.app.worker.MealPlanWorker
 import com.pvp.app.worker.TaskNotificationWorker
 import com.pvp.app.worker.TaskPointsDeductionWorker
 import com.pvp.app.worker.WeeklyActivityWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
@@ -137,6 +139,37 @@ class WorkServiceImpl @Inject constructor(
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             periodicRequest<GoalMotivationWorker>(
                 interval = 1,
+                timeUnit = TimeUnit.DAYS
+            )
+        )
+    }
+
+    override fun initiateMealPlanWorker() {
+        workManager.enqueueUniqueWork(
+            MealPlanWorker.WORKER_NAME,
+            ExistingWorkPolicy.REPLACE,
+            oneTimeRequest<MealPlanWorker>()
+        )
+
+        val daysDelay = LocalDate
+            .now().dayOfWeek.value
+            .let { dayOfWeek ->
+                if (dayOfWeek == 1) {
+                    0
+                } else {
+                    8 - dayOfWeek
+                }
+            }
+
+        workManager.enqueueUniquePeriodicWork(
+            MealPlanWorker.WORKER_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            periodicRequest<MealPlanWorker>(
+                delay = Duration.of(
+                    daysDelay.toLong(),
+                    ChronoUnit.DAYS
+                ),
+                interval = 7,
                 timeUnit = TimeUnit.DAYS
             )
         )

@@ -1,24 +1,28 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.pvp.app.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.pvp.app.R
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Notification
 import com.pvp.app.model.NotificationChannel
-import com.pvp.app.model.SportActivity
 import com.pvp.app.model.SportTask
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import java.time.LocalDate
-import java.time.LocalTime
+import kotlin.math.max
 
 @HiltWorker
 class DailyTaskWorker @AssistedInject constructor(
@@ -33,67 +37,71 @@ class DailyTaskWorker @AssistedInject constructor(
     workerParams
 ) {
 
-    companion object {
-
-        const val WORKER_NAME = "DailyTaskWorker"
-    }
-
     override suspend fun doWork(): Result {
-        return userService.user
-            .firstOrNull()
-            ?.let { user ->
-                try {
-                    val today = LocalDate.now()
-                    val tomorrow = LocalDate
-                        .now()
-                        .plusDays(1)
+        val user = userService.user.firstOrNull() ?: return Result.retry()
 
-                    val tasks = taskService
-                        .get(userEmail = user.email)
-                        .map { tasks ->
-                            tasks.filter { task ->
-                                task is SportTask &&
-                                        task.isDaily &&
-                                        task.date.isBefore(tomorrow)
-                            }
-                        }
-                        .first()
+        val now = LocalDate.now()
+        val tomorrow = now.plusDays(1)
 
-                    tasks
-                        .filter { it.date.isBefore(today) && !it.isCompleted }
-                        .forEach { task ->
-                            taskService.remove(task)
-                        }
-
-                    if (tasks.filter { it.date == today }.size >= configuration.dailyTaskCount) {
-                        return Result.success()
-                    }
-
-                    taskService.generateDaily(
-                        configuration.dailyTaskCount,
-                        user.hasDisability,
-                        user.email
-                    )
-
-                    postNotification()
-
-                    Result.success()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-
-                    Result.failure()
+        val tasks = taskService
+            .get(userEmail = user.email)
+            .mapLatest { tasks ->
+                tasks.filter { task ->
+                    task is SportTask &&
+                            task.isDaily &&
+                            task.date.isBefore(tomorrow)
                 }
             }
-            ?: Result.failure()
+            .first()
+
+        tasks
+            .filter { it.date.isBefore(now) && !it.isCompleted }
+            .forEach { task ->
+                taskService.remove(task)
+            }
+
+        val dailyTaskCount = tasks.filter { it.date.isEqual(now) }.size
+
+        if (dailyTaskCount >= configuration.dailyTaskCount) {
+            return Result.success()
+        }
+
+        return try {
+            taskService.generateDaily(
+                max(
+                    0,
+                    configuration.dailyTaskCount - dailyTaskCount
+                ),
+                user.hasDisability,
+                user.email
+            )
+
+            postNotification()
+
+            Result.success()
+        } catch (e: Exception) {
+            Log.e(
+                WORKER_NAME,
+                "Failed to generate daily tasks for ${user.email}. Retrying...",
+                e
+            )
+
+            Result.retry()
+        }
     }
 
     private fun postNotification() {
         notificationService.show(
             Notification(
                 channel = NotificationChannel.DailyTaskReminder,
-                title = "Daily Task Reminder",
-                text = "Your daily tasks have been created! Check them out in the app."
+                title = applicationContext.getString(R.string.worker_daily_notification_title),
+                text = applicationContext.getString(R.string.worker_daily_notification_description)
             )
         )
+    }
+
+    companion object {
+
+        const val WORKER_NAME = "DailyTaskWorker"
     }
 }
