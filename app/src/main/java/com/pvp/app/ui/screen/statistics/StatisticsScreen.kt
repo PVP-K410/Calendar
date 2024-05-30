@@ -1,9 +1,11 @@
 package com.pvp.app.ui.screen.statistics
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -73,6 +76,7 @@ fun StatisticsScreen(
     val localeGraphPast = stringResource(R.string.dashboard_graph_type_past)
     val localeMeasurementKCal = stringResource(R.string.measurement_kcal)
     val localeMeasurementSteps = stringResource(R.string.measurement_steps)
+    val localeMeasurementKm = stringResource(R.string.measurement_km)
     val state by model.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {
@@ -90,6 +94,7 @@ fun StatisticsScreen(
                 when (it) {
                     is GraphType.Chain.Calories -> localeMeasurementKCal
                     is GraphType.Chain.Steps -> localeMeasurementSteps
+                    is GraphType.Chain.Distance -> localeMeasurementKm
                     else -> ""
                 }
             }
@@ -122,6 +127,10 @@ fun StatisticsScreen(
         )
 
         tabs.values.elementAt(tab)()
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        StatisticsContainers(state)
     }
 }
 
@@ -204,13 +213,16 @@ private fun GraphOfDays(
     title: String,
     values: List<ActivityEntry>
 ) {
+    val localeAverage = stringResource(R.string.average)
+    val localeTotal = stringResource(R.string.total)
     val values = values.ifEmpty { listOf(ActivityEntry()) }
     var type by remember { mutableStateOf<GraphType.Chain>(GraphType.Chain.Steps) }
 
-    val selector: (ActivityEntry) -> Int = remember(type) {
+    val selector: (ActivityEntry) -> Double = remember(type) {
         when (type) {
-            GraphType.Chain.Calories -> { entry -> (entry.calories / 1000).toInt() }
-            GraphType.Chain.Steps -> { entry -> entry.steps.toInt() }
+            GraphType.Chain.Calories -> { entry -> entry.calories / 1000 }
+            GraphType.Chain.Steps -> { entry -> entry.steps.toDouble() }
+            GraphType.Chain.Distance -> { entry -> entry.steps * 0.00075 }
         }
     }
 
@@ -254,7 +266,14 @@ private fun GraphOfDays(
         Text(
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.labelMedium,
-            text = "${values.sumOf { selector(it) }} ${labelOfSum(type)}",
+            text = "$localeTotal: ${"%.2f".format(values.sumOf { selector(it) })} ${labelOfSum(type)}",
+            textAlign = TextAlign.End
+        )
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.labelMedium,
+            text = "$localeAverage: ${"%.2f".format(values.sumOf { selector(it) } / values.size)} ${labelOfSum(type)}",
             textAlign = TextAlign.End
         )
     }
@@ -335,11 +354,139 @@ private fun GraphsPast(
     )
 }
 
+@Composable
+fun StatisticsContainers(state: StatisticsState) {
+    val localeAverageTasksCompleted = stringResource(R.string.statistics_average_tasks_completed)
+    val localeAveragePoints = stringResource(R.string.statistics_average_points)
+    val localeTop3FrequentActivities = stringResource(R.string.statistics_top3_frequent_activities)
+    val localeUniqueActivities = stringResource(R.string.statistics_unique_activities)
+
+    StatisticsContainerColumn {
+        StatisticItem(
+            label = "$localeAverageTasksCompleted (7d):",
+            value = formatValue(state.averageTasksCompleted7d)
+        )
+
+        StatisticItem(
+            label = "$localeAverageTasksCompleted (30d):",
+            value = formatValue(state.averageTasksCompleted30d)
+        )
+
+        StatisticItem(
+            label = "$localeAveragePoints:",
+            value = formatValue(state.averagePoints)
+        )
+    }
+
+    StatisticsContainerColumn {
+        StatisticItem(
+            label = localeTop3FrequentActivities,
+            values = state.top3FrequentActivities
+        )
+
+        StatisticItem(
+            label = "$localeUniqueActivities (30d)",
+            values = state.uniqueActivities30d
+        )
+    }
+}
+
+
+@Composable
+fun StatisticsContainerColumn(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .background(
+                MaterialTheme.colorScheme.secondaryContainer,
+                RoundedCornerShape(8.dp)
+            )
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSecondaryContainer,
+                RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        content = content
+    )
+}
+
+@Composable
+fun StatisticItem(
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
+    }
+}
+
+@Composable
+fun StatisticItem(
+    label: String,
+    values: List<String>
+) {
+    if (values.isEmpty()) {
+        return
+    }
+
+    val chunkedValues = values.chunked((values.size + 2) / 3)
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            chunkedValues.forEach { columnValues ->
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    columnValues.forEach { value ->
+                        Text(
+                            text = "• $value",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 private sealed class GraphType(val title: @Composable () -> String) {
 
     data object Calories : GraphType({ stringResource(R.string.dashboard_calories) })
 
     data object Steps : GraphType({ stringResource(R.string.dashboard_steps) })
+
+    data object Distance : GraphType({ stringResource(R.string.dashboard_distance) })
 
     sealed class Chain(
         current: GraphType,
@@ -353,6 +500,11 @@ private sealed class GraphType(val title: @Composable () -> String) {
 
         data object Steps : Chain(
             GraphType.Steps,
+            GraphType.Distance
+        )
+
+        data object Distance : Chain(
+            GraphType.Distance,
             GraphType.Calories
         )
 
@@ -362,9 +514,20 @@ private sealed class GraphType(val title: @Composable () -> String) {
                 return when (type) {
                     is GraphType.Calories -> Calories
                     is GraphType.Steps -> Steps
+                    is GraphType.Distance -> Distance
                     else -> error("Unhandled graph type: $type")
                 }
             }
         }
+    }
+}
+
+fun formatValue(value: Double): String {
+    return if (value == value.toInt()
+            .toDouble()
+    ) {
+        "%.0f".format(value)
+    } else {
+        "%.2f".format(value)
     }
 }
