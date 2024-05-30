@@ -60,7 +60,7 @@ class MealPlanWorker @AssistedInject constructor(
             Result.success()
         } catch (e: Exception) {
             Log.e(
-                WORKER_NAME,
+                this::class.simpleName,
                 "Failed to generate meal plan for ${user.email}. Retrying...",
                 e
             )
@@ -77,10 +77,5 @@ class MealPlanWorker @AssistedInject constructor(
                 text = applicationContext.getString(R.string.worker_meal_plan_notification_description)
             )
         )
-    }
-
-    companion object {
-
-        const val WORKER_NAME = "MealPlanWorker"
     }
 }

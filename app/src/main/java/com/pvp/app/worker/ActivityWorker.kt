@@ -24,10 +24,8 @@ import java.util.concurrent.TimeUnit
 
 @HiltWorker
 class ActivityWorker @AssistedInject constructor(
-    @Assisted
-    context: Context,
-    @Assisted
-    workerParams: WorkerParameters,
+    @Assisted context: Context,
+    @Assisted workerParams: WorkerParameters,
     private val activityService: ActivityService,
     private val healthConnectService: HealthConnectService,
     private val userService: UserService
@@ -76,7 +74,7 @@ class ActivityWorker @AssistedInject constructor(
             )
         } catch (e: Exception) {
             Log.e(
-                WORKER_NAME,
+                this::class.simpleName,
                 "Failed to update ${user.email} activities. Retrying...",
                 e
             )
@@ -200,10 +198,5 @@ class ActivityWorker @AssistedInject constructor(
             start,
             end
         )
-    }
-
-    companion object {
-
-        const val WORKER_NAME = "ActivityWorker"
     }
 }

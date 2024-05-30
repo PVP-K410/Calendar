@@ -13,10 +13,8 @@ import dagger.assisted.AssistedInject
 
 @HiltWorker
 class AutocompleteWorker @AssistedInject constructor(
-    @Assisted
-    context: Context,
-    @Assisted
-    workerParams: WorkerParameters
+    @Assisted context: Context,
+    @Assisted workerParams: WorkerParameters
 ) : CoroutineWorker(
     context,
     workerParams
@@ -36,7 +34,7 @@ class AutocompleteWorker @AssistedInject constructor(
                 }
         } catch (e: Exception) {
             Log.e(
-                WORKER_NAME,
+                this::class.simpleName,
                 "Failed to start ${AutocompleteService::class.java.simpleName}. Retrying...",
                 e
             )
@@ -45,10 +43,5 @@ class AutocompleteWorker @AssistedInject constructor(
         }
 
         return Result.success()
-    }
-
-    companion object {
-
-        const val WORKER_NAME = "AutocompleteWorker"
     }
 }

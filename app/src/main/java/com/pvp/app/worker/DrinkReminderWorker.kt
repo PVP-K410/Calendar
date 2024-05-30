@@ -56,7 +56,7 @@ class DrinkReminderWorker @AssistedInject constructor(
             Result.success()
         } catch (e: Exception) {
             Log.e(
-                WORKER_NAME,
+                this::class.simpleName,
                 "Failed to initialize drink reminder listener. Retrying...",
                 e
             )
@@ -186,11 +186,6 @@ class DrinkReminderWorker @AssistedInject constructor(
             }
 
         return ids
-    }
-
-    companion object {
-
-        const val WORKER_NAME = "com.pvp.app.worker.DrinkReminderWorker"
     }
 }
 

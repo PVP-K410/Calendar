@@ -45,7 +45,7 @@ class WeeklyActivityWorker @AssistedInject constructor(
                 Result.success()
             } catch (e: Exception) {
                 Log.e(
-                    WORKER_NAME,
+                    this::class.simpleName,
                     "Failed to update ${user.email} weekly activities. Retrying...",
                     e
                 )
@@ -121,8 +121,6 @@ class WeeklyActivityWorker @AssistedInject constructor(
     }
 
     companion object {
-
-        const val WORKER_NAME = "WeeklyActivityWorker"
 
         val PERMISSIONS = setOf(
             HealthPermission.getReadPermission(ExerciseSessionRecord::class)

@@ -36,17 +36,12 @@ class TaskPointsDeductionWorker @AssistedInject constructor(
             Result.success()
         } catch (e: Exception) {
             Log.e(
-                WORKER_NAME,
+                this::class.simpleName,
                 "Failed to deduct task points for ${user.email}",
                 e
             )
 
             Result.retry()
         }
-    }
-
-    companion object {
-
-        const val WORKER_NAME = "TaskPointsDeductionWorker"
     }
 }

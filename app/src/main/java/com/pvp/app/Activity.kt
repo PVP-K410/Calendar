@@ -15,14 +15,19 @@ import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.api.WorkService
 import com.pvp.app.common.SplashScreenUtil.useStyledExit
 import com.pvp.app.ui.screen.layout.LayoutScreenBootstrap
 import com.pvp.app.ui.screen.layout.LayoutViewModel
 import com.pvp.app.ui.theme.CalendarTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class Activity : AppCompatActivity() {
+
+    @Inject
+    lateinit var workService: WorkService
 
     override fun onCreate(stateApp: Bundle?) {
         super.onCreate(stateApp)
@@ -50,7 +55,7 @@ class Activity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        (application as Application).createActivityWorker()
+        workService.initiateActivityWorker()
     }
 
     private fun isNotificationEnabled(context: Context): Boolean {
@@ -87,6 +92,7 @@ class Activity : AppCompatActivity() {
     }
 
     private fun showNotificationPermissionDialog(context: Context) {
+        // TODO: Translate alert dialog
         AlertDialog
             .Builder(context)
             .setTitle("Enable Notifications")

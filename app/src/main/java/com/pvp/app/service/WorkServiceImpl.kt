@@ -6,9 +6,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ListenableWorker
-import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
@@ -67,11 +65,7 @@ class WorkServiceImpl @Inject constructor(
         val now = System.currentTimeMillis()
 
         if ((now - lastExecuted) > TimeUnit.HOURS.toMillis(2)) {
-            workManager.enqueueUniqueWork(
-                ActivityWorker.WORKER_NAME,
-                ExistingWorkPolicy.REPLACE,
-                oneTimeRequest<ActivityWorker>()
-            )
+            workManager.oneTimeRequest<ActivityWorker>()
 
             preferences
                 .edit()
@@ -84,22 +78,14 @@ class WorkServiceImpl @Inject constructor(
     }
 
     override fun initiateAutocompleteWorker() {
-        workManager.enqueueUniquePeriodicWork(
-            AutocompleteWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            periodicRequest<AutocompleteWorker>(
-                interval = 15,
-                timeUnit = TimeUnit.MINUTES
-            )
+        workManager.periodicRequest<AutocompleteWorker>(
+            interval = 15,
+            timeUnit = TimeUnit.MINUTES
         )
     }
 
     override fun initiateDailyTaskWorker() {
-        workManager.enqueueUniqueWork(
-            DailyTaskWorker.WORKER_NAME,
-            ExistingWorkPolicy.REPLACE,
-            oneTimeRequest<DailyTaskWorker>()
-        )
+        workManager.oneTimeRequest<DailyTaskWorker>()
 
         val now = LocalDateTime.now()
 
@@ -108,90 +94,61 @@ class WorkServiceImpl @Inject constructor(
             .plusDays(1)
             .atStartOfDay()
 
-        workManager.enqueueUniquePeriodicWork(
-            DailyTaskWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            periodicRequest<DailyTaskWorker>(
-                delay = Duration.of(
-                    target.toEpochSecondTimeZoned() - now.toEpochSecondTimeZoned(),
-                    ChronoUnit.SECONDS
-                ),
-                interval = 1,
-                timeUnit = TimeUnit.DAYS
-            )
+        workManager.periodicRequest<DailyTaskWorker>(
+            delay = Duration.of(
+                target.toEpochSecondTimeZoned() - now.toEpochSecondTimeZoned(),
+                ChronoUnit.SECONDS
+            ),
+            interval = 1,
+            timeUnit = TimeUnit.DAYS
         )
     }
 
     override fun initiateDrinkReminderWorker() {
-        workManager.enqueueUniquePeriodicWork(
-            DrinkReminderWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            periodicRequest<DrinkReminderWorker>(
-                interval = 1,
-                timeUnit = TimeUnit.DAYS
-            )
+        workManager.periodicRequest<DrinkReminderWorker>(
+            interval = 1,
+            timeUnit = TimeUnit.DAYS
         )
     }
 
     override fun initiateGoalMotivationWorker() {
-        workManager.enqueueUniquePeriodicWork(
-            GoalMotivationWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            periodicRequest<GoalMotivationWorker>(
-                interval = 1,
-                timeUnit = TimeUnit.DAYS
-            )
+        workManager.periodicRequest<GoalMotivationWorker>(
+            interval = 1,
+            timeUnit = TimeUnit.DAYS
         )
     }
 
     override fun initiateMealPlanWorker() {
-        workManager.enqueueUniqueWork(
-            MealPlanWorker.WORKER_NAME,
-            ExistingWorkPolicy.REPLACE,
-            oneTimeRequest<MealPlanWorker>()
-        )
+        workManager.oneTimeRequest<MealPlanWorker>()
 
-        val daysDelay = LocalDate
-            .now().dayOfWeek.value
-            .let { dayOfWeek ->
-                if (dayOfWeek == 1) {
-                    0
-                } else {
-                    8 - dayOfWeek
-                }
-            }
-
-        workManager.enqueueUniquePeriodicWork(
-            MealPlanWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            periodicRequest<MealPlanWorker>(
-                delay = Duration.of(
-                    daysDelay.toLong(),
-                    ChronoUnit.DAYS
-                ),
-                interval = 7,
-                timeUnit = TimeUnit.DAYS
-            )
+        workManager.periodicRequest<MealPlanWorker>(
+            delay = Duration.of(
+                LocalDate
+                    .now().dayOfWeek.value
+                    .let { dayOfWeek ->
+                        if (dayOfWeek == 1) {
+                            0
+                        } else {
+                            8 - dayOfWeek
+                        }
+                    }
+                    .toLong(),
+                ChronoUnit.DAYS
+            ),
+            interval = 7,
+            timeUnit = TimeUnit.DAYS
         )
     }
 
     override fun initiateTaskNotificationWorker() {
-        workManager.enqueueUniquePeriodicWork(
-            TaskNotificationWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            periodicRequest<TaskNotificationWorker>(
-                interval = 1,
-                timeUnit = TimeUnit.DAYS
-            )
+        workManager.periodicRequest<TaskNotificationWorker>(
+            interval = 1,
+            timeUnit = TimeUnit.DAYS
         )
     }
 
     override fun initiateTaskPointsDeductionWorker() {
-        workManager.enqueueUniqueWork(
-            TaskPointsDeductionWorker.WORKER_NAME,
-            ExistingWorkPolicy.REPLACE,
-            oneTimeRequest<TaskPointsDeductionWorker>()
-        )
+        workManager.oneTimeRequest<TaskPointsDeductionWorker>()
 
         val now = LocalDateTime.now()
 
@@ -200,56 +157,56 @@ class WorkServiceImpl @Inject constructor(
             .plusDays(1)
             .atStartOfDay()
 
-        workManager.enqueueUniquePeriodicWork(
-            TaskPointsDeductionWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            periodicRequest<TaskPointsDeductionWorker>(
-                delay = Duration.of(
-                    target.toEpochSecondTimeZoned() - now.toEpochSecondTimeZoned(),
-                    ChronoUnit.SECONDS
-                ),
-                interval = 1,
-                timeUnit = TimeUnit.DAYS
-            )
+        workManager.periodicRequest<TaskPointsDeductionWorker>(
+            delay = Duration.of(
+                target.toEpochSecondTimeZoned() - now.toEpochSecondTimeZoned(),
+                ChronoUnit.SECONDS
+            ),
+            interval = 1,
+            timeUnit = TimeUnit.DAYS
         )
     }
 
     override fun initiateWeeklyActivitiesWorker() {
-        workManager.enqueueUniquePeriodicWork(
-            WeeklyActivityWorker.WORKER_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            periodicRequest<WeeklyActivityWorker>(
-                interval = 7,
-                timeUnit = TimeUnit.DAYS
-            )
+        workManager.periodicRequest<WeeklyActivityWorker>(
+            interval = 7,
+            timeUnit = TimeUnit.DAYS
         )
     }
 
     companion object {
 
-        private inline fun <reified T : ListenableWorker> oneTimeRequest(): OneTimeWorkRequest {
-            return OneTimeWorkRequestBuilder<T>()
-                .setNaiveDelay()
-                .build()
+        private inline fun <reified T : ListenableWorker> WorkManager.oneTimeRequest() {
+            enqueueUniqueWork(
+                T::class.java.name,
+                ExistingWorkPolicy.REPLACE,
+                OneTimeWorkRequestBuilder<T>()
+                    .setNaiveDelay()
+                    .build()
+            )
         }
 
-        private inline fun <reified T : ListenableWorker> periodicRequest(
+        private inline fun <reified T : ListenableWorker> WorkManager.periodicRequest(
             delay: Duration? = null,
             interval: Long,
             timeUnit: TimeUnit
-        ): PeriodicWorkRequest {
-            return PeriodicWorkRequestBuilder<T>(
-                repeatInterval = interval,
-                repeatIntervalTimeUnit = timeUnit
-            )
-                .apply {
-                    if (delay == null) {
-                        setNaiveDelay()
-                    } else {
-                        setInitialDelay(delay)
+        ) {
+            enqueueUniquePeriodicWork(
+                T::class.java.name + ".periodic",
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                PeriodicWorkRequestBuilder<T>(
+                    repeatInterval = interval,
+                    repeatIntervalTimeUnit = timeUnit
+                )
+                    .apply {
+                        if (delay == null) {
+                            setNaiveDelay()
+                        } else {
+                            setInitialDelay(delay)
+                        }
                     }
-                }
-                .build()
+                    .build()
+            )
         }
 
         private fun <T : WorkRequest.Builder<*, *>> T.setNaiveDelay(): T {

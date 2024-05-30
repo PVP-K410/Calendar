@@ -44,9 +44,4 @@ class TaskNotificationWorker @AssistedInject constructor(
 
         return Result.success()
     }
-
-    companion object {
-
-        const val WORKER_NAME = "com.pvp.app.worker.TaskNotificationWorker"
-    }
 }

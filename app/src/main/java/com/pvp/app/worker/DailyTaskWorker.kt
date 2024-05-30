@@ -62,6 +62,16 @@ class DailyTaskWorker @AssistedInject constructor(
 
         val dailyTaskCount = tasks.filter { it.date.isEqual(now) }.size
 
+        // TODO: Remove this log statement
+        println(
+            "Tasks to generate: ${
+                max(
+                    0,
+                    configuration.dailyTaskCount - dailyTaskCount
+                )
+            }"
+        )
+
         if (dailyTaskCount >= configuration.dailyTaskCount) {
             return Result.success()
         }
@@ -81,7 +91,7 @@ class DailyTaskWorker @AssistedInject constructor(
             Result.success()
         } catch (e: Exception) {
             Log.e(
-                WORKER_NAME,
+                this::class.simpleName,
                 "Failed to generate daily tasks for ${user.email}. Retrying...",
                 e
             )
@@ -98,10 +108,5 @@ class DailyTaskWorker @AssistedInject constructor(
                 text = applicationContext.getString(R.string.worker_daily_notification_description)
             )
         )
-    }
-
-    companion object {
-
-        const val WORKER_NAME = "DailyTaskWorker"
     }
 }

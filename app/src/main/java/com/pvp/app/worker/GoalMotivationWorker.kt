@@ -118,9 +118,4 @@ class GoalMotivationWorker @AssistedInject constructor(
 
         return Result.success()
     }
-
-    companion object {
-
-        const val WORKER_NAME = "com.pvp.app.worker.GoalMotivationWorker"
-    }
 }
