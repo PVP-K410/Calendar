@@ -37,8 +37,10 @@ class ProfileViewModel @Inject constructor(
 
     private val _state: MutableStateFlow<ProfileState> = MutableStateFlow(ProfileState())
     val state = _state.asStateFlow()
+
     val rangeMass = configuration.rangeMass
     val rangeHeight = configuration.rangeHeight
+    val rangeStepsPerDayGoal = configuration.rangeStepsPerDayGoal
     val intervalUsernameLength = configuration.intervalUsernameLength
 
     init {

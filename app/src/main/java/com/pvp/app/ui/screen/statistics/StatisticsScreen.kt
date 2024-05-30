@@ -1,7 +1,6 @@
 package com.pvp.app.ui.screen.statistics
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,11 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,7 +68,6 @@ import java.util.Locale
 @Composable
 fun StatisticsScreen(
     model: StatisticsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
 ) {
     val localeGraphOngoing = stringResource(R.string.dashboard_graph_type_ongoing)
     val localeGraphPast = stringResource(R.string.dashboard_graph_type_past)
@@ -84,10 +81,9 @@ fun StatisticsScreen(
     }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .padding(4.dp)
     ) {
         val labelOfSum = remember<(GraphType) -> String> {
             {
@@ -127,8 +123,6 @@ fun StatisticsScreen(
         )
 
         tabs.values.elementAt(tab)()
-
-        Spacer(modifier = Modifier.size(16.dp))
 
         StatisticsContainers(state)
     }
@@ -363,34 +357,37 @@ fun StatisticsContainers(state: StatisticsState) {
 
     StatisticsContainerColumn {
         StatisticItem(
-            label = "$localeAverageTasksCompleted (7d):",
+            label = "$localeAverageTasksCompleted 7d",
             value = formatValue(state.averageTasksCompleted7d)
         )
 
         StatisticItem(
-            label = "$localeAverageTasksCompleted (30d):",
+            label = "$localeAverageTasksCompleted 30d",
             value = formatValue(state.averageTasksCompleted30d)
         )
 
         StatisticItem(
-            label = "$localeAveragePoints:",
+            label = localeAveragePoints,
             value = formatValue(state.averagePoints)
         )
     }
 
-    StatisticsContainerColumn {
-        StatisticItem(
-            label = localeTop3FrequentActivities,
-            values = state.top3FrequentActivities
-        )
+    if (state.top3FrequentActivities.isNotEmpty() || state.uniqueActivities30d.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(16.dp))
 
-        StatisticItem(
-            label = "$localeUniqueActivities (30d)",
-            values = state.uniqueActivities30d
-        )
+        StatisticsContainerColumn {
+            StatisticItem(
+                label = localeTop3FrequentActivities,
+                values = state.top3FrequentActivities
+            )
+
+            StatisticItem(
+                label = "$localeUniqueActivities 30d",
+                values = state.uniqueActivities30d
+            )
+        }
     }
 }
-
 
 @Composable
 fun StatisticsContainerColumn(content: @Composable ColumnScope.() -> Unit) {
@@ -399,13 +396,8 @@ fun StatisticsContainerColumn(content: @Composable ColumnScope.() -> Unit) {
             .fillMaxWidth()
             .padding(8.dp)
             .background(
-                MaterialTheme.colorScheme.secondaryContainer,
-                RoundedCornerShape(8.dp)
-            )
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onSecondaryContainer,
-                RoundedCornerShape(8.dp)
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
             )
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -419,20 +411,22 @@ fun StatisticItem(
     value: String
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
 
         Text(
             text = value,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
@@ -451,18 +445,20 @@ fun StatisticItem(
     val chunkedValues = values.chunked((values.size + 2) / 3)
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 4.dp)
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             chunkedValues.forEach { columnValues ->
                 Column(
                     modifier = Modifier.weight(1f)
@@ -470,7 +466,7 @@ fun StatisticItem(
                     columnValues.forEach { value ->
                         Text(
                             text = "• $value",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
@@ -522,8 +518,9 @@ private sealed class GraphType(val title: @Composable () -> String) {
     }
 }
 
-fun formatValue(value: Double): String {
-    return if (value == value.toInt()
+private fun formatValue(value: Double): String {
+    return if (value == value
+            .toInt()
             .toDouble()
     ) {
         "%.0f".format(value)

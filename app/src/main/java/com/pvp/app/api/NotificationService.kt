@@ -1,5 +1,6 @@
 package com.pvp.app.api
 
+import android.content.Intent
 import com.pvp.app.model.Notification
 import com.pvp.app.model.Task
 import java.time.Duration
@@ -39,6 +40,11 @@ interface NotificationService {
     )
 
     /**
+     * Processes a notification request from the broadcast receiver.
+     */
+    fun processNotificationRequest(intent: Intent)
+
+    /**
      * Cancels a scheduled notification.
      * @param notification The notification to cancel.
      */
@@ -60,4 +66,37 @@ interface NotificationService {
      * Converts task object to a notification object.
      */
     suspend fun getNotificationForTask(task: Task): Notification?
+
+    companion object {
+
+        /**
+         * The value used to identify the broadcast receiver handler.
+         * Value should be [String].
+         */
+        const val BROADCAST_RECEIVER_HANDLER_ID = "notification"
+
+        /**
+         * The key used to identify the broadcast receiver notification channel id.
+         * Value should be [String].
+         */
+        const val BROADCAST_RECEIVER_NOTIFICATION_CHANNEL_ID = "notificationChannelId"
+
+        /**
+         * The key used to identify the broadcast receiver notification id.
+         * Value should be [Int].
+         */
+        const val BROADCAST_RECEIVER_NOTIFICATION_ID = "notificationId"
+
+        /**
+         * The key used to identify the broadcast receiver notification text.
+         * Value should be [String].
+         */
+        const val BROADCAST_RECEIVER_NOTIFICATION_TEXT = "notificationText"
+
+        /**
+         * The key used to identify the broadcast receiver notification title.
+         * Value should be [String].
+         */
+        const val BROADCAST_RECEIVER_NOTIFICATION_TITLE = "notificationTitle"
+    }
 }

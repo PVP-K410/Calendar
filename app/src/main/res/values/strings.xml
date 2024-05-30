@@ -54,12 +54,31 @@
     <string name="average">Average</string>
     <string name="dashboard_7_days">7 Days</string>
     <string name="dashboard_30_days">30 Days</string>
+    <string name="dashboard_activity_tracking">Activity tracking</string>
+    <string name="dashboard_BPM" translatable="false">BPM</string>
     <string name="dashboard_calories">Calories</string>
+    <string name="dashboard_decoration_buy">Purchase new decorations</string>
+    <string name="dashboard_decoration_count">Currently you have %1$s decorations 😵\n\nDecorations make you, your avatar unique! Your avatar is showcased to your friends, let them know who\'s looking the best 😉\n\nYou can earn decorations just by increasing daily return streak or by purchasing from the decorations screen.</string>
+    <string name="dashboard_decoration_count_none">Oh no… You don\'t have any decorations. 😞\n\nDecorations make you, your avatar unique! Your avatar is showcased to your friends, let them know who\'s looking the best 😉\n\nYou can earn decorations just by increasing daily return streak or by purchasing from the decorations screen. Try it, it\s worth it.</string>
     <string name="dashboard_distance">Distance</string>
+    <string name="dashboard_friend_add">View friends information</string>
+    <string name="dashboard_friend_add_none">Add friends</string>
+    <string name="dashboard_friend_count">You currently have %1$s friends. That\'s awesome! 🙌\n\nFriends help and motivate you to keep reaching your goals. In case you want to add more friends, just go to the friends screen and enter their email in request form. 😉</string>
+    <string name="dashboard_friend_count_none">Hey. 🙋 Friends help and motivate you to keep reaching your goals. Currently you do not have any friends added, but that\'s fine. 🤷\n\nYou can add your friends anytime when they join us! Just go to the friends screen and send a friend request to their email.\n\nIt\'s more fun with friends 😉</string>
+    <string name="dashboard_goals">Goals</string>
+    <string name="dashboard_goals_completed">Completed goals:</string>
+    <string name="dashboard_goals_create">Create a new goal</string>
     <string name="dashboard_graph_type_ongoing">Ongoing</string>
     <string name="dashboard_graph_type_past">Past</string>
+    <string name="dashboard_healthconnect_not_enabled">We are sad to see you have not enabled \"Health Connect\" 🥲\n\nEnabling \"Health Connect\" would help us to provide more functionality for you! 😊 We believe that these functionalities will help you a lot.\n\nYou can enable \"Health Connect\" from our application\'s settings screen, under 3rd party services section.</string>
     <string name="dashboard_month">Month</string>
+    <string name="dashboard_notification_not_enabled">We are sad to see you have not enabled all notifications from our application! 🥲\n\nEnabling notifications would help us to provide reminders to drink water, complete your tasks, inform about your active friends and many more functionalities! 💪\n\nYou can enable notifications by going to your device settings, finding our application and enabling notifications for it.</string>
+    <string name="dashboard_settings">Go to app settings</string>
     <string name="dashboard_steps">Steps</string>
+    <string name="dashboard_tasks">Today\'s tasks</string>
+    <string name="dashboard_tasks_completed">Completed tasks:</string>
+    <string name="dashboard_tasks_create">Create a new task</string>
+    <string name="dashboard_tasks_not_found">No tasks of this type found</string>
     <string name="dashboard_week">Week</string>
     <string name="decorations_error">Error has occurred while processing</string>
     <string name="decorations_error_funds">Not enough points to purchase this decoration</string>
@@ -151,7 +170,7 @@
     <string name="goals_card_average_weekly_steps">Your average weekly steps %1$s</string>
     <string name="goals_card_completed">%1$s goal is completed!</string>
     <string name="goals_card_completed_description_km">Your goal was %1$.2f km</string>
-    <string name="goals_card_completed_description_steps">Your goal was %1$.2f steps</string>
+    <string name="goals_card_completed_description_steps">Your goal was %1$s steps</string>
     <string name="goals_card_goal">Goal</string>
     <string name="goals_card_km" translatable="false">%1$.2f km</string>
     <string name="goals_card_km_progress" translatable="false">%1$.2f / %2$.2f km</string>
@@ -243,6 +262,9 @@
     <string name="input_field_scheduled_at_label">Scheduled At</string>
     <string name="input_field_steps_edit_label">Editing steps</string>
     <string name="input_field_steps_label">Steps</string>
+    <string name="input_field_steps_per_day_goal_edit_label">Editing daily steps count</string>
+    <string name="input_field_steps_per_day_goal_label">Daily steps count goal</string>
+    <string name="input_field_steps_per_day_goal_success">Your daily steps count goal has been updated</string>
     <string name="input_field_task_delete_confirm_description">If task is deleted, it cannot be recovered</string>
     <string name="input_field_task_delete_confirm_label">Are you sure you want to delete this task?</string>
     <string name="input_field_title_edit_label">Editing title</string>
@@ -275,6 +297,10 @@
     <string name="measurement_m" translatable="false">m</string>
     <string name="measurement_minutes" translatable="false">min</string>
     <string name="measurement_steps">steps</string>
+    <string name="notifications_request_dialog_button_cancel">Cancel</string>
+    <string name="notifications_request_dialog_button_settings">Go to Settings</string>
+    <string name="notifications_request_dialog_message">Only if you have enabled notifications we will be able to inform you about your and your friends progresses, remind you to drink water, inform about incoming tasks and way more. We are going to make sure that you will get only the best experience out of this!</string>
+    <string name="notifications_request_dialog_title">Enable Notifications</string>
     <string name="profile_button_delete">Delete Account</string>
     <string name="profile_button_delete_confirm_description">Your account will be permanently deleted and recovery will not be possible</string>
     <string name="profile_button_delete_confirm_input_label">To confirm, please enter your username \"%1$s\" in the box below:</string>
@@ -283,6 +309,7 @@
     <string name="profile_button_delete_error_incorrect">You entered an incorrect username</string>
     <string name="profile_button_delete_success">Account has been deleted successfully</string>
     <string name="route_calendar">Calendar</string>
+    <string name="route_dashboard">Dashboard</string>
     <string name="route_decorations">Decorations</string>
     <string name="route_friend">%1$s profile</string>
     <string name="route_friends">Friends</string>
@@ -359,6 +386,10 @@
     <string name="worker_activity_notification_single_activity">Participating in %1$s will give you more points this week!</string>
     <string name="worker_activity_notification_title">Weekly Activities</string>
     <string name="worker_activity_notification_wheelchair_activities">Participating in %1$s activities will give you more points this week!</string>
+    <string name="worker_autocomplete_notification_description">We are reading your sport activity and processing your created tasks, set goals and more in real-time.</string>
+    <string name="worker_autocomplete_notification_title">Activity Processing</string>
+    <string name="worker_daily_notification_description">Your daily tasks have been generated! Check them out in the application</string>
+    <string name="worker_daily_notification_title">Daily Tasks</string>
     <string name="worker_goal_motivation_notification_close_description_monthly">You have a %1$s goal to achieve this month (%2$s). Keep going!</string>
     <string name="worker_goal_motivation_notification_close_description_weekly">You have a %1$s goal to achieve this week (%2$s). Keep going!</string>
     <string name="worker_goal_motivation_notification_close_description_monthly_1">%2$s left! Finish your %1$s monthly goal!</string>

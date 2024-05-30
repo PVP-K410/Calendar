@@ -107,7 +107,7 @@ private fun rememberRoute(controller: NavHostController): Pair<Route, NavDestina
             Routes.authenticated.find {
                 it.path == destination?.route ||
                         it.path == destination?.parent?.route
-            } ?: Routes.Calendar,
+            } ?: Routes.Dashboard,
             destination
         )
     }
@@ -189,7 +189,7 @@ private fun Content(
         when (it) {
             0 -> Router(
                 controller = controller,
-                start = Routes.Calendar,
+                start = Routes.Dashboard,
                 routeModifier = modifier,
                 routes = Routes.authenticated
             )

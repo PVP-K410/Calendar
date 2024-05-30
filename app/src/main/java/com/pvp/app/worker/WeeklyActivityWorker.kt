@@ -1,6 +1,8 @@
 package com.pvp.app.worker
 
 import android.content.Context
+import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.hilt.work.HiltWorker
@@ -17,6 +19,9 @@ import com.pvp.app.model.SportActivity
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.firstOrNull
+import java.time.LocalDate
+import java.time.temporal.WeekFields
+import java.util.Locale
 
 @HiltWorker
 class WeeklyActivityWorker @AssistedInject constructor(
@@ -31,38 +36,44 @@ class WeeklyActivityWorker @AssistedInject constructor(
     workerParams
 ) {
 
-    companion object {
-
-        const val WORKER_NAME = "WeeklyActivityWorker"
-    }
-
     override suspend fun doWork(): Result {
-        val permissions = setOf(
-            HealthPermission.getReadPermission(
-                ExerciseSessionRecord::class
-            )
-        )
+        return if (healthConnectService.permissionsGranted(PERMISSIONS)) {
+            val user = userService.user.firstOrNull() ?: return Result.retry()
 
-        return if (healthConnectService.permissionsGranted(permissions)) {
+            val week = LocalDate
+                .now()
+                .get(
+                    WeekFields
+                        .of(AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault())
+                        .weekOfWeekBasedYear()
+                )
+
+            if (user.lastWeeklyActivitiesGeneratedWeek >= week) {
+                return Result.success()
+            }
+
             val activities = getRandomInfrequentActivities()
 
-            postActivityNotification(activities)
+            try {
+                userService.merge(
+                    user.copy(
+                        lastWeeklyActivitiesGeneratedWeek = week,
+                        weeklyActivities = activities
+                    )
+                )
 
-            userService.user
-                .firstOrNull()
-                ?.let { user ->
-                    try {
-                        userService.merge(
-                            user.copy(
-                                weeklyActivities = activities
-                            )
-                        )
+                postActivityNotification(activities)
 
-                        Result.success()
-                    } catch (e: Exception) {
-                        Result.failure()
-                    }
-                } ?: Result.failure()
+                Result.success()
+            } catch (e: Exception) {
+                Log.e(
+                    this::class.simpleName,
+                    "Failed to update ${user.email} weekly activities. Retrying...",
+                    e
+                )
+
+                Result.retry()
+            }
         } else {
             Result.failure()
         }
@@ -128,6 +139,13 @@ class WeeklyActivityWorker @AssistedInject constructor(
                 title = applicationContext.getString(R.string.worker_activity_notification_title),
                 text = formNotificationBody(activities)
             )
+        )
+    }
+
+    companion object {
+
+        val PERMISSIONS = setOf(
+            HealthPermission.getReadPermission(ExerciseSessionRecord::class)
         )
     }
 }

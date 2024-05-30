@@ -3,6 +3,8 @@ package com.pvp.app.common
 import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit
 
 object TimeUtil {
 
@@ -38,6 +40,22 @@ object TimeUtil {
             format(DateTimeFormatter.ofPattern("HH:mm")) + " - " +
                     plus(range)
                         .format(DateTimeFormatter.ofPattern("HH:mm"))
+        }
+    }
+
+    /**
+     * Converts TimeUnit to ChronoUnit
+     */
+    fun TimeUnit.asChronoUnit(): ChronoUnit {
+        return when (this) {
+            TimeUnit.NANOSECONDS -> ChronoUnit.NANOS
+            TimeUnit.MICROSECONDS -> ChronoUnit.MICROS
+            TimeUnit.MILLISECONDS -> ChronoUnit.MILLIS
+            TimeUnit.SECONDS -> ChronoUnit.SECONDS
+            TimeUnit.MINUTES -> ChronoUnit.MINUTES
+            TimeUnit.HOURS -> ChronoUnit.HOURS
+            TimeUnit.DAYS -> ChronoUnit.DAYS
+            else -> error("Unsupported time unit: $this")
         }
     }
 }

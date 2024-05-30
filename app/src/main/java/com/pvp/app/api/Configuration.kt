@@ -66,6 +66,11 @@ interface Configuration {
     val rangeReminderMinutes: List<Int>
 
     /**
+     * Steps per day goal values for the user to select from.
+     */
+    val rangeStepsPerDayGoal: List<Int>
+
+    /**
      * The inclusive interval of hours during which water drinking reminders are being sent.
      * Represents a range from startHour to endHour.
      */

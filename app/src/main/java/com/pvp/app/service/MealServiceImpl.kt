@@ -34,9 +34,7 @@ class MealServiceImpl @Inject constructor(
     )
 
     override suspend fun generateWeekPlan(): Map<DayOfWeek, List<Meal>> {
-        val user = userService.user.firstOrNull()
-
-        user ?: error("User is not logged in")
+        val user = userService.user.firstOrNull() ?: error("User is not logged in")
 
         val meals = get()
             .first()

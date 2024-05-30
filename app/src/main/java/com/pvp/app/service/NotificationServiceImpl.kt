@@ -13,6 +13,7 @@ import com.pvp.app.Activity
 import com.pvp.app.R
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.SettingService
+import com.pvp.app.model.GlobalReceiverConstants
 import com.pvp.app.model.Notification
 import com.pvp.app.model.NotificationChannel
 import com.pvp.app.model.Setting
@@ -84,6 +85,40 @@ class NotificationServiceImpl @Inject constructor(
         )
     }
 
+    override fun processNotificationRequest(intent: Intent) {
+        val channelId = intent.getStringExtra(
+            NotificationService.BROADCAST_RECEIVER_NOTIFICATION_CHANNEL_ID
+        ) ?: ""
+
+        val channel = NotificationChannel.fromChannelId(channelId)
+
+        if (channel == NotificationChannel.Unknown) {
+            error("Unknown notification channel id")
+        }
+
+        val id = intent.getIntExtra(
+            NotificationService.BROADCAST_RECEIVER_NOTIFICATION_ID,
+            0
+        )
+
+        val text = intent.getStringExtra(
+            NotificationService.BROADCAST_RECEIVER_NOTIFICATION_TEXT
+        ) ?: ""
+
+        val title = intent.getStringExtra(
+            NotificationService.BROADCAST_RECEIVER_NOTIFICATION_TITLE
+        ) ?: ""
+
+        show(
+            notification = Notification(
+                channel = channel,
+                id = id,
+                text = text,
+                title = title
+            )
+        )
+    }
+
     private fun postNotification(
         notification: Notification,
         triggerAtMillis: Long
@@ -94,27 +129,32 @@ class NotificationServiceImpl @Inject constructor(
 
         val intent = Intent(
             context,
-            NotificationReceiver::class.java
+            GlobalReceiver::class.java
         )
             .apply {
                 putExtra(
-                    "notificationId",
-                    notification.id
+                    GlobalReceiverConstants.HANDLER_ID,
+                    NotificationService.BROADCAST_RECEIVER_HANDLER_ID
                 )
 
                 putExtra(
-                    "notificationChannelId",
+                    NotificationService.BROADCAST_RECEIVER_NOTIFICATION_CHANNEL_ID,
                     notification.channel.channelId
                 )
 
                 putExtra(
-                    "notificationTitle",
-                    notification.title
+                    NotificationService.BROADCAST_RECEIVER_NOTIFICATION_ID,
+                    notification.id
                 )
 
                 putExtra(
-                    "notificationText",
+                    NotificationService.BROADCAST_RECEIVER_NOTIFICATION_TEXT,
                     notification.text
+                )
+
+                putExtra(
+                    NotificationService.BROADCAST_RECEIVER_NOTIFICATION_TITLE,
+                    notification.title
                 )
             }
 
@@ -158,17 +198,33 @@ class NotificationServiceImpl @Inject constructor(
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        val silent = with(LocalTime.now()) {
+            this >= LocalTime.of(
+                22,
+                0
+            ) || this <= LocalTime.of(
+                8,
+                0
+            )
+        }
+
         val notificationAndroid = NotificationCompat
             .Builder(
                 context,
                 notification.channel.channelId
             )
-            .setContentTitle(notification.title)
-            .setContentText(notification.text)
-            .setSmallIcon(R.drawable.logo)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setContentText(notification.text)
+            .setContentTitle(notification.title)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSilent(silent)
+            .setSmallIcon(R.drawable.logo)
+            .setStyle(
+                NotificationCompat
+                    .BigTextStyle()
+                    .bigText(notification.text)
+            )
             .build()
 
         val manager = NotificationManagerCompat.from(context)
@@ -190,8 +246,14 @@ class NotificationServiceImpl @Inject constructor(
     private fun cancelNotification(id: Int) {
         val intent = Intent(
             context,
-            NotificationReceiver::class.java
+            GlobalReceiver::class.java
         )
+            .apply {
+                putExtra(
+                    GlobalReceiverConstants.HANDLER_ID,
+                    NotificationService.BROADCAST_RECEIVER_HANDLER_ID
+                )
+            }
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -201,8 +263,10 @@ class NotificationServiceImpl @Inject constructor(
         )
 
         pendingIntent?.let {
-            val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val manager = context.getSystemService(AlarmManager::class.java)
+
             manager.cancel(it)
+
             it.cancel()
         }
     }

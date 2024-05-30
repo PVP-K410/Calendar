@@ -87,6 +87,7 @@ import coil.transform.Transformation
 import com.pvp.app.R
 import com.pvp.app.ui.common.ImageUtil.requestImage
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 @Composable
 fun AsyncImage(
@@ -420,6 +421,58 @@ fun InfoTooltip(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = "Additional information",
                 tint = iconTint
+            )
+        }
+    }
+}
+
+@Composable
+fun StepsGoal(
+    current: Int,
+    modifier: Modifier,
+    target: Int
+) {
+    val progress = current / max(
+        1.0,
+        target.toDouble()
+    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize(fraction = 1f)
+            .padding(bottom = 4.dp)
+    ) {
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.onSecondary.orInDarkTheme(MaterialTheme.colorScheme.secondary),
+            modifier = modifier,
+            progress = { progress.toFloat() },
+            strokeCap = StrokeCap.Round,
+            trackColor = MaterialTheme.colorScheme.secondary.orInDarkTheme(MaterialTheme.colorScheme.onSecondary)
+        )
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.align(Alignment.Center),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                style = MaterialTheme.typography.titleLarge,
+                text = "%d".format(current),
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                style = MaterialTheme.typography.titleSmall,
+                text = "%.2f%%".format(progress * 100),
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                fontSize = 10.sp,
+                style = MaterialTheme.typography.titleSmall,
+                text = "/ %d".format(target),
+                textAlign = TextAlign.Center
             )
         }
     }

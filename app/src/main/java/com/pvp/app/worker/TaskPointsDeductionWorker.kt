@@ -1,6 +1,7 @@
 package com.pvp.app.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -22,27 +23,25 @@ class TaskPointsDeductionWorker @AssistedInject constructor(
     workerParams
 ) {
 
-    companion object {
-
-        const val WORKER_NAME = "TaskPointsDeductionWorker"
-    }
-
     override suspend fun doWork(): Result {
-        return userService.user
-            .firstOrNull()
-            ?.let {
-                try {
-                    pointService.deduct(
-                        LocalDate
-                            .now()
-                            .minusDays(1)
-                    )
+        val user = userService.user.firstOrNull() ?: return Result.retry()
 
-                    Result.success()
-                } catch (e: Exception) {
-                    Result.failure()
-                }
-            }
-            ?: Result.failure()
+        return try {
+            pointService.deduct(
+                LocalDate
+                    .now()
+                    .minusDays(1)
+            )
+
+            Result.success()
+        } catch (e: Exception) {
+            Log.e(
+                this::class.simpleName,
+                "Failed to deduct task points for ${user.email}",
+                e
+            )
+
+            Result.retry()
+        }
     }
 }

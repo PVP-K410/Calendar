@@ -7,11 +7,13 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import com.pvp.app.R
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.GoalService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.FlowUtil.firstOr
 import com.pvp.app.model.ExerciseSessionInfo
 import com.pvp.app.model.Goal
 import com.pvp.app.model.SportTask
@@ -46,16 +48,6 @@ class AutocompleteService : Service() {
 
     @Inject
     lateinit var userService: UserService
-
-    companion object {
-
-        private const val NOTIFICATION_ID = Int.MAX_VALUE
-        private val PERMISSIONS = setOf(
-            HealthPermission.getReadPermission(
-                ExerciseSessionRecord::class
-            )
-        )
-    }
 
     private fun checkTaskCompletion(
         tasks: List<SportTask>,
@@ -151,8 +143,17 @@ class AutocompleteService : Service() {
                 this,
                 com.pvp.app.model.NotificationChannel.TaskAutocomplete.channelId
             )
-            .setContentTitle("Task Processing")
-            .setContentText("Processing your tasks in the background")
+            .setContentText(applicationContext.getString(R.string.worker_autocomplete_notification_description))
+            .setContentTitle(applicationContext.getString(R.string.worker_autocomplete_notification_title))
+            .setOngoing(true)
+            .setSilent(true)
+            .setSmallIcon(R.drawable.logo)
+            .setStyle(
+                NotificationCompat
+                    .BigTextStyle()
+                    .bigText(applicationContext.getString(R.string.worker_autocomplete_notification_description))
+
+            )
             .build()
     }
 
@@ -187,16 +188,12 @@ class AutocompleteService : Service() {
     }
 
     private suspend fun getGoals(): List<Goal> {
-        return userService.user
-            .firstOrNull()
-            ?.let { user ->
-                goalService
-                    .get(user.email)
-                    .firstOrNull()
-                    ?.filter {
-                        it.endDate.isAfter(LocalDate.now())
-                    }
-            } ?: emptyList()
+        val user = userService.user.firstOrNull() ?: return emptyList()
+
+        return goalService
+            .get(user.email)
+            .firstOr(emptyList())
+            .filter { it.endDate.isAfter(LocalDate.now()) }
     }
 
     private suspend fun getSteps(goal: Goal): Long {
@@ -211,20 +208,18 @@ class AutocompleteService : Service() {
     }
 
     private suspend fun getTasks(): List<SportTask> {
-        return userService.user
-            .firstOrNull()
-            ?.let { user ->
-                taskService
-                    .get(userEmail = user.email)
-                    .map { tasks ->
-                        tasks
-                            .mapNotNull { it as? SportTask }
-                            .filter { task ->
-                                task.date.isEqual(LocalDate.now())
-                            }
+        val user = userService.user.firstOrNull() ?: return emptyList()
+
+        return taskService
+            .get(userEmail = user.email)
+            .map { tasks ->
+                tasks
+                    .mapNotNull { it as? SportTask }
+                    .filter { task ->
+                        task.date.isEqual(LocalDate.now())
                     }
-                    .first()
-            } ?: emptyList()
+            }
+            .first()
     }
 
     override fun onStartCommand(
@@ -235,34 +230,35 @@ class AutocompleteService : Service() {
         val notification = createNotification()
 
         startForeground(
-            NOTIFICATION_ID,
+            notification.channelId.hashCode(),
             notification
         )
 
-        CoroutineScope(Dispatchers.IO).launch {
-            if (healthConnectService.permissionsGranted(PERMISSIONS)) {
-                val tasks = getTasks()
-                    .sortedBy { task -> task.time }
+        CoroutineScope(Dispatchers.IO)
+            .launch {
+                if (healthConnectService.permissionsGranted(PERMISSIONS)) {
+                    val tasks = getTasks()
+                        .sortedBy { task -> task.time }
 
-                val goals = getGoals()
+                    val goals = getGoals()
 
-                val exercises = getActivities(LocalDate.now())
-                    .map { exercise ->
-                        exerciseService.getExerciseInfo(exercise)
-                    }
+                    val exercises = getActivities(LocalDate.now())
+                        .map { exercise ->
+                            exerciseService.getExerciseInfo(exercise)
+                        }
 
-                val completedTasks = checkTaskCompletion(
-                    tasks,
-                    exercises
-                )
+                    val completedTasks = checkTaskCompletion(
+                        tasks,
+                        exercises
+                    )
 
-                val completedGoals = checkGoalCompletion(goals)
+                    val completedGoals = checkGoalCompletion(goals)
 
-                updateGoals(completedGoals)
+                    updateGoals(completedGoals)
 
-                updateTasks(completedTasks)
+                    updateTasks(completedTasks)
+                }
             }
-        }
 
         return START_REDELIVER_INTENT
     }
@@ -285,5 +281,12 @@ class AutocompleteService : Service() {
         tasks.forEach { task ->
             taskService.update(task)
         }
+    }
+
+    companion object {
+
+        private val PERMISSIONS = setOf(
+            HealthPermission.getReadPermission(ExerciseSessionRecord::class)
+        )
     }
 }

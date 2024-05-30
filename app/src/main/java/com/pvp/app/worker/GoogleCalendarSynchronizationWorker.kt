@@ -2,7 +2,6 @@ package com.pvp.app.worker
 
 import android.content.Context
 import android.util.Log
-import androidx.core.content.edit
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -40,12 +39,6 @@ class GoogleCalendarSynchronizationWorker @AssistedInject constructor(
             PREFERENCES_NAME,
             Context.MODE_PRIVATE
         )
-
-        preferences.edit {
-            clear()
-
-            commit()
-        }
 
         val lastSync = preferences.getLong(
             LAST_SYNC_KEY,

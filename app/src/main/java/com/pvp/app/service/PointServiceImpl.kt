@@ -8,6 +8,7 @@ import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.Goal
+import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.MealTask
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
@@ -156,9 +157,7 @@ class PointServiceImpl @Inject constructor(
         )
     }
 
-    override suspend fun deduct(
-        date: LocalDate
-    ) {
+    override suspend fun deduct(date: LocalDate) {
         val taskService = taskServiceProvider.get()
         val user = userService.user.firstOrNull() ?: error("User not found while deducting points")
 
@@ -166,6 +165,7 @@ class PointServiceImpl @Inject constructor(
             .get(user.email)
             .mapLatest {
                 it
+                    .filter { task -> task !is GoogleTask }
                     .filter { task -> !task.isCompleted }
                     .filter { task -> !task.points.isExpired }
                     .filter { task ->
@@ -181,42 +181,21 @@ class PointServiceImpl @Inject constructor(
             taskService.update(it)
         }
 
-        user.points -= minOf(
-            tasks.size,
-            configuration.limitPointsDeduction
+        user.points = maxOf(
+            0,
+            user.points - minOf(
+                tasks.size,
+                configuration.limitPointsDeduction
+            )
         )
 
         userService.merge(user)
     }
 
     private fun Task.markExpired(): Task {
-        return when (this) {
-            is CustomMealTask -> {
-                CustomMealTask.copy(
-                    points = this.points.copy(
-                        isExpired = true
-                    ),
-                    task = this
-                )
-            }
-
-            is SportTask -> {
-                SportTask.copy(
-                    points = this.points.copy(
-                        isExpired = true
-                    ),
-                    task = this
-                )
-            }
-
-            else -> {
-                Task.copy(
-                    points = this.points.copy(
-                        isExpired = true
-                    ),
-                    task = this
-                )
-            }
-        }
+        return Task.copy(
+            points = this.points.copy(isExpired = true),
+            task = this
+        )
     }
 }

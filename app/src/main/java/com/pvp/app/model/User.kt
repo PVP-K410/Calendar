@@ -18,9 +18,11 @@ data class User(
     @Contextual
     var lastActivitySync: Timestamp? = null,
     var lastMealPlanGeneratedWeek: Int = 0,
+    var lastWeeklyActivitiesGeneratedWeek: Int = 0,
     var level: Int = 0,
     var mass: Int = 0,
     var points: Int = 0,
+    var stepsPerDayGoal: Int = 10000,
     val streak: Streak = Streak(),
     val surveys: List<Survey> = emptyList(),
     var username: String = "",

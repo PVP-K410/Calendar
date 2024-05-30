@@ -309,6 +309,7 @@ fun ProfileScreen(
                 onUpdateIngredients = { viewModel.update { u -> u.ingredients = it } },
                 onUpdateHeight = { viewModel.update { u -> u.height = it } },
                 onUpdateMass = { viewModel.update { u -> u.mass = it } },
+                onUpdateStepsPerDayGoal = { viewModel.update { u -> u.stepsPerDayGoal = it } },
                 state = state
             )
 
@@ -325,6 +326,7 @@ private fun Properties(
     onUpdateHeight: (Int) -> Unit,
     onUpdateIngredients: (List<Ingredient>) -> Unit,
     onUpdateMass: (Int) -> Unit,
+    onUpdateStepsPerDayGoal: (Int) -> Unit,
     state: ProfileState
 ) {
     val activities = SportActivity.entries.associateBy { it.title() }
@@ -396,18 +398,35 @@ private fun Properties(
 
         EditablePickerItem(
             editLabel = stringResource(R.string.input_field_diet_edit_label),
-            label = stringResource(R.string.input_field_diet_label),
-            value = state.user.diet,
-            valueLabel = { it.title },
             items = Diet.entries,
             itemsLabel = { it.title },
+            label = stringResource(R.string.input_field_diet_label),
             onValueChange = {
                 onUpdateDiet(it)
 
                 showSnackbar(localeSuccessDiet)
-            }
+            },
+            value = state.user.diet,
+            valueLabel = { it.title }
         )
 
+        val localeSuccessStepsPerDayGoal = stringResource(
+            R.string.input_field_steps_per_day_goal_success
+        )
+
+        EditablePickerItem(
+            editLabel = stringResource(R.string.input_field_steps_per_day_goal_edit_label),
+            items = model.rangeStepsPerDayGoal,
+            itemsLabel = { it.toString() },
+            label = stringResource(R.string.input_field_steps_per_day_goal_label),
+            onValueChange = {
+                onUpdateStepsPerDayGoal(it)
+
+                showSnackbar(localeSuccessStepsPerDayGoal)
+            },
+            value = state.user.stepsPerDayGoal,
+            valueLabel = { "$it ${stringResource(R.string.measurement_steps)}" }
+        )
 
         WeeklyActivitiesItem(
             title = stringResource(R.string.input_field_weekly_activities_label),

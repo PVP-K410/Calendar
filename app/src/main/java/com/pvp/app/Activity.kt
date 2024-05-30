@@ -15,21 +15,26 @@ import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.api.WorkService
 import com.pvp.app.common.SplashScreenUtil.useStyledExit
 import com.pvp.app.ui.screen.layout.LayoutScreenBootstrap
 import com.pvp.app.ui.screen.layout.LayoutViewModel
 import com.pvp.app.ui.theme.CalendarTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class Activity : AppCompatActivity() {
+
+    @Inject
+    lateinit var workService: WorkService
 
     override fun onCreate(stateApp: Bundle?) {
         super.onCreate(stateApp)
 
         val screen = installSplashScreen()
             .useStyledExit {
-                if (!isNotificationEnabled(this)) {
+                if (!areNotificationsEnabled(this)) {
                     showNotificationPermissionDialog(this)
                 }
             }
@@ -50,10 +55,10 @@ class Activity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        (application as Application).createActivityWorker()
+        workService.initiateActivityWorker()
     }
 
-    private fun isNotificationEnabled(context: Context): Boolean {
+    private fun areNotificationsEnabled(context: Context): Boolean {
         val enabled = NotificationManagerCompat
             .from(context)
             .areNotificationsEnabled()
@@ -62,7 +67,7 @@ class Activity : AppCompatActivity() {
             return false
         }
 
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val manager = context.getSystemService(NotificationManager::class.java)
 
         for (channel in manager.notificationChannels) {
             if (channel.importance == NotificationManager.IMPORTANCE_NONE) {
@@ -89,13 +94,15 @@ class Activity : AppCompatActivity() {
     private fun showNotificationPermissionDialog(context: Context) {
         AlertDialog
             .Builder(context)
-            .setTitle("Enable Notifications")
-            .setMessage("Enable notifications to get reminders for tasks!")
-            .setPositiveButton("Go to Settings") { _, _ ->
+            .setTitle(applicationContext.getString(R.string.notifications_request_dialog_title))
+            .setMessage(applicationContext.getString(R.string.notifications_request_dialog_message))
+            .setPositiveButton(
+                applicationContext.getString(R.string.notifications_request_dialog_button_settings)
+            ) { _, _ ->
                 openNotificationSettingsForApp(context)
             }
             .setNegativeButton(
-                "Cancel",
+                applicationContext.getString(R.string.notifications_request_dialog_button_cancel),
                 null
             )
             .show()

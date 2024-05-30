@@ -78,7 +78,8 @@ class SettingsViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e(
                     "SettingsViewModel",
-                    "Google Calendar synchronization failed: ${e.message}"
+                    "Google Calendar synchronization failed: ${e.message}",
+                    e
                 )
 
                 withContext(Dispatchers.Main) {

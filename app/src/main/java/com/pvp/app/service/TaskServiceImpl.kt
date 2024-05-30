@@ -2,6 +2,7 @@
 
 package com.pvp.app.service
 
+import android.accounts.Account
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -17,6 +18,7 @@ import com.google.api.services.calendar.CalendarScopes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.R
+import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
@@ -56,7 +58,9 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.max
@@ -69,6 +73,7 @@ private val Context.dataStoreGoogleCalendarEvents: DataStore<Preferences> by pre
 private val eventsKey: Preferences.Key<Set<String>> = stringSetPreferencesKey("events")
 
 class TaskServiceImpl @Inject constructor(
+    private val authenticationService: AuthenticationService,
     private val configuration: Configuration,
     @ApplicationContext private val context: Context,
     private val database: FirebaseFirestore,
@@ -396,9 +401,8 @@ class TaskServiceImpl @Inject constructor(
     }
 
     override suspend fun generateMeal() {
-        val dayToMeals = mealService.generateWeekPlan()
-
-        dayToMeals
+        mealService
+            .generateWeekPlan()
             .mapKeys { (day, _) -> day.toNearestDate() }
             .forEach { (day, meals) ->
                 meals.forEachIndexed { index, meal ->
@@ -498,13 +502,18 @@ class TaskServiceImpl @Inject constructor(
                     .usingOAuth2(
                         context,
                         setOf(
-                            CalendarScopes.CALENDAR_READONLY,
-                            CalendarScopes.CALENDAR_EVENTS_READONLY
+                            CalendarScopes.CALENDAR_EVENTS_READONLY,
+                            CalendarScopes.CALENDAR_READONLY
                         )
                     )
-                    .also { it.selectedAccountName = user.email }
+                    .also {
+                        it.selectedAccount = authenticationService.googleAccount ?: Account(
+                            user.email,
+                            "com.google"
+                        )
+                    }
             )
-            .setApplicationName("Calendar")
+            .setApplicationName(context.getString(R.string.application_name))
             .build()
 
         val now = DateTime(System.currentTimeMillis())
@@ -524,11 +533,24 @@ class TaskServiceImpl @Inject constructor(
                     .execute().items
                     .map {
                         val date = it.start.dateTime ?: it.start.date
+                        val timeZone = it.start.timeZone
+
+                        val timeZoneShift = if (timeZone != null) {
+                            try {
+                                ZonedDateTime
+                                    .now()
+                                    .withZoneSameInstant(ZoneId.of(timeZone)).offset.totalSeconds / 60
+                            } catch (e: Exception) {
+                                0
+                            }
+                        } else {
+                            it.start.dateTime?.timeZoneShift ?: 0
+                        }
 
                         val dateTime = LocalDateTime.ofEpochSecond(
                             date.value / 1000,
                             0,
-                            ZoneOffset.ofTotalSeconds(date.timeZoneShift * 60)
+                            ZoneOffset.ofTotalSeconds(timeZoneShift * 60)
                         )
 
                         GoogleTask(
@@ -545,8 +567,6 @@ class TaskServiceImpl @Inject constructor(
             .firstOr(emptyList())
             .filter { it.date < dateStart }
             .plus(events)
-
-        println(eventsAll)
 
         editGoogleEventTasks(
             context,
