@@ -18,6 +18,7 @@ import com.pvp.app.worker.AutocompleteWorker
 import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.GoalMotivationWorker
+import com.pvp.app.worker.GoogleCalendarSynchronizationWorker
 import com.pvp.app.worker.MealPlanWorker
 import com.pvp.app.worker.TaskNotificationWorker
 import com.pvp.app.worker.TaskPointsDeductionWorker
@@ -115,6 +116,13 @@ class WorkServiceImpl @Inject constructor(
         workManager.periodicRequest<GoalMotivationWorker>(
             interval = 1,
             timeUnit = TimeUnit.DAYS
+        )
+    }
+
+    override fun initiateGoogleCalendarSynchronizationWorker() {
+        workManager.periodicRequest<GoogleCalendarSynchronizationWorker>(
+            interval = 6,
+            timeUnit = TimeUnit.HOURS
         )
     }
 

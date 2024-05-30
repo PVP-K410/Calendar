@@ -41,6 +41,13 @@ interface WorkService {
     fun initiateGoalMotivationWorker()
 
     /**
+     * Initiates the google calendar synchronization worker.
+     * The google calendar synchronization worker is responsible for synchronizing user's
+     * google calendar with the application.
+     */
+    fun initiateGoogleCalendarSynchronizationWorker()
+
+    /**
      * Initiates the meal plan worker.
      * The meal plan worker is responsible for updating user's weekly meal plan.
      */
