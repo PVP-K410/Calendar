@@ -380,12 +380,12 @@ fun StatisticsContainers(state: StatisticsState) {
 
     StatisticsContainerColumn {
         StatisticItem(
-            label = "$localeTop3FrequentActivities:",
+            label = localeTop3FrequentActivities,
             values = state.top3FrequentActivities
         )
 
         StatisticItem(
-            label = "$localeUniqueActivities (30d):",
+            label = "$localeUniqueActivities (30d)",
             values = state.uniqueActivities30d
         )
     }
@@ -447,8 +447,8 @@ fun StatisticItem(
     if (values.isEmpty()) {
         return
     }
-    
-    val chunkedValues = values.chunked((values.size + 2) / 3) // Split values into 3 nearly equal parts
+
+    val chunkedValues = values.chunked((values.size + 2) / 3)
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -456,7 +456,8 @@ fun StatisticItem(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Row(
