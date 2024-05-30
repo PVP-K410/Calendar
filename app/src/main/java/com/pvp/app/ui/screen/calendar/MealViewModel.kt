@@ -2,12 +2,14 @@
 
 package com.pvp.app.ui.screen.calendar
 
+import android.content.Context
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import com.pvp.app.api.UserService
 import com.pvp.app.model.Meal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
@@ -16,12 +18,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MealViewModel @Inject constructor(
+    @ApplicationContext context: Context,
     userService: UserService
 ) : ViewModel() {
 
     private val ingredientsToAvoid = userService.user
         .filterNotNull()
-        .mapLatest { user -> user.ingredients.map { it.title } }
+        .mapLatest { user -> user.ingredients.map { context.getString(it.titleId) } }
 
     fun getIngredientsToAvoid(meal: Meal): Flow<List<String>> {
         return ingredientsToAvoid.mapLatest { ingredients ->
@@ -31,8 +34,8 @@ class MealViewModel @Inject constructor(
                     step.ingredients
                         .filter { ingredient ->
                             ingredients.any {
-                                it.equals(
-                                    ingredient,
+                                ingredient.contains(
+                                    it,
                                     ignoreCase = true
                                 )
                             }

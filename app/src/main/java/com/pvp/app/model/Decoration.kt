@@ -1,5 +1,9 @@
 package com.pvp.app.model
 
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.pvp.app.R
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,24 +16,15 @@ data class Decoration(
     val type: Type = Type.AVATAR_FACE
 )
 
-enum class Type {
-    AVATAR_ACCESSORY,
-    AVATAR_BODY,
-    AVATAR_FACE,
-    AVATAR_HANDS,
-    AVATAR_HEAD,
-    AVATAR_LEGGINGS,
-    AVATAR_SHOES;
+enum class Type(@StringRes val titleId: Int) {
+    AVATAR_ACCESSORY(R.string.decoration_type_accessory),
+    AVATAR_BODY(R.string.decoration_type_body),
+    AVATAR_FACE(R.string.decoration_type_face),
+    AVATAR_HANDS(R.string.decoration_type_hands),
+    AVATAR_HEAD(R.string.decoration_type_head),
+    AVATAR_LEGGINGS(R.string.decoration_type_leggings),
+    AVATAR_SHOES(R.string.decoration_type_shoes);
 
-    override fun toString(): String {
-        return when (this) {
-            AVATAR_ACCESSORY -> "Accessory"
-            AVATAR_BODY -> "Body"
-            AVATAR_FACE -> "Face"
-            AVATAR_HANDS -> "Hands"
-            AVATAR_HEAD -> "Head"
-            AVATAR_LEGGINGS -> "Leggings"
-            AVATAR_SHOES -> "Shoes"
-        }
-    }
+    val title: @Composable () -> String
+        get() = { stringResource(titleId) }
 }

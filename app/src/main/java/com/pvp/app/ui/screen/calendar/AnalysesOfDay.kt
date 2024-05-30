@@ -27,11 +27,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.health.connect.client.PermissionController
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.R
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
 import com.pvp.app.model.GoogleTask
@@ -90,7 +92,11 @@ fun AnalysisOfDay(
                 Text(
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    text = if (date == LocalDate.now()) "Today's tasks" else "Day's tasks"
+                    text = if (date == LocalDate.now()) {
+                        stringResource(R.string.analyses_today_tasks)
+                    } else {
+                        stringResource(R.string.analyses_day_tasks)
+                    }
                 )
 
                 HorizontalDivider(
@@ -118,7 +124,7 @@ fun AnalysisOfDay(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Steps of the day",
+                        text = stringResource(R.string.analyses_steps_of_the_day),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleSmall,
                         modifier = Modifier

@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -42,12 +41,12 @@ import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pvp.app.R
+import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.ProgressIndicator
 import com.pvp.app.ui.common.backgroundGradientHorizontal
 import com.pvp.app.ui.common.backgroundGradientLinear
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.lighten
-import com.pvp.app.ui.common.showToast
 
 private typealias LauncherIntent = ManagedActivityResultLauncher<Intent, ActivityResult>
 private typealias LauncherIntentSenderRequest = ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
@@ -143,22 +142,21 @@ private fun Authentication(
 }
 
 @Composable
-fun AuthenticationScreen(
-    viewModel: AuthenticationViewModel = hiltViewModel()
-) {
+fun AuthenticationScreen(viewModel: AuthenticationViewModel = hiltViewModel()) {
+    val showSnackbar = LocalShowSnackbar.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
-        val context = LocalContext.current
         val state by viewModel.state.collectAsStateWithLifecycle()
         val textError = stringResource(R.string.screen_authentication_toast_error)
 
         FeatureCard.cards.forEachIndexed { index, card ->
             FeatureCardBlock(
                 radius = card.radius,
-                text = card.text,
+                text = card.text(),
                 textAlign = card.textAlign
             )
 
@@ -191,7 +189,7 @@ fun AuthenticationScreen(
                     isOneTap
                 ) {
                     if (!it.isSuccess) {
-                        context.showToast(message = textError)
+                        showSnackbar(textError)
                     }
                 }
             },

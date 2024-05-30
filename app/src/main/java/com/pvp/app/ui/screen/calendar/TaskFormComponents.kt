@@ -35,12 +35,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pvp.app.R
 import com.pvp.app.common.TimeUtil.asString
 import com.pvp.app.model.GoogleTask
 import com.pvp.app.model.Meal
@@ -78,6 +80,12 @@ fun TaskFormButtonsRow(
         horizontalArrangement = if (state.task == null) Arrangement.Center else Arrangement.SpaceBetween
     ) {
         if (state.task != null) {
+            val localeDelete = stringResource(R.string.action_delete)
+            val localeDeleteConfirmation =
+                stringResource(R.string.input_field_task_delete_confirm_label)
+            val localeDeleteDescription =
+                stringResource(R.string.input_field_task_delete_confirm_description)
+
             ButtonConfirm(
                 border = BorderStroke(
                     1.dp,
@@ -93,13 +101,13 @@ fun TaskFormButtonsRow(
 
                         Text(
                             style = MaterialTheme.typography.titleSmall,
-                            text = "Delete"
+                            text = localeDelete
                         )
                     }
                 },
-                confirmationButtonContent = { Text("Delete") },
-                confirmationDescription = { Text("If the task is deleted, it cannot be recovered") },
-                confirmationTitle = { Text("Are you sure you want to delete this task?") },
+                confirmationButtonContent = { Text(localeDelete) },
+                confirmationDescription = { Text(localeDeleteDescription) },
+                confirmationTitle = { Text(localeDeleteConfirmation) },
                 onConfirm = {
                     if (state.task is GoogleTask) {
                         model.removeGoogle(state.task as GoogleTask)
@@ -114,6 +122,9 @@ fun TaskFormButtonsRow(
         }
 
         if (showUpdate) {
+            val localeCreate = stringResource(R.string.action_create)
+            val localeUpdate = stringResource(R.string.action_update)
+
             Button(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -126,17 +137,21 @@ fun TaskFormButtonsRow(
                     onClose()
                 },
                 shape = MaterialTheme.shapes.extraLarge
-            ) { Text(if (state.task == null) "Create" else "Update") }
+            ) { Text(if (state.task == null) localeCreate else localeUpdate) }
         }
     }
 }
 
 @Composable
 fun TaskFormFieldActivity(state: TaskFormState.Sport) {
+    val localeEditLabel = stringResource(R.string.input_field_activity_edit_label)
+    val localeLabel = stringResource(R.string.input_field_activity_label)
+
     EditableSportActivityItem(
-        label = "Activity",
-        value = state.activity,
-        onValueChange = { state.activity = it }
+        editLabel = localeEditLabel,
+        label = localeLabel,
+        onValueChange = { state.activity = it },
+        value = state.activity
     )
 }
 
@@ -145,15 +160,17 @@ fun TaskFormFieldDate(
     editable: Boolean,
     state: TaskFormState<*>
 ) {
+    val localeLabel = stringResource(R.string.input_field_date_label)
+
     if (editable) {
         EditableDateItem(
-            label = "Date",
+            label = localeLabel,
             value = state.date,
             onValueChange = { state.date = it }
         )
     } else {
         InfoDateField(
-            label = "Date",
+            label = localeLabel,
             value = state.date
         )
     }
@@ -165,6 +182,24 @@ fun TaskFormFieldDescription(
     state: TaskFormState<*>
 ) {
     val isRecipe = remember(state) { state is TaskFormState.CustomMeal }
+
+    val localeEditLabel = if (isRecipe) {
+        stringResource(R.string.input_field_recipe_edit_label)
+    } else {
+        stringResource(R.string.input_field_description_edit_label)
+    }
+
+    val localeError = if (isRecipe) {
+        stringResource(R.string.input_field_recipe_error_cannot_be_empty)
+    } else {
+        ""
+    }
+
+    val localeLabel = if (isRecipe) {
+        stringResource(R.string.input_field_recipe_label)
+    } else {
+        stringResource(R.string.input_field_description_label)
+    }
 
     val description by remember(state) {
         derivedStateOf {
@@ -192,7 +227,8 @@ fun TaskFormFieldDescription(
         }
 
         EditableTextItem(
-            label = if (isRecipe) "Recipe" else "Description",
+            editLabel = localeEditLabel,
+            label = localeLabel,
             value = description,
             onValueChange = { onChange(it) },
             validate = {
@@ -202,12 +238,12 @@ fun TaskFormFieldDescription(
                     true
                 }
             },
-            errorMessage = if (isRecipe) "Recipe cannot be empty" else ""
+            errorMessage = localeError
         )
     } else {
         if (description.isNotBlank()) {
             InfoTextField(
-                label = if (isRecipe) "Recipe" else "Description",
+                label = localeLabel,
                 value = description
             )
         }
@@ -219,12 +255,16 @@ fun TaskFormFieldDistance(
     model: TaskViewModel = hiltViewModel(),
     state: TaskFormState.Sport
 ) {
+    val localeEditLabel = stringResource(R.string.input_field_distance_edit_label)
+    val localeLabel = stringResource(R.string.input_field_distance_label)
+
     EditableDistanceItem(
-        label = "Distance",
-        value = state.distance,
+        editLabel = localeEditLabel,
+        label = localeLabel,
+        onValueChange = { state.distance = it },
         rangeKilometers = model.rangeKilometers,
         rangeMeters = model.rangeMeters,
-        onValueChange = { state.distance = it }
+        value = state.distance
     )
 }
 
@@ -233,13 +273,18 @@ fun TaskFormFieldDuration(
     model: TaskViewModel = hiltViewModel(),
     state: TaskFormState<*>
 ) {
+    val localeEditLabel = stringResource(R.string.input_field_duration_edit_label)
+    val localeLabel = stringResource(R.string.input_field_duration_label)
+    val localeMeasurementMinutes = stringResource(R.string.measurement_minutes)
+
     EditablePickerItem(
-        label = "Duration",
-        value = state.duration,
-        valueLabel = "minutes",
+        editLabel = localeEditLabel,
         items = model.rangeDuration,
-        itemsLabels = "minutes",
-        onValueChange = { state.duration = it }
+        itemsLabels = localeMeasurementMinutes,
+        label = localeLabel,
+        onValueChange = { state.duration = it },
+        value = state.duration,
+        valueLabel = localeMeasurementMinutes,
     )
 }
 
@@ -249,20 +294,26 @@ fun TaskFormFieldReminderTime(
     model: TaskViewModel = hiltViewModel(),
     state: TaskFormState<*>
 ) {
+    val localeEditLabel = stringResource(R.string.input_field_reminder_time_edit_label)
+    val localeLabel = stringResource(R.string.input_field_reminder_time_label)
+    val localeMeasurementMinutes = stringResource(R.string.measurement_minutes)
+    val localeResultLabel = stringResource(R.string.input_field_reminder_time_result_label)
+
     if (editable) {
         EditablePickerItem(
-            label = "Reminder Time",
-            value = state.reminderTime,
-            valueLabel = "minutes before task",
+            editLabel = localeEditLabel,
             items = model.rangeReminderTime,
-            itemsLabels = "minutes",
-            onValueChange = { state.reminderTime = it }
+            itemsLabels = localeMeasurementMinutes,
+            label = localeLabel,
+            onValueChange = { state.reminderTime = it },
+            value = state.reminderTime,
+            valueLabel = localeResultLabel.format(state.reminderTime),
         )
     } else {
         if (state.reminderTime != null) {
             InfoTextField(
-                label = "Reminder Time",
-                value = state.reminderTime.toString() + " minutes before task"
+                label = localeLabel,
+                value = localeResultLabel.format(state.reminderTime)
             )
         }
     }
@@ -273,6 +324,9 @@ fun TaskFormFieldScheduledAt(
     editable: Boolean,
     state: TaskFormState<*>
 ) {
+    val localeEditLabel = stringResource(R.string.input_field_scheduled_at_edit_label)
+    val localeLabel = stringResource(R.string.input_field_scheduled_at_label)
+
     if (editable) {
         val supportsDuration = remember(
             (state as? TaskFormState.Sport)?.activity,
@@ -285,15 +339,16 @@ fun TaskFormFieldScheduledAt(
         }
 
         EditableTimeItem(
-            label = "Scheduled At",
+            editLabel = localeEditLabel,
+            label = localeLabel,
+            onValueChange = { state.time = it },
             value = state.time ?: LocalTime.now(),
             valueDisplay = state.time?.asString(if (supportsDuration && state.duration?.isZero == false) state.duration else null),
-            onValueChange = { state.time = it }
         )
     } else {
         if (state.time != null) {
             InfoTextField(
-                label = "Scheduled At",
+                label = localeLabel,
                 value = state.time!!.asString()
             )
         }
@@ -313,9 +368,11 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
             .fillMaxWidth()
             .padding(8.dp)
     ) {
+        val localeLabel = stringResource(R.string.input_field_meals_label)
+
         Text(
             fontWeight = FontWeight.Bold,
-            text = "Meal"
+            text = localeLabel
         )
 
         Text(text = meal.name)
@@ -363,9 +420,11 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
         },
         darken = false,
         header = {
+            val localeIngredients = stringResource(R.string.input_field_ingredients_label)
+
             Text(
                 fontWeight = FontWeight.Bold,
-                text = "Ingredients"
+                text = localeIngredients
             )
         },
         isFoldedInitially = true,
@@ -395,9 +454,11 @@ fun TaskFormFieldsMealBreakdown(meal: Meal?) {
         },
         darken = false,
         header = {
+            val localeRecipe = stringResource(R.string.input_field_recipe_label)
+
             Text(
                 fontWeight = FontWeight.Bold,
-                text = "Recipe"
+                text = localeRecipe
             )
         },
         isFoldedInitially = true,
@@ -460,9 +521,11 @@ fun TaskFormFieldMealCards(
     }
 
     if (meals.isEmpty()) {
+        val localeNotFound = stringResource(R.string.input_field_meals_error_not_found)
+
         Text(
             style = MaterialTheme.typography.labelLarge,
-            text = "No meals found"
+            text = localeNotFound
         )
     }
 
@@ -491,9 +554,11 @@ fun TaskFormFieldMealCards(
             value = query
         )
 
+        val localeNotSelected = stringResource(R.string.input_field_meals_error_not_selected)
+
         TextError(
             enabled = state.meal == null,
-            text = "Please select a meal"
+            text = localeNotSelected
         )
     }
 }
@@ -503,17 +568,22 @@ fun TaskFormFieldTitle(
     editable: Boolean,
     state: TaskFormState<*>
 ) {
+    val localeEditLabel = stringResource(R.string.input_field_title_edit_label)
+    val localeLabel = stringResource(R.string.input_field_title_label)
+    val localeError = stringResource(R.string.input_field_title_error_cannot_be_empty)
+
     if (editable) {
         EditableTextItem(
-            label = "Title",
-            value = state.title ?: "",
+            editLabel = localeEditLabel,
+            errorMessage = localeError,
+            label = localeLabel,
             onValueChange = { state.title = it },
             validate = { it.isNotBlank() },
-            errorMessage = "Title cannot be empty"
+            value = state.title ?: "",
         )
     } else {
         InfoTextField(
-            label = "Title",
+            label = localeLabel,
             value = state.title ?: ""
         )
     }
@@ -566,11 +636,13 @@ private fun TaskFormMealCard(
     MealCard(
         buttonContent = {
             if (state.meal != meal) {
+                val localeSelect = stringResource(R.string.action_select)
+
                 Text(
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.labelLarge,
-                    text = "Select"
+                    text = localeSelect
                 )
             }
         },

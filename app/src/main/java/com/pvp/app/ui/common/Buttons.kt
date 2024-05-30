@@ -26,9 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.pvp.app.R
 import java.time.LocalDateTime
 
 @Composable
@@ -62,8 +64,10 @@ fun Button(
 fun ButtonConfirm(
     border: BorderStroke? = null,
     confirmationButtonContent: @Composable RowScope.() -> Unit = {
+        val localeConfirm = stringResource(R.string.action_confirm)
+
         Text(
-            "Proceed",
+            localeConfirm,
             fontWeight = FontWeight.Bold
         )
     },
@@ -85,7 +89,11 @@ fun ButtonConfirm(
         contentAlignment = contentAlignment,
         dialogContent = confirmationDescription,
         dialogTitle = confirmationTitle,
-        dismissButtonContent = { Text("Cancel") },
+        dismissButtonContent = {
+            val localeCancel = stringResource(R.string.action_cancel)
+
+            Text(localeCancel)
+        },
         modifier = modifier,
         onConfirm = onConfirm,
         onDismiss = onDismiss,
@@ -102,12 +110,18 @@ fun ButtonWithDialog(
     contentAlignment: Alignment = Alignment.TopStart,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     confirmButtonContent: @Composable RowScope.() -> Unit = {
+        val localeConfirm = stringResource(R.string.action_confirm)
+
         Text(
-            "Confirm",
+            localeConfirm,
             fontWeight = FontWeight.Bold
         )
     },
-    dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
+    dismissButtonContent: @Composable RowScope.() -> Unit = {
+        val localeCancel = stringResource(R.string.action_cancel)
+
+        Text(localeCancel)
+    },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
     onConfirm: () -> Unit = {},
@@ -154,7 +168,11 @@ fun ButtonWithDialog(
 @Composable
 fun IconButtonConfirm(
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
-    confirmationButtonContent: @Composable RowScope.() -> Unit = { Text("Proceed") },
+    confirmationButtonContent: @Composable RowScope.() -> Unit = {
+        val localeConfirm = stringResource(R.string.action_confirm)
+
+        Text(localeConfirm)
+    },
     confirmationButtonEnabled: Boolean = true,
     confirmationDescription: @Composable () -> Unit = { },
     confirmationTitle: @Composable () -> Unit = { Text("Confirm to proceed") },
@@ -165,13 +183,15 @@ fun IconButtonConfirm(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit = {}
 ) {
+    val localeCancel = stringResource(R.string.action_cancel)
+
     IconButtonWithDialog(
         colors = colors,
         confirmButtonContent = confirmationButtonContent,
         confirmButtonEnabled = confirmationButtonEnabled,
         dialogContent = confirmationDescription,
         dialogTitle = confirmationTitle,
-        dismissButtonContent = { Text("Cancel") },
+        dismissButtonContent = { Text(localeCancel) },
         icon = icon,
         iconDescription = iconDescription,
         iconSize = iconSize,
@@ -226,9 +246,17 @@ fun IconButtonWithDialog(
     iconSize: Dp = 20.dp,
     iconDescription: String? = null,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
-    confirmButtonContent: @Composable RowScope.() -> Unit = { Text("Confirm") },
+    confirmButtonContent: @Composable RowScope.() -> Unit = {
+        val localeConfirm = stringResource(R.string.action_confirm)
+
+        Text(localeConfirm)
+    },
     confirmButtonEnabled: Boolean = true,
-    dismissButtonContent: @Composable RowScope.() -> Unit = { Text("Dismiss") },
+    dismissButtonContent: @Composable RowScope.() -> Unit = {
+        val localeCancel = stringResource(R.string.action_cancel)
+
+        Text(localeCancel)
+    },
     dialogTitle: @Composable () -> Unit = { Text("Dialog Title") },
     dialogContent: @Composable () -> Unit = { Text("Dialog Content") },
     onConfirm: () -> Unit = {},

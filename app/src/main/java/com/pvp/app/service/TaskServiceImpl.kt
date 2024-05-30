@@ -16,6 +16,7 @@ import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.CalendarScopes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
+import com.pvp.app.R
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
@@ -55,6 +56,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -380,7 +382,11 @@ class TaskServiceImpl @Inject constructor(
                         null
                     },
                     isDaily = true,
-                    title = "Task #${index + 1}: ${activity.title}",
+                    title = context.getString(
+                        R.string.task_type_daily_label,
+                        index + 1,
+                        context.getString(activity.titleId)
+                    ),
                     userEmail = userEmail
                 )
 
@@ -629,7 +635,7 @@ class TaskServiceImpl @Inject constructor(
             val unit = baseDistance * 1000 / (1 / SportActivity.Walking.pointsRatioDistance)
 
             val multiplier = "%.2f"
-                .format(exerciseService.calculateActivityLevel())
+                .format(Locale.US, exerciseService.calculateActivityLevel())
                 .toDouble()
 
             val upperBound = (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10)
@@ -660,7 +666,7 @@ class TaskServiceImpl @Inject constructor(
             val unit = baseDuration.seconds / (1 / SportActivity.Basketball.pointsRatioDuration)
 
             val multiplier = "%.2f"
-                .format(exerciseService.calculateActivityLevel())
+                .format(Locale.US, exerciseService.calculateActivityLevel())
                 .toDouble()
 
             // Division and multiplication by 300 are there to ensure upper and lower bounds

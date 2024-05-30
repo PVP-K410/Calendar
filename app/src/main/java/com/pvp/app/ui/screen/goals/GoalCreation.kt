@@ -1,21 +1,13 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.pvp.app.ui.screen.goals
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -26,20 +18,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.R
 import com.pvp.app.model.SportActivity
 import com.pvp.app.ui.common.Button
-import com.pvp.app.ui.common.EditableDistanceItem
 import com.pvp.app.ui.common.EditableInfoItem
+import com.pvp.app.ui.common.EditableSportActivityItem
 import com.pvp.app.ui.common.LabelFieldWrapper
 import com.pvp.app.ui.common.Picker
 import com.pvp.app.ui.common.PickerPair
-import com.pvp.app.ui.common.PickerState
 import com.pvp.app.ui.common.PickerState.Companion.rememberPickerState
 import com.pvp.app.ui.common.TabSelector
 import java.time.LocalDate
@@ -62,6 +55,13 @@ fun DistancePicker(
     distance: Double,
     onDistanceChange: (Double) -> Unit
 ) {
+    val localeEditLabel = stringResource(R.string.input_field_kilometers_edit_label)
+    val localeLabel = stringResource(R.string.input_field_kilometers_label)
+    val localeDistance = stringResource(R.string.input_field_distance_value)
+    val localeMeasurementKilometers = stringResource(R.string.measurement_km)
+    val localeMeasurementMeters = stringResource(R.string.measurement_m)
+    val localeTotalDistance = stringResource(R.string.input_field_distance_total)
+
     val stateKilometers = rememberPickerState(
         distance.toInt()
     )
@@ -77,8 +77,8 @@ fun DistancePicker(
                     PickerPair(
                         itemsFirst = model.rangeKilometers,
                         itemsSecond = model.rangeMeters,
-                        labelFirst = { "$it (km)" },
-                        labelSecond = { "$it (m)" },
+                        labelFirst = { "$it $localeMeasurementKilometers" },
+                        labelSecond = { "$it $localeMeasurementMeters" },
                         onChange = { stateFirst, stateSecond ->
                             stateKilometers.value = stateFirst
                             stateMeters.value = stateSecond
@@ -88,17 +88,17 @@ fun DistancePicker(
                     )
                 },
                 putBelow = true,
-                text = "%.2f (km) distance".format(
+                text = localeTotalDistance.format(
                     stateKilometers.value + (stateMeters.value / 1000.0)
                 ),
                 textAlign = TextAlign.End
             )
         },
-        dialogTitle = { Text("Editing kilometers") },
-        label = "Kilometers",
+        dialogTitle = { Text(localeEditLabel) },
+        label = localeLabel,
         onConfirm = { onDistanceChange(stateKilometers.value + (stateMeters.value / 1000.0)) },
         onDismiss = { },
-        value = "%.2f km".format(distance)
+        value = localeDistance.format(distance)
     )
 }
 
@@ -122,17 +122,18 @@ fun GoalCreateDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalCreateForm(
     model: GoalViewModel = hiltViewModel(),
     onCreate: () -> Unit
 ) {
     var activity by remember { mutableStateOf(SportActivity.Walking) }
-    var tempActivity by remember { mutableStateOf(activity) }
     var goal by remember { mutableDoubleStateOf(0.0) }
+    val localeCreate = stringResource(R.string.action_create)
+    val localeEditLabel = stringResource(R.string.input_field_activity_edit_label)
+    val localeLabel = stringResource(R.string.input_field_activity_label)
     val state by model.state.collectAsStateWithLifecycle()
-    var steps by remember { mutableStateOf(activity == SportActivity.Walking) }
+    var steps by remember(goal) { mutableStateOf(activity == SportActivity.Walking && goal == 0.0) }
     var stepCount by remember { mutableDoubleStateOf(0.0) }
     var monthly by remember { mutableStateOf(state.monthly) }
     var selectedDistanceType by remember { mutableStateOf(DistanceType.Steps) }
@@ -200,55 +201,19 @@ fun GoalCreateForm(
 
             Spacer(modifier = Modifier.padding(top = 8.dp))
 
-            EditableInfoItem(
-                dialogContent = {
-                    var isExpanded by remember { mutableStateOf(false) }
+            EditableSportActivityItem(
+                activities = goalActivities,
+                editLabel = localeEditLabel,
+                label = localeLabel,
+                value = activity,
+            ) {
+                activity = it
+                steps = activity == SportActivity.Walking && goal == 0.0
 
-                    ExposedDropdownMenuBox(
-                        expanded = isExpanded,
-                        onExpandedChange = { isExpanded = it },
-                    ) {
-                        TextField(
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            value = tempActivity.title,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-                            }
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = isExpanded,
-                            onDismissRequest = { isExpanded = false }
-                        ) {
-                            goalActivities.forEach {
-                                DropdownMenuItem(
-                                    text = { Text(text = it.title) },
-                                    onClick = {
-                                        tempActivity = it
-                                        isExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                },
-                dialogTitle = { Text("Editing activity") },
-                label = "Activity",
-                onConfirm = {
-                    activity = tempActivity
-                    steps = activity == SportActivity.Walking && goal == 0.0
-                    if (activity != SportActivity.Walking) {
-                        selectedDistanceType = DistanceType.Kilometers
-                    }
-                },
-                onDismiss = { tempActivity = activity },
-                value = activity.title
-            )
+                if (activity != SportActivity.Walking) {
+                    selectedDistanceType = DistanceType.Kilometers
+                }
+            }
 
             Spacer(modifier = Modifier.padding(4.dp))
 
@@ -303,7 +268,7 @@ fun GoalCreateForm(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 shape = MaterialTheme.shapes.extraLarge
             ) {
-                Text("Create")
+                Text(localeCreate)
             }
         }
     }
@@ -314,6 +279,9 @@ fun StepPicker(
     steps: Double,
     onStepChange: (Double) -> Unit
 ) {
+    val localeEditLabel = stringResource(R.string.input_field_steps_edit_label)
+    val localeLabel = stringResource(R.string.input_field_steps_label)
+    val localeSteps = stringResource(R.string.measurement_steps).lowercase()
     var stepCount by remember { mutableDoubleStateOf(steps) }
 
     EditableInfoItem(
@@ -332,15 +300,15 @@ fun StepPicker(
                     )
                 },
                 putBelow = true,
-                text = "${stepCount.toInt()} steps",
+                text = "${stepCount.toInt()} $localeSteps",
                 textAlign = TextAlign.End
             )
         },
-        dialogTitle = { Text("Editing steps") },
-        label = "Steps",
+        dialogTitle = { Text(localeEditLabel) },
+        label = localeLabel,
         onConfirm = { onStepChange(stepCount) },
         onDismiss = { },
-        value = "${steps.toInt()} steps"
+        value = "${steps.toInt()} $localeSteps"
     )
 }
 
@@ -352,12 +320,12 @@ fun DistanceSelector(
     TabSelector(
         onSelect = { onDistanceTypeChange(DistanceType.entries[it]) },
         tab = selectedDistanceType.ordinal,
-        tabs = DistanceType.entries.map { it.displayName },
+        tabs = DistanceType.entries.map { it.displayName() },
         withShadow = false
     )
 }
 
-enum class DistanceType(val displayName: String) {
-    Steps("Steps"),
-    Kilometers("Kilometers")
+enum class DistanceType(val displayName: @Composable () -> String) {
+    Steps({ stringResource(R.string.goals_label_steps) }),
+    Kilometers({ stringResource(R.string.goals_label_kilometers) })
 }

@@ -120,4 +120,10 @@ class ExerciseServiceImpl @Inject constructor(
                     activity != SportActivity.Other
         }
     }
+
+    override suspend fun getMostFrequentActivity(): SportActivity {
+        val activitiesWithOccurrences = getActivitiesWithOccurrencesMap()
+        return activitiesWithOccurrences
+            .maxByOrNull { it.value }?.key ?: SportActivity.Walking
+    }
 }

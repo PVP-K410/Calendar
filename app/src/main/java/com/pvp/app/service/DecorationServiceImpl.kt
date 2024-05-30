@@ -265,13 +265,13 @@ class DecorationServiceImpl @Inject constructor(
 
         private fun List<Decoration>.sorted(): List<Decoration> {
             return sortedWith(
-                compareBy<Decoration> { it.type == Type.AVATAR_FACE }
+                compareBy<Decoration> { it.type == Type.AVATAR_ACCESSORY } // applied last
+                    .thenBy { it.type == Type.AVATAR_FACE }
                     .thenBy { it.type == Type.AVATAR_HEAD }
                     .thenBy { it.type == Type.AVATAR_SHOES }
                     .thenBy { it.type == Type.AVATAR_BODY }
                     .thenBy { it.type == Type.AVATAR_LEGGINGS }
-                    .thenBy { it.type == Type.AVATAR_HANDS }
-                    .thenBy { it.type == Type.AVATAR_ACCESSORY }
+                    .thenBy { it.type == Type.AVATAR_HANDS } // applied first
             )
         }
     }

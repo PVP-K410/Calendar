@@ -19,10 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.pvp.app.R
 import com.pvp.app.model.Decoration
 import com.pvp.app.model.Reward
 import com.pvp.app.model.Streak
@@ -42,7 +44,10 @@ private fun DecorationCard(decoration: Decoration) {
         Text(
             modifier = Modifier.padding(8.dp),
             style = MaterialTheme.typography.titleMedium,
-            text = "${decoration.name} decoration!"
+            text = stringResource(
+                R.string.layout_dialog_reward_decoration_label,
+                decoration.name
+            )
         )
 
         AsyncImage(
@@ -83,7 +88,7 @@ fun RewardDialog(
             Text(
                 style = MaterialTheme.typography.headlineSmall,
                 fontSize = 20.sp,
-                text = "Your daily login streak increased!"
+                text = stringResource(R.string.layout_dialog_reward_title)
             )
 
             Box(contentAlignment = Alignment.Center) {
@@ -106,7 +111,7 @@ fun RewardDialog(
             Text(
                 style = MaterialTheme.typography.headlineSmall,
                 fontSize = 20.sp,
-                text = "You received"
+                text = stringResource(R.string.layout_dialog_reward_received)
             )
 
             Spacer(modifier = Modifier.padding(6.dp))
@@ -133,7 +138,10 @@ fun RewardDialog(
                 Text(
                     modifier = Modifier.padding(bottom = 12.dp),
                     style = MaterialTheme.typography.titleMedium,
-                    text = "${reward.experience} xp"
+                    text = stringResource(
+                        R.string.layout_dialog_reward_experience_label,
+                        reward.experience
+                    )
                 )
             }
 
@@ -145,7 +153,7 @@ fun RewardDialog(
 
 
             Button(onClick = { onClose() }) {
-                Text("Claim")
+                Text(stringResource(R.string.layout_dialog_reward_button_claim))
             }
         }
     }

@@ -100,7 +100,7 @@ fun GoalScreen(
                                         fontStyle = FontStyle.Italic,
                                         modifier = Modifier.padding(32.dp),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        text = "No goals have been set up yet"
+                                        text = localeNotSet
                                     )
                                 }
                             }
@@ -157,7 +157,7 @@ fun GoalScreen(
                 shape = CircleShape
             ) {
                 Icon(
-                    contentDescription = "Create goal",
+                    contentDescription = localeButtonContent,
                     imageVector = Icons.Outlined.Add,
                     tint = MaterialTheme.colorScheme.surface
                 )
@@ -194,7 +194,7 @@ fun GoalCard(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = goal.activity.title
+                text = goal.activity.title()
             )
 
             Spacer(modifier = Modifier.padding(2.dp))
@@ -218,17 +218,17 @@ fun GoalCard(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(end = 8.dp),
                     textAlign = TextAlign.Left,
-                    text = "Set goal: ${
+                    text = "$localeGoal ${
                         when (goal.steps) {
-                            true -> "${goal.target.toInt()} steps"
-                            false -> "%.2f km".format(goal.target)
+                            true -> localeSteps.format(goal.target.toInt())
+                            false -> localeKm.format(goal.target)
                         }
                     }"
                 )
 
                 Icon(
                     imageVector = goal.activity.icon,
-                    contentDescription = "Activity icon",
+                    contentDescription = null,
                 )
             }
 
@@ -276,7 +276,7 @@ fun GoalCompletedCard(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = goal.activity.title + " goal is completed!"
+                text = goal.activity.title.toString() + " goal is completed!"
             )
 
             Spacer(modifier = Modifier.padding(2.dp))
@@ -340,13 +340,15 @@ fun GoalTypeFilter(
     TabSelector(
         onSelect = { onClick(GoalFilter.entries[it]) },
         tab = filter.ordinal,
-        tabs = GoalFilter.entries.map { it.displayName },
+        tabs = GoalFilter.entries.map { it.displayName() },
         withShadow = !isForm
     )
 }
 
 @Composable
 private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
+    val localeBack = stringResource(R.string.goals_icon_back_content_description)
+    val localeForward = stringResource(R.string.goals_icon_forward_content_description)
     val state by model.state.collectAsStateWithLifecycle()
 
     Row {
@@ -354,7 +356,7 @@ private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
             model.previous()
         }) {
             Icon(
-                contentDescription = "Back",
+                contentDescription = localeBack,
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft
             )
         }
@@ -380,7 +382,7 @@ private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
             model.next()
         }) {
             Icon(
-                contentDescription = "Forward",
+                contentDescription = localeForward,
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight
             )
         }
@@ -389,6 +391,9 @@ private fun DateChanger(model: GoalViewModel = hiltViewModel()) {
 
 @Composable
 fun ProgressBar(goal: Goal) {
+    val localeStepsProgress = stringResource(R.string.goals_card_steps_progress)
+    val localeKmProgress = stringResource(R.string.goals_card_km_progress)
+
     val progress by animateFloatAsState(
         animationSpec = tween(durationMillis = 1000),
         label = "ExperienceProgressAnimation",
@@ -415,19 +420,21 @@ fun ProgressBar(goal: Goal) {
         )
 
         Text(
-            text = when (goal.steps) {
-                true -> "${goal.progress.toInt()} / ${goal.target.toInt()} steps"
-                false -> "%.2f / %.2f km".format(
+            text = if (goal.steps) {
+                localeStepsProgress
+            } else {
+                localeKmProgress
+            }
+                .format(
                     goal.progress,
                     goal.target
-                )
-            },
+                ),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
 
-enum class GoalFilter(val displayName: String) {
-    Weekly("Weekly"),
-    Monthly("Monthly")
+enum class GoalFilter(val displayName: @Composable () -> String) {
+    Weekly({ stringResource(R.string.goals_weekly) }),
+    Monthly({ stringResource(R.string.goals_monthly) })
 }
