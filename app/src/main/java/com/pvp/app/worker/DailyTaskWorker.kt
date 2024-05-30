@@ -39,7 +39,6 @@ class DailyTaskWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         val user = userService.user.firstOrNull() ?: return Result.retry()
-
         val now = LocalDate.now()
         val tomorrow = now.plusDays(1)
 
