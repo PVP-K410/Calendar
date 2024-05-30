@@ -1,6 +1,7 @@
 package com.pvp.app.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -40,30 +41,32 @@ class DrinkReminderWorker @AssistedInject constructor(
     workerParams
 ) {
 
-    companion object {
-
-        const val WORKER_NAME = "com.pvp.app.worker.DrinkReminderWorker"
-    }
-
-    private val scope = CoroutineScope(Dispatchers.IO)
-    private val sharedPreferences = context.getSharedPreferences(
+    private val preferences = context.getSharedPreferences(
         PREFS_NAME,
         Context.MODE_PRIVATE
     )
-    private var scheduledNotificationIds = mutableListOf<Int>()
 
-    init {
-        scheduledNotificationIds = getScheduledNotificationIds()
-    }
+    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scheduledNotificationIds = getScheduledNotificationIds()
 
     override suspend fun doWork(): Result {
-        initializeReminderListener()
+        return try {
+            initializeReminderListener()
 
-        return Result.success()
+            Result.success()
+        } catch (e: Exception) {
+            Log.e(
+                WORKER_NAME,
+                "Failed to initialize drink reminder listener. Retrying...",
+                e
+            )
+
+            Result.retry()
+        }
     }
 
     private suspend fun initializeReminderListener(): Result {
-        val stateFlow = settingService
+        settingService
             .get(Setting.Notifications.CupVolumeMl)
             .combine(settingService.get(Setting.Notifications.HydrationNotificationsEnabled)) { volume, isEnabled ->
                 Pair(
@@ -83,17 +86,16 @@ class DrinkReminderWorker @AssistedInject constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = DrinkReminderState()
             )
+            .collect { (volume, isEnabled, userMass) ->
+                cancelScheduledNotifications()
 
-        stateFlow.collect { (volume, isEnabled, userMass) ->
-            cancelScheduledNotifications()
-
-            if (userMass != 0 && isEnabled) {
-                scheduleNotifications(
-                    mass = userMass,
-                    cupVolume = volume
-                )
+                if (userMass != 0 && isEnabled) {
+                    scheduleNotifications(
+                        mass = userMass,
+                        cupVolume = volume
+                    )
+                }
             }
-        }
     }
 
     private fun scheduleNotifications(
@@ -108,6 +110,7 @@ class DrinkReminderWorker @AssistedInject constructor(
         val endHour = configuration.intervalDrinkReminder.second
         val totalDuration = Duration.ofHours((endHour - startHour).toLong())
         val intervalDuration = totalDuration.dividedBy(count.toLong())
+
         var notificationTime = LocalTime.of(
             startHour,
             0
@@ -147,13 +150,15 @@ class DrinkReminderWorker @AssistedInject constructor(
         }
 
         scheduledNotificationIds.clear()
+
         saveScheduledNotificationIds()
     }
 
     private fun saveScheduledNotificationIds() {
-        val notificationIdsJson = Gson().toJson(scheduledNotificationIds)
+        val notificationIdsJson = Gson()
+            .toJson(scheduledNotificationIds)
 
-        sharedPreferences
+        preferences
             .edit()
             .putString(
                 NOTIFICATION_IDS_KEY,
@@ -165,22 +170,27 @@ class DrinkReminderWorker @AssistedInject constructor(
     private fun getScheduledNotificationIds(): MutableList<Int> {
         val ids = mutableListOf<Int>()
 
-        val notificationIdsJson = sharedPreferences
+        preferences
             .getString(
                 NOTIFICATION_IDS_KEY,
                 null
             )
-
-        notificationIdsJson?.let {
-            ids.addAll(
-                Gson().fromJson(
-                    it,
-                    object : TypeToken<List<Int>>() {}.type
+            ?.let {
+                ids.addAll(
+                    Gson()
+                        .fromJson(
+                            it,
+                            object : TypeToken<List<Int>>() {}.type
+                        )
                 )
-            )
-        }
+            }
 
         return ids
+    }
+
+    companion object {
+
+        const val WORKER_NAME = "com.pvp.app.worker.DrinkReminderWorker"
     }
 }
 
