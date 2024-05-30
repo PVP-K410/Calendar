@@ -70,7 +70,6 @@ import java.util.Locale
 @Composable
 fun StatisticsScreen(
     model: StatisticsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
 ) {
     val localeGraphOngoing = stringResource(R.string.dashboard_graph_type_ongoing)
     val localeGraphPast = stringResource(R.string.dashboard_graph_type_past)
@@ -84,10 +83,9 @@ fun StatisticsScreen(
     }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .padding(4.dp)
     ) {
         val labelOfSum = remember<(GraphType) -> String> {
             {
