@@ -163,12 +163,17 @@ class NotificationServiceImpl @Inject constructor(
                 context,
                 notification.channel.channelId
             )
-            .setContentTitle(notification.title)
-            .setContentText(notification.text)
-            .setSmallIcon(R.drawable.logo)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setContentText(notification.text)
+            .setContentTitle(notification.title)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSmallIcon(R.drawable.logo)
+            .setStyle(
+                NotificationCompat
+                    .BigTextStyle()
+                    .bigText(notification.text)
+            )
             .build()
 
         val manager = NotificationManagerCompat.from(context)

@@ -143,11 +143,17 @@ class AutocompleteService : Service() {
                 this,
                 com.pvp.app.model.NotificationChannel.TaskAutocomplete.channelId
             )
-            .setOngoing(false)
             .setContentText(applicationContext.getString(R.string.worker_autocomplete_notification_description))
             .setContentTitle(applicationContext.getString(R.string.worker_autocomplete_notification_title))
+            .setOngoing(true)
             .setSilent(true)
             .setSmallIcon(R.drawable.logo)
+            .setStyle(
+                NotificationCompat
+                    .BigTextStyle()
+                    .bigText(applicationContext.getString(R.string.worker_autocomplete_notification_description))
+
+            )
             .build()
     }
 
