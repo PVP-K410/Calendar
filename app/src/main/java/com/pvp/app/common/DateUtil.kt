@@ -9,6 +9,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.TextStyle
+import java.time.temporal.TemporalAdjusters
 import java.util.Date
 import java.util.Locale
 
@@ -119,5 +120,20 @@ object DateUtil {
                 .systemDefault().rules
                 .getOffset(this)
         )
+    }
+
+    /**
+     * Compares current date with specified day of the week and returns the nearest date of that day.
+     *
+     * @return LocalDate of the nearest day of the week
+     */
+    fun DayOfWeek.toNearestDate(): LocalDate {
+        val today = LocalDate.now()
+
+        return if (today.dayOfWeek == this) {
+            today
+        } else {
+            today.with(TemporalAdjusters.next(this))
+        }
     }
 }

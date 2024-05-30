@@ -83,11 +83,21 @@
     <string name="decoration_type_head">Head</string>
     <string name="decoration_type_leggings">Leggings</string>
     <string name="decoration_type_shoes">Shoes</string>
+    <string name="diet_carbohydrates">Carbohydrates</string>
+    <string name="diet_fat">Fat</string>
+    <string name="diet_protein">Protein</string>
+    <string name="diet_take_everything">Taking Everything</string>
     <string name="drawer_application_motto">Schedule Your Day</string>
     <string name="drawer_button_sign_out">Sign Out</string>
     <string name="drawer_button_sign_out_confirmation">Are you sure you want to sign out?</string>
     <string name="drawer_button_sign_out_error">Error has occurred while signing out</string>
+    <string name="drawer_button_feedback">Feedback</string>
     <string name="empty" translatable="false" />
+    <string name="feedback_form_bug">Bug</string>
+    <string name="feedback_form_bug_description">Provide information about the bug you encountered:\n1. Where did you find the bug?\n2. What steps did you take in order for the bug to present itself?</string>
+    <string name="feedback_form_feature_request">Feature request</string>
+    <string name="feedback_form_feature_request_description">Provide description about new functionality/change of functionality you want to request.</string>
+    <string name="feedback_form_rating">Rating</string>
     <string name="form_create_meal_description">Description</string>
     <string name="form_create_meal_duration">Preparation time</string>
     <string name="form_create_meal_ingredients">Ingredients</string>
@@ -183,7 +193,11 @@
     <string name="input_field_activity_label">Activity</string>
     <string name="input_field_date_label">Date</string>
     <string name="input_field_description_edit_label">Editing description</string>
+    <string name="input_field_description_error_cannot_be_empty">Description cannot be empty</string>
     <string name="input_field_description_label">Description</string>
+    <string name="input_field_diet_edit_label">Editing diet</string>
+    <string name="input_field_diet_label">Diet</string>
+    <string name="input_field_diet_success">Your diet has been updated</string>
     <string name="input_field_distance_edit_label">Editing distance</string>
     <string name="input_field_distance_label">Distance</string>
     <string name="input_field_distance_total" translatable="false">%1$.2f km distance</string>
@@ -331,6 +345,7 @@
     <string name="task_type_general">General</string>
     <string name="task_type_meal">Meal</string>
     <string name="task_type_set_meal">Set Meals</string>
+    <string name="task_type_set_meal_label">Diet #%1$d: %2$s</string>
     <string name="task_type_sport">Sport</string>
     <string name="total">Total</string>
     <string name="worker_activity_notification_many">%1$s and %2$s will give you more points this week!</string>
