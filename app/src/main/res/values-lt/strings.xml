@@ -266,7 +266,7 @@
     <string name="measurement_steps">žingsniai</string>
     <string name="notifications_request_dialog_button_cancel">Atšaukti</string>
     <string name="notifications_request_dialog_button_settings">Eiti į nustatymus</string>
-    <string name="notifications_request_dialog_message">Tik jeigu įjungsite pranešimus mes galėsime informuoti Jus apie Jūsų ir Jūsų draugų progresą, priminti apie vandens gėrimą, informuoti apie vyksiančias užduotis ir dar daugiau. Mes užtikrinsime, kad Jūs gautumėte tik pačią geriausią patirtį iš įjungtų pranešimų!</string>
+    <string name="notifications_request_dialog_message">Tik įjungus pranešimus mes galėsime informuoti Jus apie Jūsų ir Jūsų draugų progresą, priminti apie vandens gėrimą, informuoti apie vyksiančias užduotis ir dar daugiau. Mes užtikrinsime, kad Jūs gautumėte tik pačią geriausią patirtį iš įjungtų pranešimų!</string>
     <string name="notifications_request_dialog_title">Įjunkite pranešimus</string>
     <string name="profile_button_delete">Ištrinti paskyrą</string>
     <string name="profile_button_delete_confirm_description">Jeigu jūsų paskyra bus ištrinta, jos nebepavyks susigrąžinti.</string>
