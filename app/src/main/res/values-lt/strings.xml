@@ -291,10 +291,14 @@
     <string name="settings_locale_lt">Lietuvių</string>
     <string name="settings_setting_cup_volume_description">Pasirinkite savo puodelio dydį tikslesniems vandens gėrimo priminimams gauti. Įprastas nustatymas lygus %1$s ml</string>
     <string name="settings_setting_cup_volume_title">Puodelio Dydis</string>
+    <string name="settings_setting_google_calendar_auto_description">Pasirinkite ar norite automatiškai sinchronizuoti \"Google Calendar\" užduotis ir renginius su mūsų programėle. Tik šiandienos ir ateities užduotys bus sinchronizuotos.</string>
+    <string name="settings_setting_google_calendar_auto_title">\"Google\" Kalendoriaus Automatinis Sinchronizatorius</string>
+    <string name="settings_setting_google_calendar_auto_value">Kas %1$d val.</string>
+    <string name="settings_setting_google_calendar_auto_value_never">Nesinchronizuoti</string>
     <string name="settings_setting_google_calendar_button_synchronize">Sinchronizuoti</string>
-    <string name="settings_setting_google_calendar_description">Susinchronizuokite savo \"Google\" kalendoriaus užduotis ir renginius su mūsų programėle, kad rastumėte visas savo veiklas vienoje vietoje. Praėjusių dienų \"Google\" užduotys nebus sinchronizuotos. Tik šiandienos ir ateities užduotys bus sinchronizuotos.</string>
+    <string name="settings_setting_google_calendar_description">Susinchronizuokite savo \"Google\" kalendoriaus užduotis ir renginius su mūsų programėle, kad rastumėte visas savo veiklas vienoje vietoje. Tik šiandienos ir ateities užduotys bus sinchronizuotos.</string>
     <string name="settings_setting_google_calendar_synchronize_success">\"Google\" Kalendorius sėkmingai sinchronizuotas</string>
-    <string name="settings_setting_google_calendar_title">\"Google\" Kalendorius</string>
+    <string name="settings_setting_google_calendar_title">\"Google\" Kalendoriaus Rankinis Sinchronizatorius</string>
     <string name="settings_setting_health_connect_button_configure">Konfigūruoti</string>
     <string name="settings_setting_health_connect_description">Skirdami tam tikrus \"Health Connect\" leidimus padedate mums pateikti daugiau puikių funkcionalumų jums. Skirtus leidimus bet kada galite išjungti ateidami čia. \"Health Connect\" mums leidžia pasinaudoti kitų programėlių surinktais duomenimis apie jūsų aktyvumą.</string>
     <string name="settings_setting_health_connect_title">\"Health Connect\" įrankis</string>

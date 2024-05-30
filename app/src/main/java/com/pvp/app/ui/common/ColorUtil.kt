@@ -7,8 +7,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pvp.app.model.Setting
+import com.pvp.app.model.Setting.Appearance.Theme
 import com.pvp.app.ui.screen.settings.SettingsViewModel
-import com.pvp.app.ui.screen.settings.Theme
 
 fun Color.darken(fraction: Float = 0.5f): Color {
     return ColorUtils

@@ -23,6 +23,7 @@ import com.pvp.app.worker.DailyTaskWorker
 import com.pvp.app.worker.DailyTaskWorkerSetup
 import com.pvp.app.worker.DrinkReminderWorker
 import com.pvp.app.worker.GoalMotivationWorker
+import com.pvp.app.worker.GoogleCalendarSynchronizationWorker
 import com.pvp.app.worker.MealPlanWorker
 import com.pvp.app.worker.TaskNotificationWorker
 import com.pvp.app.worker.TaskPointsDeductionWorkerSetup
@@ -62,6 +63,8 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
         createDrinkReminderWorker()
 
         createGoalMotivationWorker()
+
+        createGoogleCalendarSynchronizationWorker()
 
         createMealPlanWorker()
 
@@ -181,6 +184,18 @@ class Application : Application(), Configuration.Provider, ImageLoaderFactory {
             GoalMotivationWorker.WORKER_NAME,
             ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             request
+        )
+    }
+
+    private fun createGoogleCalendarSynchronizationWorker() {
+        workManager.enqueueUniquePeriodicWork(
+            GoogleCalendarSynchronizationWorker::class.java.name,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            PeriodicWorkRequestBuilder<GoogleCalendarSynchronizationWorker>(
+                repeatInterval = 6,
+                repeatIntervalTimeUnit = TimeUnit.HOURS
+            )
+                .build()
         )
     }
 

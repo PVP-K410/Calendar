@@ -303,10 +303,14 @@
     <string name="settings_setting_cup_volume_button" translatable="false">%1$s ml</string>
     <string name="settings_setting_cup_volume_description">Choose your cup size for more accurate water drinking reminders. Default is %1$s ml</string>
     <string name="settings_setting_cup_volume_title">Cup Volume</string>
+    <string name="settings_setting_google_calendar_auto_description">Choose how often you want to automatically synchronize your Google Calendar tasks with our application. Google tasks from the past will not be synchronized, only today\'s and future tasks will be synchronized. If you don\'t want to synchronize tasks, you can disable automatic synchronization here too.</string>
+    <string name="settings_setting_google_calendar_auto_title">Google Calendar Auto Synchronizer</string>
+    <string name="settings_setting_google_calendar_auto_value">Every %1$d hours</string>
+    <string name="settings_setting_google_calendar_auto_value_never">Do not synchronize</string>
     <string name="settings_setting_google_calendar_button_synchronize">Synchronize</string>
     <string name="settings_setting_google_calendar_description">Synchronize your Google Calendar with our app to find all your tasks in one place. Google tasks from the past will not be synchronized, only today\'s and future tasks will be synchronized.</string>
     <string name="settings_setting_google_calendar_synchronize_success">Google Calendar successfully synchronized</string>
-    <string name="settings_setting_google_calendar_title">Google Calendar</string>
+    <string name="settings_setting_google_calendar_title">Google Calendar Manual Synchronizer</string>
     <string name="settings_setting_health_connect_button_configure">Configure</string>
     <string name="settings_setting_health_connect_description">By enabling certain Health Connect permissions you are allowing us to provide you more great features. You can disable those permissions anytime by coming here. Health Connect allows us to read other applications\' gathered data about your activity.</string>
     <string name="settings_setting_health_connect_title">Health Connect</string>

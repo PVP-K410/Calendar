@@ -463,7 +463,10 @@ class TaskServiceImpl @Inject constructor(
     override suspend fun removeGoogle(task: GoogleTask) {
         editGoogleEventTasks(
             context,
-            getGoogleEventTasks(context)
+            getGoogleEventTasks(
+                context = context,
+                emitEmpty = false
+            )
                 .firstOr(emptyList())
                 .filter { it.id != task.id }
         )
@@ -542,6 +545,8 @@ class TaskServiceImpl @Inject constructor(
             .firstOr(emptyList())
             .filter { it.date < dateStart }
             .plus(events)
+
+        println(eventsAll)
 
         editGoogleEventTasks(
             context,
@@ -737,7 +742,10 @@ class TaskServiceImpl @Inject constructor(
             }
         }
 
-        private fun getGoogleEventTasks(context: Context): Flow<List<GoogleTask>> {
+        private fun getGoogleEventTasks(
+            context: Context,
+            emitEmpty: Boolean = true
+        ): Flow<List<GoogleTask>> {
             return context.dataStoreGoogleCalendarEvents.data
                 .mapLatest { it[eventsKey] ?: emptySet() }
                 .mapLatest { events ->
@@ -745,7 +753,11 @@ class TaskServiceImpl @Inject constructor(
                         JSON.decodeFromJsonElement<GoogleTask>(JSON.parseToJsonElement(it))
                     }
                 }
-                .onStart { emit(emptyList()) }
+                .onStart {
+                    if (emitEmpty) {
+                        emit(emptyList())
+                    }
+                }
         }
 
         private suspend fun isWeekly(
