@@ -238,9 +238,10 @@ fun GoalCard(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 6.dp),
                     textAlign = TextAlign.Left,
-                    text = "You're average " + when (goal.monthly) {
-                        true -> "monthly steps: %d".format((monthSteps / 30))
-                        false -> "weekly steps: %d".format((monthSteps / 30 * 7))
+                    text = if (goal.monthly) {
+                        localeStepsMonthly.format(monthSteps)
+                    } else {
+                        localeStepsWeekly.format(monthSteps / 30 * 7)
                     }
                 )
             }
