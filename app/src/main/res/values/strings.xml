@@ -347,6 +347,10 @@
     <string name="worker_activity_notification_wheelchair_activities">Participating in %1$s activities will give you more points this week!</string>
     <string name="worker_goal_motivation_notification_close_description_monthly">You have a %1$s goal to achieve this month (%2$s). Keep going!</string>
     <string name="worker_goal_motivation_notification_close_description_weekly">You have a %1$s goal to achieve this week (%2$s). Keep going!</string>
+    <string name="worker_goal_motivation_notification_close_description_monthly_1">%2$s left! Finish your %1$s monthly goal!</string>
+    <string name="worker_goal_motivation_notification_close_description_weekly_1">%2$s left! Finish your %1$s weekly goal!</string>
+    <string name="worker_goal_motivation_notification_close_description_monthly_2">Don\'t forget your %1$s monthly goal! %2$s left!</string>
+    <string name="worker_goal_motivation_notification_close_description_weekly_2">Don\'t forget your %1$s weekly goal! %2$s left!</string>
     <string name="worker_goal_motivation_notification_close_title">🏆 One Step Closer to Success!</string>
     <string name="worker_goal_motivation_notification_buddies_description">Participate in goals to keep up with your friends!</string>
     <string name="worker_goal_motivation_notification_buddies_title">🚀 Keep Up with Your Active Buddies!</string>
