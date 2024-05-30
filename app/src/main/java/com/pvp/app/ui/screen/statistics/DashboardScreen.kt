@@ -61,6 +61,7 @@ import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
 import com.pvp.app.ui.screen.goals.GoalCard
+import java.time.LocalDate
 
 @Composable
 private fun ActivityRow(model: DashboardViewModel = hiltViewModel()) {
@@ -264,6 +265,13 @@ fun Goals(goals: List<Goal>) {
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = stringResource(R.string.dashboard_goals_completed) + " ${goals.count { it.completed }}",
+            style = MaterialTheme.typography.titleMedium
+        )
     }
 }
 
@@ -310,6 +318,15 @@ fun Header(state: DashboardState) {
         Text(
             style = MaterialTheme.typography.titleLarge,
             text = state.user.username
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = LocalDate
+                .now()
+                .toString(),
+            style = MaterialTheme.typography.titleLarge
         )
     }
 }
@@ -382,6 +399,13 @@ fun Tasks(tasks: List<Task>) {
                 tasks = tasks.filter { it is SportTask && !it.isDaily },
             )
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = stringResource(R.string.dashboard_tasks_completed) + " ${tasks.count { it.isCompleted }}",
+            style = MaterialTheme.typography.titleMedium
+        )
     }
 }
 
