@@ -6,8 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -441,40 +439,26 @@ fun StatisticItem(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun StatisticItem(
     label: String,
     values: List<@Composable () -> String>
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            color = MaterialTheme.colorScheme.onSecondaryContainer
         )
 
-        FlowRow(modifier = Modifier.align(Alignment.CenterVertically)) {
-            values.forEachIndexed { index, composableString ->
-                Text(
-                    text = composableString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-
-                if (index < values.size - 1) {
-                    Text(
-                        text = ", ",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
-            }
+        values.forEach { composableString ->
+            Text(
+                text = "• " + composableString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
     }
 }
@@ -522,7 +506,9 @@ private sealed class GraphType(val title: @Composable () -> String) {
 }
 
 fun formatValue(value: Double): String {
-    return if (value == value.toInt().toDouble()) {
+    return if (value == value.toInt()
+            .toDouble()
+    ) {
         "%.0f".format(value)
     } else {
         "%.2f".format(value)
