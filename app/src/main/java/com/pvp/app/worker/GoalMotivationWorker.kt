@@ -49,9 +49,9 @@ class GoalMotivationWorker @AssistedInject constructor(
                 val goalType = applicationContext.getString(goal.activity.titleId)
 
                 val target = if (goal.steps) {
-                    "${goal.target.toInt()} ${applicationContext.getString(R.string.measurement_steps)}"
+                    "${goal.target.toInt() - goal.progress.toInt()} ${applicationContext.getString(R.string.measurement_steps)}"
                 } else {
-                    "${goal.target} ${applicationContext.getString(R.string.measurement_km)}"
+                    "${goal.target - goal.progress} ${applicationContext.getString(R.string.measurement_km)}"
                 }
 
                 val descriptions = if (goal.monthly) {
@@ -63,8 +63,8 @@ class GoalMotivationWorker @AssistedInject constructor(
                 } else {
                     listOf(
                         R.string.worker_goal_motivation_notification_close_description_weekly,
-                        R.string.worker_goal_motivation_notification_close_description_monthly_1,
-                        R.string.worker_goal_motivation_notification_close_description_monthly_2
+                        R.string.worker_goal_motivation_notification_close_description_weekly_1,
+                        R.string.worker_goal_motivation_notification_close_description_weekly_2
                     )
                 }
 
