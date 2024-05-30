@@ -62,16 +62,6 @@ class DailyTaskWorker @AssistedInject constructor(
 
         val dailyTaskCount = tasks.filter { it.date.isEqual(now) }.size
 
-        // TODO: Remove this log statement
-        println(
-            "Tasks to generate: ${
-                max(
-                    0,
-                    configuration.dailyTaskCount - dailyTaskCount
-                )
-            }"
-        )
-
         if (dailyTaskCount >= configuration.dailyTaskCount) {
             return Result.success()
         }

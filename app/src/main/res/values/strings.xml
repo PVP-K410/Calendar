@@ -359,8 +359,8 @@
     <string name="worker_activity_notification_single_activity">Participating in %1$s will give you more points this week!</string>
     <string name="worker_activity_notification_title">Weekly Activities</string>
     <string name="worker_activity_notification_wheelchair_activities">Participating in %1$s activities will give you more points this week!</string>
-    <string name="worker_daily_notification_description">Daily Tasks</string>
-    <string name="worker_daily_notification_title">Your daily tasks have been generated! Check them out in the application</string>
+    <string name="worker_daily_notification_description">Your daily tasks have been generated! Check them out in the application</string>
+    <string name="worker_daily_notification_title">Daily Tasks</string>
     <string name="worker_goal_motivation_notification_close_description_monthly">You have a %1$s goal to achieve this month (%2$s). Keep going!</string>
     <string name="worker_goal_motivation_notification_close_description_weekly">You have a %1$s goal to achieve this week (%2$s). Keep going!</string>
     <string name="worker_goal_motivation_notification_close_description_monthly_1">%2$s left! Finish your %1$s monthly goal!</string>
