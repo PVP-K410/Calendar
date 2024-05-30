@@ -104,13 +104,14 @@ class StatisticsViewModel @Inject constructor(
                 tasksByDate(
                     now.minusDays(29) to now,
                     user.email
-                ).map { entries ->
-                    entries
-                        .mapNotNull { task ->
-                            (task as? SportTask)?.activity?.title
-                        }
-                        .distinct()
-                }
+                )
+                    .map { entries ->
+                        entries
+                            .mapNotNull { task ->
+                                (task as? SportTask)?.activity?.title
+                            }
+                            .distinct()
+                    }
             }
 
             val top3FrequentActivitiesFlow = userFlow.flatMapLatest { user ->
@@ -119,19 +120,20 @@ class StatisticsViewModel @Inject constructor(
                 tasksByDate(
                     LocalDate.MIN to now,
                     user.email
-                ).map { entries ->
-                    val activities = entries.mapNotNull { task ->
-                        (task as? SportTask)?.activity
-                    }
+                )
+                    .map { entries ->
+                        val activities = entries.mapNotNull { task ->
+                            (task as? SportTask)?.activity
+                        }
 
-                    activities
-                        .groupingBy { it }
-                        .eachCount()
-                        .toList()
-                        .sortedByDescending { it.second }
-                        .take(3)
-                        .map { it.first.title }
-                }
+                        activities
+                            .groupingBy { it }
+                            .eachCount()
+                            .toList()
+                            .sortedByDescending { it.second }
+                            .take(3)
+                            .map { it.first.title }
+                    }
             }
 
             val averagePointsFlow = userFlow.flatMapLatest { user ->
@@ -140,15 +142,17 @@ class StatisticsViewModel @Inject constructor(
                 tasksByDate(
                     LocalDate.MIN to now,
                     user.email
-                ).map { entries ->
-                    if (entries.isNotEmpty()) {
-                        val totalPoints = entries.sumOf { it.points.value }
-                        val averagePoints = totalPoints.toDouble() / entries.size
-                        averagePoints
-                    } else {
-                        0.0
+                )
+                    .map { entries ->
+                        if (entries.isNotEmpty()) {
+                            val totalPoints = entries.sumOf { it.points.value }
+                            val averagePoints = totalPoints.toDouble() / entries.size
+
+                            averagePoints
+                        } else {
+                            0.0
+                        }
                     }
-                }
             }
 
             val averageTasksCompleted7dFlow = userFlow.flatMapLatest { user ->
@@ -157,13 +161,14 @@ class StatisticsViewModel @Inject constructor(
                 tasksByDate(
                     now.minusDays(6) to now,
                     user.email
-                ).map { tasks ->
-                    val tasksByDate = tasks.groupBy { it.date }
-                    val tasksCountByDate = tasksByDate.mapValues { it.value.size }
-                    val averageTasksCount = tasksCountByDate.values.average()
+                )
+                    .map { tasks ->
+                        val tasksByDate = tasks.groupBy { it.date }
+                        val tasksCountByDate = tasksByDate.mapValues { it.value.size }
+                        val averageTasksCount = tasksCountByDate.values.average()
 
-                    averageTasksCount
-                }
+                        averageTasksCount
+                    }
             }
 
             val averageTasksCompleted30dFlow = userFlow.flatMapLatest { user ->
@@ -172,13 +177,14 @@ class StatisticsViewModel @Inject constructor(
                 tasksByDate(
                     now.minusDays(29) to now,
                     user.email
-                ).map { tasks ->
-                    val tasksByDate = tasks.groupBy { it.date }
-                    val tasksCountByDate = tasksByDate.mapValues { it.value.size }
-                    val averageTasksCount = tasksCountByDate.values.average()
+                )
+                    .map { tasks ->
+                        val tasksByDate = tasks.groupBy { it.date }
+                        val tasksCountByDate = tasksByDate.mapValues { it.value.size }
+                        val averageTasksCount = tasksCountByDate.values.average()
 
-                    averageTasksCount
-                }
+                        averageTasksCount
+                    }
             }
 
             val valuesWeekFlow = userFlow.flatMapLatest { user ->
@@ -263,9 +269,10 @@ class StatisticsViewModel @Inject constructor(
                     uniqueActivities30d = partialState2.uniqueActivities30d,
                     top3FrequentActivities = partialState2.top3FrequentActivities
                 )
-            }.collectLatest { state ->
-                _state.update { state }
             }
+                .collectLatest { state ->
+                    _state.update { state }
+                }
         }
     }
 }

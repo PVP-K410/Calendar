@@ -368,10 +368,12 @@ fun StatisticsContainers(state: StatisticsState) {
             label = "$localeAverageTasksCompleted (7d):",
             value = "%.2f".format(state.averageTasksCompleted7d)
         )
+
         StatisticItem(
             label = "$localeAverageTasksCompleted (30d):",
             value = "%.2f".format(state.averageTasksCompleted30d)
         )
+
         StatisticItem(
             label = "$localeAveragePoints:",
             value = "%.2f".format(state.averagePoints)
@@ -383,6 +385,7 @@ fun StatisticsContainers(state: StatisticsState) {
             label = "$localeTop3FrequentActivities:",
             values = state.top3FrequentActivities
         )
+
         StatisticItem(
             label = "$localeUniqueActivities (30d):",
             values = state.uniqueActivities30d
@@ -392,9 +395,7 @@ fun StatisticsContainers(state: StatisticsState) {
 
 
 @Composable
-fun StatisticsContainerColumn(
-    content: @Composable ColumnScope.() -> Unit
-) {
+fun StatisticsContainerColumn(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -430,6 +431,7 @@ fun StatisticItem(
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
+
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
@@ -457,15 +459,14 @@ fun StatisticItem(
             modifier = Modifier.align(Alignment.CenterVertically)
         )
 
-        FlowRow(
-            modifier = Modifier.align(Alignment.CenterVertically)
-        ) {
+        FlowRow(modifier = Modifier.align(Alignment.CenterVertically)) {
             values.forEachIndexed { index, composableString ->
                 Text(
                     text = composableString(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
+
                 if (index < values.size - 1) {
                     Text(
                         text = ", ",
