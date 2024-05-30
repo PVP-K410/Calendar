@@ -238,9 +238,10 @@ fun GoalCard(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 6.dp),
                     textAlign = TextAlign.Left,
-                    text = "You're average " + when (goal.monthly) {
-                        true -> "monthly steps: %d".format((monthSteps / 30))
-                        false -> "weekly steps: %d".format((monthSteps / 30 * 7))
+                    text = if (goal.monthly) {
+                        localeStepsMonthly.format(monthSteps)
+                    } else {
+                        localeStepsWeekly.format(monthSteps / 30 * 7)
                     }
                 )
             }
@@ -252,6 +253,18 @@ fun GoalCard(
 fun GoalCompletedCard(
     goal: Goal
 ) {
+    val goalDescription = if (goal.steps) {
+        stringResource(
+            R.string.goals_card_completed_description_steps,
+            goal.target.toInt()
+        )
+    } else {
+        stringResource(
+            R.string.goals_card_completed_description_km,
+            goal.target
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -273,7 +286,10 @@ fun GoalCompletedCard(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = goal.activity.title.invoke() + " goal is completed!"
+                text = stringResource(
+                    R.string.goals_card_completed,
+                    goal.activity.title()
+                )
             )
 
             Spacer(modifier = Modifier.padding(2.dp))
@@ -293,12 +309,7 @@ fun GoalCompletedCard(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(end = 8.dp),
                     textAlign = TextAlign.Left,
-                    text = "Your goal was: ${
-                        when (goal.steps) {
-                            true -> "${goal.target.toInt()} steps"
-                            false -> "${goal.target} km"
-                        }
-                    }"
+                    text = goalDescription
                 )
 
                 Icon(

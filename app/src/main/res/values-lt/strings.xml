@@ -148,6 +148,9 @@
     <string name="global_level">Lygis</string>
     <string name="goals_card_average_monthly_steps">Vidutinis nueitų žingsnių kiekis per mėnesį %1$s</string>
     <string name="goals_card_average_weekly_steps">Vidutinis nueitų žingsnių kiekis per savaitę %1$s</string>
+    <string name="goals_card_completed">Siekis %1$s įvykdytas!</string>
+    <string name="goals_card_completed_description_km">Jūsų siekis buvo %1$.2f km</string>
+    <string name="goals_card_completed_description_steps">Jūsų siekis buvo %1$.2f žingsniai</string>
     <string name="goals_card_goal">Siekis</string>
     <string name="goals_card_steps">%1$s žingsniai</string>
     <string name="goals_card_steps_progress">%1$s / %2$s žingsniai</string>
@@ -351,4 +354,6 @@
     <string name="worker_goal_motivation_notification_buddies_title">🚀 Nepralaimėkite Aktyviems Draugams!</string>
     <string name="worker_hydration_notification_description">Laikas puodeliui vandens (%1$d ml)! 😋 Progresas: %2$.1f/%3$.1f litrai</string>
     <string name="worker_hydration_notification_title">Išgerkite Vandens 💦</string>
+    <string name="worker_meal_plan_notification_description">Jūsų savaitinis dietos planas sudarytas!</string>
+    <string name="worker_meal_plan_notification_title">Dietos Planas</string>
 </resources>
