@@ -2,7 +2,7 @@
 
 package com.pvp.app.ui.screen.statistics
 
-import androidx.compose.runtime.Composable
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.ActivityService
@@ -13,6 +13,7 @@ import com.pvp.app.model.ActivityEntry
 import com.pvp.app.model.SportTask
 import com.pvp.app.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +35,8 @@ import javax.inject.Inject
 class StatisticsViewModel @Inject constructor(
     private val activityService: ActivityService,
     private val userService: UserService,
-    private val taskService: TaskService
+    private val taskService: TaskService,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(StatisticsState())
@@ -108,9 +110,12 @@ class StatisticsViewModel @Inject constructor(
                     .map { entries ->
                         entries
                             .mapNotNull { task ->
-                                (task as? SportTask)?.activity?.title
+                                (task as? SportTask)?.activity
                             }
                             .distinct()
+                            .map { activity ->
+                                context.getString(activity.titleId)
+                            }
                     }
             }
 
@@ -132,7 +137,10 @@ class StatisticsViewModel @Inject constructor(
                             .toList()
                             .sortedByDescending { it.second }
                             .take(3)
-                            .map { it.first.title }
+                            .map { it.first }
+                            .map { activity ->
+                                context.getString(activity.titleId)
+                            }
                     }
             }
 
@@ -286,6 +294,6 @@ data class StatisticsState(
     val averageTasksCompleted7d: Double = 0.0,
     val averageTasksCompleted30d: Double = 0.0,
     val averagePoints: Double = 0.0,
-    val uniqueActivities30d: List<@Composable () -> String> = listOf(),
-    val top3FrequentActivities: List<@Composable () -> String> = listOf()
+    val uniqueActivities30d: List<String> = listOf(),
+    val top3FrequentActivities: List<String> = listOf()
 )

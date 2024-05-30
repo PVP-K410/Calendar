@@ -442,8 +442,14 @@ fun StatisticItem(
 @Composable
 fun StatisticItem(
     label: String,
-    values: List<@Composable () -> String>
+    values: List<String>
 ) {
+    if (values.isEmpty()) {
+        return
+    }
+    
+    val chunkedValues = values.chunked((values.size + 2) / 3) // Split values into 3 nearly equal parts
+
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -453,12 +459,22 @@ fun StatisticItem(
             color = MaterialTheme.colorScheme.onSecondaryContainer
         )
 
-        values.forEach { composableString ->
-            Text(
-                text = "• " + composableString(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            chunkedValues.forEach { columnValues ->
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    columnValues.forEach { value ->
+                        Text(
+                            text = "• $value",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
         }
     }
 }
