@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -374,6 +375,8 @@ fun StatisticsContainers(state: StatisticsState) {
         )
     }
 
+    Spacer(modifier = Modifier.height(16.dp))
+
     StatisticsContainerColumn {
         StatisticItem(
             label = localeTop3FrequentActivities,
@@ -387,21 +390,14 @@ fun StatisticsContainers(state: StatisticsState) {
     }
 }
 
-
 @Composable
 fun StatisticsContainerColumn(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
             .background(
-                MaterialTheme.colorScheme.secondaryContainer,
-                RoundedCornerShape(8.dp)
-            )
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onSecondaryContainer,
-                RoundedCornerShape(8.dp)
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
             )
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -415,7 +411,7 @@ fun StatisticItem(
     value: String
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -446,7 +442,11 @@ fun StatisticItem(
 
     val chunkedValues = values.chunked((values.size + 2) / 3)
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
