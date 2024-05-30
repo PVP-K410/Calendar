@@ -15,16 +15,20 @@ import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.DecorationService
+import com.pvp.app.api.FriendService
 import com.pvp.app.api.GoalService
 import com.pvp.app.api.HealthConnectService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.common.DateUtil
+import com.pvp.app.model.Friends
 import com.pvp.app.model.Goal
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
+import com.pvp.app.ui.router.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +50,7 @@ class DashboardViewModel @Inject constructor(
     private val context: Context,
     private val client: HealthConnectClient,
     private val decorationService: DecorationService,
+    private val friendsService: FriendService,
     private val goalService: GoalService,
     private val healthConnectService: HealthConnectService,
     private val userService: UserService,
@@ -62,18 +67,22 @@ class DashboardViewModel @Inject constructor(
     private fun collectStateChanges() {
         viewModelScope.launch(Dispatchers.IO) {
             val userFlow = userService.user.filterNotNull()
+            val friendFlow = friendsService.get(userFlow.first().email)
             val goalFlow = goalService.get(userFlow.first().email)
             val taskFlow = taskService.get(userFlow.first().email)
             val avatarFlow = decorationService.getAvatar(userFlow)
 
             combine(
                 userFlow,
+                friendFlow,
                 goalFlow,
                 taskFlow,
                 avatarFlow
-            ) { user, goals, tasks, avatar ->
+            ) { user, friends, goals, tasks, avatar ->
                 DashboardState(
                     avatar = avatar,
+                    decorationCount = user.decorationsOwned.size,
+                    friendCount = friends?.friends?.size ?: 0,
                     goals = goals.filter {
                         it.startDate <= LocalDate.now() && it.endDate >= LocalDate.now()
                     },
@@ -136,7 +145,6 @@ class DashboardViewModel @Inject constructor(
         )
     }
 
-
     private fun isNotificationEnabled(context: Context): Boolean {
         val enabled = NotificationManagerCompat
             .from(context)
@@ -163,6 +171,8 @@ data class DashboardState(
         1,
         1
     ),
+    val decorationCount: Int = 0,
+    val friendCount: Int = 0,
     val goals: List<Goal> = emptyList(),
     val isLoading: Boolean = true,
     val isHealthConnectEnabled: Boolean = false,

@@ -2,6 +2,7 @@ package com.pvp.app.ui.screen.statistics
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,10 +47,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.pvp.app.R
 import com.pvp.app.model.CustomMealTask
 import com.pvp.app.model.GeneralTask
@@ -61,6 +64,7 @@ import com.pvp.app.model.Task
 import com.pvp.app.ui.common.ProgressIndicatorWithinDialog
 import com.pvp.app.ui.common.darken
 import com.pvp.app.ui.common.orInDarkTheme
+import com.pvp.app.ui.router.Routes
 import com.pvp.app.ui.screen.goals.GoalCard
 import java.time.LocalDate
 
@@ -171,8 +175,9 @@ private fun ActivityRowItem(
 
 @Composable
 fun DashboardScreen(
+    model: DashboardViewModel = hiltViewModel(),
+    controller: NavHostController,
     modifier: Modifier,
-    model: DashboardViewModel = hiltViewModel()
 ) {
     val state by model.state.collectAsStateWithLifecycle()
 
@@ -191,32 +196,46 @@ fun DashboardScreen(
         ) {
             Header(state)
 
-            if (!state.isHealthConnectEnabled) {
-                InformationElement(stringResource(R.string.dashboard_healthconnect_not_enabled))
+            if (state.isHealthConnectEnabled) {
+                InformationElement(
+                    controller = controller,
+                    showSettingsButton = true,
+                    text = stringResource(R.string.dashboard_healthconnect_not_enabled)
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             if (!state.isNotificationEnabled) {
-                InformationElement(stringResource(R.string.dashboard_notification_not_enabled))
+                InformationElement(
+                    controller = controller,
+                    showSettingsButton = false,
+                    text = stringResource(R.string.dashboard_notification_not_enabled)
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            if (state.isHealthConnectEnabled) {
+            if (!state.isHealthConnectEnabled) {
                 ActivityRow()
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             if (state.tasks.isNotEmpty()) {
-                Tasks(state.tasks)
+                Tasks(
+                    controller = controller,
+                    tasks = state.tasks
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             if (state.goals.isNotEmpty()) {
-                Goals(state.goals)
+                Goals(
+                    controller = controller,
+                    goals = state.goals
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -225,11 +244,153 @@ fun DashboardScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         StatisticsScreen()
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(
+            Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Friends(
+                controller = controller,
+                friendCount = state.friendCount
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Decorations(
+                controller = controller,
+                decorationCount = state.decorationCount
+            )
+        }
     }
 }
 
 @Composable
-fun Goals(goals: List<Goal>) {
+fun Decorations(
+    controller: NavHostController,
+    decorationCount: Int
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = MaterialTheme.shapes.medium
+            )
+            .padding(16.dp),
+    ) {
+        when (decorationCount) {
+            0 -> {
+                Text(
+                    text = stringResource(R.string.dashboard_decoration_count_none),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            else -> {
+                Text(
+                    text = stringResource(
+                        R.string.dashboard_decoration_count,
+                        decorationCount
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+
+        Text(
+            text = stringResource(R.string.dashboard_decoration_buy),
+            modifier = Modifier.clickable {
+                controller.popBackStack()
+
+                controller.navigate(Routes.Decorations.path) {
+                    launchSingleTop = true
+                }
+            },
+            style = MaterialTheme.typography.bodyMedium.copy(
+                textDecoration = TextDecoration.Underline
+            )
+        )
+    }
+}
+
+@Composable
+fun Friends(
+    controller: NavHostController,
+    friendCount: Int
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = MaterialTheme.shapes.medium
+            )
+            .padding(16.dp),
+    ) {
+        when (friendCount) {
+            0 -> {
+                Text(
+                    text = stringResource(R.string.dashboard_friend_count_none),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(R.string.dashboard_friend_add_none),
+                    modifier = Modifier.clickable {
+                        controller.popBackStack()
+
+                        controller.navigate(Routes.Friends.path) {
+                            launchSingleTop = true
+                        }
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textDecoration = TextDecoration.Underline
+                    )
+                )
+            }
+
+            else -> {
+                Text(
+                    text = stringResource(
+                        R.string.dashboard_friend_count,
+                        friendCount
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = stringResource(R.string.dashboard_friend_add),
+                    modifier = Modifier.clickable {
+                        controller.popBackStack()
+
+                        controller.navigate(Routes.Friends.path) {
+                            launchSingleTop = true
+                        }
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textDecoration = TextDecoration.Underline
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun Goals(
+    controller: NavHostController,
+    goals: List<Goal>
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -272,6 +433,22 @@ fun Goals(goals: List<Goal>) {
         Text(
             text = stringResource(R.string.dashboard_goals_completed) + " ${goals.count { it.completed }}",
             style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = stringResource(R.string.dashboard_goals_create),
+            style = MaterialTheme.typography.titleMedium.copy(
+                textDecoration = TextDecoration.Underline
+            ),
+            modifier = Modifier.clickable {
+                controller.popBackStack()
+
+                controller.navigate(Routes.Goals.path) {
+                    launchSingleTop = true
+                }
+            }
         )
     }
 }
@@ -333,7 +510,11 @@ fun Header(state: DashboardState) {
 }
 
 @Composable
-private fun InformationElement(text: String) {
+private fun InformationElement(
+    controller: NavHostController,
+    showSettingsButton: Boolean,
+    text: String
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -349,6 +530,24 @@ private fun InformationElement(text: String) {
         )
 
         Box(modifier = Modifier.fillMaxWidth()) {
+            if (showSettingsButton) {
+                Text(
+                    text = stringResource(R.string.dashboard_settings),
+                    modifier = Modifier
+                        .clickable {
+                            controller.popBackStack()
+
+                            controller.navigate(Routes.Settings.path) {
+                                launchSingleTop = true
+                            }
+                        }
+                        .align(Alignment.BottomStart),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textDecoration = TextDecoration.Underline
+                    )
+                )
+            }
+
             Icon(
                 imageVector = Icons.Outlined.Error,
                 contentDescription = "Error icon",
@@ -361,7 +560,10 @@ private fun InformationElement(text: String) {
 }
 
 @Composable
-fun Tasks(tasks: List<Task>) {
+fun Tasks(
+    controller: NavHostController,
+    tasks: List<Task>
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -416,6 +618,22 @@ fun Tasks(tasks: List<Task>) {
         Text(
             text = stringResource(R.string.dashboard_tasks_completed) + " ${tasks.count { it.isCompleted }}",
             style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = stringResource(R.string.dashboard_tasks_create),
+            style = MaterialTheme.typography.titleMedium.copy(
+                textDecoration = TextDecoration.Underline
+            ),
+            modifier = Modifier.clickable {
+                controller.popBackStack()
+
+                controller.navigate(Routes.Calendar.path) {
+                    launchSingleTop = true
+                }
+            }
         )
     }
 }
