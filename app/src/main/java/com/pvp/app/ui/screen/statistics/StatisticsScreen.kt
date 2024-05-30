@@ -125,8 +125,6 @@ fun StatisticsScreen(
 
         tabs.values.elementAt(tab)()
 
-        Spacer(modifier = Modifier.size(16.dp))
-
         StatisticsContainers(state)
     }
 }
@@ -395,6 +393,7 @@ fun StatisticsContainerColumn(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(8.dp)
             .background(
                 MaterialTheme.colorScheme.surfaceContainer,
                 MaterialTheme.shapes.medium
@@ -411,7 +410,9 @@ fun StatisticItem(
     value: String
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
