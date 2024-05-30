@@ -10,6 +10,7 @@ enum class NotificationChannel(
     TaskAutocomplete("Task Autocomplete"),
     TaskReminder("Task Reminder"),
     WeeklyActivityReminder("Weekly Activity Reminder"),
+    WeeklyMealPlan("Weekly Meal Plan"),
 
     Unknown("Unknown");
 

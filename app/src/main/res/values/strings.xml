@@ -149,6 +149,9 @@
     <string name="global_level">Level</string>
     <string name="goals_card_average_monthly_steps">Your average monthly steps %1$s</string>
     <string name="goals_card_average_weekly_steps">Your average weekly steps %1$s</string>
+    <string name="goals_card_completed">%1$s goal is completed!</string>
+    <string name="goals_card_completed_description_km">Your goal was %1$.2f km</string>
+    <string name="goals_card_completed_description_steps">Your goal was %1$.2f steps</string>
     <string name="goals_card_goal">Goal</string>
     <string name="goals_card_km" translatable="false">%1$.2f km</string>
     <string name="goals_card_km_progress" translatable="false">%1$.2f / %2$.2f km</string>
@@ -354,9 +357,15 @@
     <string name="worker_activity_notification_wheelchair_activities">Participating in %1$s activities will give you more points this week!</string>
     <string name="worker_goal_motivation_notification_close_description_monthly">You have a %1$s goal to achieve this month (%2$s). Keep going!</string>
     <string name="worker_goal_motivation_notification_close_description_weekly">You have a %1$s goal to achieve this week (%2$s). Keep going!</string>
+    <string name="worker_goal_motivation_notification_close_description_monthly_1">%2$s left! Finish your %1$s monthly goal!</string>
+    <string name="worker_goal_motivation_notification_close_description_weekly_1">%2$s left! Finish your %1$s weekly goal!</string>
+    <string name="worker_goal_motivation_notification_close_description_monthly_2">Don\'t forget your %1$s monthly goal! %2$s left!</string>
+    <string name="worker_goal_motivation_notification_close_description_weekly_2">Don\'t forget your %1$s weekly goal! %2$s left!</string>
     <string name="worker_goal_motivation_notification_close_title">🏆 One Step Closer to Success!</string>
     <string name="worker_goal_motivation_notification_buddies_description">Participate in goals to keep up with your friends!</string>
     <string name="worker_goal_motivation_notification_buddies_title">🚀 Keep Up with Your Active Buddies!</string>
     <string name="worker_hydration_notification_description">Time for a cup of water (%1$d ml)! 😋 Today\'s progress: %2$.1f/%3$.1f liters</string>
     <string name="worker_hydration_notification_title">Hydration Reminder 💦</string>
+    <string name="worker_meal_plan_notification_description">Your weekly meal plan has been generated!</string>
+    <string name="worker_meal_plan_notification_title">Meal Plan</string>
 </resources>
