@@ -126,6 +126,25 @@ object Routes {
         path = "calendar"
     )
 
+    data object Dashboard : Node(
+        compose = { _, c, m ->
+            DashboardScreen(
+                controller = c,
+                modifier = m
+            )
+        },
+        options = Options(
+            icon = {
+                RouteIcon(
+                    imageVector = Icons.Outlined.AutoGraph,
+                    resourceId = R.string.route_dashboard
+                )
+            },
+            title = { RouteTitle(stringResource(R.string.route_dashboard)) }
+        ),
+        path = "dashboard"
+    )
+
     data object Decorations : Node(
         compose = { _, _, m -> DecorationScreen(modifier = m) },
         options = Options(
@@ -214,20 +233,6 @@ object Routes {
             title = { RouteTitle(stringResource(R.string.route_settings)) }
         ),
         path = "settings"
-    )
-
-    data object Dashboard : Node(
-        compose = { _, _, m -> DashboardScreen(modifier = m) },
-        options = Options(
-            icon = {
-                RouteIcon(
-                    imageVector = Icons.Outlined.AutoGraph,
-                    resourceId = R.string.route_dashboard
-                )
-            },
-            title = { RouteTitle(stringResource(R.string.route_dashboard)) }
-        ),
-        path = "dashboard"
     )
 
     data object Survey : Node(
