@@ -1,6 +1,7 @@
 package com.pvp.app.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.hilt.work.HiltWorker
@@ -31,38 +32,26 @@ class WeeklyActivityWorker @AssistedInject constructor(
     workerParams
 ) {
 
-    companion object {
-
-        const val WORKER_NAME = "WeeklyActivityWorker"
-    }
-
     override suspend fun doWork(): Result {
-        val permissions = setOf(
-            HealthPermission.getReadPermission(
-                ExerciseSessionRecord::class
-            )
-        )
-
-        return if (healthConnectService.permissionsGranted(permissions)) {
+        return if (healthConnectService.permissionsGranted(PERMISSIONS)) {
+            val user = userService.user.firstOrNull() ?: return Result.retry()
             val activities = getRandomInfrequentActivities()
 
-            postActivityNotification(activities)
+            try {
+                userService.merge(user.copy(weeklyActivities = activities))
 
-            userService.user
-                .firstOrNull()
-                ?.let { user ->
-                    try {
-                        userService.merge(
-                            user.copy(
-                                weeklyActivities = activities
-                            )
-                        )
+                postActivityNotification(activities)
 
-                        Result.success()
-                    } catch (e: Exception) {
-                        Result.failure()
-                    }
-                } ?: Result.failure()
+                Result.success()
+            } catch (e: Exception) {
+                Log.e(
+                    WORKER_NAME,
+                    "Failed to update ${user.email} weekly activities. Retrying...",
+                    e
+                )
+
+                Result.retry()
+            }
         } else {
             Result.failure()
         }
@@ -128,6 +117,15 @@ class WeeklyActivityWorker @AssistedInject constructor(
                 title = applicationContext.getString(R.string.worker_activity_notification_title),
                 text = formNotificationBody(activities)
             )
+        )
+    }
+
+    companion object {
+
+        const val WORKER_NAME = "WeeklyActivityWorker"
+
+        val PERMISSIONS = setOf(
+            HealthPermission.getReadPermission(ExerciseSessionRecord::class)
         )
     }
 }
