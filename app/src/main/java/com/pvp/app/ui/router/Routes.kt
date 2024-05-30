@@ -26,6 +26,7 @@ import com.pvp.app.ui.screen.friends.FriendsScreen
 import com.pvp.app.ui.screen.friends.FriendsViewModel
 import com.pvp.app.ui.screen.goals.GoalScreen
 import com.pvp.app.ui.screen.settings.SettingsScreen
+import com.pvp.app.ui.screen.statistics.DashboardScreen
 import com.pvp.app.ui.screen.statistics.StatisticsScreen
 import com.pvp.app.ui.screen.survey.SurveyScreen
 
@@ -69,12 +70,12 @@ object Routes {
      */
     val authenticated = listOf(
         Calendar,
+        Dashboard,
         Decorations,
         FriendsRoot,
         Goals,
         None,
-        Settings,
-        Statistics
+        Settings
     )
 
     /**
@@ -87,11 +88,11 @@ object Routes {
      */
     val drawer = listOf(
         Calendar,
+        Dashboard,
         Decorations,
         Friends,
         Goals,
-        Settings,
-        Statistics
+        Settings
     )
 
     /**
@@ -215,18 +216,18 @@ object Routes {
         path = "settings"
     )
 
-    data object Statistics : Node(
-        compose = { _, _, m -> StatisticsScreen(modifier = m) },
+    data object Dashboard : Node(
+        compose = { _, _, m -> DashboardScreen(modifier = m) },
         options = Options(
             icon = {
                 RouteIcon(
                     imageVector = Icons.Outlined.AutoGraph,
-                    resourceId = R.string.route_statistics
+                    resourceId = R.string.route_dashboard
                 )
             },
-            title = { RouteTitle(stringResource(R.string.route_statistics)) }
+            title = { RouteTitle(stringResource(R.string.route_dashboard)) }
         ),
-        path = "statistics"
+        path = "dashboard"
     )
 
     data object Survey : Node(
