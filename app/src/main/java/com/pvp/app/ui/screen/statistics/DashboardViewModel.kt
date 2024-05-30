@@ -92,7 +92,6 @@ class DashboardViewModel @Inject constructor(
 
     suspend fun getCalories(): Double {
         val today = LocalDate.now()
-
         val end = DateUtil.toNowOrNextDay(today)
 
         val start = today
@@ -125,7 +124,6 @@ class DashboardViewModel @Inject constructor(
 
     suspend fun getHeartRate(): Long {
         val today = LocalDate.now()
-
         val end = DateUtil.toNowOrNextDay(today)
 
         val start = today

@@ -122,9 +122,7 @@ private fun ActivityRowItem(
     title: String,
     value: String,
 ) {
-    Box(
-        modifier = Modifier.size(110.dp)
-    ) {
+    Box(modifier = Modifier.size(110.dp)) {
         Box(
             modifier = Modifier
                 .fillMaxSize(0.85f)
@@ -201,7 +199,6 @@ fun DashboardScreen(
                 InformationElement(stringResource(R.string.dashboard_notification_not_enabled))
 
                 Spacer(modifier = Modifier.height(16.dp))
-
             }
 
             if (state.isHealthConnectEnabled) {
