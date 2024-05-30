@@ -448,9 +448,7 @@ fun StatisticItem(
 
     val chunkedValues = values.chunked((values.size + 2) / 3)
 
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
@@ -520,8 +518,9 @@ private sealed class GraphType(val title: @Composable () -> String) {
     }
 }
 
-fun formatValue(value: Double): String {
-    return if (value == value.toInt()
+private fun formatValue(value: Double): String {
+    return if (value == value
+            .toInt()
             .toDouble()
     ) {
         "%.0f".format(value)
