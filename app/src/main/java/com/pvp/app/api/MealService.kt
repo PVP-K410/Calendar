@@ -2,11 +2,20 @@ package com.pvp.app.api
 
 import com.pvp.app.model.Meal
 import kotlinx.coroutines.flow.Flow
+import java.time.DayOfWeek
 
 interface MealService : DocumentsCollection {
 
     override val identifier: String
         get() = "meals"
+
+    /**
+     * Generates a week meal plan based on the meals in the database and user diet preferences.
+     * The plan will contain 3 meals for each day of the week.
+     *
+     * @return a map of the week meal plan.
+     */
+    suspend fun generateWeekPlan(): Map<DayOfWeek, List<Meal>>
 
     /**
      * @return a flow of all meals in the database.
