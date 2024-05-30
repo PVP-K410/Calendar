@@ -39,12 +39,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pvp.app.R
 import com.pvp.app.model.Goal
 import com.pvp.app.ui.common.TabSelector
 import kotlin.math.max
@@ -54,6 +56,8 @@ fun GoalScreen(
     model: GoalViewModel = hiltViewModel(),
     modifier: Modifier
 ) {
+    val localeButtonContent = stringResource(R.string.goals_icon_create_goal_content_description)
+    val localeNotSet = stringResource(R.string.goals_text_nothing_set)
     val state by model.state.collectAsStateWithLifecycle()
     var isDialogOpen by remember { mutableStateOf(false) }
     val toggleDialog = remember { { isDialogOpen = !isDialogOpen } }
@@ -168,6 +172,12 @@ fun GoalCard(
     goal: Goal,
     monthSteps: Long
 ) {
+    val localeGoal = stringResource(R.string.goals_card_goal)
+    val localeSteps = stringResource(R.string.goals_card_steps)
+    val localeStepsMonthly = stringResource(R.string.goals_card_average_monthly_steps)
+    val localeStepsWeekly = stringResource(R.string.goals_card_average_weekly_steps)
+    val localeKm = stringResource(R.string.goals_card_km)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -229,9 +239,10 @@ fun GoalCard(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 6.dp),
                     textAlign = TextAlign.Left,
-                    text = "Your average " + when (goal.monthly) {
-                        true -> "monthly steps: %d".format((monthSteps / 30))
-                        false -> "weekly steps: %d".format((monthSteps / 30 * 7))
+                    text = if (goal.monthly) {
+                        localeStepsMonthly.format(monthSteps)
+                    } else {
+                        localeStepsWeekly.format(monthSteps / 30 * 7)
                     }
                 )
             }
