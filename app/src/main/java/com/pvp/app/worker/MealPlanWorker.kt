@@ -35,13 +35,12 @@ class MealPlanWorker @AssistedInject constructor(
 ) {
 
     override suspend fun doWork(): Result {
-        val meals = mealService.get().first()
-
-        postActivityNotification()
 
         val user = userService.user.firstOrNull()
 
         user ?: return Result.retry()
+
+        postActivityNotification()
 
         val week = LocalDate
             .now()

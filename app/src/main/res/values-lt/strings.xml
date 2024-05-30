@@ -146,6 +146,9 @@
     <string name="global_level">Lygis</string>
     <string name="goals_card_average_monthly_steps">Vidutinis nueitų žingsnių kiekis per mėnesį %1$s</string>
     <string name="goals_card_average_weekly_steps">Vidutinis nueitų žingsnių kiekis per savaitę %1$s</string>
+    <string name="goals_card_completed">Siekis %1$s įvykdytas!</string>
+    <string name="goals_card_completed_description_km">Jūsų siekis buvo: %1$.2f km</string>
+    <string name="goals_card_completed_description_steps">Your goal was: %1$.2f žingsniai</string>
     <string name="goals_card_goal">Siekis</string>
     <string name="goals_card_steps">%1$s žingsniai</string>
     <string name="goals_card_steps_progress">%1$s / %2$s žingsniai</string>

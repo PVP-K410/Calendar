@@ -147,6 +147,9 @@
     <string name="global_level">Level</string>
     <string name="goals_card_average_monthly_steps">Your average monthly steps %1$s</string>
     <string name="goals_card_average_weekly_steps">Your average weekly steps %1$s</string>
+    <string name="goals_card_completed">%1$s goal is completed!</string>
+    <string name="goals_card_completed_description_km">Your goal was: %1$.2f km</string>
+    <string name="goals_card_completed_description_steps">Your goal was: %1$.2f steps</string>
     <string name="goals_card_goal">Goal</string>
     <string name="goals_card_km" translatable="false">%1$.2f km</string>
     <string name="goals_card_km_progress" translatable="false">%1$.2f / %2$.2f km</string>
