@@ -1,6 +1,7 @@
 package com.pvp.app.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -35,13 +36,8 @@ class ActivityWorker @AssistedInject constructor(
     workerParams
 ) {
 
-    companion object {
-
-        const val WORKER_NAME = "ActivityWorker"
-    }
-
     override suspend fun doWork(): Result {
-        val user = userService.user.firstOrNull() ?: return Result.failure()
+        val user = userService.user.firstOrNull() ?: return Result.retry()
 
         user.lastActivitySync?.let { sync ->
             val difference = TimeUnit.HOURS.convert(
@@ -54,36 +50,44 @@ class ActivityWorker @AssistedInject constructor(
             }
         }
 
-        updateActivities(
-            email = user.email,
-            lastSync = user.lastActivitySync
-                ?: LocalDate
-                    .now()
-                    .minusDays(30)
-                    .toTimestamp()
-        )
-
-        val hasDisability = checkForDisability(
-            lastSync = user.lastActivitySync
-                ?: LocalDate
-                    .now()
-                    .minusDays(30)
-                    .toTimestamp()
-        )
-
-        userService.merge(
-            user.copy(
-                hasDisability = hasDisability,
-                lastActivitySync = Timestamp.now()
+        try {
+            updateActivities(
+                email = user.email,
+                lastSync = user.lastActivitySync
+                    ?: LocalDate
+                        .now()
+                        .minusDays(30)
+                        .toTimestamp()
             )
-        )
+
+            val hasDisability = checkForDisability(
+                lastSync = user.lastActivitySync
+                    ?: LocalDate
+                        .now()
+                        .minusDays(30)
+                        .toTimestamp()
+            )
+
+            userService.merge(
+                user.copy(
+                    hasDisability = hasDisability,
+                    lastActivitySync = Timestamp.now()
+                )
+            )
+        } catch (e: Exception) {
+            Log.e(
+                WORKER_NAME,
+                "Failed to update ${user.email} activities. Retrying...",
+                e
+            )
+
+            return Result.retry()
+        }
 
         return Result.success()
     }
 
-    private suspend fun checkForDisability(
-        lastSync: Timestamp
-    ): Boolean {
+    private suspend fun checkForDisability(lastSync: Timestamp): Boolean {
         val start = lastSync
             .toDate()
             .toInstant()
@@ -115,7 +119,11 @@ class ActivityWorker @AssistedInject constructor(
 
         val end = LocalDate.now()
 
-        for (date in start.datesUntil(end.plusDays(1))) {
+        val dates = generateSequence(start) { it.plusDays(1) }
+            .takeWhile { it <= end }
+            .toList()
+
+        for (date in dates) {
             val calories = getCalories(date)
             val distance = getDistance(date)
             val steps = getSteps(date)
@@ -192,5 +200,10 @@ class ActivityWorker @AssistedInject constructor(
             start,
             end
         )
+    }
+
+    companion object {
+
+        const val WORKER_NAME = "ActivityWorker"
     }
 }
