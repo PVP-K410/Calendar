@@ -35,12 +35,9 @@ class MealPlanWorker @AssistedInject constructor(
 ) {
 
     override suspend fun doWork(): Result {
-
         val user = userService.user.firstOrNull()
 
         user ?: return Result.retry()
-
-        postActivityNotification()
 
         val week = LocalDate
             .now()
@@ -59,6 +56,8 @@ class MealPlanWorker @AssistedInject constructor(
         user.lastMealPlanGeneratedWeek = week
 
         userService.merge(user)
+
+        postActivityNotification()
 
         return Result.success()
     }
