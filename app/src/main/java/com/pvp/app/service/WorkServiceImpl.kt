@@ -222,8 +222,8 @@ class WorkServiceImpl @Inject constructor(
             // the worker starts executing to avoid any permission related issues.
             setInitialDelay(
                 Duration.of(
-                    1,
-                    ChronoUnit.MINUTES
+                    30,
+                    ChronoUnit.SECONDS
                 )
             )
 
