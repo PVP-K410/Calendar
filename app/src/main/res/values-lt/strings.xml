@@ -264,6 +264,10 @@
     <string name="meal_card_servings_breakdown">Porcijų informacija</string>
     <string name="meal_card_weight_per_serving">%1$s per porciją</string>
     <string name="measurement_steps">žingsniai</string>
+    <string name="notifications_request_dialog_button_cancel">Atšaukti</string>
+    <string name="notifications_request_dialog_button_settings">Eiti į nustatymus</string>
+    <string name="notifications_request_dialog_message">Tik jeigu įjungsite pranešimus mes galėsime informuoti Jus apie Jūsų ir Jūsų draugų progresą, priminti apie vandens gėrimą, informuoti apie vyksiančias užduotis ir dar daugiau. Mes užtikrinsime, kad Jūs gautumėte tik pačią geriausią patirtį iš įjungtų pranešimų!</string>
+    <string name="notifications_request_dialog_title">Įjunkite pranešimus</string>
     <string name="profile_button_delete">Ištrinti paskyrą</string>
     <string name="profile_button_delete_confirm_description">Jeigu jūsų paskyra bus ištrinta, jos nebepavyks susigrąžinti.</string>
     <string name="profile_button_delete_confirm_input_label">Norėdami patvirtinti, įveskite savo slapyvardį \"%1$s\" žemiau:</string>
@@ -347,6 +351,8 @@
     <string name="worker_activity_notification_single_activity">Dalyvavimas "%1$s" veikloje duos daugiau taškų šią savaitę!</string>
     <string name="worker_activity_notification_title">Savaitinės veiklos</string>
     <string name="worker_activity_notification_wheelchair_activities">Dalyvavimas "%1$s" veiklose duos daugiau taškų šią savaitę!</string>
+    <string name="worker_autocomplete_notification_description">Mes sekame Jūsų sportinį aktyvumą ir realiu laiku įvykdome Jūsų susikurtas užduotis, išsikeltus siekius bei dar daugiau. Šį funkcionalumą galite išsijungti programėlės nustatymuose, tačiau nukentės Jums suteikiamų funkcijų tikslumas.</string>
+    <string name="worker_autocomplete_notification_title">Aktyvumo Sekimas</string>
     <string name="worker_daily_notification_description">Jūsų dieninės užduotys sugeneruotos! Užeikite į programėlę ir pamatykite jas</string>
     <string name="worker_daily_notification_title">Dieninės Užduotys</string>
     <string name="worker_goal_motivation_notification_close_description_monthly">Bandote įveikti %1$s siekį šį mėnesį (%2$s). Taip ir toliau!</string>

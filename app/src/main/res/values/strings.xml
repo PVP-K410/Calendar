@@ -275,6 +275,10 @@
     <string name="measurement_m" translatable="false">m</string>
     <string name="measurement_minutes" translatable="false">min</string>
     <string name="measurement_steps">steps</string>
+    <string name="notifications_request_dialog_button_cancel">Cancel</string>
+    <string name="notifications_request_dialog_button_settings">Go to Settings</string>
+    <string name="notifications_request_dialog_message">Only if you have enabled notifications we will be able to inform you about your and your friends progresses, remind you to drink water, inform about incoming tasks and way more. We are going to make sure that you will get only the best experience out of this!</string>
+    <string name="notifications_request_dialog_title">Enable Notifications</string>
     <string name="profile_button_delete">Delete Account</string>
     <string name="profile_button_delete_confirm_description">Your account will be permanently deleted and recovery will not be possible</string>
     <string name="profile_button_delete_confirm_input_label">To confirm, please enter your username \"%1$s\" in the box below:</string>
@@ -359,6 +363,8 @@
     <string name="worker_activity_notification_single_activity">Participating in %1$s will give you more points this week!</string>
     <string name="worker_activity_notification_title">Weekly Activities</string>
     <string name="worker_activity_notification_wheelchair_activities">Participating in %1$s activities will give you more points this week!</string>
+    <string name="worker_autocomplete_notification_description">We are reading your sport activity and processing your created tasks, set goals and more in real-time. This functionality can be disabled in application\'s settings, however accuracy of functions that we provide to you will suffer.</string>
+    <string name="worker_autocomplete_notification_title">Activity Processing</string>
     <string name="worker_daily_notification_description">Your daily tasks have been generated! Check them out in the application</string>
     <string name="worker_daily_notification_title">Daily Tasks</string>
     <string name="worker_goal_motivation_notification_close_description_monthly">You have a %1$s goal to achieve this month (%2$s). Keep going!</string>

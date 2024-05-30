@@ -144,8 +144,8 @@ class AutocompleteService : Service() {
                 com.pvp.app.model.NotificationChannel.TaskAutocomplete.channelId
             )
             .setOngoing(false)
-            .setContentText("Processing your tasks in the background")
-            .setContentTitle("Task Processing")
+            .setContentText(applicationContext.getString(R.string.worker_autocomplete_notification_description))
+            .setContentTitle(applicationContext.getString(R.string.worker_autocomplete_notification_title))
             .setSilent(true)
             .setSmallIcon(R.drawable.logo)
             .build()

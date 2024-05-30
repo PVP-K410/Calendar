@@ -34,7 +34,7 @@ class Activity : AppCompatActivity() {
 
         val screen = installSplashScreen()
             .useStyledExit {
-                if (!isNotificationEnabled(this)) {
+                if (!areNotificationsEnabled(this)) {
                     showNotificationPermissionDialog(this)
                 }
             }
@@ -58,7 +58,7 @@ class Activity : AppCompatActivity() {
         workService.initiateActivityWorker()
     }
 
-    private fun isNotificationEnabled(context: Context): Boolean {
+    private fun areNotificationsEnabled(context: Context): Boolean {
         val enabled = NotificationManagerCompat
             .from(context)
             .areNotificationsEnabled()
@@ -67,7 +67,7 @@ class Activity : AppCompatActivity() {
             return false
         }
 
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val manager = context.getSystemService(NotificationManager::class.java)
 
         for (channel in manager.notificationChannels) {
             if (channel.importance == NotificationManager.IMPORTANCE_NONE) {
@@ -92,16 +92,17 @@ class Activity : AppCompatActivity() {
     }
 
     private fun showNotificationPermissionDialog(context: Context) {
-        // TODO: Translate alert dialog
         AlertDialog
             .Builder(context)
-            .setTitle("Enable Notifications")
-            .setMessage("Enable notifications to get reminders for tasks!")
-            .setPositiveButton("Go to Settings") { _, _ ->
+            .setTitle(applicationContext.getString(R.string.notifications_request_dialog_title))
+            .setMessage(applicationContext.getString(R.string.notifications_request_dialog_message))
+            .setPositiveButton(
+                applicationContext.getString(R.string.notifications_request_dialog_button_settings)
+            ) { _, _ ->
                 openNotificationSettingsForApp(context)
             }
             .setNegativeButton(
-                "Cancel",
+                applicationContext.getString(R.string.notifications_request_dialog_button_cancel),
                 null
             )
             .show()
