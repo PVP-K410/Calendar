@@ -168,6 +168,12 @@ interface TaskService : DocumentsCollection {
     ): List<SportTask>
 
     /**
+     * Generates meal tasks for current week, starting from today, for current user.
+     * This happens by using [MealService.generateWeekPlan] to get the meals for the week
+     */
+    suspend fun generateMeal()
+
+    /**
      * Gets all tasks for the given user by its email.
      *
      * @param userEmail email of the user to get tasks for

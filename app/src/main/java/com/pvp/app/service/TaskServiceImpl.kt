@@ -24,6 +24,7 @@ import com.pvp.app.api.MealService
 import com.pvp.app.api.PointService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.common.DateUtil.toNearestDate
 import com.pvp.app.common.FlowUtil.firstOr
 import com.pvp.app.common.JsonUtil.JSON
 import com.pvp.app.common.JsonUtil.toJsonElement
@@ -394,6 +395,28 @@ class TaskServiceImpl @Inject constructor(
             }
     }
 
+    override suspend fun generateMeal() {
+        val dayToMeals = mealService.generateWeekPlan()
+
+        dayToMeals
+            .mapKeys { (day, _) -> day.toNearestDate() }
+            .forEach { (day, meals) ->
+                meals.forEachIndexed { index, meal ->
+                    create(
+                        date = day,
+                        duration = Duration.ofMinutes(meal.readyInMinutes.toLong()),
+                        meal = meal,
+                        title = context.getString(
+                            R.string.task_type_set_meal_label,
+                            index + 1,
+                            meal.name
+                        ),
+                        userEmail = userService.user.firstOrNull()?.email ?: error("User not found")
+                    )
+                }
+            }
+    }
+
     override suspend fun get(userEmail: String): Flow<List<Task>> {
         return database
             .collection(identifier)
@@ -635,7 +658,10 @@ class TaskServiceImpl @Inject constructor(
             val unit = baseDistance * 1000 / (1 / SportActivity.Walking.pointsRatioDistance)
 
             val multiplier = "%.2f"
-                .format(Locale.US, exerciseService.calculateActivityLevel())
+                .format(
+                    Locale.US,
+                    exerciseService.calculateActivityLevel()
+                )
                 .toDouble()
 
             val upperBound = (unit * (1 / activity.pointsRatioDistance) * (multiplier) / 10)
@@ -666,7 +692,10 @@ class TaskServiceImpl @Inject constructor(
             val unit = baseDuration.seconds / (1 / SportActivity.Basketball.pointsRatioDuration)
 
             val multiplier = "%.2f"
-                .format(Locale.US, exerciseService.calculateActivityLevel())
+                .format(
+                    Locale.US,
+                    exerciseService.calculateActivityLevel()
+                )
                 .toDouble()
 
             // Division and multiplication by 300 are there to ensure upper and lower bounds
