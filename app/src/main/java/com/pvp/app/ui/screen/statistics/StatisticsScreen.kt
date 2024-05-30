@@ -366,17 +366,17 @@ fun StatisticsContainers(state: StatisticsState) {
     StatisticsContainerColumn {
         StatisticItem(
             label = "$localeAverageTasksCompleted (7d):",
-            value = "%.2f".format(state.averageTasksCompleted7d)
+            value = formatValue(state.averageTasksCompleted7d)
         )
 
         StatisticItem(
             label = "$localeAverageTasksCompleted (30d):",
-            value = "%.2f".format(state.averageTasksCompleted30d)
+            value = formatValue(state.averageTasksCompleted30d)
         )
 
         StatisticItem(
             label = "$localeAveragePoints:",
-            value = "%.2f".format(state.averagePoints)
+            value = formatValue(state.averagePoints)
         )
     }
 
@@ -518,5 +518,13 @@ private sealed class GraphType(val title: @Composable () -> String) {
                 }
             }
         }
+    }
+}
+
+fun formatValue(value: Double): String {
+    return if (value == value.toInt().toDouble()) {
+        "%.0f".format(value)
+    } else {
+        "%.2f".format(value)
     }
 }
