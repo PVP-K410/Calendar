@@ -333,4 +333,6 @@
     <string name="worker_goal_motivation_notification_buddies_title">🚀 Nepralaimėkite Aktyviems Draugams!</string>
     <string name="worker_hydration_notification_description">Laikas puodeliui vandens (%1$d ml)! 😋 Progresas: %2$.1f/%3$.1f litrai</string>
     <string name="worker_hydration_notification_title">Išgerkite Vandens 💦</string>
+    <string name="worker_meal_plan_notification_description">Jūsų savaitinis dietos planas sudarytas!</string>
+    <string name="worker_meal_plan_notification_title">Dietos Planas</string>
 </resources>
