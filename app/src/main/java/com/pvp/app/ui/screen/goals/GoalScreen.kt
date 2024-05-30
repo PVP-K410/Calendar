@@ -71,6 +71,8 @@ fun GoalScreen(
                     .padding(16.dp)
             ) {
                 Column {
+                    val (completeds, goalss) = state.currentGoals.partition { it.completed }
+                    goalss.forEach { it.completed = true }
                     val (completed, goals) = state.currentGoals.partition { it.completed }
 
                     val filter by remember {
@@ -276,7 +278,7 @@ fun GoalCompletedCard(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                text = goal.activity.title.toString() + " goal is completed!"
+                text = goal.activity.title.invoke() + " goal is completed!"
             )
 
             Spacer(modifier = Modifier.padding(2.dp))
@@ -310,23 +312,7 @@ fun GoalCompletedCard(
                 )
             }
 
-            if (goal.steps) {
-                Spacer(modifier = Modifier.padding(2.dp))
-
-                Text(
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 6.dp),
-                    textAlign = TextAlign.Left,
-                    text = "Your average pace was " + when (goal.monthly) {
-                        true -> "$monthSteps"
-                        false -> "${monthSteps / 30 * 7}"
-                    }
-                )
-            }
-
             Spacer(modifier = Modifier.padding(8.dp))
-
-            ProgressBar(goal = goal)
         }
     }
 }
