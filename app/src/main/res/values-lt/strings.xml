@@ -89,6 +89,12 @@
     <string name="drawer_button_sign_out">Atsijungti</string>
     <string name="drawer_button_sign_out_confirmation">Ar tikrai norite atsijungti?</string>
     <string name="drawer_button_sign_out_error">Nepavyko atsijungti, įvyko klaida</string>
+    <string name="drawer_button_feedback">Palikti atsiliepimą</string>
+    <string name="feedback_form_bug">Klaida</string>
+    <string name="feedback_form_bug_description">Įveskite informaciją apie klaidą su kuria susidūrėte:\n1. Kurioje programėles vietoje klaida aptikta?\n2. Kokius veiksmus atliekant susidūrėte su klaida?</string>
+    <string name="feedback_form_feature_request">Prašymas</string>
+    <string name="feedback_form_feature_request_description">Įveskite naujo funkcionalumo/funkcionalumo pakeitimo prašymo aprašymą.</string>
+    <string name="feedback_form_rating">Įvertinimas</string>
     <string name="form_create_meal_description">Aprašymas</string>
     <string name="form_create_meal_duration">Gaminimo trukmė</string>
     <string name="form_create_meal_ingredients">Ingredientai</string>
@@ -182,6 +188,7 @@
     <string name="input_field_activity_label">Veikla</string>
     <string name="input_field_date_label">Data</string>
     <string name="input_field_description_edit_label">Redaguojate aprašymą</string>
+    <string name="input_field_description_error_cannot_be_empty">Aprašymas negali būti tuščias</string>
     <string name="input_field_description_label">Aprašymas</string>
     <string name="input_field_diet_edit_label">Redaguojate dietą</string>
     <string name="input_field_diet_label">Dieta</string>
