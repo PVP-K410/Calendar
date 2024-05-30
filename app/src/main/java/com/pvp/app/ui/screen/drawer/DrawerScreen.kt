@@ -1,13 +1,11 @@
 package com.pvp.app.ui.screen.drawer
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,7 +18,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +34,7 @@ import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.LocalShowSnackbar
 import com.pvp.app.ui.common.RouteTitle
 import com.pvp.app.ui.router.Route
+import com.pvp.app.ui.screen.feedback.FeedbackCreationDialog
 
 @Composable
 private fun Body(
@@ -104,29 +106,43 @@ private fun Footer(
 ) {
     val localeButton = stringResource(R.string.drawer_button_sign_out)
     val localeConfirmation = stringResource(R.string.drawer_button_sign_out_confirmation)
+    var isFeedbackDialogOpen by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        ButtonConfirm(
+        Row(
             modifier = Modifier
-                .padding(
-                    top = 20.dp,
-                    bottom = 10.dp,
-                    end = 10.dp
-                )
-                .fillMaxSize(),
-            content = {
-                Text(
-                    text = localeButton,
-                    color = MaterialTheme.colorScheme.surface
-                )
-            },
-            contentAlignment = Alignment.BottomEnd,
-            confirmationButtonContent = { Text(text = localeButton) },
-            confirmationTitle = { Text(text = localeConfirmation) },
-            onConfirm = { onSignOut() },
-            shape = MaterialTheme.shapes.extraLarge
-        )
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.drawer_button_feedback),
+                modifier = Modifier
+                    .clickable { isFeedbackDialogOpen = true },
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            ButtonConfirm(
+                content = {
+                    Text(
+                        text = localeButton,
+                        color = MaterialTheme.colorScheme.surface
+                    )
+                },
+                contentAlignment = Alignment.BottomEnd,
+                confirmationButtonContent = { Text(text = localeButton) },
+                confirmationTitle = { Text(text = localeConfirmation) },
+                onConfirm = { onSignOut() },
+                shape = MaterialTheme.shapes.extraLarge
+            )
+        }
     }
+
+    FeedbackCreationDialog(
+        isOpen = isFeedbackDialogOpen,
+        onClose = { isFeedbackDialogOpen = false }
+    )
 }
 
 @Composable

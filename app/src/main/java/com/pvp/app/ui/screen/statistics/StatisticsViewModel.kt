@@ -2,13 +2,18 @@
 
 package com.pvp.app.ui.screen.statistics
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pvp.app.api.ActivityService
+import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
 import com.pvp.app.common.DateUtil.toTimestamp
 import com.pvp.app.model.ActivityEntry
+import com.pvp.app.model.SportTask
+import com.pvp.app.model.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -28,7 +34,9 @@ import javax.inject.Inject
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
     private val activityService: ActivityService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val taskService: TaskService,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(StatisticsState())
@@ -76,6 +84,117 @@ class StatisticsViewModel @Inject constructor(
                     }
             }
 
+            suspend fun tasksByDate(
+                date: Pair<LocalDate, LocalDate>,
+                email: String
+            ): Flow<List<Task>> {
+                return taskService
+                    .get(email)
+                    .mapLatest {
+                        it.sortedBy { task -> task.date }
+                    }
+                    .mapLatest {
+                        it.filter { task ->
+                            task.date in date.first..date.second
+                        }
+                    }
+            }
+
+            val uniqueActivities30dFlow = userFlow.flatMapLatest { user ->
+                val now = LocalDate.now()
+
+                tasksByDate(
+                    now.minusDays(29) to now,
+                    user.email
+                )
+                    .map { entries ->
+                        entries
+                            .mapNotNull { task ->
+                                (task as? SportTask)?.activity
+                            }
+                            .distinct()
+                            .map { activity ->
+                                context.getString(activity.titleId)
+                            }
+                    }
+            }
+
+            val top3FrequentActivitiesFlow = userFlow.flatMapLatest { user ->
+                val now = LocalDate.now()
+
+                tasksByDate(
+                    LocalDate.MIN to now,
+                    user.email
+                )
+                    .map { entries ->
+                        val activities = entries.mapNotNull { task ->
+                            (task as? SportTask)?.activity
+                        }
+
+                        activities
+                            .groupingBy { it }
+                            .eachCount()
+                            .toList()
+                            .sortedByDescending { it.second }
+                            .take(3)
+                            .map { it.first }
+                            .map { activity ->
+                                context.getString(activity.titleId)
+                            }
+                    }
+            }
+
+            val averagePointsFlow = userFlow.flatMapLatest { user ->
+                val now = LocalDate.now()
+
+                tasksByDate(
+                    LocalDate.MIN to now,
+                    user.email
+                )
+                    .map { entries ->
+                        if (entries.isNotEmpty()) {
+                            val totalPoints = entries.sumOf { it.points.value }
+                            val averagePoints = totalPoints.toDouble() / entries.size
+
+                            averagePoints
+                        } else {
+                            0.0
+                        }
+                    }
+            }
+
+            val averageTasksCompleted7dFlow = userFlow.flatMapLatest { user ->
+                val now = LocalDate.now()
+
+                tasksByDate(
+                    now.minusDays(6) to now,
+                    user.email
+                )
+                    .map { tasks ->
+                        val tasksByDate = tasks.groupBy { it.date }
+                        val tasksCountByDate = tasksByDate.mapValues { it.value.size }
+                        val averageTasksCount = tasksCountByDate.values.average()
+
+                        averageTasksCount
+                    }
+            }
+
+            val averageTasksCompleted30dFlow = userFlow.flatMapLatest { user ->
+                val now = LocalDate.now()
+
+                tasksByDate(
+                    now.minusDays(29) to now,
+                    user.email
+                )
+                    .map { tasks ->
+                        val tasksByDate = tasks.groupBy { it.date }
+                        val tasksCountByDate = tasksByDate.mapValues { it.value.size }
+                        val averageTasksCount = tasksCountByDate.values.average()
+
+                        averageTasksCount
+                    }
+            }
+
             val valuesWeekFlow = userFlow.flatMapLatest { user ->
                 val now = LocalDate.now()
 
@@ -112,21 +231,56 @@ class StatisticsViewModel @Inject constructor(
                 )
             }
 
-            combine(
+            val valuesFlow = combine(
                 valuesWeekFlow,
                 valuesMonthFlow,
                 values7dFlow,
                 values30dFlow
             ) { valuesWeek, valuesMonth, values7d, values30d ->
                 StatisticsState(
-                    isLoading = false,
                     valuesWeek = valuesWeek,
                     valuesMonth = valuesMonth,
                     values7d = values7d,
                     values30d = values30d
                 )
             }
-                .collectLatest { state -> _state.update { state } }
+
+            val averagesFlow = combine(
+                averageTasksCompleted7dFlow,
+                averageTasksCompleted30dFlow,
+                averagePointsFlow,
+                uniqueActivities30dFlow,
+                top3FrequentActivitiesFlow
+            ) { averageTasksCompleted7d, averageTasksCompleted30d, averagePoints, uniqueActivities30d, top3FrequentActivities ->
+                StatisticsState(
+                    averageTasksCompleted7d = averageTasksCompleted7d,
+                    averageTasksCompleted30d = averageTasksCompleted30d,
+                    averagePoints = averagePoints,
+                    uniqueActivities30d = uniqueActivities30d,
+                    top3FrequentActivities = top3FrequentActivities
+                )
+            }
+
+            combine(
+                valuesFlow,
+                averagesFlow
+            ) { partialState1, partialState2 ->
+                StatisticsState(
+                    isLoading = false,
+                    valuesWeek = partialState1.valuesWeek,
+                    valuesMonth = partialState1.valuesMonth,
+                    values7d = partialState1.values7d,
+                    values30d = partialState1.values30d,
+                    averageTasksCompleted7d = partialState2.averageTasksCompleted7d,
+                    averageTasksCompleted30d = partialState2.averageTasksCompleted30d,
+                    averagePoints = partialState2.averagePoints,
+                    uniqueActivities30d = partialState2.uniqueActivities30d,
+                    top3FrequentActivities = partialState2.top3FrequentActivities
+                )
+            }
+                .collectLatest { state ->
+                    _state.update { state }
+                }
         }
     }
 }
@@ -136,5 +290,10 @@ data class StatisticsState(
     val valuesWeek: List<ActivityEntry> = listOf(),
     val valuesMonth: List<ActivityEntry> = listOf(),
     val values7d: List<ActivityEntry> = listOf(),
-    val values30d: List<ActivityEntry> = listOf()
+    val values30d: List<ActivityEntry> = listOf(),
+    val averageTasksCompleted7d: Double = 0.0,
+    val averageTasksCompleted30d: Double = 0.0,
+    val averagePoints: Double = 0.0,
+    val uniqueActivities30d: List<String> = listOf(),
+    val top3FrequentActivities: List<String> = listOf()
 )
