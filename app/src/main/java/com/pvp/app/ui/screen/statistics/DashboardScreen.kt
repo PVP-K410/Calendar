@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.MonitorHeart
@@ -333,7 +334,7 @@ fun Header(state: DashboardState) {
 
 @Composable
 private fun InformationElement(text: String) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
@@ -346,6 +347,16 @@ private fun InformationElement(text: String) {
             text = text,
             style = MaterialTheme.typography.bodyMedium
         )
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                imageVector = Icons.Outlined.Error,
+                contentDescription = "Error icon",
+                modifier = Modifier
+                    .size(28.dp)
+                    .align(Alignment.BottomEnd)
+            )
+        }
     }
 }
 
