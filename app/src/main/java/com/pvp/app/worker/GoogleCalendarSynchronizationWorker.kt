@@ -41,6 +41,7 @@ class GoogleCalendarSynchronizationWorker @AssistedInject constructor(
             Context.MODE_PRIVATE
         )
 
+        // TODO: Remove this block in PR
         preferences.edit {
             clear()
 

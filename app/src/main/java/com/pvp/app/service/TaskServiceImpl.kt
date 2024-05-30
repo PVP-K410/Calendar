@@ -56,7 +56,9 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.max
@@ -524,11 +526,24 @@ class TaskServiceImpl @Inject constructor(
                     .execute().items
                     .map {
                         val date = it.start.dateTime ?: it.start.date
+                        val timeZone = it.start.timeZone
+
+                        val timeZoneShift = if (timeZone != null && timeZone != "null") {
+                            try {
+                                ZonedDateTime
+                                    .now()
+                                    .withZoneSameInstant(ZoneId.of(timeZone)).offset.totalSeconds / 60
+                            } catch (e: Exception) {
+                                0
+                            }
+                        } else {
+                            it.start.dateTime?.timeZoneShift ?: 0
+                        }
 
                         val dateTime = LocalDateTime.ofEpochSecond(
                             date.value / 1000,
                             0,
-                            ZoneOffset.ofTotalSeconds(date.timeZoneShift * 60)
+                            ZoneOffset.ofTotalSeconds(timeZoneShift * 60)
                         )
 
                         GoogleTask(
@@ -545,8 +560,6 @@ class TaskServiceImpl @Inject constructor(
             .firstOr(emptyList())
             .filter { it.date < dateStart }
             .plus(events)
-
-        println(eventsAll)
 
         editGoogleEventTasks(
             context,
