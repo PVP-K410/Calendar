@@ -71,8 +71,6 @@ fun GoalScreen(
                     .padding(16.dp)
             ) {
                 Column {
-                    val (completeds, goalss) = state.currentGoals.partition { it.completed }
-                    goalss.forEach { it.completed = true }
                     val (completed, goals) = state.currentGoals.partition { it.completed }
 
                     val filter by remember {
@@ -138,8 +136,7 @@ fun GoalScreen(
 
                             items(completed) { goal ->
                                 GoalCompletedCard(
-                                    goal = goal,
-                                    monthSteps = state.monthSteps
+                                    goal = goal
                                 )
                             }
                         }
@@ -254,8 +251,7 @@ fun GoalCard(
 
 @Composable
 fun GoalCompletedCard(
-    goal: Goal,
-    monthSteps: Long
+    goal: Goal
 ) {
     Box(
         modifier = Modifier
@@ -311,8 +307,6 @@ fun GoalCompletedCard(
                     contentDescription = "Activity icon",
                 )
             }
-
-            Spacer(modifier = Modifier.padding(8.dp))
         }
     }
 }
