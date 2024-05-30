@@ -59,6 +59,7 @@
     <string name="dashboard_calories">Calories</string>
     <string name="dashboard_distance">Distance</string>
     <string name="dashboard_goals">Goals</string>
+    <string name="dashboard_goals_completed">Completed goals:</string>
     <string name="dashboard_graph_type_ongoing">Ongoing</string>
     <string name="dashboard_graph_type_past">Past</string>
     <string name="dashboard_healthconnect_not_enabled">We are sad to see you have not enabled HealthConnect!\n\nEnabling HealthConnect would help us to provide more functionality for you!\n\nYou can enable HealthConnect from the settings tab!</string>
@@ -66,6 +67,7 @@
     <string name="dashboard_notification_not_enabled">We are sad to see you have not enabled notifications!\n\nEnabling notifications would help us to provide reminders to drink water, complete your tasks and many more functionalities!\n\nYou can enable notifications by going to your device settings!</string>
     <string name="dashboard_steps">Steps</string>
     <string name="dashboard_tasks">Today\'s tasks</string>
+    <string name="dashboard_tasks_completed">Completed tasks:</string>
     <string name="dashboard_tasks_not_found">No tasks of this type found</string>
     <string name="dashboard_week">Week</string>
     <string name="decorations_error">Error has occurred while processing</string>

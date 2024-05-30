@@ -65,6 +65,7 @@
     <string name="dashboard_notification_not_enabled">Mums liūdna, jog nesuteikėte mums pranešimų leidimo!\n\Suteikdami pranešimų leidimą leidžiate mums siųsti jums priminimus apie vandens gėrimą, ateinančias užduotis ir daug daugiau kitų funkcionalumų!\n\nPranešimų siuntimo leidimus galite įjungti savo įrenginio nustatymuose!</string>
     <string name="dashboard_steps">Žingsniai</string>
     <string name="dashboard_tasks">Šiandienos užduotys</string>
+    <string name="dashboard_tasks_completed">Užbaigtos užduotys:</string>
     <string name="dashboard_tasks_not_found">Šios rūšies užduočių nerasta</string>
     <string name="dashboard_week">Savaitė</string>
     <string name="decorations_error">Įvyko klaida vykdant operaciją</string>
@@ -128,6 +129,7 @@
     <string name="friends_sort_type_distance">Atstumas</string>
     <string name="friends_sort_type_experience">Patirtis</string>
     <string name="friends_sort_type_goals">Siekiai</string>
+    <string name="dashboard_goals_completed">Užbaigti siekiai:</string>
     <string name="friends_sort_type_points">Taškai</string>
     <string name="friends_sort_type_steps">Žingsniai</string>
     <string name="friends_sort_type_tasks">Užduotys</string>
