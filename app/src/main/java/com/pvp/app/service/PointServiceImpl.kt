@@ -156,9 +156,7 @@ class PointServiceImpl @Inject constructor(
         )
     }
 
-    override suspend fun deduct(
-        date: LocalDate
-    ) {
+    override suspend fun deduct(date: LocalDate) {
         val taskService = taskServiceProvider.get()
         val user = userService.user.firstOrNull() ?: error("User not found while deducting points")
 
@@ -181,42 +179,21 @@ class PointServiceImpl @Inject constructor(
             taskService.update(it)
         }
 
-        user.points -= minOf(
-            tasks.size,
-            configuration.limitPointsDeduction
+        user.points = maxOf(
+            0,
+            user.points - minOf(
+                tasks.size,
+                configuration.limitPointsDeduction
+            )
         )
 
         userService.merge(user)
     }
 
     private fun Task.markExpired(): Task {
-        return when (this) {
-            is CustomMealTask -> {
-                CustomMealTask.copy(
-                    points = this.points.copy(
-                        isExpired = true
-                    ),
-                    task = this
-                )
-            }
-
-            is SportTask -> {
-                SportTask.copy(
-                    points = this.points.copy(
-                        isExpired = true
-                    ),
-                    task = this
-                )
-            }
-
-            else -> {
-                Task.copy(
-                    points = this.points.copy(
-                        isExpired = true
-                    ),
-                    task = this
-                )
-            }
-        }
+        return Task.copy(
+            points = this.points.copy(isExpired = true),
+            task = this
+        )
     }
 }
