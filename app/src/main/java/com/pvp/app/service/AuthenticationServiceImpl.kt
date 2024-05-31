@@ -1,11 +1,13 @@
 package com.pvp.app.service
 
+import android.accounts.Account
 import android.content.Intent
 import android.content.IntentSender
 import android.util.Log
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.client.googleapis.extensions.android.accounts.GoogleAccountManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -33,8 +35,12 @@ class AuthenticationServiceImpl @Inject constructor(
     @Named(AuthenticationModule.INTENT_GOOGLE_SIGN_IN)
     private val intent: Intent,
     private val request: BeginSignInRequest,
-    private val userService: UserService
+    private val userService: UserService,
 ) : AuthenticationService {
+
+    private var _googleAccount: Account? = null
+    override val googleAccount: Account?
+        get() = _googleAccount
 
     override val user = callbackFlow {
         val listener = FirebaseAuth.AuthStateListener {
@@ -63,7 +69,10 @@ class AuthenticationServiceImpl @Inject constructor(
                 .beginSignIn(request)
                 .await()
         } catch (e: Exception) {
-            Log.e(TAG, "Begin sign in failed: ${e.message}")
+            Log.e(
+                TAG,
+                "Begin sign in failed: ${e.message}"
+            )
 
             if (e is CancellationException) {
                 throw e
@@ -78,7 +87,9 @@ class AuthenticationServiceImpl @Inject constructor(
     override suspend fun deleteAccount() {
         val user = auth.currentUser ?: return
 
-        user.delete().await()
+        user
+            .delete()
+            .await()
     }
 
     /**
@@ -136,11 +147,24 @@ class AuthenticationServiceImpl @Inject constructor(
     ): AuthenticationResult {
         return try {
             val token = if (!isOneTap) {
-                GoogleSignIn
+                val account = GoogleSignIn
                     .getSignedInAccountFromIntent(intent)
-                    .await().idToken
+                    .await()
+
+                _googleAccount = account.account
+
+                account.idToken
             } else {
-                client.getSignInCredentialFromIntent(intent).googleIdToken
+                val credentials = client.getSignInCredentialFromIntent(intent)
+
+                _googleAccount = credentials.googleIdToken?.let {
+                    Account(
+                        credentials.id,
+                        GoogleAccountManager.ACCOUNT_TYPE
+                    )
+                }
+
+                credentials.googleIdToken
             }
 
             val user = auth
@@ -160,7 +184,10 @@ class AuthenticationServiceImpl @Inject constructor(
                 resolveAuthenticationResult(it)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Sign in failed: ${e.message}")
+            Log.e(
+                TAG,
+                "Sign in failed: ${e.message}"
+            )
 
             AuthenticationResult(messageError = e.message)
         }
@@ -179,7 +206,10 @@ class AuthenticationServiceImpl @Inject constructor(
             SignOutResult(isSuccess = true)
                 .also { onSignOut(it) }
         } catch (e: Exception) {
-            Log.e(TAG, "Sign out failed: ${e.message}")
+            Log.e(
+                TAG,
+                "Sign out failed: ${e.message}"
+            )
 
             if (e is CancellationException) {
                 throw e

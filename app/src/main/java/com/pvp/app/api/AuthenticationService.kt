@@ -1,5 +1,6 @@
 package com.pvp.app.api
 
+import android.accounts.Account
 import android.content.Intent
 import android.content.IntentSender
 import com.google.firebase.auth.FirebaseUser
@@ -8,6 +9,12 @@ import com.pvp.app.model.SignOutResult
 import kotlinx.coroutines.flow.Flow
 
 interface AuthenticationService {
+
+    /**
+     * @return currently signed-in google account if the user is authenticated, otherwise returns
+     * null.
+     */
+    val googleAccount: Account?
 
     /**
      * @return flow of currently signed-in user if the user is authenticated, otherwise returns

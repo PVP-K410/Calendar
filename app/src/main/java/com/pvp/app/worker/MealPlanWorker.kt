@@ -1,21 +1,19 @@
 package com.pvp.app.worker
 
 import android.content.Context
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.pvp.app.R
-import com.pvp.app.api.MealService
 import com.pvp.app.api.NotificationService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
-import com.pvp.app.model.Meal
 import com.pvp.app.model.Notification
 import com.pvp.app.model.NotificationChannel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import java.time.LocalDate
 import java.time.temporal.WeekFields
@@ -25,7 +23,6 @@ import java.util.Locale
 class MealPlanWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val mealService: MealService,
     private val notificationService: NotificationService,
     private val taskService: TaskService,
     private val userService: UserService
@@ -35,9 +32,7 @@ class MealPlanWorker @AssistedInject constructor(
 ) {
 
     override suspend fun doWork(): Result {
-        val user = userService.user.firstOrNull()
-
-        user ?: return Result.retry()
+        val user = userService.user.firstOrNull() ?: return Result.retry()
 
         val week = LocalDate
             .now()
@@ -51,15 +46,25 @@ class MealPlanWorker @AssistedInject constructor(
             return Result.success()
         }
 
-        taskService.generateMeal()
+        return try {
+            taskService.generateMeal()
 
-        user.lastMealPlanGeneratedWeek = week
+            user.lastMealPlanGeneratedWeek = week
 
-        userService.merge(user)
+            userService.merge(user)
 
-        postActivityNotification()
+            postActivityNotification()
 
-        return Result.success()
+            Result.success()
+        } catch (e: Exception) {
+            Log.e(
+                this::class.simpleName,
+                "Failed to generate meal plan for ${user.email}. Retrying...",
+                e
+            )
+
+            Result.retry()
+        }
     }
 
     private fun postActivityNotification() {
@@ -70,10 +75,5 @@ class MealPlanWorker @AssistedInject constructor(
                 text = applicationContext.getString(R.string.worker_meal_plan_notification_description)
             )
         )
-    }
-
-    companion object {
-
-        const val WORKER_NAME = "MealPlanWorker"
     }
 }

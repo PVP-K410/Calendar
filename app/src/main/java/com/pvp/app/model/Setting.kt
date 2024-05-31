@@ -9,6 +9,31 @@ sealed class Setting<T>(
     val defaultValue: T
 ) {
 
+    object Appearance {
+
+        /**
+         * Application theme. Uses [Theme] entries order as a value. Default is [Theme.Light].
+         */
+        data object ApplicationTheme : Setting<Int>(
+            intPreferencesKey("applicationTheme"),
+            1
+        )
+
+        /**
+         * Whether to enable dynamic theme color palette.
+         */
+        data object DynamicThemeEnabled : Setting<Boolean>(
+            booleanPreferencesKey("DynamicThemeEnabled"),
+            false
+        )
+
+        enum class Theme {
+            Dark,
+            Light,
+            Auto
+        }
+    }
+
     object Notifications {
 
         /**
@@ -22,26 +47,33 @@ sealed class Setting<T>(
             10
         )
 
+        /**
+         * Size of the cup in milliliters.
+         */
         data object CupVolumeMl : Setting<Int>(
             intPreferencesKey("cupVolumeMl"),
             250
         )
 
+        /**
+         * Whether to show hydration notifications.
+         */
         data object HydrationNotificationsEnabled : Setting<Boolean>(
             booleanPreferencesKey("HydrationNotificationsEnabled"),
             true
         )
     }
 
-    object Appearance {
-        data object ApplicationTheme : Setting<Int>(
-            intPreferencesKey("applicationTheme"),
-            1
-        )
+    object ThirdPartyServices {
 
-        data object DynamicThemeEnabled : Setting<Boolean>(
-            booleanPreferencesKey("DynamicThemeEnabled"),
-            false
+        /**
+         * Interval in hours for google calendar synchronization.
+         * Default is **-1** hours. Should be either of **-1, 6, 12, 24**.
+         * **-1** means that synchronization is disabled.
+         */
+        data object GoogleCalendarSyncInterval : Setting<Int>(
+            intPreferencesKey("GoogleCalendarSyncInterval"),
+            -1
         )
     }
 }

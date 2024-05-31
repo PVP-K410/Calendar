@@ -294,6 +294,10 @@
     <string name="measurement_m" translatable="false">m</string>
     <string name="measurement_minutes" translatable="false">min</string>
     <string name="measurement_steps">steps</string>
+    <string name="notifications_request_dialog_button_cancel">Cancel</string>
+    <string name="notifications_request_dialog_button_settings">Go to Settings</string>
+    <string name="notifications_request_dialog_message">Only if you have enabled notifications we will be able to inform you about your and your friends progresses, remind you to drink water, inform about incoming tasks and way more. We are going to make sure that you will get only the best experience out of this!</string>
+    <string name="notifications_request_dialog_title">Enable Notifications</string>
     <string name="profile_button_delete">Delete Account</string>
     <string name="profile_button_delete_confirm_description">Your account will be permanently deleted and recovery will not be possible</string>
     <string name="profile_button_delete_confirm_input_label">To confirm, please enter your username \"%1$s\" in the box below:</string>
@@ -323,10 +327,14 @@
     <string name="settings_setting_cup_volume_button" translatable="false">%1$s ml</string>
     <string name="settings_setting_cup_volume_description">Choose your cup size for more accurate water drinking reminders. Default is %1$s ml</string>
     <string name="settings_setting_cup_volume_title">Cup Volume</string>
+    <string name="settings_setting_google_calendar_auto_description">Choose how often you want to automatically synchronize your Google Calendar tasks with our application. Google tasks from the past will not be synchronized, only today\'s and future tasks will be synchronized. If you don\'t want to synchronize tasks, you can disable automatic synchronization here too.</string>
+    <string name="settings_setting_google_calendar_auto_title">Google Calendar Auto Synchronizer</string>
+    <string name="settings_setting_google_calendar_auto_value">Every %1$d hours</string>
+    <string name="settings_setting_google_calendar_auto_value_never">Do not synchronize</string>
     <string name="settings_setting_google_calendar_button_synchronize">Synchronize</string>
     <string name="settings_setting_google_calendar_description">Synchronize your Google Calendar with our app to find all your tasks in one place. Google tasks from the past will not be synchronized, only today\'s and future tasks will be synchronized.</string>
     <string name="settings_setting_google_calendar_synchronize_success">Google Calendar successfully synchronized</string>
-    <string name="settings_setting_google_calendar_title">Google Calendar</string>
+    <string name="settings_setting_google_calendar_title">Google Calendar Manual Synchronizer</string>
     <string name="settings_setting_health_connect_button_configure">Configure</string>
     <string name="settings_setting_health_connect_description">By enabling certain Health Connect permissions you are allowing us to provide you more great features. You can disable those permissions anytime by coming here. Health Connect allows us to read other applications\' gathered data about your activity.</string>
     <string name="settings_setting_health_connect_title">Health Connect</string>
@@ -375,6 +383,10 @@
     <string name="worker_activity_notification_single_activity">Participating in %1$s will give you more points this week!</string>
     <string name="worker_activity_notification_title">Weekly Activities</string>
     <string name="worker_activity_notification_wheelchair_activities">Participating in %1$s activities will give you more points this week!</string>
+    <string name="worker_autocomplete_notification_description">We are reading your sport activity and processing your created tasks, set goals and more in real-time. This functionality can be disabled in application\'s settings, however accuracy of functions that we provide to you will suffer.</string>
+    <string name="worker_autocomplete_notification_title">Activity Processing</string>
+    <string name="worker_daily_notification_description">Your daily tasks have been generated! Check them out in the application</string>
+    <string name="worker_daily_notification_title">Daily Tasks</string>
     <string name="worker_goal_motivation_notification_close_description_monthly">You have a %1$s goal to achieve this month (%2$s). Keep going!</string>
     <string name="worker_goal_motivation_notification_close_description_weekly">You have a %1$s goal to achieve this week (%2$s). Keep going!</string>
     <string name="worker_goal_motivation_notification_close_description_monthly_1">%2$s left! Finish your %1$s monthly goal!</string>
