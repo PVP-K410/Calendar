@@ -56,10 +56,12 @@
     <string name="dashboard_30_days">30 Dienų</string>
     <string name="dashboard_activity_tracking">Aktyvumo sekimas</string>
     <string name="dashboard_calories">Kalorijos</string>
+    <string name="dashboard_decorations">Dekoracijos</string>
     <string name="dashboard_decoration_buy">Pirkti dekoracijas</string>
     <string name="dashboard_decoration_count">Šiuo metu turite %1$s dekoracijas</string>
     <string name="dashboard_decoration_count_none">Šiuo metu neturite nei vienos dekoracijos.</string>
     <string name="dashboard_distance">Atstumas</string>
+    <string name="dashboard_friends">Draugai</string>
     <string name="dashboard_friend_add">Peržiūrėti draugų informaciją</string>
     <string name="dashboard_friend_add_none">Pridėti draugų</string>
     <string name="dashboard_friend_count">Šiuo metu turite %1$s draugų</string>

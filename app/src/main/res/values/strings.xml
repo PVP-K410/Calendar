@@ -57,10 +57,12 @@
     <string name="dashboard_activity_tracking">Activity tracking</string>
     <string name="dashboard_BPM" translatable="false">BPM</string>
     <string name="dashboard_calories">Calories</string>
+    <string name="dashboard_decorations">Decorations</string>
     <string name="dashboard_decoration_buy">Buy new decorations</string>
     <string name="dashboard_decoration_count">Currently you have %1$s decorations</string>
     <string name="dashboard_decoration_count_none">Currently you do not own any decorations.</string>
     <string name="dashboard_distance">Distance</string>
+    <string name="dashboard_friends">Friends</string>
     <string name="dashboard_friend_add">View friend information</string>
     <string name="dashboard_friend_add_none">Add friends</string>
     <string name="dashboard_friend_count">You currently have %1$s friends</string>
