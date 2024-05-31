@@ -3,6 +3,6 @@
     android:description="@string/application_name"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:minWidth="100dp"
-    android:minHeight="100dp"
+    android:minHeight="150dp"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen" />
