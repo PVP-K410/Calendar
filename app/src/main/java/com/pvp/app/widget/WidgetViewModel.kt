@@ -1,6 +1,7 @@
 package com.pvp.app.widget
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.health.connect.client.HealthConnectClient
 import androidx.lifecycle.ViewModel
@@ -15,24 +16,22 @@ import com.pvp.app.common.DateUtil
 import com.pvp.app.model.Goal
 import com.pvp.app.model.Task
 import com.pvp.app.model.User
-import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
-@HiltViewModel
 class WidgetViewModel @Inject constructor(
     @ApplicationContext
     private val context: Context,
@@ -83,28 +82,23 @@ class WidgetViewModel @Inject constructor(
         }
     }
 
-    fun getCalories(): Double {
+    fun getCaloriesFlow(): Flow<Double> = flow {
         val today = LocalDate.now()
         val end = DateUtil.toNowOrNextDay(today)
-
         val start = today
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
 
-        var result = 0.0
-        runBlocking {
-            result = async {
-                healthConnectService.aggregateTotalCalories(
-                    start,
-                    end
-                )
-            }.await()
-        }
-        return result
+        val result = healthConnectService.aggregateTotalCalories(
+            start,
+            end
+        )
+
+        emit(result)
     }
 
 
-    suspend fun getSteps(): Long {
+    suspend fun getStepsFlow(): Flow<Long> = flow {
         val today = LocalDate.now()
 
         val end = today
@@ -116,24 +110,29 @@ class WidgetViewModel @Inject constructor(
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
 
-        return healthConnectService.aggregateSteps(
+        val result = healthConnectService.aggregateSteps(
             start,
             end
         )
+
+        Log.e("Widget", "Steps: $result")
+
+        emit(result)
     }
 
-    suspend fun getHeartRate(): Long {
+    suspend fun getHeartRateFlow(): Flow<Long> = flow {
         val today = LocalDate.now()
         val end = DateUtil.toNowOrNextDay(today)
-
         val start = today
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
 
-        return healthConnectService.getHeartRateAvg(
+        val result = healthConnectService.getHeartRateAvg(
             start,
             end
         )
+
+        emit(result)
     }
 }
 
