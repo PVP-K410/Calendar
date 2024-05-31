@@ -60,7 +60,9 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.pvp.app.R
+import com.pvp.app.common.CollectionUtil.indexOfOrNull
 import com.pvp.app.model.Setting
+import com.pvp.app.model.Setting.Appearance.Theme
 import com.pvp.app.ui.common.ButtonConfirm
 import com.pvp.app.ui.common.DropdownMenu
 import com.pvp.app.ui.common.LocalShowSnackbar
@@ -175,12 +177,6 @@ private fun SettingHydrationNotificationToggle(model: SettingsViewModel = hiltVi
         title = stringResource(R.string.settings_setting_hydration_reminder_title),
         value = isEnabled
     )
-}
-
-enum class Theme {
-    Dark,
-    Light,
-    Auto
 }
 
 @Composable
@@ -328,6 +324,60 @@ fun SettingLanguage() {
 }
 
 @Composable
+private fun GoogleCalendarAutoSynchronizer(model: SettingsViewModel = hiltViewModel()) {
+    val localeNever = stringResource(R.string.settings_setting_google_calendar_auto_value_never)
+    val localeTitle = stringResource(R.string.settings_setting_google_calendar_auto_title)
+    val localeValue = stringResource(R.string.settings_setting_google_calendar_auto_value)
+    var value by model.rememberSetting(setting = Setting.ThirdPartyServices.GoogleCalendarSyncInterval)
+    val state = rememberPickerState(initialValue = value)
+
+    val range = listOf(
+        -1,
+        6,
+        12,
+        24
+    )
+
+    SettingCard(
+        description = stringResource(R.string.settings_setting_google_calendar_auto_description),
+        editContent = {
+            Column(
+                modifier = Modifier
+                    .clip(shape = MaterialTheme.shapes.medium)
+                    .background(color = MaterialTheme.colorScheme.surfaceContainer)
+                    .wrapContentSize()
+                    .padding(32.dp)
+            ) {
+                Text(
+                    style = MaterialTheme.typography.titleLarge,
+                    text = localeTitle
+                )
+
+                Picker(
+                    items = range,
+                    label = {
+                        when (it) {
+                            -1 -> localeNever
+                            else -> localeValue.format(it)
+                        }
+                    },
+                    modifier = Modifier.padding(top = 16.dp),
+                    startIndex = range.indexOfOrNull(value) ?: 0,
+                    state = state
+                )
+            }
+        },
+        icon = Icons.Outlined.Sync,
+        onEdit = { value = state.value },
+        title = localeTitle,
+        value = when (value) {
+            -1 -> localeNever
+            else -> localeValue.format(value)
+        }
+    )
+}
+
+@Composable
 private fun GoogleCalendarSynchronizer(model: SettingsViewModel = hiltViewModel()) {
     val localeSuccess = stringResource(
         R.string.settings_setting_google_calendar_synchronize_success
@@ -407,6 +457,8 @@ fun SettingsScreen(modifier: Modifier) {
             icon = Icons.Outlined.PermIdentity,
             title = stringResource(R.string.settings_category_3rd_party_services_title)
         )
+
+        GoogleCalendarAutoSynchronizer()
 
         GoogleCalendarSynchronizer()
 

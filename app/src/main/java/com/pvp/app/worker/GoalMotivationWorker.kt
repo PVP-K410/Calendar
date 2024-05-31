@@ -30,13 +30,8 @@ class GoalMotivationWorker @AssistedInject constructor(
     workerParams
 ) {
 
-    companion object {
-
-        const val WORKER_NAME = "com.pvp.app.worker.GoalMotivationWorker"
-    }
-
     override suspend fun doWork(): Result {
-        val email = userService.user.first()?.email ?: return Result.failure()
+        val email = userService.user.first()?.email ?: return Result.retry()
 
         goalService
             .get(email)
@@ -99,8 +94,9 @@ class GoalMotivationWorker @AssistedInject constructor(
                                 return@goalsForEach
                             }
 
-                            if (goal.completed) {
+                            if (goal.completed || goal.progress > 0) {
                                 hasActiveFriends = true
+
                                 return@friends
                             }
                         }

@@ -10,6 +10,7 @@ import com.pvp.app.api.UserService
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
+import java.time.LocalDate
 
 @HiltWorker
 class TaskNotificationWorker @AssistedInject constructor(
@@ -23,22 +24,20 @@ class TaskNotificationWorker @AssistedInject constructor(
     workerParams
 ) {
 
-    companion object {
-
-        const val WORKER_NAME = "com.pvp.app.worker.TaskNotificationWorker"
-    }
-
     override suspend fun doWork(): Result {
-        val email = userService.user.first()?.email ?: return Result.failure()
+        val email = userService.user.first()?.email ?: return Result.retry()
+        val now = LocalDate.now()
 
         taskService
             .get(email)
             .first()
+            .filter { it.date >= now }
             .forEach { task ->
                 notificationService
                     .getNotificationForTask(task)
                     ?.let { notification ->
                         notificationService.cancel(notification)
+
                         notificationService.post(notification)
                     }
             }

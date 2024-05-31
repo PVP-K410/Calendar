@@ -26,6 +26,7 @@ import com.pvp.app.api.SettingService
 import com.pvp.app.api.StreakService
 import com.pvp.app.api.TaskService
 import com.pvp.app.api.UserService
+import com.pvp.app.api.WorkService
 import com.pvp.app.service.ActivityServiceImpl
 import com.pvp.app.service.AuthenticationServiceImpl
 import com.pvp.app.service.ConfigurationImpl
@@ -45,6 +46,7 @@ import com.pvp.app.service.SettingServiceImpl
 import com.pvp.app.service.StreakServiceImpl
 import com.pvp.app.service.TaskServiceImpl
 import com.pvp.app.service.UserServiceImpl
+import com.pvp.app.service.WorkServiceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -132,6 +134,10 @@ interface ServiceBindingsModule {
     @Binds
     @Singleton
     fun bindUserService(service: UserServiceImpl): UserService
+
+    @Binds
+    @Singleton
+    fun bindWorkService(service: WorkServiceImpl): WorkService
 }
 
 @Module
