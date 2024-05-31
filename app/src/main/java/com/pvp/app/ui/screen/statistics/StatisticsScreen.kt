@@ -10,11 +10,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,7 +69,6 @@ import java.util.Locale
 @Composable
 fun StatisticsScreen(
     model: StatisticsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
 ) {
     val localeGraphOngoing = stringResource(R.string.dashboard_graph_type_ongoing)
     val localeGraphPast = stringResource(R.string.dashboard_graph_type_past)
@@ -84,10 +82,9 @@ fun StatisticsScreen(
     }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .padding(4.dp)
     ) {
         val labelOfSum = remember<(GraphType) -> String> {
             {
@@ -127,8 +124,6 @@ fun StatisticsScreen(
         )
 
         tabs.values.elementAt(tab)()
-
-        Spacer(modifier = Modifier.size(16.dp))
 
         StatisticsContainers(state)
     }
@@ -378,6 +373,8 @@ fun StatisticsContainers(state: StatisticsState) {
         )
     }
 
+    Spacer(modifier = Modifier.height(16.dp))
+
     StatisticsContainerColumn {
         StatisticItem(
             label = localeTop3FrequentActivities,
@@ -391,7 +388,6 @@ fun StatisticsContainers(state: StatisticsState) {
     }
 }
 
-
 @Composable
 fun StatisticsContainerColumn(content: @Composable ColumnScope.() -> Unit) {
     Column(
@@ -399,13 +395,8 @@ fun StatisticsContainerColumn(content: @Composable ColumnScope.() -> Unit) {
             .fillMaxWidth()
             .padding(8.dp)
             .background(
-                MaterialTheme.colorScheme.secondaryContainer,
-                RoundedCornerShape(8.dp)
-            )
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onSecondaryContainer,
-                RoundedCornerShape(8.dp)
+                MaterialTheme.colorScheme.surfaceContainer,
+                MaterialTheme.shapes.medium
             )
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -419,7 +410,9 @@ fun StatisticItem(
     value: String
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -451,7 +444,9 @@ fun StatisticItem(
     val chunkedValues = values.chunked((values.size + 2) / 3)
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
     ) {
         Text(
             text = label,
@@ -522,8 +517,9 @@ private sealed class GraphType(val title: @Composable () -> String) {
     }
 }
 
-fun formatValue(value: Double): String {
-    return if (value == value.toInt()
+private fun formatValue(value: Double): String {
+    return if (value == value
+            .toInt()
             .toDouble()
     ) {
         "%.0f".format(value)
