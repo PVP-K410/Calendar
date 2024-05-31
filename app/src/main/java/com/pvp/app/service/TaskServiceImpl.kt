@@ -17,6 +17,7 @@ import com.google.api.services.calendar.CalendarScopes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.pvp.app.R
+import com.pvp.app.api.AuthenticationService
 import com.pvp.app.api.Configuration
 import com.pvp.app.api.ExerciseService
 import com.pvp.app.api.ExperienceService
@@ -71,6 +72,7 @@ private val Context.dataStoreGoogleCalendarEvents: DataStore<Preferences> by pre
 private val eventsKey: Preferences.Key<Set<String>> = stringSetPreferencesKey("events")
 
 class TaskServiceImpl @Inject constructor(
+    private val authenticationService: AuthenticationService,
     private val configuration: Configuration,
     @ApplicationContext private val context: Context,
     private val database: FirebaseFirestore,
@@ -500,13 +502,15 @@ class TaskServiceImpl @Inject constructor(
                     .usingOAuth2(
                         context,
                         setOf(
-                            CalendarScopes.CALENDAR_READONLY,
-                            CalendarScopes.CALENDAR_EVENTS_READONLY
+                            CalendarScopes.CALENDAR_EVENTS_READONLY,
+                            CalendarScopes.CALENDAR_READONLY
                         )
                     )
-                    .also { it.selectedAccountName = user.email }
+                    .also {
+                        it.selectedAccount = authenticationService.googleAccount
+                    }
             )
-            .setApplicationName("Calendar")
+            .setApplicationName(context.getString(R.string.application_name))
             .build()
 
         val now = DateTime(System.currentTimeMillis())
@@ -528,7 +532,7 @@ class TaskServiceImpl @Inject constructor(
                         val date = it.start.dateTime ?: it.start.date
                         val timeZone = it.start.timeZone
 
-                        val timeZoneShift = if (timeZone != null && timeZone != "null") {
+                        val timeZoneShift = if (timeZone != null) {
                             try {
                                 ZonedDateTime
                                     .now()
