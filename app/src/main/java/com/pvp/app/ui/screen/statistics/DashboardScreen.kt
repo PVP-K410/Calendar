@@ -196,7 +196,7 @@ fun DashboardScreen(
         ) {
             Header(state)
 
-            if (state.isHealthConnectEnabled) {
+            if (!state.isHealthConnectEnabled) {
                 InformationElement(
                     controller = controller,
                     showSettingsButton = true,
@@ -216,7 +216,7 @@ fun DashboardScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            if (!state.isHealthConnectEnabled) {
+            if (state.isHealthConnectEnabled) {
                 ActivityRow()
 
                 Spacer(modifier = Modifier.height(16.dp))

@@ -153,7 +153,7 @@ dependencies {
     implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
     implementation("com.google.code.gson:gson:2.11.0")
     implementation("com.google.dagger:hilt-android:2.51.1")
-    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-crashlytics")
