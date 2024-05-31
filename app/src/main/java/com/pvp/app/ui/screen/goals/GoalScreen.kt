@@ -169,7 +169,8 @@ fun GoalScreen(
 @Composable
 fun GoalCard(
     goal: Goal,
-    monthSteps: Long
+    monthSteps: Long,
+    modifier: Modifier = Modifier
 ) {
     val localeGoal = stringResource(R.string.goals_card_goal)
     val localeSteps = stringResource(R.string.goals_card_steps)
@@ -183,6 +184,7 @@ fun GoalCard(
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.surfaceContainer)
+            .then(modifier)
     ) {
         Column(
             modifier = Modifier
@@ -231,7 +233,7 @@ fun GoalCard(
                 )
             }
 
-            if (goal.steps) {
+            if (goal.steps && monthSteps > 0) {
                 Spacer(modifier = Modifier.padding(2.dp))
 
                 Text(
